@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -51,6 +50,9 @@ function RouteComponent() {
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary text-primary-foreground"
+              onClick={() => {
+                window.location.href = '/dashboard/membership';
+              }}
             >
               <Label>Sign In</Label>
             </Button>
