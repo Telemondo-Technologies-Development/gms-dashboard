@@ -12,6 +12,8 @@ import {
 	Shield,
 	Users,
 	LogOut,
+	BanknoteArrowDown,
+	GitBranch,
 } from "lucide-react"
 import { Button } from "../ui/button"
 
@@ -59,7 +61,8 @@ export default function Aside() {
 			title: "Marketing",
 			items: [
 				{ label: "Sales", href: "/dashboard/sales", icon: LayoutDashboard },
-                { label: "Membership", href: "/dashboard/membership", icon: Users },
+                { label: "Membership", href: "/dashboard/marketing/membership", icon: Users },
+				{ label: "Branch", href: "/dashboard/marketing/branch", icon: GitBranch  },
 	
 			],
 		},
@@ -77,6 +80,7 @@ export default function Aside() {
 				{ label: "Users", href: "/dashboard/admin/users", icon: Users },
 				{ label: "Roles & Access", href: "/dashboard/admin/access", icon: KeyRound },
 				{ label: "Audit Log", href: "/dashboard/admin/audit", icon: Shield },
+				{ label: "Expenses", href: "/dashboard/admin/expense", icon: BanknoteArrowDown  },
 			],
 		},
 		{
