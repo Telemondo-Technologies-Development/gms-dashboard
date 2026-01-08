@@ -11,8 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PostRouteImport } from './routes/post'
 import { Route as HomeRouteImport } from './routes/home'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardSalesRouteImport } from './routes/dashboard/sales'
 import { Route as DashboardMembershipRouteImport } from './routes/dashboard/membership'
@@ -28,14 +28,14 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,12 +46,12 @@ const IndexRoute = IndexRouteImport.update({
 const DashboardSalesRoute = DashboardSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardMembershipRoute = DashboardMembershipRouteImport.update({
   id: '/membership',
   path: '/membership',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
@@ -61,8 +61,8 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/home': typeof HomeRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
@@ -71,8 +71,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/home': typeof HomeRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
@@ -82,8 +82,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/dashboard': typeof DashboardRouteWithChildren
   '/home': typeof HomeRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
@@ -94,8 +94,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/dashboard'
+    | '/about'
     | '/home'
     | '/post'
     | '/auth/login'
@@ -104,8 +104,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
     | '/dashboard'
+    | '/about'
     | '/home'
     | '/post'
     | '/auth/login'
@@ -114,8 +114,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/about'
     | '/dashboard'
+    | '/about'
     | '/home'
     | '/post'
     | '/auth/login'
@@ -125,8 +125,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
-  DashboardRoute: typeof DashboardRouteWithChildren
   HomeRoute: typeof HomeRoute
   PostRoute: typeof PostRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -148,18 +148,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -174,14 +174,14 @@ declare module '@tanstack/react-router' {
       path: '/sales'
       fullPath: '/dashboard/sales'
       preLoaderRoute: typeof DashboardSalesRouteImport
-      parentRoute: typeof DashboardRoute
+      parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/membership': {
       id: '/dashboard/membership'
       path: '/membership'
       fullPath: '/dashboard/membership'
       preLoaderRoute: typeof DashboardMembershipRouteImport
-      parentRoute: typeof DashboardRoute
+      parentRoute: typeof DashboardRouteRoute
     }
     '/auth/login': {
       id: '/auth/login'
@@ -193,24 +193,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface DashboardRouteChildren {
+interface DashboardRouteRouteChildren {
   DashboardMembershipRoute: typeof DashboardMembershipRoute
   DashboardSalesRoute: typeof DashboardSalesRoute
 }
 
-const DashboardRouteChildren: DashboardRouteChildren = {
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardMembershipRoute: DashboardMembershipRoute,
   DashboardSalesRoute: DashboardSalesRoute,
 }
 
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
   AboutRoute: AboutRoute,
-  DashboardRoute: DashboardRouteWithChildren,
   HomeRoute: HomeRoute,
   PostRoute: PostRoute,
   AuthLoginRoute: AuthLoginRoute,

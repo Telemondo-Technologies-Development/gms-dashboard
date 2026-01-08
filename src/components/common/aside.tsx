@@ -58,7 +58,7 @@ export default function Aside() {
 		{
 			title: "Marketing",
 			items: [
-				{ label: "Sales", href: "dashboard/sales", icon: LayoutDashboard },
+				{ label: "Sales", href: "/dashboard/sales", icon: LayoutDashboard },
                 { label: "Membership", href: "/dashboard/membership", icon: Users },
 	
 			],
