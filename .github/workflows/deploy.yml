@@ -39,7 +39,8 @@ jobs:
           cloudflare-project-name: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
           directory: dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          gitHubEnvironment: production
+          github-environment: production
+
 
 
 
