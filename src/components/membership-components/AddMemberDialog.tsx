@@ -177,17 +177,17 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="name">Full Name *</Label>
-                          <Input id="name" placeholder="John Doe" value={member.name} onChange={(e) => handleMemberChange('name', e.target.value)} required />
+                          <Input id="name" placeholder="Enter full name" value={member.name} onChange={(e) => handleMemberChange('name', e.target.value)} required />
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="email">Email *</Label>
-                          <Input id="email" type="email" placeholder="john@example.com" value={member.email} onChange={(e) => handleMemberChange('email', e.target.value)} required />
+                          <Input id="email" type="email" placeholder="Enter email address" value={member.email} onChange={(e) => handleMemberChange('email', e.target.value)} required />
                         </div>
 
                         <div className="space-y-2 sm:col-span-2">
                           <Label htmlFor="phone">Phone Number *</Label>
-                          <Input id="phone" type="tel" placeholder="+63 9xx xxx xxxx" value={member.phone} onChange={(e) => handleMemberChange('phone', e.target.value)} required />
+                          <Input id="phone" type="tel" placeholder="Enter phone number" value={member.phone} onChange={(e) => handleMemberChange('phone', e.target.value)} required />
                         </div>
                       </div>
                     </CardContent>
