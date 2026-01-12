@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { AddMemberDialog, type MemberFormData, type MemberInfo } from '@/components/membership-components/AddMemberDialog'
+import { mockMembers } from '@/lib/mock-members'
 import { MemberDetailsDialog } from '@/components/membership-components/MemberDetailsDialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -24,7 +25,7 @@ interface AttendanceRecord {
 }
 
 function MembershipRoute() {
-  const [members, setMembers] = useState<MemberFormData[]>([])
+  const [members, setMembers] = useState<MemberFormData[]>(() => mockMembers)
   const [searchQuery, setSearchQuery] = useState('')
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
   const [attendanceSearch, setAttendanceSearch] = useState('')
