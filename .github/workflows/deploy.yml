@@ -1,46 +1,28 @@
-# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Cloudflare Pages Deploy
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - main
-      - sprint
-   
+    branches: [main, sprint]
+  workflow_dispatch:
+
 jobs:
   deploy:
-    permissions:
-      actions: read
-      contents: read
-      deployments: write
-      pull-requests: write
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Install dependencies
+          node-version: 20
 
-        run: npm ci
-      - name: Build
-        run: npm run build
+      - run: npm ci
+      - run: npm run build
 
       - name: Deploy to Cloudflare Pages
-        uses: andykenward/github-actions-cloudflare-pages@v3.0.0
-        with:
-          cloudflare-api-token: ${{ secrets.CLOUDFLARE_NAME_TOKEN }}
-          cloudflare-account-id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          cloudflare-project-name: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
-          directory: dist
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          github-environment: skip
-
-
-
-
+        run: |
+          npx wrangler@4 pages deploy dist \
+            --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} \
+            --branch=${{ github.ref_name }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_NAME_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
