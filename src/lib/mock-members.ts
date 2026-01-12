@@ -1,4 +1,4 @@
-import type { MemberFormData, MemberInfo } from '@/components/membership-components/AddMemberDialog'
+import type { MemberFormData } from '@/components/membership-components/AddMemberDialog'
 
 export const mockMembers: MemberFormData[] = [
   {
