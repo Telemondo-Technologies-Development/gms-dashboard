@@ -39,7 +39,7 @@ jobs:
           cloudflare-project-name: ${{ vars.CLOUDFLARE_PROJECT_NAME }}
           directory: dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          github-environment: production
+          github-environment: skip
 
 
 
