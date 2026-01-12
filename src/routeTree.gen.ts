@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PostRouteImport } from './routes/post'
-import { Route as HomeRouteImport } from './routes/home'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,11 +22,6 @@ import { Route as DashboardAdminExpenseRouteImport } from './routes/dashboard/ad
 const PostRoute = PostRouteImport.update({
   id: '/post',
   path: '/post',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HomeRoute = HomeRouteImport.update({
-  id: '/home',
-  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -77,7 +71,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/home': typeof HomeRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
   '/dashboard/sales': typeof DashboardSalesRoute
@@ -89,7 +82,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/home': typeof HomeRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
   '/dashboard/sales': typeof DashboardSalesRoute
@@ -102,7 +94,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/home': typeof HomeRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
   '/dashboard/sales': typeof DashboardSalesRoute
@@ -116,7 +107,6 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/about'
-    | '/home'
     | '/post'
     | '/auth/login'
     | '/dashboard/sales'
@@ -128,7 +118,6 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/about'
-    | '/home'
     | '/post'
     | '/auth/login'
     | '/dashboard/sales'
@@ -140,7 +129,6 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/about'
-    | '/home'
     | '/post'
     | '/auth/login'
     | '/dashboard/sales'
@@ -153,7 +141,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
-  HomeRoute: typeof HomeRoute
   PostRoute: typeof PostRoute
   AuthLoginRoute: typeof AuthLoginRoute
 }
@@ -165,13 +152,6 @@ declare module '@tanstack/react-router' {
       path: '/post'
       fullPath: '/post'
       preLoaderRoute: typeof PostRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -255,7 +235,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   AboutRoute: AboutRoute,
-  HomeRoute: HomeRoute,
   PostRoute: PostRoute,
   AuthLoginRoute: AuthLoginRoute,
 }
