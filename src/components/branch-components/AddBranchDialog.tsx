@@ -46,7 +46,7 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
 
   return (
     <>
-      <Button className="gap-2" onClick={() => setOpen(true)}>
+      <Button className="gap-2 text-primary-foreground" variant="default" onClick={() => setOpen(true)}>
         <Plus className="h-4 w-4" />
         Add New Branch
       </Button>

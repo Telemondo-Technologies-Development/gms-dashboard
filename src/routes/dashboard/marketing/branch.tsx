@@ -26,6 +26,13 @@ function RouteComponent() {
       phone: '09179876543',
       status: 'Maintenance', 
     },
+        {
+      id: '3',
+      name: 'Panacan Gym Fitness',
+      address: '123 Panacan Davao City Philippines',
+      phone: '09179876543',
+      status: 'Maintenance', 
+    },
   ]);
 
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -46,22 +53,20 @@ function RouteComponent() {
     : null;
 
   return (
-    <div className="text-zinc-900 bg-white min-h-screen">
+    <div className="text-zinc-900 bg-surface min-h-screen">
       <div className="flex">
         <main className="flex-1 p-8 md:p-12">
           <header className="flex justify-between items-end mb-12">
             <div>
-              <h1 className="text-4xl font-semibold tracking-tight text-black">Branches</h1>
-              <p className="text-zinc-500 mt-2">Manage your locations and staff access.</p>
             </div>
             <AddBranchDialog onAddBranch={handleAddBranch} />
           </header>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {branches.map((branch) => (
               <Card
                 key={branch.id}
-                className="p-6 shadow-md rounded-xl border border-zinc-100 cursor-pointer hover:bg-muted/50"
+                className="p-6  border border-zinc-100 cursor-pointer hover:bg-muted/50"
                 onClick={() => {
                   setSelectedBranchId(branch.id);
                   setDetailsOpen(true);
