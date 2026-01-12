@@ -16,12 +16,14 @@ function RouteComponent() {
       id: '1',
       name: 'Matina Gym Fitness',
       address: '123 Matina GSIS Davao City Philippines',
+      phone: '09171234567',
       status: 'Active', 
     },
     {
       id: '2',
       name: 'Panacan Gym Fitness',
       address: '123 Panacan Davao City Philippines',
+      phone: '09179876543',
       status: 'Maintenance', 
     },
   ]);

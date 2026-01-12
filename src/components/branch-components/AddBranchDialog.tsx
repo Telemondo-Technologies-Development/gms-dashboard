@@ -13,6 +13,7 @@ export interface BranchFormData {
   id: string;
   name: string;
   address: string;
+  phone: string;
   status: 'Active' | 'Maintenance';
 }
 
@@ -21,11 +22,12 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
   const [formData, setFormData] = useState({
     name: '',
     address: '',
+    phone: '',
     status: 'Active', 
   });
 
   const resetForm = () => {
-    setFormData({ name: '', address: '', status: 'Active' }); 
+    setFormData({ name: '', address: '', phone: '', status: 'Active' }); 
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -34,6 +36,7 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
       id: crypto.randomUUID(),
       name: formData.name,
       address: formData.address,
+        phone: formData.phone,
       status: formData.status as 'Active' | 'Maintenance',
     };
     onAddBranch(newBranch); 
@@ -107,6 +110,16 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
                         placeholder="Enter branch address"
                         value={formData.address}
                         onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Input
+                        id="phone"
+                        placeholder="Enter phone number"
+                        value={formData.phone}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
                         required
                       />
                     </div>
