@@ -9,19 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] 
 
 ### Added
- - Added header and sidebar layout components with navigation links, and base styling.
+- Branch Management Module : Implemented centralized control for gym locations with status tracking ('Active'/'Maintenance').
+- Dynamic Branch Dialogs : Integrated `AddBranchDialog` and `BranchDetailsDialog` for seamless CRUD operations.
+- Added header and sidebar layout components with navigation links, and base styling.
 - Membership management section under Dashboard → Marketing: member listing, search, and attendance features.
 - "Add New Member" dialog to register member groups (supports multiple members per group), set membership dates, and upload documents.
 - Editable Member Details modal showing full member, membership, and billing information — allows updating saved billing info for returning customers.
 - Attendance workflows: manual check-in with search and placeholders for QR/fingerprint methods; today's attendance view and records.
 - Responsive members table with fixed column widths and truncation to avoid horizontal scrolling; rows are clickable to open the details modal.
 
-### Changed
 
+### Changed
+- **Iconography System**: Refactored raw SVG paths to `lucide-react` components across the marketing dashboard for better maintainability.
+- **Data Schema**: Standardized `BranchFormData` to include `phone` and `address` validation.
 - Members table: removed separate Membership and Billing columns to improve layout and usability; billing is viewable/editable in the details modal.
  - Improved login page: updated layout.
 
 ### Notes
 
 - This release focuses on UI/UX for membership management and prepares the codepaths for integrating persistent storage and payment processing in future updates.
+
+
 
