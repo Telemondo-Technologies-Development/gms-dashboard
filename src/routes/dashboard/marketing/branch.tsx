@@ -4,7 +4,7 @@ import { Card } from '../../../components/ui/card';
 import { AddBranchDialog } from '@/components/branch-components/AddBranchDialog';
 import type { BranchFormData, StaffMember } from '@/components/branch-components/AddBranchDialog';
 import { BranchDetailsDialog } from '@/components/branch-components/BranchDetailsDialog';
-import { AssignStaffDialog } from '@/components/branch-components/AssignStaffDialog'; 
+import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog'; 
 
 import { MapPin, MoreVertical } from 'lucide-react';
 
