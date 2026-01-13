@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Editable Member Details modal showing full member, membership, and billing information — allows updating saved billing info for returning customers.
 - Attendance workflows: manual check-in with search and placeholders for QR/fingerprint methods; today's attendance view and records.
 - Responsive members table with fixed column widths and truncation to avoid horizontal scrolling; rows are clickable to open the details modal.
+- Added Expense Tracking page 
+- Add New Expense dialog for new expenses
+- Expense Details dialog for expense history with edit and delete options
+- Added Annual and Monthly Spending trends cards with interactive charts 
 
 
 ### Changed
