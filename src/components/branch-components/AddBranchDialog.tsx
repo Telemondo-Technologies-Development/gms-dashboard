@@ -9,13 +9,25 @@ interface AddBranchDialogProps {
   onAddBranch: (branch: BranchFormData) => void;
 }
 
+export interface StaffMember {
+  id: string;
+  name: string;
+  role: 'Manager' | 'Staff';
+  email: string;
+  phone: string;    
+  address: string;  
+  birthday: string; 
+}
+
 export interface BranchFormData {
   id: string;
   name: string;
   address: string;
   phone: string;
   status: 'Active' | 'Maintenance';
+  assignedStaff: StaffMember[]; 
 }
+
 
 export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
   const [open, setOpen] = useState(false);
@@ -32,13 +44,16 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+  
     const newBranch: BranchFormData = {
       id: crypto.randomUUID(),
       name: formData.name,
       address: formData.address,
-        phone: formData.phone,
+      phone: formData.phone,
       status: formData.status as 'Active' | 'Maintenance',
+      assignedStaff: [], 
     };
+  
     onAddBranch(newBranch); 
     resetForm(); 
     setOpen(false);
