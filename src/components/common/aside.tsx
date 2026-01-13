@@ -14,6 +14,7 @@ import {
 	LogOut,
 	BanknoteArrowDown,
 	GitBranch,
+	ChartCandlestick,
 } from "lucide-react"
 import { Button } from "../ui/button"
 
@@ -63,6 +64,7 @@ export default function Aside() {
 				{ label: "Sales", href: "/dashboard/sales", icon: LayoutDashboard },
                 { label: "Membership", href: "/dashboard/marketing/membership", icon: Users },
 				{ label: "Branch", href: "/dashboard/marketing/branch", icon: GitBranch  },
+				{ label: "Assets", href: "/dashboard/marketing/assets", icon: ChartCandlestick   },
 	
 			],
 		},
