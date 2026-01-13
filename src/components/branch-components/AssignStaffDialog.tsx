@@ -51,55 +51,69 @@ export function AssignStaffDialog({ open, onOpenChange, branchName, staff, onUpd
 
   return (
     <Dialog open={open} onOpenChange={(val) => { onOpenChange(val); if (!val) setView('list'); }}>
-      <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto border-none shadow-2xl">
-    
-{view === 'list' && (
-  <div className="flex flex-col max-h-[70vh]"> 
-    <DialogHeader className="border-b pb-4 shrink-0">
-      <DialogTitle className="text-xl tracking-tight font-bold text-zinc-900">
-        Staff: {branchName}
-      </DialogTitle>
-    </DialogHeader>
+      <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto border-none shadow-2xl">  
+        {view === 'list' && (
+          <div className="flex flex-col max-h-[70vh]"> 
+            <DialogHeader className="border-b pb-4 shrink-0">
+              <DialogTitle className="text-xl tracking-tight font-bold text-zinc-900">
+                Staff: {branchName}
+              </DialogTitle>
+            </DialogHeader>
 
-    <div className="pt-6 shrink-0 px-1">
-      <Button 
-        onClick={() => setView('add')}
-        variant="outline" 
-        className="w-full h-16 border-dashed border-2 text-zinc-500 hover:text-black hover:border-zinc-900 gap-2 transition-all bg-zinc-50/50"
-      >
-        <Plus size={18} />
-        <span className="font-bold uppercase text-[10px] tracking-widest">Add New Staff Member</span>
-      </Button>
-    </div>
-
-    <div className="mt-6 overflow-y-auto pr-2 space-y-2 flex-1 custom-scrollbar min-h-[200px]">
-      {staff.length === 0 ? (
-        <div className="py-12 text-center border-2 border-dashed border-zinc-50 rounded-xl">
-           <p className="text-sm text-zinc-400 italic">No staff assigned yet.</p>
-        </div>
-      ) : (
-        staff.map((s) => (
-          <div 
-            key={s.id} 
-            onClick={() => { setSelectedStaff(s); setView('details'); }}
-            className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 hover:bg-zinc-100 cursor-pointer transition-all group border border-transparent hover:border-zinc-200"
-          >
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-white border border-zinc-200 flex items-center justify-center text-xs font-bold text-zinc-600">
-                {s.name.charAt(0)}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-zinc-900">{s.name}</p>
-                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tight">{s.role}</p>
-              </div>
+            <div className="pt-6 shrink-0 px-1">
+              <Button 
+                onClick={() => setView('add')}
+                variant="outline" 
+                className="w-full h-16 border-dashed border-2 text-zinc-500 hover:text-black hover:border-zinc-900 gap-2 transition-all bg-zinc-50/50"
+              >
+                <Plus size={18} />
+                <span className="font-bold uppercase text-[10px] tracking-widest">Add New Staff Member</span>
+              </Button>
             </div>
-            <span className="text-[10px] font-bold text-zinc-300 group-hover:text-black tracking-widest uppercase">Details →</span>
+
+            <div className="mt-6 overflow-y-auto pr-2 space-y-2 flex-1 custom-scrollbar min-h-[200px]">
+              {staff.length === 0 ? (
+                <div className="py-12 text-center border-2 border-dashed border-zinc-50 rounded-xl">
+                  <p className="text-sm text-zinc-400 italic">No staff assigned yet.</p>
+                </div>
+              ) : (
+                staff.map((s) => (
+                  <div 
+                    key={s.id} 
+                    onClick={() => { setSelectedStaff(s); setView('details'); }}
+                    className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 hover:bg-zinc-100 cursor-pointer transition-all group border border-transparent hover:border-zinc-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      {/* Avatar with Role Badge */}
+                      <div className="h-10 w-10 rounded-full bg-white border border-zinc-200 flex items-center justify-center relative shrink-0">
+                        <span className="text-xs font-bold text-zinc-600">{s.name.charAt(0)}</span>
+                        
+                        {/* The Badge: Positioned at the bottom right of the circle */}
+                        <div className="absolute -bottom-1 -right-1 p-1 bg-white rounded-full shadow-sm border border-zinc-100">
+                          {s.role === 'Manager' ? (
+                            <Shield className="h-2.5 w-2.5 text-emerald-600" />
+                          ) : (
+                            <User className="h-2.5 w-2.5 text-zinc-400" />
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm font-semibold text-zinc-900 leading-none">{s.name}</p>
+                        <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-tight mt-1">
+                          {s.role}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-zinc-300 group-hover:text-black tracking-widest uppercase transition-colors">
+                      Details →
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        ))
-      )}
-    </div>
-  </div>
-)}
+        )}
         {view === 'add' && (
           <div className="space-y-6">
             <header className="flex items-center gap-3">
