@@ -36,7 +36,7 @@ function RouteComponent() {
       latitude: 7.1502,
     },
     {
-      id: '2',
+      id: '3',
       name: 'Toril Gym Fitness',
       address: '123 Panacan Davao City Philippines',
       phone: '09179876543',
