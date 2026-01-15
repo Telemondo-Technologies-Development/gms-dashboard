@@ -1,11 +1,11 @@
-import type { ChangeEvent, FormEvent, Dispatch, SetStateAction } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import { Upload, DollarSign, CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import { cn } from '@/lib/utils'
+//import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
@@ -29,7 +29,7 @@ interface AddExpenseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   formData: AddExpenseFormData
-  setFormData: Dispatch<SetStateAction<AddExpenseFormData>>
+  setFormData: React.Dispatch<React.SetStateAction<AddExpenseFormData>>
   date: Date | undefined
   setDate: (date: Date | undefined) => void
   receipt: File | null
@@ -50,37 +50,105 @@ export function AddExpenseDialog({
   onSubmit,
   onCancel,
 }: AddExpenseDialogProps) {
+  
+  // Client-side validation function
+  const validateForm = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = []
+    
+    // Check type
+    if (!formData.type) errors.push('Expense Type is required')
+    
+    // Check salary type only if expense type is salary
+    if (formData.type === 'salary' && !formData.salaryType) {
+      errors.push('Salary Type is required for salary expenses')
+    }
+    
+    // Check name
+    if (!formData.name.trim()) errors.push('Name/Note is required')
+    
+    // Check date
+    if (!date) errors.push('Date is required')
+    
+    // Check amount
+    const amountNum = Number.parseFloat(formData.amount)
+    if (!formData.amount || isNaN(amountNum) || amountNum <= 0) {
+      errors.push('Valid Amount is required (greater than 0)')
+    }
+    
+    // Check branch
+    if (!formData.branch) errors.push('Branch is required')
+    
+    // Check payment method
+    if (!formData.paymentMethod) errors.push('Payment Method is required')
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    }
+  }
+  
+  // Enhanced form submit handler
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    const validation = validateForm()
+    
+    if (!validation.isValid) {
+      alert(`Please fix the following errors:\n\n${validation.errors.join('\n')}`)
+      return
+    }
+    
+    // If all validation passes, call the parent's onSubmit
+    onSubmit(e)
+  }
+  
+  // Handle amount change with validation
+  const handleAmountChange = (value: string) => {
+    // Allow only numbers and one decimal point
+    const regex = /^\d*\.?\d*$/
+    if (value === '' || regex.test(value)) {
+      setFormData(prev => ({ ...prev, amount: value }))
+    }
+  }
+
+  const handleCancel = () => {
+    onCancel()
+    onOpenChange(false)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <form onSubmit={onSubmit}>
-        <DialogContent className="max-w-[95vw] md:max-w-[900px] xl:max-w-[1100px] max-h-[90vh] overflow-y-auto [&>button]:hidden">
-          <DialogHeader>
-            <DialogTitle>Add New Expense</DialogTitle>
-            <DialogDescription>Fill in the expense details. Click save when you're done.</DialogDescription>
-          </DialogHeader>
+      <DialogContent className="max-w-[95vw] md:max-w-[900px] xl:max-w-[1100px] max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogHeader>
+          <DialogTitle>Add New Expense</DialogTitle>
+        </DialogHeader>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-4">
+        <form onSubmit={handleSubmit} id="add-expense-form">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 space-y-3">
               <Card>
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <DollarSign className="h-5 w-5" />
                     Expense Information
                   </CardTitle>
-                  <CardDescription>Add expense details</CardDescription>
                 </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="add-type">Expense Type *</Label>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="add-type">
+                        Expense Type *
+                      </Label>
                       <Select
                         value={formData.type}
                         onValueChange={(v) => {
-                          setFormData((prev) => ({ ...prev, type: v }))
-                          if (v !== 'salary') {
-                            setFormData((prev) => ({ ...prev, salaryType: '' }))
-                          }
+                          setFormData(prev => ({
+                            ...prev,
+                            type: v,
+                            salaryType: v === 'salary' ? prev.salaryType : ''
+                          }))
                         }}
                       >
                         <SelectTrigger id="add-type">
@@ -97,11 +165,13 @@ export function AddExpenseDialog({
                     </div>
 
                     {formData.type === 'salary' && (
-                      <div className="space-y-2">
-                        <Label htmlFor="add-salaryType">Salary Type *</Label>
+                                            <div className="space-y-1.5">
+                        <Label htmlFor="add-salaryType">
+                          Salary Type *
+                        </Label>
                         <Select
                           value={formData.salaryType}
-                          onValueChange={(v) => setFormData((prev) => ({ ...prev, salaryType: v }))}
+                          onValueChange={(v) => setFormData(prev => ({ ...prev, salaryType: v }))}
                         >
                           <SelectTrigger id="add-salaryType">
                             <SelectValue placeholder="Select salary type" />
@@ -117,50 +187,57 @@ export function AddExpenseDialog({
                       </div>
                     )}
 
-                    <div className="space-y-2 sm:col-span-2">
-                      <Label htmlFor="add-name">Name / Note *</Label>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="add-name">
+                        Name / Note *
+                      </Label>
                       <Input
                         id="add-name"
                         placeholder="Enter expense name or note"
                         value={formData.name}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                        required
+                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Date *</Label>
+                    <div className="space-y-1.5">
+                      <Label>
+                        Date *
+                      </Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             type="button"
                             variant="outline"
-                            className={cn(
-                              'w-full justify-start text-left font-normal',
-                              !date && 'text-muted-foreground'
-                            )}
+                            className="w-full justify-start text-left font-normal"
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {date ? format(date, 'PPP') : 'Pick a date'}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                          <Calendar 
+                            mode="single" 
+                            selected={date} 
+                            onSelect={setDate}
+                            initialFocus 
+                          />
                         </PopoverContent>
                       </Popover>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="add-amount">Amount *</Label>
+                      <Label htmlFor="add-amount">
+                        Amount *
+                      </Label>
                       <Input
                         id="add-amount"
-                        type="number"
-                        step="0.01"
+                        type="text"
+                        inputMode="decimal"
                         placeholder="0.00"
                         value={formData.amount}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, amount: e.target.value }))}
-                        required
+                        onChange={(e) => handleAmountChange(e.target.value)}
                       />
+                      <p className="text-xs text-muted-foreground">Enter amount in PHP</p>
                     </div>
 
                     <div className="space-y-2 sm:col-span-2">
@@ -169,20 +246,17 @@ export function AddExpenseDialog({
                         id="add-description"
                         placeholder="Additional notes or details..."
                         value={formData.description}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                         rows={2}
                       />
                     </div>
                   </div>
                 </CardContent>
 
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Receipt / Document</CardTitle>
-                  <CardDescription>Upload receipt image or file</CardDescription>
-                </CardHeader>
-                <CardContent>
+
+                <CardContent className="space-y-2">
                   <div className="space-y-2">
-                    <Label htmlFor="add-receipt">Add Receipt Image or File</Label>
+                    <Label htmlFor="add-receipt">Upload Receipt Image or File</Label>
                     <label
                       htmlFor="add-receipt"
                       className="flex w-full items-center justify-center rounded-2xl border px-4 py-2 cursor-pointer bg-transparent hover:bg-muted/10"
@@ -203,23 +277,28 @@ export function AddExpenseDialog({
                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                       className="sr-only"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Supported formats: PDF, JPG, PNG, DOC
+                    </p>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Card>
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2">
                   <CardTitle className="text-lg">Additional Details</CardTitle>
                 </CardHeader>
 
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                   <div className="space-y-2">
-                    <Label htmlFor="add-branch">Branch *</Label>
+                    <Label htmlFor="add-branch">
+                      Branch *
+                    </Label>
                     <Select
                       value={formData.branch}
-                      onValueChange={(v) => setFormData((prev) => ({ ...prev, branch: v }))}
+                      onValueChange={(v) => setFormData(prev => ({ ...prev, branch: v }))}
                     >
                       <SelectTrigger id="add-branch">
                         <SelectValue placeholder="Select branch" />
@@ -235,10 +314,12 @@ export function AddExpenseDialog({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="add-paymentMethod">Payment Method *</Label>
+                    <Label htmlFor="add-paymentMethod">
+                      Payment Method *
+                    </Label>
                     <Select
                       value={formData.paymentMethod}
-                      onValueChange={(v) => setFormData((prev) => ({ ...prev, paymentMethod: v }))}
+                      onValueChange={(v) => setFormData(prev => ({ ...prev, paymentMethod: v }))}
                     >
                       <SelectTrigger id="add-paymentMethod">
                         <SelectValue placeholder="Select method" />
@@ -253,36 +334,52 @@ export function AddExpenseDialog({
                     </Select>
                   </div>
 
-                  <div className="rounded-2xl border bg-muted/50 p-4 space-y-3 mt-4">
+                  <div className="rounded-2xl border bg-muted/50 p-3 space-y-2 mt-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Expense Type</span>
                       <span className="font-medium capitalize">
-                        {formData.type ? formData.type.replace('-', ' ') : '—'}
+                        {formData.type ? formData.type.replace('-', ' ') : (
+                          <span className="text-destructive text-sm">Required</span>
+                        )}
                       </span>
                     </div>
-                    {formData.type === 'salary' && formData.salaryType && (
+                    {formData.type === 'salary' && (
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">Salary Type</span>
-                        <span className="font-medium capitalize">{formData.salaryType}</span>
+                        <span className="font-medium capitalize">
+                          {formData.salaryType || (
+                            <span className="text-destructive text-sm">Required</span>
+                          )}
+                        </span>
                       </div>
                     )}
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Branch</span>
-                      <span className="font-medium">{formData.branch || '—'}</span>
+                      <span className="font-medium">
+                        {formData.branch || (
+                          <span className="text-destructive text-sm">Required</span>
+                        )}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Payment Method</span>
                       <span className="font-medium capitalize">
-                        {formData.paymentMethod ? formData.paymentMethod.replace('-', ' ') : '—'}
+                        {formData.paymentMethod ? formData.paymentMethod.replace('-', ' ') : (
+                          <span className="text-destructive text-sm">Required</span>
+                        )}
                       </span>
                     </div>
-                    <div className="border-t pt-3 flex items-center justify-between">
+                    <div className="border-t pt-2 flex items-center justify-between">
                       <span className="font-semibold">Amount</span>
                       <span className="text-2xl font-bold text-primary">
-                        ₱{formData.amount ? Number.parseFloat(formData.amount).toLocaleString('en-PH', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }) : '0.00'}
+                        {formData.amount && Number.parseFloat(formData.amount) > 0 ? (
+                          `₱${Number.parseFloat(formData.amount).toLocaleString('en-PH', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}`
+                        ) : (
+                          <span className="text-destructive text-sm">Required</span>
+                        )}
                       </span>
                     </div>
                   </div>
@@ -291,16 +388,20 @@ export function AddExpenseDialog({
             </div>
           </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" onClick={onCancel}>
+          <DialogFooter className="flex flex-col sm:flex-row items-start sm:items-center gap-2 pt-4">
+            <div className="flex gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCancel}
+              >
                 Cancel
               </Button>
-            </DialogClose>
-            <Button type="submit">Save</Button>
+              <Button type="submit">Save</Button>
+            </div>
           </DialogFooter>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   )
 }
