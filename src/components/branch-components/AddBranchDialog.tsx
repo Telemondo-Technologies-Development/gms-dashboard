@@ -83,11 +83,15 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
     onAddBranch(newBranch);
     resetForm();
   };
-
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={(isOpen) => setOpen(isOpen)}>
       <DialogTrigger asChild>
-        <Button className="gap-2 text-primary-foreground" variant="default">
+        <Button
+          className="gap-2 text-primary-foreground"
+          variant="default"
+          onClick={() => setOpen(true)}
+        >
           <Plus className="h-4 w-4" />
           Add New Branch
         </Button>
@@ -97,8 +101,7 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
           <DialogHeader>
             <DialogTitle>Add New Branch</DialogTitle>
             <DialogDescription>
-              Fill in the details for the new branch. Click save when you're
-              done.
+              Fill in the details for the new branch. Click save when you're done.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -177,7 +180,10 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => resetForm()}
+              onClick={() => {
+                resetForm(); // Reset the form fields
+                setOpen(false); // Close the dialog
+              }}
             >
               Cancel
             </Button>
