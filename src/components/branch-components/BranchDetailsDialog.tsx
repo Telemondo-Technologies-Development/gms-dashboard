@@ -29,13 +29,15 @@ export interface BranchFormData {
   phone: string;
   status: 'Active' | 'Maintenance';
   assignedStaff: StaffMember[];
+  latitude: number; 
+  longitude: number;
 }
 
 interface BranchDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   branch: BranchFormData | null;
-  onSave: (updatedBranch: BranchFormData) => void;
+  onSave: (updatedBranch: BranchFormData) => void; 
 }
 
 export function BranchDetailsDialog({
