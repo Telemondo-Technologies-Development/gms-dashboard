@@ -7,7 +7,6 @@ import {
   FileText,
   Receipt,
   Search,
-  Users,
   XCircle,
 } from 'lucide-react'
 
@@ -137,28 +136,6 @@ export function PaymentHistoryPage() {
     return { paidCents, overdueCents, upcomingCents, failedCents }
   }, [payments, now])
 
-  const memberLedger = useMemo(() => {
-    const map = new Map<
-      string,
-      { memberId: string; memberName: string; paidCents: number; openCents: number }
-    >()
-
-    for (const p of payments) {
-      const st = effectiveStatus(p, now)
-      const amt = amountDueCents(p)
-      const entry = map.get(p.memberId) ?? {
-        memberId: p.memberId,
-        memberName: p.memberName,
-        paidCents: 0,
-        openCents: 0,
-      }
-      if (st === 'paid') entry.paidCents += amt
-      if (st === 'overdue' || st === 'upcoming' || st === 'failed') entry.openCents += amt
-      map.set(p.memberId, entry)
-    }
-
-    return Array.from(map.values()).sort((a, b) => a.memberName.localeCompare(b.memberName))
-  }, [payments, now])
 
   const updatePayment = (id: string, updater: (prev: Payment) => Payment) => {
     setPayments((prev) => prev.map((p) => (p.id === id ? updater(p) : p)))

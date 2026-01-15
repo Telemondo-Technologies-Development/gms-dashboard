@@ -101,7 +101,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl h-[95vh]">
+      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
           <DialogHeader>
             <DialogTitle>Member Details</DialogTitle>

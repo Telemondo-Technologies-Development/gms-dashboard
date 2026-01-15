@@ -200,7 +200,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
 
       <DialogContent
         showCloseButton={false}
-        className="max-w-none w-[95vw] sm:max-w-none md:w-275 xl:w-350 h-[95vh] overflow-hidden p-0 flex flex-col gap-0"
+        className="max-w-none w-[95vw] sm:max-w-none md:w-275 xl:w-350 max-h-[95vh] overflow-auto p-0 flex flex-col gap-0"
       >
         <div className="p-6 border-b">
           <DialogHeader className="text-left">
