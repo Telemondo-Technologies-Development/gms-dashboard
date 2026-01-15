@@ -82,6 +82,7 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
 
     onAddBranch(newBranch);
     resetForm();
+    setOpen(false);
   };
   const [open, setOpen] = useState(false);
   return (
