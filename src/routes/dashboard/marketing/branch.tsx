@@ -55,14 +55,33 @@ function RouteComponent() {
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
   const [mapBranch, setMapBranch] = useState<BranchFormData | null>(null);
 
+  const currentUserId = 'exampleUserId'; // Replace with actual logic to get the current user ID
+
   const handleAddBranch = (branch: BranchFormData) => {
-    setBranches((prev) => [branch, ...prev]);
+  const newBranch = {
+    ...branch,
+    created_by: currentUserId, 
+    updated_by: currentUserId, 
   };
 
+
+    setBranches((prev) => [newBranch, ...prev]);
+
+    // Send newBranch to the backend
+    // Example: await api.createBranch(newBranch);
+  };
   const handleSaveBranch = (updatedBranch: BranchFormData) => {
+    const branchWithUpdatedBy = {
+      ...updatedBranch,
+      updated_by: currentUserId, 
+    };
+  
     setBranches((prev) =>
-      prev.map((branch) => (branch.id === updatedBranch.id ? updatedBranch : branch))
+      prev.map((branch) => (branch.id === updatedBranch.id ? branchWithUpdatedBy : branch))
     );
+  
+    // Send branchWithUpdatedBy to the backend
+    // Example: await api.updateBranch(branchWithUpdatedBy);
   };
 
   const handleUpdateStaff = (newStaff: StaffMember[]) => {
