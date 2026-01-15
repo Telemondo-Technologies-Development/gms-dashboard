@@ -58,11 +58,14 @@ function RouteComponent() {
   const currentUserId = 'exampleUserId'; // Replace with actual logic to get the current user ID
 
   const handleAddBranch = (branch: BranchFormData) => {
-  const newBranch = {
-    ...branch,
-    created_by: currentUserId, 
-    updated_by: currentUserId, 
-  };
+    const currentTimestamp = new Date().toISOString(); 
+    const newBranch = {
+      ...branch,
+      created_by: currentUserId, 
+      updated_by: currentUserId, 
+      created_at: currentTimestamp, 
+      updated_at: currentTimestamp,
+    };
 
 
     setBranches((prev) => [newBranch, ...prev]);
@@ -71,9 +74,11 @@ function RouteComponent() {
     // Example: await api.createBranch(newBranch);
   };
   const handleSaveBranch = (updatedBranch: BranchFormData) => {
+    const currentTimestamp = new Date().toISOString();
     const branchWithUpdatedBy = {
       ...updatedBranch,
       updated_by: currentUserId, 
+      updated_at: currentTimestamp,
     };
   
     setBranches((prev) =>
