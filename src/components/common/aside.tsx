@@ -1,15 +1,8 @@
 import type { LucideIcon } from "lucide-react"
 import {
-	BadgeDollarSign,
 	CreditCard,
 	Dumbbell,
-	FileText,
-	KeyRound,
-	LayoutDashboard,
-	Plug,
-	Receipt,
 	Settings,
-	Shield,
 	Users,
 	LogOut,
 	BanknoteArrowDown,
@@ -61,7 +54,6 @@ export default function Aside() {
 		{
 			title: "Marketing",
 			items: [
-				{ label: "Sales", href: "/dashboard/sales", icon: LayoutDashboard },
                 { label: "Membership", href: "/dashboard/marketing/membership", icon: Users },
 				{ label: "Branch", href: "/dashboard/marketing/branch", icon: GitBranch  },
 				{ label: "Assets", href: "/dashboard/marketing/assets", icon: ChartCandlestick   },
@@ -71,17 +63,13 @@ export default function Aside() {
 		{
 			title: "Billing",
 			items: [
-				{ label: "Plans", href: "/dashboard/billing/plans", icon: BadgeDollarSign },
-				{ label: "Invoices", href: "/dashboard/billing/invoices", icon: Receipt },
-				{ label: "Payment Methods", href: "/dashboard/billing/payments", icon: CreditCard },
+				{ label: "Payment History", href: "/dashboard/billing/payment-history", icon: CreditCard },
 			],
 		},
 		{
 			title: "Admin",
 			items: [
 				{ label: "Users", href: "/dashboard/admin/users", icon: Users },
-				{ label: "Roles & Access", href: "/dashboard/admin/access", icon: KeyRound },
-				{ label: "Audit Log", href: "/dashboard/admin/audit", icon: Shield },
 				{ label: "Expenses", href: "/dashboard/admin/expense", icon: BanknoteArrowDown  },
 			],
 		},
@@ -89,8 +77,6 @@ export default function Aside() {
 			title: "System",
 			items: [
 				{ label: "Settings", href: "/dashboard/settings", icon: Settings },
-				{ label: "Integrations", href: "/dashboard/integrations", icon: Plug },
-				{ label: "Documentation", href: "/dashboard/docs", icon: FileText },
 			],
 		},
 	]
