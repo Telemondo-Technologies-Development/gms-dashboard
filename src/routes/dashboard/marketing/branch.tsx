@@ -49,7 +49,7 @@ function RouteComponent() {
     },
   ]);
 
-  // Group dialog states into a single object
+ 
   const [dialogState, setDialogState] = useState({
     detailsOpen: false,
     staffDialogOpen: false,
@@ -62,9 +62,9 @@ function RouteComponent() {
   const [mapBranch, setMapBranch] = useState<BranchFormData | null>(null);
   const [branchToRemove, setBranchToRemove] = useState<BranchFormData | null>(null);
 
-  const currentUserId = 'exampleUserId'; // Replace with actual logic to get the current user ID
+  const currentUserId = 'exampleUserId'; 
 
-  // Helper function to toggle dialog visibility
+  
   const toggleDialog = (dialog: keyof typeof dialogState, value: boolean) => {
     setDialogState((prev) => ({ ...prev, [dialog]: value }));
   };
@@ -81,8 +81,7 @@ function RouteComponent() {
 
     setBranches((prev) => [newBranch, ...prev]);
 
-    // Send newBranch to the backend
-    // Example: await api.createBranch(newBranch);
+
   };
 
   const handleSaveBranch = (updatedBranch: BranchFormData) => {
