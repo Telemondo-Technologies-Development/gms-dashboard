@@ -5,13 +5,13 @@ import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { BRANCHES, EXPENSE_TYPES, SALARY_TYPES } from '@/lib/expense-constants'
+import { BRANCHES, EXPENSE_TYPES, SALARY_TYPES, PAYMENT_METHODS } from '@/lib/expense-constants'
 import type { ExpenseFormData } from '@/lib/expense-types'
 
 interface ExpenseDetailsDialogProps {
@@ -73,38 +73,31 @@ export function ExpenseDetailsDialog({
 }: ExpenseDetailsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <form onSubmit={onSubmit}>
-        <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
-          <DialogHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <DialogTitle>
-                  {isEditing ? 'Edit Expense History' : 'Expense Details'}
-                </DialogTitle>
-                <DialogDescription>
-                  {isEditing
-                    ? 'Update expense information and details.'
-                    : 'View expense information and details.'}
-                </DialogDescription>
-              </div>
-              {!isEditing && (
-                <DialogClose asChild>
-                  <Button type="button" variant="outline">
-                    Close
-                  </Button>
-                </DialogClose>
-              )}
-            </div>
-          </DialogHeader>
+      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-y-auto [&>button]:hidden">
+        <DialogHeader>
+          <div className="flex items-start justify-between">
+            <DialogTitle>
+              {isEditing ? 'Edit Expense History' : 'Expense Details'}
+            </DialogTitle>
+            {!isEditing && (
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  Close
+                </Button>
+              </DialogClose>
+            )}
+          </div>
+        </DialogHeader>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <div className="space-y-4">
+        <form onSubmit={onSubmit} id="edit-expense-form">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="text-sm font-medium">Expense Information</div>
 
-                <div className="rounded-lg border p-4 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                <div className="rounded-lg border p-3 space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
                       <Label htmlFor="edit-type">Expense Type</Label>
                       {isEditing ? (
                         <Select
@@ -137,7 +130,7 @@ export function ExpenseDetailsDialog({
                     </div>
 
                     {type === 'salary' && (
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         <Label htmlFor="edit-salaryType">Salary Type</Label>
                         {isEditing ? (
                           <Select value={salaryType} onValueChange={setSalaryType}>
@@ -163,7 +156,7 @@ export function ExpenseDetailsDialog({
                     )}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="edit-name">Name / Note</Label>
                     {isEditing ? (
                       <Input
@@ -179,8 +172,8 @@ export function ExpenseDetailsDialog({
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
                       <Label htmlFor="edit-date">Date</Label>
                       {isEditing ? (
                         <Popover>
@@ -208,7 +201,7 @@ export function ExpenseDetailsDialog({
                       )}
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       <Label htmlFor="edit-amount">Amount</Label>
                       {isEditing ? (
                         <Input
@@ -232,7 +225,7 @@ export function ExpenseDetailsDialog({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="edit-description">Description</Label>
                     {isEditing ? (
                       <Textarea
@@ -251,11 +244,11 @@ export function ExpenseDetailsDialog({
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="space-y-4">
+            <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="text-sm font-medium">Receipt / Document</div>
 
-                <div className="rounded-lg border p-4 space-y-4">
+                <div className="rounded-lg border p-3 space-y-3">
                   {!isEditing && receipt && (
                     <div className="flex items-center justify-center bg-muted rounded-lg p-8">
                       <div className="text-center space-y-2">
@@ -272,7 +265,7 @@ export function ExpenseDetailsDialog({
                   )}
 
                   {isEditing && (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       <Label htmlFor="edit-receipt">
                         {receipt ? 'Update Receipt' : 'Add Receipt Image or File'}
                       </Label>
@@ -311,11 +304,11 @@ export function ExpenseDetailsDialog({
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="text-sm font-medium">Additional Details</div>
 
-                <div className="rounded-lg border p-4 space-y-4">
-                  <div className="space-y-2">
+                <div className="rounded-lg border p-3 space-y-3">
+                  <div className="space-y-1.5">
                     <Label htmlFor="edit-branch">Branch</Label>
                     {isEditing ? (
                       <Select value={branch} onValueChange={setBranch}>
@@ -337,7 +330,7 @@ export function ExpenseDetailsDialog({
                     )}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <Label htmlFor="edit-paymentMethod">Payment Method</Label>
                     {isEditing ? (
                       <Select value={paymentMethod} onValueChange={setPaymentMethod}>
@@ -345,9 +338,11 @@ export function ExpenseDetailsDialog({
                           <SelectValue placeholder="Select method" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="cash">Cash</SelectItem>
-                          <SelectItem value="gcash">GCash</SelectItem>
-                          <SelectItem value="bank-transfer">Bank Transfer</SelectItem>
+                          {PAYMENT_METHODS.map((method) => (
+                            <SelectItem key={method.value} value={method.value}>
+                              {method.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     ) : (
@@ -361,7 +356,7 @@ export function ExpenseDetailsDialog({
             </div>
           </div>
 
-          <DialogFooter className="flex items-center justify-between sm:justify-between">
+          <DialogFooter className="flex items-center justify-between sm:justify-between pt-4">
             <div>
               {isEditing && (
                 <Button
@@ -395,8 +390,8 @@ export function ExpenseDetailsDialog({
               )}
             </div>
           </DialogFooter>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   )
 }

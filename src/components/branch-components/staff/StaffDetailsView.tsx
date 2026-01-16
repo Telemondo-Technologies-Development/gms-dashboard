@@ -1,4 +1,10 @@
 import { ArrowLeft, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 
 interface StaffDetailsViewProps {
   member: {
@@ -12,9 +18,10 @@ interface StaffDetailsViewProps {
   };
   onBack: () => void;
   onRemove: (id: string) => void;
+  onRoleChange: (id: string, role: 'Manager' | 'Staff') => void; // Add callback for role change
 }
 
-export function StaffDetailsView({ member, onBack, onRemove }: StaffDetailsViewProps) {
+export function StaffDetailsView({ member, onBack, onRemove, onRoleChange }: StaffDetailsViewProps) {
   const detailRows = [
     { icon: Mail, label: 'Email', value: member.email },
     { icon: Phone, label: 'Phone', value: member.phone },
@@ -28,7 +35,7 @@ export function StaffDetailsView({ member, onBack, onRemove }: StaffDetailsViewP
         <button onClick={onBack} className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
           <ArrowLeft size={20} />
         </button>
-        <button 
+        <button
           onClick={() => onRemove(member.id)}
           className="text-[10px] font-bold uppercase text-red-400 hover:text-red-600 transition-colors"
         >
@@ -43,7 +50,21 @@ export function StaffDetailsView({ member, onBack, onRemove }: StaffDetailsViewP
           </div>
           <div>
             <h3 className="text-xl font-bold text-zinc-900 tracking-tight">{member.name}</h3>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">{member.role}</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 border border-black rounded-md px-2 py-1 hover:bg-gray-100 transition-colors">
+                {member.role}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {(['Manager', 'Staff'] as Array<'Manager' | 'Staff'>).map((role) => (
+                  <DropdownMenuItem
+                    key={role}
+                    onClick={() => onRoleChange(member.id, role)} // Call onRoleChange with selected role
+                  >
+                    {role}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

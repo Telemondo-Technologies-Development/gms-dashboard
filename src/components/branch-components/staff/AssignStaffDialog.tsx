@@ -22,15 +22,26 @@ interface AssignStaffDialogProps {
   onUpdateStaff: (newStaff: StaffMember[]) => void;
 }
 
-export function AssignStaffDialog({ 
-  open, 
-  onOpenChange, 
-  branchName, 
-  staff, 
-  onUpdateStaff 
+export function AssignStaffDialog({
+  open,
+  onOpenChange,
+  branchName,
+  staff,
+  onUpdateStaff,
 }: AssignStaffDialogProps) {
   const [view, setView] = useState<'list' | 'add' | 'details'>('list');
   const [selectedMember, setSelectedMember] = useState<StaffMember | null>(null);
+
+  const handleRoleChange = (id: string, role: 'Manager' | 'Staff') => {
+    const updatedStaff = staff.map((member) =>
+      member.id === id ? { ...member, role } : member
+    );
+    onUpdateStaff(updatedStaff);
+
+    if (selectedMember?.id === id) {
+      setSelectedMember((prev) => (prev ? { ...prev, role } : null));
+    }
+  };
 
   const handleBack = () => {
     setView('list');
@@ -38,31 +49,30 @@ export function AssignStaffDialog({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onOpenChange={(val) => { 
-        onOpenChange(val); 
-        if (!val) setView('list'); 
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        onOpenChange(val);
+        if (!val) setView('list');
       }}
     >
       <DialogContent className="sm:max-w-[450px] max-h-[85vh] p-0 flex flex-col overflow-hidden border-none shadow-2xl bg-white">
-        
         {view === 'list' && (
-          <StaffListView 
-            branchName={branchName} 
-            staff={staff} 
+          <StaffListView
+            branchName={branchName}
+            staff={staff}
             onAddClick={() => setView('add')}
-            onSelect={(m: any) => { 
-              setSelectedMember(m); 
-              setView('details'); 
+            onSelect={(member: StaffMember) => {
+              setSelectedMember(member);
+              setView('details');
             }}
           />
         )}
 
         {view === 'add' && (
-          <StaffAddView 
-            onBack={handleBack} 
-            onSave={(newMember: any) => {
+          <StaffAddView
+            onBack={handleBack}
+            onSave={(newMember: StaffMember) => {
               onUpdateStaff([...staff, newMember]);
               handleBack();
             }}
@@ -70,13 +80,14 @@ export function AssignStaffDialog({
         )}
 
         {view === 'details' && selectedMember && (
-          <StaffDetailsView 
+          <StaffDetailsView
             member={selectedMember}
             onBack={handleBack}
             onRemove={(id: string) => {
-              onUpdateStaff(staff.filter(s => s.id !== id));
+              onUpdateStaff(staff.filter((member) => member.id !== id));
               handleBack();
             }}
+            onRoleChange={handleRoleChange} 
           />
         )}
       </DialogContent>

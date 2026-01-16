@@ -6,8 +6,10 @@ import type { BranchFormData, StaffMember } from '@/components/branch-components
 import { BranchDetailsDialog } from '@/components/branch-components/BranchDetailsDialog';
 import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
 import { MapDialog } from '@/components/branch-components/MapDialog';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 import { MapPin, MoreVertical } from 'lucide-react';
+import { Button } from '../../../components/ui/button'; // Adjust the path if necessary
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
@@ -35,6 +37,16 @@ function RouteComponent() {
       longitude: 125.6478,
       latitude: 7.1502,
     },
+    {
+      id: '3',
+      name: 'Toril Gym Fitness',
+      address: '123 Panacan Davao City Philippines',
+      phone: '09179876543',
+      status: 'Active',
+      assignedStaff: [],
+      longitude: 125.497874,
+      latitude: 7.014951,
+    },
   ]);
 
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -45,31 +57,79 @@ function RouteComponent() {
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
   const [mapBranch, setMapBranch] = useState<BranchFormData | null>(null);
 
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [branchToRemove, setBranchToRemove] = useState<BranchFormData | null>(null);
+
+  const currentUserId = 'exampleUserId'; // Replace with actual logic to get the current user ID
+
   const handleAddBranch = (branch: BranchFormData) => {
-    setBranches((prev) => [branch, ...prev]);
+    const currentTimestamp = new Date().toISOString();
+    const newBranch = {
+      ...branch,
+      created_by: currentUserId,
+      updated_by: currentUserId,
+      created_at: currentTimestamp,
+      updated_at: currentTimestamp,
+    };
+
+    setBranches((prev) => [newBranch, ...prev]);
+
+    // Send newBranch to the backend
+    // Example: await api.createBranch(newBranch);
   };
 
   const handleSaveBranch = (updatedBranch: BranchFormData) => {
+    const currentTimestamp = new Date().toISOString();
+    const branchWithUpdatedBy = {
+      ...updatedBranch,
+      updated_by: currentUserId,
+      updated_at: currentTimestamp,
+    };
+
     setBranches((prev) =>
-      prev.map((branch) => (branch.id === updatedBranch.id ? updatedBranch : branch))
+      prev.map((branch) => (branch.id === updatedBranch.id ? branchWithUpdatedBy : branch))
     );
+
+    // Send branchWithUpdatedBy to the backend
+    // Example: await api.updateBranch(branchWithUpdatedBy);
   };
 
-  const handleUpdateStaff = (newStaff: StaffMember[]) => {
-    if (!activeBranchForStaff) return;
-    setBranches((prev) =>
-      prev.map((branch) =>
-        branch.id === activeBranchForStaff.id ? { ...branch, assignedStaff: newStaff } : branch
-      )
-    );
-    setActiveBranchForStaff((prev) =>
-      prev ? { ...prev, assignedStaff: newStaff } : null
-    );
+  const handleRemoveBranch = () => {
+    if (branchToRemove) {
+      setBranches((prev) => prev.filter((branch) => branch.id !== branchToRemove.id));
+      setConfirmDialogOpen(false);
+      setBranchToRemove(null);
+
+      // Send delete request to the backend
+      // Example: await api.deleteBranch(branchToRemove.id);
+    }
   };
 
   const selectedBranch = selectedBranchId
     ? branches.find((branch) => branch.id === selectedBranchId) ?? null
     : null;
+
+  function handleUpdateStaff(newStaff: StaffMember[]): void {
+    if (activeBranchForStaff) {
+      const updatedBranch = {
+        ...activeBranchForStaff,
+        assignedStaff: newStaff,
+        updated_by: currentUserId,
+        updated_at: new Date().toISOString(),
+      };
+
+      setBranches((prev) =>
+        prev.map((branch) =>
+          branch.id === activeBranchForStaff.id ? updatedBranch : branch
+        )
+      );
+
+      setActiveBranchForStaff(updatedBranch);
+
+      // Send updatedBranch to the backend
+      // Example: await api.updateBranch(updatedBranch);
+    }
+  }
 
   return (
     <div className="text-zinc-900 bg-surface min-h-screen">
@@ -117,12 +177,27 @@ function RouteComponent() {
                     </a>
                   </div>
                 </div>
-                <button
-                  className="text-zinc-400 hover:text-black transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical size={20} />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="text-zinc-400 hover:text-black transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical size={20} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBranchToRemove(branch);
+                        setConfirmDialogOpen(true);
+                      }}
+                    >
+                      Remove
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               <div className="mt-6 flex justify-end">
@@ -168,6 +243,33 @@ function RouteComponent() {
           longitude={mapBranch.longitude}
           address={mapBranch.address}
         />
+      )}
+
+      {confirmDialogOpen && (
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-md z-50">
+          <h3 className="text-lg font-semibold mb-4">Remove Branch?</h3>
+          <p className="text-sm text-gray-600 mb-6">
+            Are you sure you want to remove the branch "{branchToRemove?.name}"?
+          </p>
+          <div className="flex justify-end gap-4">
+            {/* Cancel Button */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setConfirmDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+
+            {/* Confirm Button */}
+            <Button
+              type="button"
+              onClick={handleRemoveBranch}
+            >
+              Remove
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

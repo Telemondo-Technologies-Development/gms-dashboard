@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility';
@@ -15,6 +15,9 @@ export function MapDialog({ open, onOpenChange, latitude, longitude, address }: 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Branch Location</DialogTitle>
+        </DialogHeader>
         <div className="h-[300px] w-full">
           <MapContainer
             center={[latitude, longitude]}
