@@ -46,3 +46,4 @@ export const billingSubscriptionSchema = z.object({
 })
 
 export type BillingSubscription = z.infer<typeof billingSubscriptionSchema>
+
