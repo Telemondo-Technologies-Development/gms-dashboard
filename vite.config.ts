@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => {
           target: apiTarget,
           changeOrigin: true,
           // Serve index.html for browser GET navigation requests instead of proxying
-          bypass: (req, res) => {
+          bypass: (req) => {
             const accept = req.headers && (req.headers.accept || '')
             if (req.method === 'GET' && typeof accept === 'string' && accept.includes('text/html')) {
               return '/index.html'
@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
           target: apiTarget,
           changeOrigin: true,
           // Only proxy non-GET requests; allow client-side routing for GET
-          bypass: (req, res) => {
+          bypass: (req) => {
             const accept = req.headers && (req.headers.accept || '')
             if (req.method === 'GET' && typeof accept === 'string' && accept.includes('text/html')) {
               return '/index.html'
