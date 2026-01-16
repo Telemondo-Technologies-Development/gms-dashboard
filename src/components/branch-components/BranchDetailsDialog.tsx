@@ -142,7 +142,7 @@ export function BranchDetailsDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            <Button type="submit" disabled={!branch} className="bg-black text-white hover:bg-zinc-800">
+            <Button type="submit" disabled={!branch} className="">
               Save changes
             </Button>
           </DialogFooter>
