@@ -71,11 +71,16 @@ export function AssignStaffDialog({
 
         {view === 'add' && (
           <StaffAddView
-            onBack={handleBack}
-            onSave={(newMember: StaffMember) => {
-              onUpdateStaff([...staff, newMember]);
+            open={open}
+            onClose={() => {
+              onOpenChange(false);
               handleBack();
             }}
+            onSave={(newMember: StaffMember) => {
+              onUpdateStaff([...staff, newMember]);
+              setView('list');
+            }}
+            onBack={handleBack}
           />
         )}
 
