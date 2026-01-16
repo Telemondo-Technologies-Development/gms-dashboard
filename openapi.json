@@ -1,0 +1,2573 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/branch": {
+      "get": {
+        "operationId": "getAllBranches",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBranchTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Branches",
+        "tags": [
+          "Branch"
+        ]
+      },
+      "post": {
+        "operationId": "createBranch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBranchTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Branch",
+        "tags": [
+          "Branch"
+        ]
+      }
+    },
+    "/api/branch/personnel": {
+      "get": {
+        "operationId": "getAllBranchPersonnel",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBranchPersonnelTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Branch Personnel",
+        "tags": [
+          "Branch Personnel"
+        ]
+      },
+      "post": {
+        "operationId": "createBranchPersonnel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchPersonnelPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBranchPersonnelTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Branch Personnel",
+        "tags": [
+          "Branch Personnel"
+        ]
+      }
+    },
+    "/api/branch/personnel/{id}": {
+      "delete": {
+        "operationId": "deleteBranchPersonnel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Branch Personnel by id",
+        "tags": [
+          "Branch Personnel"
+        ]
+      },
+      "get": {
+        "operationId": "getBranchPersonnel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBranchPersonnelTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Branch Personnel by id",
+        "tags": [
+          "Branch Personnel"
+        ]
+      },
+      "put": {
+        "operationId": "updateBranchPersonnel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchPersonnelPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBranchPersonnelTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Branch Personnel by id",
+        "tags": [
+          "Branch Personnel"
+        ]
+      }
+    },
+    "/api/branch/{id}": {
+      "delete": {
+        "operationId": "deleteBranch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Branch by id",
+        "tags": [
+          "Branch"
+        ]
+      },
+      "get": {
+        "operationId": "getBranch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBranchTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Branch by id",
+        "tags": [
+          "Branch"
+        ]
+      },
+      "put": {
+        "operationId": "updateBranch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBranchTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Branch by id",
+        "tags": [
+          "Branch"
+        ]
+      }
+    },
+    "/api/branch/{id}/employees": {
+      "get": {
+        "operationId": "getBranchEmployees",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IN",
+                "OUT",
+                "UNDECIDED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBranchEmployeesDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Personnel per Branch by id",
+        "tags": [
+          "Branch"
+        ]
+      }
+    },
+    "/api/employee": {
+      "get": {
+        "operationId": "getAllUsers_2",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListEmployeeTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Employees",
+        "tags": [
+          "Employee"
+        ]
+      },
+      "post": {
+        "operationId": "createEmployee",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmployeePostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseEmployeeTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Employee",
+        "tags": [
+          "Employee"
+        ]
+      }
+    },
+    "/api/employee/{id}": {
+      "delete": {
+        "operationId": "deleteEmployee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete an Employee by id",
+        "tags": [
+          "Employee"
+        ]
+      },
+      "get": {
+        "operationId": "getEmployee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseEmployeeTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get an Employee by id",
+        "tags": [
+          "Employee"
+        ]
+      },
+      "put": {
+        "operationId": "updateEmployee",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmployeePutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseEmployeeTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update an Employee by id",
+        "tags": [
+          "Employee"
+        ]
+      }
+    },
+    "/api/member": {
+      "get": {
+        "operationId": "getAllUsers_1",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListMemberTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Members",
+        "tags": [
+          "Member"
+        ]
+      },
+      "post": {
+        "operationId": "createMember",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Member",
+        "tags": [
+          "Member"
+        ]
+      }
+    },
+    "/api/member/{id}": {
+      "delete": {
+        "operationId": "deleteMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Member by id",
+        "tags": [
+          "Member"
+        ]
+      },
+      "get": {
+        "operationId": "getMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Member by id",
+        "tags": [
+          "Member"
+        ]
+      },
+      "put": {
+        "operationId": "updateMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Member by id",
+        "tags": [
+          "Member"
+        ]
+      }
+    },
+    "/api/permission": {
+      "get": {
+        "operationId": "getAllPermissions",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListPermission"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Permissions",
+        "tags": [
+          "Access Control"
+        ]
+      },
+      "post": {
+        "operationId": "createPermission",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "[DEV] Create a new Permission",
+        "tags": [
+          "Access Control"
+        ]
+      }
+    },
+    "/api/permission/{id}": {
+      "get": {
+        "operationId": "getPermission",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOptionalPermission"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Permission by id",
+        "tags": [
+          "Access Control"
+        ]
+      }
+    },
+    "/api/role": {
+      "get": {
+        "operationId": "getAllRoles",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListRoleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Roles",
+        "tags": [
+          "Access Control"
+        ]
+      },
+      "post": {
+        "operationId": "createRole",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseRoleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Role",
+        "tags": [
+          "Access Control"
+        ]
+      }
+    },
+    "/api/role/{id}": {
+      "delete": {
+        "operationId": "deleteRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Role by id",
+        "tags": [
+          "Access Control"
+        ]
+      },
+      "get": {
+        "operationId": "getRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseRolePermissionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Role with its Permissions by id",
+        "tags": [
+          "Access Control"
+        ]
+      },
+      "put": {
+        "operationId": "updateRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseRoleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Role by id",
+        "tags": [
+          "Access Control"
+        ]
+      }
+    },
+    "/api/role/{id}/permission": {
+      "delete": {
+        "operationId": "deleteRolePermissions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePermissionDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Role's Permission by id",
+        "tags": [
+          "Access Control"
+        ]
+      },
+      "put": {
+        "operationId": "updateRolePermissions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePermissionDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseRolePermissionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Role's Permission by id",
+        "tags": [
+          "Access Control"
+        ]
+      }
+    },
+    "/api/user": {
+      "get": {
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListUserTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Users",
+        "tags": [
+          "User"
+        ]
+      },
+      "post": {
+        "description": "Creates a new user record in the database",
+        "operationId": "createUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new User",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/api/user/{id}": {
+      "delete": {
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a User by id",
+        "tags": [
+          "User"
+        ]
+      },
+      "get": {
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a User by id",
+        "tags": [
+          "User"
+        ]
+      },
+      "put": {
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a User by id",
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogInDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "description"
+        ]
+      },
+      "ApiResponseBranchEmployeesDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BranchEmployeesDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseBranchPersonnelTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BranchPersonnelTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseBranchTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BranchTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseEmployeeTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/EmployeeTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListBranchPersonnelTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchPersonnelTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListBranchTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListEmployeeTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListMemberTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListPermission": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListRoleTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListUserTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseMemberTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MemberTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseOptionalPermission": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Permission"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseRolePermissionTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RolePermissionTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseRoleTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RoleTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseUnit": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseUserTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/UserTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "BranchEmployeesDTO": {
+        "type": "object",
+        "description": "Format for Branch with Personnel read",
+        "properties": {
+          "branch": {
+            "$ref": "#/components/schemas/BranchSummaryDTO"
+          },
+          "employees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeInBranchDTO"
+            }
+          }
+        },
+        "required": [
+          "branch"
+        ]
+      },
+      "BranchPersonnelPostDTO": {
+        "type": "object",
+        "description": "Format for Branch Personnel create",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "createdById",
+          "status"
+        ]
+      },
+      "BranchPersonnelPutDTO": {
+        "type": "object",
+        "description": "Format for Branch Personnel update",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "status",
+          "updatedById"
+        ]
+      },
+      "BranchPersonnelTableDTO": {
+        "type": "object",
+        "description": "Format for Branch Personnel read",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "createdAt",
+          "id",
+          "status",
+          "updatedAt"
+        ]
+      },
+      "BranchPostDTO": {
+        "type": "object",
+        "description": "Format for Branch create",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "latitude": {
+            "type": "string"
+          },
+          "longitude": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profilePictureId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "createdById",
+          "latitude",
+          "longitude",
+          "name",
+          "status"
+        ]
+      },
+      "BranchPutDTO": {
+        "type": "object",
+        "description": "Format for Branch update",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "string"
+          },
+          "longitude": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "profilePictureId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "address",
+          "latitude",
+          "longitude",
+          "name",
+          "status",
+          "updatedById"
+        ]
+      },
+      "BranchSummaryDTO": {
+        "type": "object",
+        "description": "Format for Branch read summary",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "latitude": {
+            "type": "string"
+          },
+          "longitude": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "id",
+          "latitude",
+          "longitude",
+          "name",
+          "status"
+        ]
+      },
+      "BranchTableDTO": {
+        "type": "object",
+        "description": "Format for Branch read",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "latitude": {
+            "type": "string"
+          },
+          "longitude": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "address",
+          "createdAt",
+          "id",
+          "latitude",
+          "longitude",
+          "name",
+          "status",
+          "updatedAt"
+        ]
+      },
+      "EmployeeInBranchDTO": {
+        "type": "object",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "employee": {
+            "$ref": "#/components/schemas/EmployeeSummaryDTO"
+          }
+        },
+        "required": [
+          "actorId"
+        ]
+      },
+      "EmployeePostDTO": {
+        "type": "object",
+        "description": "Format for Employee create",
+        "properties": {
+          "contactNo": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "profilePictureId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contactNo",
+          "firstName",
+          "status",
+          "surname"
+        ]
+      },
+      "EmployeePutDTO": {
+        "type": "object",
+        "description": "Format for Employee update",
+        "properties": {
+          "contactNo": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "profilePictureId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "contactNo",
+          "firstName",
+          "status",
+          "surname"
+        ]
+      },
+      "EmployeeSummaryDTO": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "EmployeeTableDTO": {
+        "type": "object",
+        "description": "Format for Employee read",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contactNo": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserTableDTO"
+          }
+        },
+        "required": [
+          "contactNo",
+          "firstName",
+          "id",
+          "status",
+          "surname"
+        ]
+      },
+      "LogInDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "MemberPostDTO": {
+        "type": "object",
+        "description": "Format for Member create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "profilePictureId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdById",
+          "firstName",
+          "status",
+          "surname"
+        ]
+      },
+      "MemberPutDTO": {
+        "type": "object",
+        "description": "Format for Member update",
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "profilePictureId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "firstName",
+          "status",
+          "surname",
+          "updatedById"
+        ]
+      },
+      "MemberTableDTO": {
+        "type": "object",
+        "description": "Format for Member read",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "middleName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "firstName",
+          "id",
+          "status",
+          "surname"
+        ]
+      },
+      "PageMetadata": {
+        "type": "object",
+        "properties": {
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "pageCount",
+          "pageIndex",
+          "pageSize",
+          "totalCount"
+        ]
+      },
+      "Permission": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "RolePermissionDTO": {
+        "type": "object",
+        "description": "Format for Role Permission's update & delete",
+        "properties": {
+          "permissionIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "permissionIds"
+        ]
+      },
+      "RolePermissionTableDTO": {
+        "type": "object",
+        "description": "Format for Role Permission read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            }
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "description",
+          "id",
+          "name",
+          "permissions"
+        ]
+      },
+      "RolePostDTO": {
+        "type": "object",
+        "description": "Format for Role create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdById",
+          "description",
+          "name"
+        ]
+      },
+      "RolePutDTO": {
+        "type": "object",
+        "description": "Format for Role update",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "description",
+          "name",
+          "updatedById"
+        ]
+      },
+      "RoleTableDTO": {
+        "type": "object",
+        "description": "Format for Role read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "description",
+          "id",
+          "name"
+        ]
+      },
+      "UserPostDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "UserPutDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "UserTableDTO": {
+        "type": "object",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "email",
+          "id"
+        ]
+      }
+    }
+  }
+}
