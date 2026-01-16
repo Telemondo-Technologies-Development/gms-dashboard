@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Added 
+- Added `AssignStaffDialog` for managing assigned staff per branch.
+- Integrated `MapDialog` to display branch locations with latitude and longitude.
+- Dropdown menu for branch-specific actions (e.g., remove branch).
+- Added confirmation dialog for branch removal.
+- Responsive grid layout for branch cards with hover effects and clickable actions.
 - Add New Member dialog (supports multiple members per group)
 - Member details modal: view/edit member, membership and billing info
 - Membership dates, durations and start/end date handling
@@ -25,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Basic login backend logic (session-based authentication)
 
 ### Changed 
+- Added `created_by` and `updated_by` fields for tracking user actions.
+- Added timestamps (`created_at`, `updated_at`) for branch creation and updates.
 - AddMemberDialog changed it to Shadcn dialog
 
 ### Deleted
