@@ -9,7 +9,7 @@ import { MapDialog } from '@/components/branch-components/MapDialog';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 import { MapPin, MoreVertical } from 'lucide-react';
-import { Button } from '../../../components/ui/button'; // Adjust the path if necessary
+import { Button } from '../../../components/ui/button';
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
@@ -49,18 +49,25 @@ function RouteComponent() {
     },
   ]);
 
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [staffDialogOpen, setStaffDialogOpen] = useState(false);
+  // Group dialog states into a single object
+  const [dialogState, setDialogState] = useState({
+    detailsOpen: false,
+    staffDialogOpen: false,
+    mapDialogOpen: false,
+    confirmDialogOpen: false,
+  });
+
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [activeBranchForStaff, setActiveBranchForStaff] = useState<BranchFormData | null>(null);
-
-  const [mapDialogOpen, setMapDialogOpen] = useState(false);
   const [mapBranch, setMapBranch] = useState<BranchFormData | null>(null);
-
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [branchToRemove, setBranchToRemove] = useState<BranchFormData | null>(null);
 
   const currentUserId = 'exampleUserId'; // Replace with actual logic to get the current user ID
+
+  // Helper function to toggle dialog visibility
+  const toggleDialog = (dialog: keyof typeof dialogState, value: boolean) => {
+    setDialogState((prev) => ({ ...prev, [dialog]: value }));
+  };
 
   const handleAddBranch = (branch: BranchFormData) => {
     const currentTimestamp = new Date().toISOString();
@@ -97,7 +104,7 @@ function RouteComponent() {
   const handleRemoveBranch = () => {
     if (branchToRemove) {
       setBranches((prev) => prev.filter((branch) => branch.id !== branchToRemove.id));
-      setConfirmDialogOpen(false);
+      toggleDialog('confirmDialogOpen', false);
       setBranchToRemove(null);
 
       // Send delete request to the backend
@@ -132,136 +139,126 @@ function RouteComponent() {
   }
 
   return (
-    <div className="text-zinc-900 bg-surface min-h-screen">
-      <main className="flex-1 p-8 md:p-12">
-        <header className="flex justify-between items-end mb-12">
-          <div />
-          <AddBranchDialog onAddBranch={handleAddBranch} />
-        </header>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div />
+        <AddBranchDialog onAddBranch={handleAddBranch} />
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {branches.map((branch) => (
-            <Card
-              key={branch.id}
-              className="p-6 border border-zinc-100 cursor-pointer hover:bg-muted/50 transition-all flex flex-col justify-between"
-              onClick={() => {
-                setSelectedBranchId(branch.id);
-                setDetailsOpen(true);
-              }}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded ${
-                      branch.status === 'Active'
-                        ? 'text-emerald-600 bg-emerald-50'
-                        : 'text-yellow-600 bg-yellow-50'
-                    }`}
-                  >
-                    {branch.status}
-                  </span>
-                  <h3 className="text-xl font-semibold mt-3 text-black">{branch.name}</h3>
-                  <div className="flex items-center gap-1 mt-1 text-zinc-500">
-                    <MapPin size={14} />
-                    <a
-                      href="#"
-                      className="text-sm text-blue-500 underline"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setMapBranch(branch);
-                        setMapDialogOpen(true);
-                      }}
-                    >
-                      {branch.address}
-                    </a>
-                  </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="text-zinc-400 hover:text-black transition-colors"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreVertical size={20} />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setBranchToRemove(branch);
-                        setConfirmDialogOpen(true);
-                      }}
-                    >
-                      Remove
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <div className="mt-6 flex justify-end">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {branches.map((branch) => (
+          <Card
+            key={branch.id}
+            className="p-6 border border-zinc-100 cursor-pointer hover:bg-muted/50 transition-all flex flex-col justify-between"
+            onClick={() => {
+              setSelectedBranchId(branch.id);
+              toggleDialog('detailsOpen', true);
+            }}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div>
                 <span
-                  className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-black transition-all border-b border-transparent hover:border-black pb-0.5 cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveBranchForStaff(branch);
-                    setStaffDialogOpen(true);
-                  }}
+                  className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded ${
+                    branch.status === 'Active'
+                      ? 'text-emerald-600 bg-emerald-50'
+                      : 'text-yellow-600 bg-yellow-50'
+                  }`}
                 >
-                  Assigned Staff
+                  {branch.status}
                 </span>
+                <h3 className="text-lg font-semibold mt-3 text-black">{branch.name}</h3>
+                <div className="flex items-center gap-1 mt-1 text-muted-foreground">
+                  <MapPin size={14} />
+                  <a
+                    href="#"
+                    className="text-sm text-blue-500 underline"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setMapBranch(branch);
+                      toggleDialog('mapDialogOpen', true);
+                    }}
+                  >
+                    {branch.address}
+                  </a>
+                </div>
               </div>
-            </Card>
-          ))}
-        </div>
-      </main>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="text-muted-foreground hover:text-black transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreVertical size={20} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setBranchToRemove(branch);
+                      toggleDialog('confirmDialogOpen', true);
+                    }}
+                  >
+                    Remove
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <span
+                className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-black transition-all border-b border-transparent hover:border-black pb-0.5 cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveBranchForStaff(branch);
+                  toggleDialog('staffDialogOpen', true);
+                }}
+              >
+                Assigned Staff
+              </span>
+            </div>
+          </Card>
+        ))}
+      </div>
 
       <BranchDetailsDialog
-        open={detailsOpen}
-        onOpenChange={(open) => {
-          setDetailsOpen(open);
-          if (!open) setSelectedBranchId(null);
-        }}
+        open={dialogState.detailsOpen}
+        onOpenChange={(open) => toggleDialog('detailsOpen', open)}
         branch={selectedBranch}
         onSave={handleSaveBranch}
       />
 
       <AssignStaffDialog
-        open={staffDialogOpen}
-        onOpenChange={setStaffDialogOpen}
+        open={dialogState.staffDialogOpen}
+        onOpenChange={(open) => toggleDialog('staffDialogOpen', open)}
         branchName={activeBranchForStaff?.name || ''}
         staff={activeBranchForStaff?.assignedStaff || []}
         onUpdateStaff={handleUpdateStaff}
       />
 
-      {mapBranch && (
-        <MapDialog
-          open={mapDialogOpen}
-          onOpenChange={setMapDialogOpen}
-          latitude={mapBranch.latitude}
-          longitude={mapBranch.longitude}
-          address={mapBranch.address}
-        />
-      )}
+      <MapDialog
+        open={dialogState.mapDialogOpen}
+        onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
+        latitude={mapBranch?.latitude || 0}
+        longitude={mapBranch?.longitude || 0}
+        address={mapBranch?.address || ''}
+      />
 
-      {confirmDialogOpen && (
+      {dialogState.confirmDialogOpen && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-md z-50">
           <h3 className="text-lg font-semibold mb-4">Remove Branch?</h3>
-          <p className="text-sm text-gray-600 mb-6">
+          <p className="text-sm text-muted-foreground mb-6">
             Are you sure you want to remove the branch "{branchToRemove?.name}"?
           </p>
           <div className="flex justify-end gap-4">
-            {/* Cancel Button */}
             <Button
               type="button"
               variant="outline"
-              onClick={() => setConfirmDialogOpen(false)}
+              onClick={() => toggleDialog('confirmDialogOpen', false)}
             >
               Cancel
             </Button>
-
-            {/* Confirm Button */}
             <Button
               type="button"
               onClick={handleRemoveBranch}
