@@ -3,7 +3,6 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { StaffListView } from './StaffListView';
 import { StaffAddView } from './StaffAddView';
 import { StaffDetailsView } from './StaffDetailsView';
-import { List } from 'lucide-react';
 
 export interface StaffMember {
   id: string;

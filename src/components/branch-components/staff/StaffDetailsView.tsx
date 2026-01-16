@@ -18,15 +18,15 @@ interface StaffDetailsViewProps {
   };
   onBack: () => void;
   onRemove: (id: string) => void;
-  onRoleChange: (id: string, role: 'Manager' | 'Staff') => void; // Add callback for role change
+  onRoleChange: (id: string, role: 'Manager' | 'Staff') => void; 
 }
 
 export function StaffDetailsView({ member, onBack, onRemove, onRoleChange }: StaffDetailsViewProps) {
   const detailRows = [
+    { icon: Calendar, label: 'Birthday', value: member.birthday },
     { icon: Mail, label: 'Email', value: member.email },
     { icon: Phone, label: 'Phone', value: member.phone },
     { icon: MapPin, label: 'Address', value: member.address },
-    { icon: Calendar, label: 'Birthday', value: member.birthday },
   ];
 
   return (
@@ -58,7 +58,7 @@ export function StaffDetailsView({ member, onBack, onRemove, onRoleChange }: Sta
                 {(['Manager', 'Staff'] as Array<'Manager' | 'Staff'>).map((role) => (
                   <DropdownMenuItem
                     key={role}
-                    onClick={() => onRoleChange(member.id, role)} // Call onRoleChange with selected role
+                    onClick={() => onRoleChange(member.id, role)}
                   >
                     {role}
                   </DropdownMenuItem>

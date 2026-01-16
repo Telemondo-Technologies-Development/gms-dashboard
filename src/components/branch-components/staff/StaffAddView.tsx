@@ -3,7 +3,53 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Mail, Phone, MapPin, Calendar } from 'lucide-react';
 
+interface StaffDetailsCardProps {
+  staff: {
+    name: string;
+    role: string;
+    email: string;
+    phone: string;
+    address: string;
+    birthday: string;
+  };
+}
+
+export function StaffDetailsCard({ staff }: StaffDetailsCardProps) {
+  const detailRows = [
+    { icon: Mail, label: 'Email', value: staff.email },
+    { icon: Phone, label: 'Phone', value: staff.phone },
+    { icon: MapPin, label: 'Address', value: staff.address },
+    { icon: Calendar, label: 'Birthday', value: staff.birthday },
+  ];
+
+  return (
+    <div className="bg-white rounded-lg shadow-md p-6 space-y-6 border border-zinc-200">
+      <div className="flex flex-col items-center text-center space-y-3">
+        <div className="h-20 w-20 rounded-full bg-zinc-900 text-white flex items-center justify-center text-2xl font-bold">
+          {staff.name.charAt(0)}
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-zinc-900 tracking-tight">{staff.name}</h3>
+          <p className="text-sm font-medium text-zinc-500">{staff.role}</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {detailRows.map((row, idx) => (
+          <div key={idx} className="flex items-start gap-4">
+            <row.icon size={20} className="text-zinc-400 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold uppercase text-zinc-400">{row.label}</p>
+              <p className="text-sm font-medium text-zinc-900">{row.value || 'Not provided'}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface StaffAddViewProps {
   open: boolean;
@@ -54,7 +100,7 @@ export function StaffAddView({ open, onClose, onSave, onBack }: StaffAddViewProp
     });
 
     resetForm();
-    onBack();
+    onBack(); 
   };
 
   return (
@@ -85,6 +131,14 @@ export function StaffAddView({ open, onClose, onSave, onBack }: StaffAddViewProp
               </select>
             </div>
             <div className="space-y-1.5">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Birthday</Label>
+              <Input
+                type="date"
+                value={formData.birthday}
+                onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
               <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Email Address</Label>
               <Input
                 type="email"
@@ -109,14 +163,6 @@ export function StaffAddView({ open, onClose, onSave, onBack }: StaffAddViewProp
                 placeholder="Street, City, Province"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Birthday</Label>
-              <Input
-                type="date"
-                value={formData.birthday}
-                onChange={(e) => setFormData({ ...formData, birthday: e.target.value })}
-              />
-            </div>
           </div>
           <DialogFooter className="mt-6">
             <Button
@@ -135,8 +181,4 @@ export function StaffAddView({ open, onClose, onSave, onBack }: StaffAddViewProp
       </DialogContent>
     </Dialog>
   );
-}
-
-function onBack() {
-  throw new Error('Function not implemented.');
 }
