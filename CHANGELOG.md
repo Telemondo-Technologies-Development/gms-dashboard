@@ -6,7 +6,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] 
+
+## [Unreleased]
+
+
+### Added 
+- Add New Member dialog (supports multiple members per group)
+- Member details modal: view/edit member, membership and billing info
+- Membership dates, durations and start/end date handling
+- Member documents upload (ID, medical certificates)
+- Attendance workflows: manual check-in, today's attendance view
+- Payment history page with filters and export support
+- Billing subscriptions and per-member billing cycles
+- Support for multiple payment methods (cash, GCash, bank transfer, cards)
+- Receipts and statements UI (view/print/download)
+- Charts for monthly/annual spending summaries
+- Docker environment with Swagger UI for API exploration
+- Basic login backend logic (session-based authentication)
+
+### Changed 
+- AddMemberDialog changed it to Shadcn dialog
+
+### Deleted
+- use-mobile hook unnecessary file no use
+
+
+## [0.1.0] - 2025-1-12 
 
 ### Added
 - Branch Management Module : Implemented centralized control for gym locations with status tracking ('Active'/'Maintenance').

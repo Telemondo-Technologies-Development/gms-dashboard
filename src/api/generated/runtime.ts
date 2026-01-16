@@ -149,8 +149,20 @@ export class BaseAPI {
             url += '?' + this.configuration.queryParamsStringify(context.query);
         }
 
-        const headers = Object.assign({}, this.configuration.headers, context.headers);
+        let headers = Object.assign({}, this.configuration.headers, context.headers);
         Object.keys(headers).forEach(key => headers[key] === undefined ? delete headers[key] : {});
+
+        // Inject Authorization header from localStorage token when available and not already provided
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const token = localStorage.getItem('auth_token');
+                if (token && !(headers as any)['Authorization']) {
+                    headers = Object.assign({}, headers, { Authorization: `Bearer ${token}` });
+                }
+            }
+        } catch (e) {
+            // ignore in non-browser environments
+        }
 
         const initOverrideFn =
             typeof initOverrides === "function"
@@ -161,7 +173,8 @@ export class BaseAPI {
             method: context.method,
             headers,
             body: context.body,
-            credentials: this.configuration.credentials,
+            // default to include credentials so cookie-based sessions work in browsers
+            credentials: this.configuration.credentials ?? 'include',
         };
 
         const overriddenInit: RequestInit = {

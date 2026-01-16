@@ -31,10 +31,24 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: apiTarget,
           changeOrigin: true,
+          // Serve index.html for browser GET navigation requests instead of proxying
+          bypass: (req) => {
+            const accept = req.headers && (req.headers.accept || '')
+            if (req.method === 'GET' && typeof accept === 'string' && accept.includes('text/html')) {
+              return '/index.html'
+            }
+          },
         },
         '/auth': {
           target: apiTarget,
           changeOrigin: true,
+          // Only proxy non-GET requests; allow client-side routing for GET
+          bypass: (req) => {
+            const accept = req.headers && (req.headers.accept || '')
+            if (req.method === 'GET' && typeof accept === 'string' && accept.includes('text/html')) {
+              return '/index.html'
+            }
+          },
         },
       },
     },
