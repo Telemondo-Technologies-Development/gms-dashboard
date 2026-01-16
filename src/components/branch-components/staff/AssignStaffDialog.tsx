@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { StaffListView } from './StaffListView';
 import { StaffAddView } from './StaffAddView';
 import { StaffDetailsView } from './StaffDetailsView';
+import { List } from 'lucide-react';
 
 export interface StaffMember {
   id: string;
@@ -71,11 +72,16 @@ export function AssignStaffDialog({
 
         {view === 'add' && (
           <StaffAddView
-            onBack={handleBack}
-            onSave={(newMember: StaffMember) => {
-              onUpdateStaff([...staff, newMember]);
+            open={open}
+            onClose={() => {
+              onOpenChange(false);
               handleBack();
             }}
+            onSave={(newMember: StaffMember) => {
+              onUpdateStaff([...staff, newMember]);
+              setView('list');
+            }}
+            onBack={handleBack}
           />
         )}
 
