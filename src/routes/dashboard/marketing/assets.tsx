@@ -234,7 +234,7 @@ function RouteComponent() {
                   </div>
                   <div className="w-full bg-muted rounded-full h-1.5 mt-3">
                     <div
-                      className={`h-1.5 rounded-full ${nearEOL ? 'bg-red-500' : 'bg-blue-500'}`}
+                      className={`h-1.5 rounded-full ${nearEOL ? 'bg-destructive' : 'bg-primary'}`}
                       style={{ width: `${Math.min((age / asset.lifespan) * 100, 100)}%` }}
                     />
                   </div>
