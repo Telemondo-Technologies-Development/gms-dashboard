@@ -46,7 +46,7 @@ services:
     #      context: .
     #      dockerfile: Dockerfile
 
-    image: ghcr.io/telemondo-technologies-development/gms-backend-spring:9fb777a12ca3def498f9d069daae2c6eaea8fb7b
+    image: ghcr.io/telemondo-technologies-development/gms-backend-spring:dev
 
     restart: unless-stopped
     env_file: ./.env
