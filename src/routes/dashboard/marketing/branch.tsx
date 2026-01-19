@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Card } from '../../../components/ui/card';
 import { AddBranchDialog } from '@/components/branch-components/branch/AddBranchDialog';
 import type { BranchFormData, StaffMember } from '@/components/branch-components/branch/AddBranchDialog';
 import { BranchDetailsDialog } from '@/components/branch-components/branch/BranchDetailsDialog';
 import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
 import { MapDialog } from '@/components/branch-components/branch/MapDialog';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
 
-import { MapPin, MoreVertical } from 'lucide-react';
 import { MultiBranchOverview } from '@/components/branch-components/branch/MultiBranchOverview';
+import { BranchList } from '@/components/branch-components/branch/BranchList';
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
@@ -153,84 +151,14 @@ function RouteComponent() {
         <div />
         <AddBranchDialog onAddBranch={handleAddBranch} />
       </div>
-      <Card className="p-8 py-26 border border-zinc-100">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {branches.map((branch) => (
-            <Card
-              key={branch.id}
-              className="p-6 border border-zinc-100 cursor-pointer hover:bg-muted/50 transition-all flex flex-col justify-between"
-              onClick={() => {
-                setSelectedBranchId(branch.id);
-                toggleDialog('detailsOpen', true);
-              }}
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <span
-                    className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded ${
-                      branch.status === 'Active'
-                        ? 'text-emerald-600 bg-emerald-50'
-                        : 'text-yellow-600 bg-yellow-50'
-                    }`}
-                  >
-                    {branch.status}
-                  </span>
-                  <h3 className="text-lg font-semibold mt-3 text-black">{branch.name}</h3>
-                  <div className="flex items-center gap-1 mt-1 text-muted-foreground">
-                    <MapPin size={14} />
-                    <a
-                      href="#"
-                      className="text-sm text-blue-500 underline"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setMapBranch(branch);
-                        toggleDialog('mapDialogOpen', true);
-                      }}
-                    >
-                      {branch.address}
-                    </a>
-                  </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      className="text-muted-foreground hover:text-black transition-colors"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreVertical size={20} />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setBranchToRemove(branch);
-                        toggleDialog('confirmDialogOpen', true);
-                      }}
-                    >
-                      Remove
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                <span
-                  className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-black transition-all border-b border-transparent hover:border-black pb-0.5 cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveBranchForStaff(branch);
-                    toggleDialog('staffDialogOpen', true);
-                  }}
-                >
-                  Assigned Staff
-                </span>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Card>
+      <BranchList
+        branches={branches}
+        onSelectBranch={setSelectedBranchId}
+        onToggleDialog={toggleDialog}
+        onSetMapBranch={setMapBranch}
+        onSetBranchToRemove={setBranchToRemove}
+        onSetActiveBranchForStaff={setActiveBranchForStaff}
+      />
       <MultiBranchOverview branches={branches} />
 
       <BranchDetailsDialog

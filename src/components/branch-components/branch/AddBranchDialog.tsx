@@ -188,8 +188,8 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
               type="button"
               variant="outline"
               onClick={() => {
-                resetForm(); // Reset the form fields
-                setOpen(false); // Close the dialog
+                resetForm(); 
+                setOpen(false); 
               }}
             >
               Cancel
