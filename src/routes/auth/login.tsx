@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { createFileRoute, useNavigate, type ErrorComponentProps } from '@tanstack/react-router'
+import { createFileRoute, type ErrorComponentProps } from '@tanstack/react-router'
 import { useMutation } from '@tanstack/react-query'
 import { Dumbbell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -29,12 +29,12 @@ export const Route = createFileRoute('/auth/login')({
 })
 
 function RouteComponent() {
-  const navigate = useNavigate()
   const [formState, setFormState] = useState<LoginPayload>({
     email: '',
     password: '',
   })
   const [formError, setFormError] = useState<string | null>(null)
+  const [loginResponse, setLoginResponse] = useState<string | null>(null)
 
   const loginIdField = import.meta.env.VITE_LOGIN_ID_FIELD === 'username' ? 'username' : 'email'
 
@@ -98,10 +98,6 @@ function RouteComponent() {
           // a plain token string was returned
           return parsed.data.trim()
         }
-        if (rawText && /logged in successfully/i.test(rawText)) {
-          return null
-        }
-
         throw new Error('Unexpected response from the login service.')
       } catch (error) {
         if (error instanceof Error) {
@@ -114,14 +110,22 @@ function RouteComponent() {
     onSuccess: async (token) => {
       if (typeof token === 'string' && token.trim()) {
         localStorage.setItem('auth_token', token)
+        setLoginResponse(`Login success. Token: ${token}`)
+      } else {
+        // No token returned — likely HttpOnly session cookie set by backend
+        setLoginResponse('Login success. (No token returned; session cookie set)')
       }
-      // If token is null, backend likely set an HttpOnly session cookie; proceed.
-      await navigate({ to: '/dashboard/marketing/membership' })
+
+      // Give the user a moment to see the response, then redirect.
+      window.setTimeout(() => {
+        window.location.href = 'http://localhost:3000/dashboard'
+      }, 800)
     },
   })
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setLoginResponse(null)
     const parsed = loginSchema.safeParse(formState)
     if (!parsed.success) {
       setFormError(parsed.error.issues[0]?.message ?? 'Please check your login details.')
@@ -191,6 +195,12 @@ function RouteComponent() {
             >
               <Label>{loginMutation.isPending ? 'Signing In...' : 'Sign In'}</Label>
             </Button>
+
+            {loginResponse && (
+              <p className="text-xs text-muted-foreground break-words" role="status">
+                {loginResponse}
+              </p>
+            )}
 
             <div className="pt-2 text-center">
               <p className="text-xs text-muted-foreground">Demo credentials - any username/password combination works</p>

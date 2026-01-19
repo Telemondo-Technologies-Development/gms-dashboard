@@ -1,5 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { useMemo, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { CalendarIcon, ChevronRight, Plus, Upload, Users, X } from 'lucide-react'
 
@@ -11,7 +12,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -21,31 +21,8 @@ import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-
-interface AddMemberDialogProps {
-  onAddMember: (member: MemberFormData) => void
-}
-
-export interface MemberInfo {
-  id: string
-  name: string
-  email: string
-  phone: string
-}
-
-export interface MemberFormData {
-  id: string
-  members: MemberInfo[]
-  startDate?: Date
-  endDate?: Date
-  membershipType: string
-  membershipDuration: string
-  billingAmount: string
-  billingCycle: string
-  paymentMethod: string
-  membershipDetails: string
-  documents: File[]
-}
+import { apiResponseMemberTableSchema, memberPostDtoSchema, type ApiResponseMemberTable } from '@/types/membership/memberSchemas'
+import type { MemberFormData, MemberInfo, AddMemberDialogProps } from '@/types/membership/memberSchemas'
 
 export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false)
@@ -54,6 +31,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   const [startDate, setStartDate] = useState<Date | undefined>()
   const [endDate, setEndDate] = useState<Date | undefined>()
   const [documents, setDocuments] = useState<File[]>([])
+  const [lastApiResponse, setLastApiResponse] = useState<string | null>(null)
 
   const [member, setMember] = useState<MemberInfo>({
     id: crypto.randomUUID(),
@@ -125,7 +103,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
     return null
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
     const err = validateBillingStep()
@@ -147,12 +125,19 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       membershipDetails: formData.membershipDetails,
       documents,
     }
-    onAddMember(payload)
-    resetForm()
-    setOpen(false)
+
+    try {
+      setStepError(null)
+      await createMemberMutation.mutateAsync(payload)
+      onAddMember(payload)
+      resetForm()
+      setOpen(false)
+    } catch (error) {
+      setStepError(error instanceof Error ? error.message : 'Failed to create member.')
+    }
   }
 
-  const handleSkipBilling = () => {
+  const handleSkipBilling = async () => {
     const membershipErr = validateMembershipStep()
     if (membershipErr) {
       setStepError(membershipErr)
@@ -173,10 +158,65 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       membershipDetails: formData.membershipDetails,
       documents,
     }
-    onAddMember(payload)
-    resetForm()
-    setOpen(false)
+
+    try {
+      setStepError(null)
+      await createMemberMutation.mutateAsync(payload)
+      onAddMember(payload)
+      resetForm()
+      setOpen(false)
+    } catch (error) {
+      setStepError(error instanceof Error ? error.message : 'Failed to create member.')
+    }
   }
+
+  const createMemberMutation = useMutation({
+    mutationFn: async (payload: MemberFormData) => {
+      const fullName = payload.members[0]?.name?.trim() ?? ''
+      const parts = fullName.split(/\s+/).filter(Boolean)
+      const surname = parts.length > 1 ? (parts.at(-1) ?? '') : (parts[0] ?? '')
+      const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] ?? '')
+
+      // NOTE: OpenAPI requires createdById. If your backend validates this against a real user,
+      // replace this placeholder with the authenticated user id.
+      const memberPostDTO = {
+        createdById: crypto.randomUUID(),
+        firstName: firstName || 'Unknown',
+        surname: surname || 'Unknown',
+        status: 'IN',
+      }
+
+      const validated = memberPostDtoSchema.parse(memberPostDTO)
+
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+      const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
+      const url = `${base}/api/member`
+
+      const token = localStorage.getItem('auth_token')
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: 'include',
+        body: JSON.stringify(validated),
+      })
+
+      const rawText = await response.text().catch(() => '')
+
+      if (!response.ok) {
+        throw new Error(`Create member failed (${response.status}). ${rawText || 'Check server logs for details.'}`)
+      }
+
+      const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
+      return apiResponseMemberTableSchema.parse(parsedJson)
+    },
+    onSuccess: (response: ApiResponseMemberTable) => {
+      setLastApiResponse(JSON.stringify(response, null, 2))
+      console.log('createMember response', response)
+    },
+  })
 
   return (
     <Dialog
@@ -200,18 +240,13 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
 
       <DialogContent
         showCloseButton={false}
-        className="max-w-none w-[95vw] sm:max-w-none md:w-275 xl:w-350 max-h-[95vh] overflow-auto p-0 flex flex-col gap-0"
+        className="max-w-none w-max sm:max-w-none md:w-275 xl:w-350 max-h-[95vh] overflow-auto p-0 flex flex-col gap-0"
       >
         <div className="p-6 border-b">
           <DialogHeader className="text-left">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <DialogTitle>Add New Member</DialogTitle>
-                <DialogDescription>
-                  {step === 'membership'
-                    ? 'Step 1: Membership details (no billing yet).'
-                    : 'Step 2: Choose billing subscription.'}
-                </DialogDescription>
                 <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
                   <span
                     className={cn(
@@ -439,7 +474,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
               </div>
 
               <div className="space-y-6">
-                {step === 'billing' ? (
+                {step === 'billing' && (
                   <Card className="h-full flex flex-col">
                     <CardHeader>
                       <CardTitle className="text-lg">Billing</CardTitle>
@@ -525,23 +560,20 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
                       </div>
                     </CardContent>
                   </Card>
-                ) : (
-                  <Card className="h-full flex flex-col">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Billing</CardTitle>
-                      <CardDescription>Billing is set up in Step 2 after saving membership info.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="text-sm text-muted-foreground">
-                      Click “Next” when you’re ready to select a subscription.
-                    </CardContent>
-                  </Card>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 p-6 pt-4 border-t sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 p-6 pt-4 border-t">
             <div className="text-sm text-destructive">{stepError ?? ''}</div>
+
+            {lastApiResponse && (
+              <pre className="max-h-40 overflow-auto rounded-md border bg-muted/50 p-3 text-xs whitespace-pre-wrap break-words">
+                {lastApiResponse}
+              </pre>
+            )}
+
             <div className="flex items-center justify-end gap-3">
               <DialogClose asChild>
                 <Button
@@ -559,6 +591,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
               {step === 'membership' ? (
                 <Button
                   type="button"
+                  disabled={createMemberMutation.isPending}
                   onClick={() => {
                     const err = validateMembershipStep()
                     if (err) {
@@ -576,6 +609,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
                   <Button
                     type="button"
                     variant="outline"
+                    disabled={createMemberMutation.isPending}
                     onClick={() => {
                       setStepError(null)
                       setStep('membership')
@@ -583,10 +617,10 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
                   >
                     Back
                   </Button>
-                  <Button type="button" variant="outline" onClick={handleSkipBilling}>
+                  <Button type="button" variant="outline" onClick={handleSkipBilling} disabled={createMemberMutation.isPending}>
                     Save (membership only)
                   </Button>
-                  <Button type="submit">Save</Button>
+                  <Button type="submit" disabled={createMemberMutation.isPending}>Save</Button>
                 </>
               )}
             </div>
