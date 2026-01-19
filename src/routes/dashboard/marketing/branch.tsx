@@ -114,7 +114,7 @@ function RouteComponent() {
         <div />
         <AddBranchDialog onAddBranch={handleAddBranch} />
       </div> 
-        <Tabs>
+        <Tabs defaultValue='branches' >
           <TabsList className="mb-10 flex space-x-6">
             <TabsTrigger value="branches">Branches</TabsTrigger>
             <TabsTrigger value="multiBranchDashboard">MultiBranchDashboard</TabsTrigger>
