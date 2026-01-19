@@ -34,7 +34,7 @@ export const MultiBranchOverview: React.FC<MultiBranchOverviewProps> = ({ branch
   const totalMemberships = branches.reduce((sum, branch) => sum + (branch.memberships || 0), 0);
 
   return (
-    <Card className="p-8 border py-26 border-zinc-100">
+    <Card className="p-8 py-26 border border-zinc-100">
       <h2 className="text-xl font-bold mb-4">Multi-Branch Overview</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ChartCard
