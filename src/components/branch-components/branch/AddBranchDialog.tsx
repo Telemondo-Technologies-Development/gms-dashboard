@@ -29,6 +29,9 @@ export interface BranchFormData {
   assignedStaff: StaffMember[];
   latitude: number;
   longitude: number;
+  revenue: number; // Added revenue property
+  expenses: number; // Added expenses property
+  memberships: number; // Added memberships property
 }
 
 export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
@@ -78,6 +81,9 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
       assignedStaff: [],
       latitude,
       longitude,
+      revenue: 0, // Initialize revenue
+      expenses: 0, // Initialize expenses
+      memberships: 0, // Initialize memberships
     };
 
     onAddBranch(newBranch);
