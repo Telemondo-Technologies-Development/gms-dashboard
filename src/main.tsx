@@ -9,6 +9,17 @@ import { routeTree } from './routeTree.gen.ts'
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 
+// If a browser has an old service worker registered for this origin,
+// it may keep requesting /sw.js and cause backend static-resource errors.
+// This unregisters any existing SW registrations.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    regs.forEach((reg) => {
+      reg.unregister().catch(() => {})
+    })
+  }).catch(() => {})
+}
+
 // Create a new router instance
 const router = createRouter({
   routeTree,
