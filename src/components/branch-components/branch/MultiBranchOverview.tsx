@@ -39,19 +39,19 @@ export const MultiBranchOverview: React.FC<MultiBranchOverviewProps> = ({ branch
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ChartCard
           title="Total Revenue"
-          value={`$${totalRevenue}`}
+          value={`₱${totalRevenue}`}
           data={revenueData}
           dataKey="value"
           chartName="Revenue"
-          formatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+          formatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
         />
         <ChartCard
           title="Total Expenses"
-          value={`$${totalExpenses}`}
+          value={`₱${totalExpenses}`}
           data={expensesData}
           dataKey="value"
           chartName="Expenses"
-          formatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+          formatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
         />
         <ChartCard
           title="Total Memberships"
