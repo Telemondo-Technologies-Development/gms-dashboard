@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { Card } from '../../../components/ui/card';
-import { AddBranchDialog } from '@/components/branch-components/AddBranchDialog';
-import type { BranchFormData, StaffMember } from '@/components/branch-components/AddBranchDialog';
-import { BranchDetailsDialog } from '@/components/branch-components/BranchDetailsDialog';
+import { AddBranchDialog } from '@/components/branch-components/branch/AddBranchDialog';
+import type { BranchFormData, StaffMember } from '@/components/branch-components/branch/AddBranchDialog';
+import { BranchDetailsDialog } from '@/components/branch-components/branch/BranchDetailsDialog';
 import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
-import { MapDialog } from '@/components/branch-components/MapDialog';
+import { MapDialog } from '@/components/branch-components/branch/MapDialog';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
 
 import { MapPin, MoreVertical } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
+import { MultiBranchOverview } from '@/components/branch-components/branch/MultiBranchOverview';
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
@@ -26,6 +27,9 @@ function RouteComponent() {
       assignedStaff: [],
       longitude: 125.5929,
       latitude: 7.0618,
+      revenue: 50000,
+      expenses: 20000,
+      memberships: 150,
     },
     {
       id: '2',
@@ -36,6 +40,9 @@ function RouteComponent() {
       assignedStaff: [],
       longitude: 125.6478,
       latitude: 7.1502,
+      revenue: 30000, 
+      expenses: 19000, 
+      memberships: 100, 
     },
     {
       id: '3',
@@ -46,6 +53,9 @@ function RouteComponent() {
       assignedStaff: [],
       longitude: 125.497874,
       latitude: 7.014951,
+      revenue: 40000, 
+      expenses: 18000, 
+      memberships: 120,
     },
   ]);
 
@@ -143,83 +153,85 @@ function RouteComponent() {
         <div />
         <AddBranchDialog onAddBranch={handleAddBranch} />
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {branches.map((branch) => (
-          <Card
-            key={branch.id}
-            className="p-6 border border-zinc-100 cursor-pointer hover:bg-muted/50 transition-all flex flex-col justify-between"
-            onClick={() => {
-              setSelectedBranchId(branch.id);
-              toggleDialog('detailsOpen', true);
-            }}
-          >
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <span
-                  className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded ${
-                    branch.status === 'Active'
-                      ? 'text-emerald-600 bg-emerald-50'
-                      : 'text-yellow-600 bg-yellow-50'
-                  }`}
-                >
-                  {branch.status}
-                </span>
-                <h3 className="text-lg font-semibold mt-3 text-black">{branch.name}</h3>
-                <div className="flex items-center gap-1 mt-1 text-muted-foreground">
-                  <MapPin size={14} />
-                  <a
-                    href="#"
-                    className="text-sm text-blue-500 underline"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setMapBranch(branch);
-                      toggleDialog('mapDialogOpen', true);
-                    }}
+      <Card className="p-8 py-26 border border-zinc-100">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {branches.map((branch) => (
+            <Card
+              key={branch.id}
+              className="p-6 border border-zinc-100 cursor-pointer hover:bg-muted/50 transition-all flex flex-col justify-between"
+              onClick={() => {
+                setSelectedBranchId(branch.id);
+                toggleDialog('detailsOpen', true);
+              }}
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span
+                    className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded ${
+                      branch.status === 'Active'
+                        ? 'text-emerald-600 bg-emerald-50'
+                        : 'text-yellow-600 bg-yellow-50'
+                    }`}
                   >
-                    {branch.address}
-                  </a>
+                    {branch.status}
+                  </span>
+                  <h3 className="text-lg font-semibold mt-3 text-black">{branch.name}</h3>
+                  <div className="flex items-center gap-1 mt-1 text-muted-foreground">
+                    <MapPin size={14} />
+                    <a
+                      href="#"
+                      className="text-sm text-blue-500 underline"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setMapBranch(branch);
+                        toggleDialog('mapDialogOpen', true);
+                      }}
+                    >
+                      {branch.address}
+                    </a>
+                  </div>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="text-muted-foreground hover:text-black transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical size={20} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBranchToRemove(branch);
+                        toggleDialog('confirmDialogOpen', true);
+                      }}
+                    >
+                      Remove
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className="text-muted-foreground hover:text-black transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MoreVertical size={20} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setBranchToRemove(branch);
-                      toggleDialog('confirmDialogOpen', true);
-                    }}
-                  >
-                    Remove
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
 
-            <div className="mt-6 flex justify-end">
-              <span
-                className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-black transition-all border-b border-transparent hover:border-black pb-0.5 cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveBranchForStaff(branch);
-                  toggleDialog('staffDialogOpen', true);
-                }}
-              >
-                Assigned Staff
-              </span>
-            </div>
-          </Card>
-        ))}
-      </div>
+              <div className="mt-6 flex justify-end">
+                <span
+                  className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-black transition-all border-b border-transparent hover:border-black pb-0.5 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveBranchForStaff(branch);
+                    toggleDialog('staffDialogOpen', true);
+                  }}
+                >
+                  Assigned Staff
+                </span>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </Card>
+      <MultiBranchOverview branches={branches} />
 
       <BranchDetailsDialog
         open={dialogState.detailsOpen}
@@ -244,29 +256,12 @@ function RouteComponent() {
         address={mapBranch?.address || ''}
       />
 
-      {dialogState.confirmDialogOpen && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-md shadow-md z-50">
-          <h3 className="text-lg font-semibold mb-4">Remove Branch?</h3>
-          <p className="text-sm text-muted-foreground mb-6">
-            Are you sure you want to remove the branch "{branchToRemove?.name}"?
-          </p>
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => toggleDialog('confirmDialogOpen', false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleRemoveBranch}
-            >
-              Remove
-            </Button>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmDialog
+        isOpen={dialogState.confirmDialogOpen}
+        branchName={branchToRemove?.name || null}
+        onCancel={() => toggleDialog('confirmDialogOpen', false)}
+        onConfirm={handleRemoveBranch}
+      />
     </div>
   );
 }
