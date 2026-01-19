@@ -10,6 +10,8 @@ import { DeleteConfirmDialog } from '../../../components/branch-components/Delet
 import { MultiBranchOverview } from '@/components/branch-components/branch/MultiBranchOverview';
 import { BranchList } from '@/components/branch-components/branch/BranchList';
 import { fakeBranchesData } from '@/components/branch-components/fakeBranchData';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
@@ -111,26 +113,37 @@ function RouteComponent() {
       <div className="flex items-center justify-between">
         <div />
         <AddBranchDialog onAddBranch={handleAddBranch} />
-      </div>
-      <div className="max-h-[500px] overflow-y-auto">
-        <BranchList
-          branches={branches}
-          onSelectBranch={setSelectedBranchId}
-          onToggleDialog={toggleDialog}
-          onSetMapBranch={setMapBranch}
-          onSetBranchToRemove={setBranchToRemove}
-          onSetActiveBranchForStaff={setActiveBranchForStaff}
-        />
-      </div>
-      <MultiBranchOverview branches={branches} />
+      </div> 
+        <Tabs>
+          <TabsList className="mb-10 flex space-x-6">
+            <TabsTrigger value="branches">Branches</TabsTrigger>
+            <TabsTrigger value="multiBranchDashboard">MultiBranchDashboard</TabsTrigger>
+          </TabsList>
 
+          <TabsContent value="branches">
+            <div>
+              <BranchList
+                branches={branches}
+                onSelectBranch={setSelectedBranchId}
+                onToggleDialog={toggleDialog}
+                onSetMapBranch={setMapBranch}
+                onSetBranchToRemove={setBranchToRemove}
+                onSetActiveBranchForStaff={setActiveBranchForStaff}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="multiBranchDashboard">
+            <MultiBranchOverview branches={branches} />
+          </TabsContent>
+        </Tabs>
+  
       <BranchDetailsDialog
         open={dialogState.detailsOpen}
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}
         branch={selectedBranch}
         onSave={handleSaveBranch}
       />
-
+  
       <AssignStaffDialog
         open={dialogState.staffDialogOpen}
         onOpenChange={(open) => toggleDialog('staffDialogOpen', open)}
@@ -138,7 +151,7 @@ function RouteComponent() {
         staff={activeBranchForStaff?.assignedStaff || []}
         onUpdateStaff={handleUpdateStaff}
       />
-
+  
       <MapDialog
         open={dialogState.mapDialogOpen}
         onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
@@ -146,7 +159,7 @@ function RouteComponent() {
         longitude={mapBranch?.longitude || 0}
         address={mapBranch?.address || ''}
       />
-
+  
       <DeleteConfirmDialog
         isOpen={dialogState.confirmDialogOpen}
         branchName={branchToRemove?.name || null}
