@@ -31,6 +31,9 @@ export interface BranchFormData {
   assignedStaff: StaffMember[];
   latitude: number; 
   longitude: number;
+  revenue: number; 
+  expenses: number; 
+  memberships: number;
 }
 
 interface BranchDetailsDialogProps {
