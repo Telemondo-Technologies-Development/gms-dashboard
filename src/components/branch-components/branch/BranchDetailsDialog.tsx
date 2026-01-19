@@ -12,6 +12,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+export interface StaffMember {
+  id: string;
+  name: string;
+  role: 'Manager' | 'Staff';
+  email: string;
+  phone: string;
+  address: string;
+  birthday: string;
+}
 
 export interface BranchFormData {
   id: string;
@@ -19,13 +28,19 @@ export interface BranchFormData {
   address: string;
   phone: string;
   status: 'Active' | 'Maintenance';
+  assignedStaff: StaffMember[];
+  latitude: number; 
+  longitude: number;
+  revenue: number; 
+  expenses: number; 
+  memberships: number;
 }
 
 interface BranchDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   branch: BranchFormData | null;
-  onSave: (updatedBranch: BranchFormData) => void;
+  onSave: (updatedBranch: BranchFormData) => void; 
 }
 
 export function BranchDetailsDialog({
@@ -130,7 +145,7 @@ export function BranchDetailsDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            <Button type="submit" disabled={!branch} className="bg-black text-white hover:bg-zinc-800">
+            <Button type="submit" disabled={!branch} className="">
               Save changes
             </Button>
           </DialogFooter>

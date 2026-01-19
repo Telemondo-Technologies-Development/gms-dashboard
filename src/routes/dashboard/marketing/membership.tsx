@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { AddMemberDialog, type MemberFormData, type MemberInfo } from '@/components/membership-components/AddMemberDialog'
-import { mockMembers } from '@/lib/mock-members'
+import { useEffect, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useForm } from 'react-hook-form'
+import { AddMemberDialog } from '@/components/membership-components/AddMemberDialog'
+import type {  MemberFormData, MemberInfo } from '@/types/membership/memberSchemas'
 import { MemberDetailsDialog } from '@/components/membership-components/MemberDetailsDialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -10,27 +12,94 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Search, Mail, Phone, Calendar, QrCode, Fingerprint, UserCheck, Clock } from 'lucide-react'
 import { format } from 'date-fns'
+import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
+import type { AttendanceRecord } from '@/types/membership/memberSchemas'
+import type { MembershipSearchForm } from '@/types/membership/memberSchemas'
+
 
 export const Route = createFileRoute('/dashboard/marketing/membership')({
   component: MembershipRoute,
 })
 
-interface AttendanceRecord {
-  id: string
-  memberId: string
-  memberName: string
-  membershipType: string
-  checkInTime: Date
-  checkInMethod: 'qr' | 'fingerprint' | 'manual'
+
+async function fetchMembersFromApi() {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
+  const url = `${base}/api/member`
+
+  const token = localStorage.getItem('auth_token')
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: 'include',
+  })
+
+  const rawText = await response.text().catch(() => '')
+  if (!response.ok) {
+    throw new Error(`Failed to load members (${response.status}). ${rawText || 'Check server logs for details.'}`)
+  }
+
+  const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
+  const envelope = apiResponseListMemberTableSchema.parse(parsedJson)
+  if (!envelope.success) {
+    throw new Error(envelope.message ?? 'Failed to load members.')
+  }
+  return envelope.data
 }
 
 function MembershipRoute() {
-  const [members, setMembers] = useState<MemberFormData[]>(() => mockMembers)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [members, setMembers] = useState<MemberFormData[]>([])
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
-  const [attendanceSearch, setAttendanceSearch] = useState('')
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [selectedMemberGroupId, setSelectedMemberGroupId] = useState<string | null>(null)
+
+  const form = useForm<MembershipSearchForm>({
+    defaultValues: { searchQuery: '', attendanceSearch: '' },
+  })
+
+  const searchQuery = form.watch('searchQuery')
+  const attendanceSearch = form.watch('attendanceSearch')
+
+  const membersQuery = useQuery({
+    queryKey: ['members'],
+    queryFn: fetchMembersFromApi,
+  })
+
+  const mappedApiMembers = useMemo<MemberFormData[]>(() => {
+    const apiMembers = membersQuery.data ?? []
+    return apiMembers.map((m) => {
+      const fullName = [m.firstName, m.middleName, m.surname, m.suffix].filter(Boolean).join(' ')
+      return {
+        id: m.id,
+        members: [
+          {
+            id: m.id,
+            name: fullName || 'Unknown',
+            email: '',
+            phone: '',
+          },
+        ],
+        startDate: undefined,
+        endDate: undefined,
+        membershipType: 'Member',
+        membershipDuration: '',
+        billingAmount: '',
+        billingCycle: '',
+        paymentMethod: '',
+        membershipDetails: `Status: ${m.status}`,
+        documents: [],
+      }
+    })
+  }, [membersQuery.data])
+
+  useEffect(() => {
+    // If this page is still empty, hydrate from API.
+    if (members.length === 0 && mappedApiMembers.length > 0) {
+      setMembers(mappedApiMembers)
+    }
+  }, [mappedApiMembers, members.length])
 
   const handleAddMember = (member: MemberFormData) => {
     setMembers(prev => [member, ...prev])
@@ -50,7 +119,7 @@ function MembershipRoute() {
       checkInMethod: method,
     }
     setAttendanceRecords(prev => [newRecord, ...prev])
-    setAttendanceSearch('')
+    form.setValue('attendanceSearch', '')
   }
 
   const filteredMembers = members.filter(memberGroup =>
@@ -113,7 +182,17 @@ function MembershipRoute() {
       <div className="flex items-center justify-between">
         <div>
         </div>
-        <AddMemberDialog onAddMember={handleAddMember} />
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => membersQuery.refetch()}
+            disabled={membersQuery.isFetching}
+          >
+            {membersQuery.isFetching ? 'Refreshing…' : 'Refresh'}
+          </Button>
+          <AddMemberDialog onAddMember={handleAddMember} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -131,12 +210,17 @@ function MembershipRoute() {
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search by name, email, phone, or membership type..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    {...form.register('searchQuery')}
                     className="pl-9"
                   />
                 </div>
               </div>
+
+              {membersQuery.error && (
+                <div className="mb-4 text-sm text-destructive" role="alert">
+                  {membersQuery.error instanceof Error ? membersQuery.error.message : 'Failed to load members.'}
+                </div>
+              )}
 
               <div className="text-xs text-muted-foreground mb-3">Tip: Click a row to view/edit full details and billing.</div>
 
@@ -272,8 +356,7 @@ function MembershipRoute() {
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search member by name, email, or phone..."
-                    value={attendanceSearch}
-                    onChange={(e) => setAttendanceSearch(e.target.value)}
+                    {...form.register('attendanceSearch')}
                     className="pl-9"
                   />
                 </div>
@@ -301,7 +384,7 @@ function MembershipRoute() {
                             {matches.map((member) => (
                               <div
                                 key={member.id}
-                                className="p-2 rounded-md hover:bg-accent flex items-center justify-between"
+                                className="p-2 rounded-md flex hover:bg-accent-foreground items-center justify-between"
                               >
                                 <div>
                                   <div className="font-medium">{member.name}</div>

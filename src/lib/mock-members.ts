@@ -1,4 +1,4 @@
-import type { MemberFormData } from '@/components/membership-components/AddMemberDialog'
+import type { MemberFormData } from '@/types/membership/memberSchemas'
 
 export const mockMembers: MemberFormData[] = [
   {
@@ -20,7 +20,6 @@ export const mockMembers: MemberFormData[] = [
     id: 'group-2',
     members: [
       { id: 'm-2', name: 'Carlos Rivera', email: 'carlos.rivera@example.com', phone: '+63 998 765 4321' },
-      { id: 'm-3', name: 'Maya Rivera', email: 'maya.rivera@example.com', phone: '+63 998 765 4322' },
     ],
     startDate: new Date('2026-01-05'),
     endDate: new Date('2026-04-05'),
@@ -35,7 +34,7 @@ export const mockMembers: MemberFormData[] = [
   {
     id: 'group-3',
     members: [
-      { id: 'm-4', name: 'Liza Moreno', email: 'liza.moreno@example.com', phone: '+63 917 555 0101' },
+      { id: 'm-3', name: 'Liza Moreno', email: 'liza.moreno@example.com', phone: '+63 917 555 0101' },
     ],
     startDate: new Date('2025-11-15'),
     endDate: new Date('2026-02-14'),

@@ -6,7 +6,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] 
+
+## [Unreleased]
+
+
+### Added 
+- Added `AssignStaffDialog` for managing assigned staff per branch.
+- Integrated `MapDialog` to display branch locations with latitude and longitude.
+- Dropdown menu for branch-specific actions (e.g., remove branch).
+- Added confirmation dialog for branch removal.
+- Responsive grid layout for branch cards with hover effects and clickable actions.
+- Add New Member dialog (supports multiple members per group)
+- Member details modal: view/edit member, membership and billing info
+- Membership dates, durations and start/end date handling
+- Member documents upload (ID, medical certificates)
+- Attendance workflows: manual check-in, today's attendance view
+- Payment history page with filters and export support
+- Billing subscriptions and per-member billing cycles
+- Support for multiple payment methods (cash, GCash, bank transfer, cards)
+- Receipts and statements UI (view/print/download)
+- Charts for monthly/annual spending summaries
+- Docker environment with Swagger UI for API exploration
+- Basic login backend logic (session-based authentication)
+- Add DeleteConfirmDialog for ExpenseDetailsDialog
+- Add ExpenseTable.tsx 
+- Add expense-constants.ts and expense-types.ts to lib
+- Add useExpenseForm.ts
+
+
+### Changed 
+- Added `created_by` and `updated_by` fields for tracking user actions.
+- Added timestamps (`created_at`, `updated_at`) for branch creation and updates.
+- AddMemberDialog changed it to Shadcn dialog
+- AddExpenseDialog and ExpenseDetailsDialog changed to utilize Shadcn dialog
+- Modularized expense.tsx into different component files
+
+### Deleted
+- use-mobile hook unnecessary file no use
+
+
+## [0.1.0] - 2025-1-12 
 
 ### Added
 - Branch Management Module : Implemented centralized control for gym locations with status tracking ('Active'/'Maintenance').

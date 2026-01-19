@@ -1,0 +1,74 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASS}"
+    ports:
+      - "${DB_PORT}:3306"
+    networks:
+      - mysql
+    volumes:
+      - db:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    volumes:
+      - ./php-make/upload.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    networks:
+      - mysql
+    ports:
+      - "${PHPMYADMIN_PORT}:80"
+
+  nats:
+    image: nats:2.12.0
+    restart: unless-stopped
+    ports:
+      - "${NATS_LOCAL_PORT}:${NATS_DOCKER_PORT}"
+      - "${NATS_MONITOR_LOCAL_PORT}:${NATS_MONITOR_DOCKER_PORT}"
+    networks:
+      - mysql
+
+  backend:
+    #    # local build for testing
+    #    build:
+    #      context: .
+    #      dockerfile: Dockerfile
+
+    image: ghcr.io/telemondo-technologies-development/gms-backend-spring:dev
+
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      DB_HOST: "${DB_HOST}"
+      DB_PORT: "${DB_CONTAINER_PORT}"
+
+      SPRING_PROFILES_ACTIVE: dev
+
+      NATS_URL: "nats://nats:${NATS_DOCKER_PORT}"
+
+    depends_on:
+      - mysql
+      - nats
+    networks:
+      - mysql
+    ports:
+      - "${BACKEND_PORT}:8080"
+
+networks:
+  mysql:
+    driver: bridge
+
+volumes:
+  db:

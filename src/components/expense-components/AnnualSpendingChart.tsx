@@ -1,6 +1,19 @@
 import { useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import type { ExpenseFormData } from '@/components/expense-components/AddExpenseDialog'
+
+interface ExpenseFormData {
+  id: string
+  type: string
+  name: string
+  date: Date
+  amount: string
+  branch: string
+  paymentMethod: string
+  category: string
+  description: string
+  receipt: File | null
+  salaryType?: string
+}
 
 interface AnnualSpendingChartProps {
   expenses: ExpenseFormData[]

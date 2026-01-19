@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { CalendarIcon, Upload } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import type { MemberFormData, MemberInfo } from '@/components/membership-components/AddMemberDialog'
+import type { MemberFormData, MemberInfo } from '@/types/membership/memberSchemas'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -19,13 +19,9 @@ import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import type { MemberDetailsDialogProps } from '@/types/membership/memberSchemas'
 
-interface MemberDetailsDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  memberGroup: MemberFormData | null
-  onSave: (updated: MemberFormData) => void
-}
+
 
 export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }: MemberDetailsDialogProps) {
   const [members, setMembers] = useState<MemberInfo[]>([])
@@ -101,7 +97,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl">
+      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
           <DialogHeader>
             <DialogTitle>Member Details</DialogTitle>

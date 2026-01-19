@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Card } from '../../../components/ui/card';
-import { AddBranchDialog } from '@/components/branch-components/AddBranchDialog';
-import type { BranchFormData } from '@/components/branch-components/AddBranchDialog';
-import { BranchDetailsDialog } from '@/components/branch-components/BranchDetailsDialog';
-import { MapPin, MoreVertical } from 'lucide-react';
+import { AddBranchDialog } from '@/components/branch-components/branch/AddBranchDialog';
+import type { BranchFormData, StaffMember } from '@/components/branch-components/branch/AddBranchDialog';
+import { BranchDetailsDialog } from '@/components/branch-components/branch/BranchDetailsDialog';
+import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
+import { MapDialog } from '@/components/branch-components/branch/MapDialog';
+import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
+
+import { MultiBranchOverview } from '@/components/branch-components/branch/MultiBranchOverview';
+import { BranchList } from '@/components/branch-components/branch/BranchList';
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
@@ -17,98 +21,174 @@ function RouteComponent() {
       name: 'Matina Gym Fitness',
       address: '123 Matina GSIS Davao City Philippines',
       phone: '09171234567',
-      status: 'Active', 
+      status: 'Active',
+      assignedStaff: [],
+      longitude: 125.5929,
+      latitude: 7.0618,
+      revenue: 50000,
+      expenses: 20000,
+      memberships: 150,
     },
     {
       id: '2',
       name: 'Panacan Gym Fitness',
       address: '123 Panacan Davao City Philippines',
       phone: '09179876543',
-      status: 'Maintenance', 
+      status: 'Maintenance',
+      assignedStaff: [],
+      longitude: 125.6478,
+      latitude: 7.1502,
+      revenue: 30000, 
+      expenses: 19000, 
+      memberships: 100, 
     },
-        {
+    {
       id: '3',
-      name: 'Panacan Gym Fitness',
+      name: 'Toril Gym Fitness',
       address: '123 Panacan Davao City Philippines',
       phone: '09179876543',
-      status: 'Maintenance', 
+      status: 'Active',
+      assignedStaff: [],
+      longitude: 125.497874,
+      latitude: 7.014951,
+      revenue: 40000, 
+      expenses: 18000, 
+      memberships: 120,
     },
   ]);
 
-  const [detailsOpen, setDetailsOpen] = useState(false);
+ 
+  const [dialogState, setDialogState] = useState({
+    detailsOpen: false,
+    staffDialogOpen: false,
+    mapDialogOpen: false,
+    confirmDialogOpen: false,
+  });
+
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
+  const [activeBranchForStaff, setActiveBranchForStaff] = useState<BranchFormData | null>(null);
+  const [mapBranch, setMapBranch] = useState<BranchFormData | null>(null);
+  const [branchToRemove, setBranchToRemove] = useState<BranchFormData | null>(null);
+
+  const currentUserId = 'exampleUserId'; 
+
+  
+  const toggleDialog = (dialog: keyof typeof dialogState, value: boolean) => {
+    setDialogState((prev) => ({ ...prev, [dialog]: value }));
+  };
 
   const handleAddBranch = (branch: BranchFormData) => {
-    setBranches((prev) => [branch, ...prev]);
+    const currentTimestamp = new Date().toISOString();
+    const newBranch = {
+      ...branch,
+      created_by: currentUserId,
+      updated_by: currentUserId,
+      created_at: currentTimestamp,
+      updated_at: currentTimestamp,
+    };
+
+    setBranches((prev) => [newBranch, ...prev]);
+
+
   };
 
   const handleSaveBranch = (updatedBranch: BranchFormData) => {
+    const currentTimestamp = new Date().toISOString();
+    const branchWithUpdatedBy = {
+      ...updatedBranch,
+      updated_by: currentUserId,
+      updated_at: currentTimestamp,
+    };
+
     setBranches((prev) =>
-      prev.map((branch) => (branch.id === updatedBranch.id ? updatedBranch : branch))
+      prev.map((branch) => (branch.id === updatedBranch.id ? branchWithUpdatedBy : branch))
     );
+
+    // Send branchWithUpdatedBy to the backend
+    // Example: await api.updateBranch(branchWithUpdatedBy);
+  };
+
+  const handleRemoveBranch = () => {
+    if (branchToRemove) {
+      setBranches((prev) => prev.filter((branch) => branch.id !== branchToRemove.id));
+      toggleDialog('confirmDialogOpen', false);
+      setBranchToRemove(null);
+
+      // Send delete request to the backend
+      // Example: await api.deleteBranch(branchToRemove.id);
+    }
   };
 
   const selectedBranch = selectedBranchId
     ? branches.find((branch) => branch.id === selectedBranchId) ?? null
     : null;
 
-  return (
-    <div className="text-zinc-900 bg-surface min-h-screen">
-      <div className="flex">
-        <main className="flex-1 p-8 md:p-12">
-          <header className="flex justify-between items-end mb-12">
-            <div>
-            </div>
-            <AddBranchDialog onAddBranch={handleAddBranch} />
-          </header>
+  function handleUpdateStaff(newStaff: StaffMember[]): void {
+    if (activeBranchForStaff) {
+      const updatedBranch = {
+        ...activeBranchForStaff,
+        assignedStaff: newStaff,
+        updated_by: currentUserId,
+        updated_at: new Date().toISOString(),
+      };
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {branches.map((branch) => (
-              <Card
-                key={branch.id}
-                className="p-6  border border-zinc-100 cursor-pointer hover:bg-muted/50"
-                onClick={() => {
-                  setSelectedBranchId(branch.id);
-                  setDetailsOpen(true);
-                }}
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-widest ${
-                      branch.status === 'Active'
-                        ? 'text-emerald-600 bg-emerald-50'
-                        : branch.status === 'Maintenance'
-                        ? 'text-yellow-600 bg-yellow-50'
-                        : 'text-zinc-400 bg-zinc-100'
-                      } px-2 py-1 rounded`}
-                    >
-                      {branch.status}
-                    </span>
-                    <h3 className="text-xl font-semibold mt-3 text-black">{branch.name}</h3>
-                    <div className="flex items-center gap-1 mt-1 text-zinc-500">
-                      <MapPin size={14} />
-                      <p className="text-sm">{branch.address}</p>
-                    </div>
-                  </div>
-                  <button className="text-zinc-400 hover:text-black transition-colors">
-                    <MoreVertical size={20} />
-                  </button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </main>
+      setBranches((prev) =>
+        prev.map((branch) =>
+          branch.id === activeBranchForStaff.id ? updatedBranch : branch
+        )
+      );
+
+      setActiveBranchForStaff(updatedBranch);
+
+      // Send updatedBranch to the backend
+      // Example: await api.updateBranch(updatedBranch);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div />
+        <AddBranchDialog onAddBranch={handleAddBranch} />
       </div>
+      <BranchList
+        branches={branches}
+        onSelectBranch={setSelectedBranchId}
+        onToggleDialog={toggleDialog}
+        onSetMapBranch={setMapBranch}
+        onSetBranchToRemove={setBranchToRemove}
+        onSetActiveBranchForStaff={setActiveBranchForStaff}
+      />
+      <MultiBranchOverview branches={branches} />
 
       <BranchDetailsDialog
-        open={detailsOpen}
-        onOpenChange={(open) => {
-          setDetailsOpen(open);
-          if (!open) setSelectedBranchId(null);
-        }}
+        open={dialogState.detailsOpen}
+        onOpenChange={(open) => toggleDialog('detailsOpen', open)}
         branch={selectedBranch}
         onSave={handleSaveBranch}
+      />
+
+      <AssignStaffDialog
+        open={dialogState.staffDialogOpen}
+        onOpenChange={(open) => toggleDialog('staffDialogOpen', open)}
+        branchName={activeBranchForStaff?.name || ''}
+        staff={activeBranchForStaff?.assignedStaff || []}
+        onUpdateStaff={handleUpdateStaff}
+      />
+
+      <MapDialog
+        open={dialogState.mapDialogOpen}
+        onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
+        latitude={mapBranch?.latitude || 0}
+        longitude={mapBranch?.longitude || 0}
+        address={mapBranch?.address || ''}
+      />
+
+      <DeleteConfirmDialog
+        isOpen={dialogState.confirmDialogOpen}
+        branchName={branchToRemove?.name || null}
+        onCancel={() => toggleDialog('confirmDialogOpen', false)}
+        onConfirm={handleRemoveBranch}
       />
     </div>
   );
