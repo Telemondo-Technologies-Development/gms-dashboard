@@ -8,6 +8,7 @@ import {
 	BanknoteArrowDown,
 	GitBranch,
 	ChartCandlestick,
+	LineChart
 } from "lucide-react"
 import { Button } from "../ui/button"
 
@@ -71,6 +72,7 @@ export default function Aside() {
 			items: [
 				{ label: "Users", href: "/dashboard/admin/users", icon: Users },
 				{ label: "Expenses", href: "/dashboard/admin/expense", icon: BanknoteArrowDown  },
+				{ label: "Analytics", href: "/dashboard/admin/analytics", icon: LineChart },
 			],
 		},
 		{
