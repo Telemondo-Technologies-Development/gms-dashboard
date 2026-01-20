@@ -1,4 +1,3 @@
-.openapi-generator-ignore
 apis/AccessControlApi.ts
 apis/AuthApi.ts
 apis/BranchApi.ts

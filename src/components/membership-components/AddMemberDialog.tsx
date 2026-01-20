@@ -1,13 +1,9 @@
-import type { ChangeEvent, FormEvent } from 'react'
-import { useMemo, useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
-import { format } from 'date-fns'
-import { CalendarIcon, ChevronRight, Plus, Upload, Users, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useForm } from '@tanstack/react-form'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogClose,
@@ -18,172 +14,151 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { apiResponseMemberTableSchema, memberPostDtoSchema, type ApiResponseMemberTable } from '@/types/membership/memberSchemas'
-import type { MemberFormData, MemberInfo, AddMemberDialogProps } from '@/types/membership/memberSchemas'
+import { apiResponseMemberTableSchema, memberPostDtoSchema } from '@/types/membership/memberSchemas'
+import type { AddMemberDialogProps, MemberFormData } from '@/types/membership/memberSchemas'
+import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
+import type { JwtClaims } from '@/types/user/userSchemas'
+import type { MemberFormValues } from '@/types/membership/memberSchemas'
+
+
+
+function tryDecodeJwtClaims(token: string): JwtClaims | null {
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  const payload = parts[1]
+  if (!payload) return null
+
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
+    if (typeof atob !== 'function') return null
+    const json = atob(padded)
+    const parsed: unknown = JSON.parse(json)
+    return parsed && typeof parsed === 'object' ? (parsed as JwtClaims) : null
+  } catch {
+    return null
+  }
+}
+
+function getStringClaim(claims: JwtClaims | null, key: string): string | undefined {
+  if (!claims) return undefined
+  const value = claims[key]
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+}
+
+function looksLikeUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+}
+
+async function fetchJsonOrThrow(url: string, token?: string): Promise<unknown> {
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: 'include',
+  })
+
+  const rawText = await response.text().catch(() => '')
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status}). ${rawText || 'Check server logs for details.'}`)
+  }
+
+  try {
+    return JSON.parse(rawText)
+  } catch {
+    throw new Error('Unexpected response from the server (invalid JSON).')
+  }
+}
+
+async function fetchUserById(userId: string, token?: string): Promise<UserTable> {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
+  const url = `${base}/api/user/${encodeURIComponent(userId)}`
+
+  const json = await fetchJsonOrThrow(url, token)
+  const parsed = apiResponseUserTableSchema.safeParse(json)
+  if (!parsed.success) {
+    throw new Error('Failed to validate user response.')
+  }
+  if (!parsed.data.success) {
+    throw new Error(parsed.data.message ?? 'Failed to fetch user.')
+  }
+  return parsed.data.data
+}
+
+async function fetchUserByEmail(email: string, token?: string): Promise<UserTable | null> {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
+  const url = `${base}/api/user`
+
+  const json = await fetchJsonOrThrow(url, token)
+  const parsed = apiResponseListUserTableSchema.safeParse(json)
+  if (!parsed.success) {
+    throw new Error('Failed to validate users response.')
+  }
+  if (!parsed.data.success) {
+    throw new Error(parsed.data.message ?? 'Failed to fetch users.')
+  }
+
+  const needle = email.trim().toLowerCase()
+  return parsed.data.data.find((u) => u.email.toLowerCase() === needle) ?? null
+}
 
 export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false)
-  const [step, setStep] = useState<'membership' | 'billing'>('membership')
-  const [stepError, setStepError] = useState<string | null>(null)
-  const [startDate, setStartDate] = useState<Date | undefined>()
-  const [endDate, setEndDate] = useState<Date | undefined>()
-  const [documents, setDocuments] = useState<File[]>([])
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [lastApiResponse, setLastApiResponse] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
-  const [member, setMember] = useState<MemberInfo>({
-    id: crypto.randomUUID(),
-    name: '',
-    email: '',
-    phone: '',
+  const defaultValues: MemberFormValues = {
+    createdById: '',
+    firstName: '',
+    middleName: '',
+    surname: '',
+    suffix: '',
+    profilePictureId: '',
+    status: 'IN',
+  }
+
+  const token = typeof window !== 'undefined' ? (localStorage.getItem('auth_token') ?? '') : ''
+  const storedEmail = typeof window !== 'undefined' ? (localStorage.getItem('auth_email') ?? '') : ''
+  const claims = token ? tryDecodeJwtClaims(token) : null
+  const authUserId = (() => {
+    const sub = getStringClaim(claims, 'sub')
+    return sub && looksLikeUuid(sub) ? sub : undefined
+  })()
+
+  const currentUserQuery = useQuery({
+    queryKey: ['currentUser', authUserId ?? null, storedEmail || null],
+    enabled: typeof window !== 'undefined' && (!!authUserId || !!storedEmail),
+    queryFn: async () => {
+      if (authUserId) return await fetchUserById(authUserId, token)
+      if (storedEmail) return await fetchUserByEmail(storedEmail, token)
+      return null
+    },
+    retry: false,
   })
 
-  const [formData, setFormData] = useState({
-    membershipType: '',
-    membershipDuration: '',
-    billingAmount: '',
-    billingCycle: '',
-    paymentMethod: '',
-    membershipDetails: '',
-  })
-
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleMemberChange = (field: keyof MemberInfo, value: string) => {
-    setMember((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const totalCost = useMemo(() => {
-    const amount = Number.parseFloat(formData.billingAmount)
-    const safe = Number.isFinite(amount) ? amount : 0
-    return (safe * 1).toFixed(2)
-  }, [formData.billingAmount])
-
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return
-    setDocuments(Array.from(e.target.files))
-  }
-
-  const resetForm = () => {
-    setMember({ id: crypto.randomUUID(), name: '', email: '', phone: '' })
-    setFormData({
-      membershipType: '',
-      membershipDuration: '',
-      billingAmount: '',
-      billingCycle: '',
-      paymentMethod: '',
-      membershipDetails: '',
-    })
-    setStep('membership')
-    setStepError(null)
-    setStartDate(undefined)
-    setEndDate(undefined)
-    setDocuments([])
-  }
-
-  const validateMembershipStep = () => {
-    if (!member.name.trim()) return 'Full name is required.'
-    if (!member.email.trim()) return 'Email is required.'
-    if (!member.phone.trim()) return 'Phone number is required.'
-    if (!formData.membershipType) return 'Membership type is required.'
-    if (!formData.membershipDuration) return 'Membership duration is required.'
-    if (!startDate) return 'Start date is required.'
-    return null
-  }
-
-  const validateBillingStep = () => {
-    const amount = Number.parseFloat(formData.billingAmount)
-    if (!Number.isFinite(amount) || amount <= 0) return 'Billing amount must be greater than 0.'
-    if (!formData.billingCycle) return 'Billing cycle is required.'
-    if (!formData.paymentMethod) return 'Mode of payment is required.'
-    return null
-  }
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-
-    const err = validateBillingStep()
-    if (err) {
-      setStepError(err)
-      return
-    }
-
-    const payload: MemberFormData = {
-      id: crypto.randomUUID(),
-      members: [member],
-      startDate,
-      endDate,
-      membershipType: formData.membershipType,
-      membershipDuration: formData.membershipDuration,
-      billingAmount: formData.billingAmount,
-      billingCycle: formData.billingCycle,
-      paymentMethod: formData.paymentMethod,
-      membershipDetails: formData.membershipDetails,
-      documents,
-    }
-
-    try {
-      setStepError(null)
-      await createMemberMutation.mutateAsync(payload)
-      onAddMember(payload)
-      resetForm()
-      setOpen(false)
-    } catch (error) {
-      setStepError(error instanceof Error ? error.message : 'Failed to create member.')
-    }
-  }
-
-  const handleSkipBilling = async () => {
-    const membershipErr = validateMembershipStep()
-    if (membershipErr) {
-      setStepError(membershipErr)
-      setStep('membership')
-      return
-    }
-
-    const payload: MemberFormData = {
-      id: crypto.randomUUID(),
-      members: [member],
-      startDate,
-      endDate,
-      membershipType: formData.membershipType,
-      membershipDuration: formData.membershipDuration,
-      billingAmount: '',
-      billingCycle: '',
-      paymentMethod: '',
-      membershipDetails: formData.membershipDetails,
-      documents,
-    }
-
-    try {
-      setStepError(null)
-      await createMemberMutation.mutateAsync(payload)
-      onAddMember(payload)
-      resetForm()
-      setOpen(false)
-    } catch (error) {
-      setStepError(error instanceof Error ? error.message : 'Failed to create member.')
-    }
-  }
+  const createdByActorId = currentUserQuery.data?.actorId
+  const currentUserEmail = currentUserQuery.data?.email ?? storedEmail
 
   const createMemberMutation = useMutation({
-    mutationFn: async (payload: MemberFormData) => {
-      const fullName = payload.members[0]?.name?.trim() ?? ''
-      const parts = fullName.split(/\s+/).filter(Boolean)
-      const surname = parts.length > 1 ? (parts.at(-1) ?? '') : (parts[0] ?? '')
-      const firstName = parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] ?? '')
+    mutationFn: async (values: MemberFormValues) => {
+      const createdById = values.createdById.trim()
+      if (!createdById) {
+        throw new Error('Missing actor id for the current user. Please log in again or ask admin to create an actor record.')
+      }
 
-      // NOTE: OpenAPI requires createdById. If your backend validates this against a real user,
-      // replace this placeholder with the authenticated user id.
       const memberPostDTO = {
-        createdById: crypto.randomUUID(),
-        firstName: firstName || 'Unknown',
-        surname: surname || 'Unknown',
-        status: 'IN',
+        createdById,
+        firstName: values.firstName.trim(),
+        middleName: values.middleName.trim() ? values.middleName.trim() : undefined,
+        profilePictureId: values.profilePictureId.trim() ? values.profilePictureId.trim() : undefined,
+        surname: values.surname.trim(),
+        suffix: values.suffix.trim() ? values.suffix.trim() : undefined,
+        status: values.status,
       }
 
       const validated = memberPostDtoSchema.parse(memberPostDTO)
@@ -192,7 +167,6 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
       const url = `${base}/api/member`
 
-      const token = localStorage.getItem('auth_token')
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -204,33 +178,82 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       })
 
       const rawText = await response.text().catch(() => '')
-
       if (!response.ok) {
         throw new Error(`Create member failed (${response.status}). ${rawText || 'Check server logs for details.'}`)
       }
 
       const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
-      return apiResponseMemberTableSchema.parse(parsedJson)
+      const envelope = apiResponseMemberTableSchema.parse(parsedJson)
+      if (!envelope.success) {
+        throw new Error(envelope.message ?? 'Failed to create member.')
+      }
+
+      return envelope.data
     },
-    onSuccess: (response: ApiResponseMemberTable) => {
-      setLastApiResponse(JSON.stringify(response, null, 2))
-      console.log('createMember response', response)
+    onSuccess: (data) => {
+      setLastApiResponse(JSON.stringify(data, null, 2))
+      setSubmitError(null)
+
+      void queryClient.invalidateQueries({ queryKey: ['members'] })
+
+      const fullName = [data.firstName, data.middleName, data.surname, data.suffix].filter(Boolean).join(' ')
+      const payload: MemberFormData = {
+        id: data.id,
+        members: [
+          {
+            id: data.id,
+            name: fullName || 'Unknown',
+            email: '',
+            phone: '',
+          },
+        ],
+        startDate: undefined,
+        endDate: undefined,
+        membershipType: 'Member',
+        membershipDuration: '',
+        billingAmount: '',
+        billingCycle: '',
+        paymentMethod: '',
+        membershipDetails: `Status: ${data.status}`,
+        documents: [],
+      }
+
+      onAddMember(payload)
     },
   })
 
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (nextOpen) {
-          resetForm()
-          setOpen(true)
-          return
-        }
-        resetForm()
+  const form = useForm({
+    defaultValues,
+    onSubmit: async ({ value }) => {
+      setSubmitError(null)
+      setLastApiResponse(null)
+
+      if (!value.createdById.trim()) {
+        setSubmitError('Current user actor id is missing. Cannot create member.')
+        return
+      }
+
+      try {
+        await createMemberMutation.mutateAsync(value)
         setOpen(false)
-      }}
-    >
+        form.reset()
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to create member.'
+        setSubmitError(message)
+      }
+    },
+  })
+
+  useEffect(() => {
+    if (!createdByActorId) return
+    const current = form.state.values.createdById
+    if (current !== createdByActorId) {
+      form.setFieldValue('createdById', createdByActorId)
+    }
+  }, [createdByActorId, form])
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
@@ -238,392 +261,219 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-none w-max sm:max-w-none md:w-275 xl:w-350 max-h-[95vh] overflow-auto p-0 flex flex-col gap-0"
-      >
-        <div className="p-6 border-b">
-          <DialogHeader className="text-left">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <DialogTitle>Add New Member</DialogTitle>
-                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                  <span
-                    className={cn(
-                      'flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold',
-                      step === 'membership'
-                        ? 'border-primary text-primary'
-                        : 'border-muted-foreground/30 text-muted-foreground',
-                    )}
-                  >
-                    1
-                  </span>
-                  <span className={step === 'membership' ? 'text-foreground' : undefined}>Membership</span>
-                  <ChevronRight className="h-4 w-4" />
-                  <span
-                    className={cn(
-                      'flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold',
-                      step === 'billing'
-                        ? 'border-primary text-primary'
-                        : 'border-muted-foreground/30 text-muted-foreground',
-                    )}
-                  >
-                    2
-                  </span>
-                  <span className={step === 'billing' ? 'text-foreground' : undefined}>Billing</span>
-                </div>
-              </div>
+      <DialogContent showCloseButton={false} className="max-w-lg">
+        <DialogHeader className="text-left">
+          <div className="flex items-start justify-between gap-4">
+            <DialogTitle>Add New Member</DialogTitle>
+            <DialogClose asChild>
+              <Button type="button" variant="ghost" size="sm">
+                Close
+              </Button>
+            </DialogClose>
+          </div>
+        </DialogHeader>
 
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Close dialog"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </DialogClose>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            void form.handleSubmit()
+          }}
+          className="space-y-4"
+        >
+          <form.Field name="createdById">
+            {(field) => (
+              <input
+                type="hidden"
+                name={field.name}
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+              />
+            )}
+          </form.Field>
+
+          <div className="space-y-2">
+            <Label>Current user</Label>
+            <div className="rounded-md border bg-muted/30 px-3 py-2 text-sm">
+              {currentUserQuery.isLoading ? 'Loading…' : (currentUserEmail || '—')}
             </div>
-          </DialogHeader>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex-1 overflow-auto p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <Card className="h-full">
-                  <CardHeader className="flex flex-row items-start justify-between gap-4">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Users className="h-5 w-5" />
-                        Member Information
-                      </CardTitle>
-                      <CardDescription>Add member details</CardDescription>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full Name *</Label>
-                        <Input
-                          id="name"
-                          placeholder="Enter full name"
-                          value={member.name}
-                          onChange={(e) => handleMemberChange('name', e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="Enter email address"
-                          value={member.email}
-                          onChange={(e) => handleMemberChange('email', e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="phone">Phone Number *</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="Enter phone number"
-                          value={member.phone}
-                          onChange={(e) => handleMemberChange('phone', e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-
-                  <CardHeader>
-                    <CardTitle className="text-lg">Membership Details</CardTitle>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="membershipType">Membership Type *</Label>
-                        <Select
-                          value={formData.membershipType}
-                          onValueChange={(v) => handleInputChange('membershipType', v)}
-                        >
-                          <SelectTrigger id="membershipType">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="basic">Basic</SelectItem>
-                            <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="premium">Premium</SelectItem>
-                            <SelectItem value="vip">VIP</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="membershipDuration">Duration *</Label>
-                        <Select
-                          value={formData.membershipDuration}
-                          onValueChange={(v) => handleInputChange('membershipDuration', v)}
-                        >
-                          <SelectTrigger id="membershipDuration">
-                            <SelectValue placeholder="Select duration" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="day">Day Tour</SelectItem>
-                            <SelectItem value="1-month">1 Month</SelectItem>
-                            <SelectItem value="3-months">3 Months</SelectItem>
-                            <SelectItem value="6-months">6 Months</SelectItem>
-                            <SelectItem value="12-months">12 Months</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Start Date *</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={cn(
-                                'w-full justify-start text-left font-normal',
-                                !startDate && 'text-muted-foreground',
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {startDate ? format(startDate, 'PPP') : 'Pick a date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>End Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={cn(
-                                'w-full justify-start text-left font-normal',
-                                !endDate && 'text-muted-foreground',
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {endDate ? format(endDate, 'PPP') : 'Pick a date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="membershipDetails">Additional Details</Label>
-                      <Textarea
-                        id="membershipDetails"
-                        placeholder="Any special requirements or notes..."
-                        value={formData.membershipDetails}
-                        onChange={(e) => handleInputChange('membershipDetails', e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                  </CardContent>
-
-                  <CardHeader>
-                    <CardTitle className="text-lg">Member Documents</CardTitle>
-                    <CardDescription>Upload ID, medical certificates, etc.</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Label htmlFor="documents">Upload Documents</Label>
-                      <div className="flex items-center gap-2 w-100">
-                        <label
-                          htmlFor="documents"
-                          className="flex w-full items-center justify-center rounded-2xl border px-4 py-2 cursor-pointer bg-transparent hover:bg-muted/10"
-                        >
-                          <Upload className="mr-2 h-4 w-4" />
-                          <span className="text-sm text-muted-foreground">
-                            {documents.length > 0 ? `${documents.length} file(s) selected` : 'No files chosen'}
-                          </span>
-                        </label>
-                        <input
-                          id="documents"
-                          type="file"
-                          multiple
-                          onChange={handleFileUpload}
-                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                          className="sr-only"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="space-y-6">
-                {step === 'billing' && (
-                  <Card className="h-full flex flex-col">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Billing</CardTitle>
-                      <CardDescription>Select what subscription the member will take.</CardDescription>
-                    </CardHeader>
-
-                    <CardContent className="flex-1 flex flex-col justify-between space-y-4">
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="billingAmount">Amount per Member (PHP) *</Label>
-                          <Input
-                            id="billingAmount"
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            value={formData.billingAmount}
-                            onChange={(e) => handleInputChange('billingAmount', e.target.value)}
-                          />
-                        </div>
-
-                        <div className="space-y-2 m-auto">
-                          <Label htmlFor="billingCycle">Billing Cycle *</Label>
-                          <Select
-                            value={formData.billingCycle}
-                            onValueChange={(v) => handleInputChange('billingCycle', v)}
-                          >
-                            <SelectTrigger id="billingCycle">
-                              <SelectValue placeholder="Select cycle" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="day">Day (Day Tour)</SelectItem>
-                              <SelectItem value="monthly">Monthly</SelectItem>
-                              <SelectItem value="quarterly">Quarterly</SelectItem>
-                              <SelectItem value="semi-annually">Semi-Annually</SelectItem>
-                              <SelectItem value="annually">Annually</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="space-y-2 m-auto">
-                          <Label htmlFor="paymentMethod">Mode of Payment *</Label>
-                          <Select
-                            value={formData.paymentMethod}
-                            onValueChange={(v) => handleInputChange('paymentMethod', v)}
-                          >
-                            <SelectTrigger id="paymentMethod">
-                              <SelectValue placeholder="Select payment method" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="cash">Cash</SelectItem>
-                              <SelectItem value="gcash">GCash</SelectItem>
-                              <SelectItem value="paymaya">PayMaya</SelectItem>
-                              <SelectItem value="credit-card">Credit Card</SelectItem>
-                              <SelectItem value="debit-card">Debit Card</SelectItem>
-                              <SelectItem value="bank-transfer">Bank Transfer</SelectItem>
-                              <SelectItem value="online">Other Online Payment</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="rounded-2xl border bg-muted/50 p-4 space-y-3 mt-auto pb-6">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Member</span>
-                            <span className="font-medium">{member.name || '—'}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Price per member</span>
-                            <span className="font-medium">PHP {formData.billingAmount || '0.00'}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Billing cycle</span>
-                            <span className="font-medium">{formData.billingCycle || '—'}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Mode of payment</span>
-                            <span className="font-medium">{formData.paymentMethod || '—'}</span>
-                          </div>
-                          <div className="border-t pt-3 flex items-center justify-between">
-                            <span className="font-semibold">Total</span>
-                            <span className="text-2xl font-bold text-primary">PHP {totalCost}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
+            {currentUserQuery.error ? (
+              <p className="text-xs text-destructive" role="alert">
+                {currentUserQuery.error instanceof Error
+                  ? currentUserQuery.error.message
+                  : 'Failed to load current user.'}
+              </p>
+            ) : null}
           </div>
 
-          <div className="flex flex-col gap-3 p-6 pt-4 border-t">
-            <div className="text-sm text-destructive">{stepError ?? ''}</div>
-
-            {lastApiResponse && (
-              <pre className="max-h-40 overflow-auto rounded-md border bg-muted/50 p-3 text-xs whitespace-pre-wrap break-words">
-                {lastApiResponse}
-              </pre>
-            )}
-
-            <div className="flex items-center justify-end gap-3">
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    resetForm()
-                    setOpen(false)
-                  }}
-                >
-                  Cancel
-                </Button>
-              </DialogClose>
-
-              {step === 'membership' ? (
-                <Button
-                  type="button"
-                  disabled={createMemberMutation.isPending}
-                  onClick={() => {
-                    const err = validateMembershipStep()
-                    if (err) {
-                      setStepError(err)
-                      return
-                    }
-                    setStepError(null)
-                    setStep('billing')
-                  }}
-                >
-                  Next
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={createMemberMutation.isPending}
-                    onClick={() => {
-                      setStepError(null)
-                      setStep('membership')
-                    }}
-                  >
-                    Back
-                  </Button>
-                  <Button type="button" variant="outline" onClick={handleSkipBilling} disabled={createMemberMutation.isPending}>
-                    Save (membership only)
-                  </Button>
-                  <Button type="submit" disabled={createMemberMutation.isPending}>Save</Button>
-                </>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <form.Field
+              name="firstName"
+              validators={{
+                onChange: ({ value }) => (!value.trim() ? 'First name is required.' : undefined),
+              }}
+            >
+              {(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor={field.name}>First name</Label>
+                  <Input
+                    id={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="Juan"
+                  />
+                  {field.state.meta.isTouched && field.state.meta.errors.length ? (
+                    <p className="text-sm text-destructive" role="alert">
+                      {field.state.meta.errors[0]}
+                    </p>
+                  ) : null}
+                </div>
               )}
-            </div>
+            </form.Field>
+
+            <form.Field name="middleName">
+              {(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor={field.name}>Middle name (optional)</Label>
+                  <Input
+                    id={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="D."
+                  />
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field
+              name="surname"
+              validators={{
+                onChange: ({ value }) => (!value.trim() ? 'Surname is required.' : undefined),
+              }}
+            >
+              {(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor={field.name}>Surname</Label>
+                  <Input
+                    id={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="Dela Cruz"
+                  />
+                  {field.state.meta.isTouched && field.state.meta.errors.length ? (
+                    <p className="text-sm text-destructive" role="alert">
+                      {field.state.meta.errors[0]}
+                    </p>
+                  ) : null}
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field name="suffix">
+              {(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor={field.name}>Suffix (optional)</Label>
+                  <Input
+                    id={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="Jr."
+                  />
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field
+              name="profilePictureId"
+              validators={{
+                onChange: ({ value }) => {
+                  const trimmed = value.trim()
+                  if (!trimmed) return undefined
+                  return looksLikeUuid(trimmed) ? undefined : 'Profile picture id must be a UUID.'
+                },
+              }}
+            >
+              {(field) => (
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor={field.name}>Profile picture id (optional)</Label>
+                  <Input
+                    id={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="UUID"
+                  />
+                  {field.state.meta.isTouched && field.state.meta.errors.length ? (
+                    <p className="text-sm text-destructive" role="alert">
+                      {field.state.meta.errors[0]}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Backend expects an existing uploaded image id.
+                    </p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+          </div>
+
+          <form.Field name="status">
+            {(field) => (
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={field.state.value} onValueChange={(v) => field.handleChange(v as MemberFormValues['status'])}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="IN">IN</SelectItem>
+                    <SelectItem value="OUT">OUT</SelectItem>
+                    <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </form.Field>
+
+          {submitError ? (
+            <p className="text-sm text-destructive" role="alert">
+              {submitError}
+            </p>
+          ) : null}
+
+          {createMemberMutation.error && !submitError ? (
+            <p className="text-sm text-destructive" role="alert">
+              {createMemberMutation.error instanceof Error ? createMemberMutation.error.message : 'Failed to create member.'}
+            </p>
+          ) : null}
+
+          {lastApiResponse ? (
+            <pre className="max-h-40 overflow-auto rounded-md border bg-muted/50 p-3 text-xs whitespace-pre-wrap wrap-break-word">
+              {lastApiResponse}
+            </pre>
+          ) : null}
+
+          <div className="flex items-center justify-end gap-2">
+            <DialogClose asChild>
+              <Button type="button" variant="outline" disabled={createMemberMutation.isPending}>
+                Cancel
+              </Button>
+            </DialogClose>
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
+              {([canSubmit, isSubmitting]) => (
+                <Button
+                  type="submit"
+                  disabled={!form.state.values.createdById.trim() || !canSubmit || isSubmitting || createMemberMutation.isPending}
+                >
+                  {createMemberMutation.isPending ? 'Creating…' : 'Create Member'}
+                </Button>
+              )}
+            </form.Subscribe>
+            <Button variant="secondary"> Add Subscription</Button>
           </div>
         </form>
       </DialogContent>

@@ -47,6 +47,15 @@ export interface MemberDetailsDialogProps {
   memberGroup: MemberFormData | null
   onSave: (updated: MemberFormData) => void
 }
+export type MemberFormValues = {
+  createdById: string
+  firstName: string
+  middleName: string
+  surname: string
+  suffix: string
+  profilePictureId: string
+  status: 'IN' | 'OUT' | 'UNDECIDED'
+}
 
 
 export const apiErrorSchema = z.object({
