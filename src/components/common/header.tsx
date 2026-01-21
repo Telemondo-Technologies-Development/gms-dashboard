@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Bell, Search, User2 } from 'lucide-react'
+import { Bell, Search, User2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'	
+import { Label } from '@/components/ui/label'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
 
 type JwtClaims = Record<string, unknown>
@@ -95,6 +95,8 @@ async function fetchUserByEmail(email: string, token?: string): Promise<UserTabl
 }
 
 export default function Header() {
+	const [searchOpen, setSearchOpen] = useState(false)
+
 	const identity = useMemo(() => {
 		if (typeof window === 'undefined') return null
 
@@ -134,39 +136,126 @@ export default function Header() {
 	})
 
 	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? 'Account'
+	const searchInput = (
+		<div className="relative">
+			<Input
+				type="text"
+				placeholder="Search..."
+				className="pl-9 pr-10 py-2 h-9 w-full rounded-2xl bg-muted focus:bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring"
+			/>
+			<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+			<Button
+				type="button"
+				variant="ghost"
+				size="icon"
+				className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-2xl"
+				aria-label="Close search"
+				onClick={() => setSearchOpen(false)}
+			>
+				<X className="h-4 w-4" />
+			</Button>
+		</div>
+	)
+
 	return (
-		<header className="h-16 border-b flex items-center px-6 shadow-sm shadow-accent-foreground/10 ">
-			<div className="flex items-center gap-4 w-full justify-evenly h-full ">
-				<div className=" flex items-start gap-2 justify-start  w-full">
-                    <Button
+		<header className="border-b px-4 shadow-sm shadow-accent-foreground/10 md:px-6">
+			<div className="flex h-16 items-center justify-between">
+				{/* Mobile layout */}
+				<div className="flex w-full items-center md:hidden">
+					<Button
 						variant="ghost"
-						size="sm"
-						className="flex items-center gap-2 h-9 px-3 py-1 rounded-2xl "
-						aria-label="Edit profile"
+						size="icon"
+						aria-label="Notifications"
+						className="h-9 w-9 rounded-2xl"
 					>
-						<User2 className="h-5 w-5 hover:text-accent-foreground" />
-						<span className="text-sm font-medium hover:text-accent-foreground text-center">
-							{currentUserQuery.isLoading ? 'Loading…' : displayEmail}
-						</span>
-					</Button>
-                    <Button variant="ghost" size="icon" aria-label="Notifications" className="h-9 w-9 rounded-2xl">
 						<Bell className="h-5 w-5" />
 					</Button>
-					<div className="relative">
-						<Input
-							type="text"
-							placeholder="Search..."
-							className="pl-9 pr-3 py-2 h-9 w-100 rounded-2xl bg-muted focus:bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring"
-						/>
-						<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+					<div className="flex flex-1 justify-center">
+						<Button
+							variant="ghost"
+							size="sm"
+							className="flex items-center gap-2 h-9 px-3 py-1 rounded-2xl"
+							aria-label="Account"
+						>
+							<User2 className="h-5 w-5" />
+							<span className="text-sm font-medium">
+								{currentUserQuery.isLoading ? 'Loading…' : displayEmail}
+							</span>
+						</Button>
+					</div>
+					<Button
+						variant="ghost"
+						size="icon"
+						aria-label={searchOpen ? 'Close search' : 'Open search'}
+						className="h-9 w-9 rounded-2xl"
+						onClick={() => setSearchOpen((v) => !v)}
+					>
+						{searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+					</Button>
+				</div>
+
+				{/* Tablet/Desktop layout */}
+				<div className="hidden w-full items-center justify-between md:flex">
+					<div className="flex items-center gap-2">
+						<Button
+							variant="ghost"
+							size="sm"
+							className="flex items-center gap-2 h-9 px-3 py-1 rounded-2xl"
+							aria-label="Account"
+						>
+							<User2 className="h-5 w-5" />
+							<span className="text-sm font-medium">
+								{currentUserQuery.isLoading ? 'Loading…' : displayEmail}
+							</span>
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							aria-label="Notifications"
+							className="h-9 w-9 rounded-2xl"
+						>
+							<Bell className="h-5 w-5" />
+						</Button>
+
+						{/* Desktop search (always visible) */}
+						<div className="hidden lg:block w-105">
+							<div className="relative">
+								<Input
+									type="text"
+									placeholder="Search..."
+									className="pl-9 pr-3 py-2 h-9 w-full rounded-2xl bg-muted focus:bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring"
+								/>
+								<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+							</div>
+						</div>
+
+						{/* Tablet search (collapsible) */}
+						<Button
+							variant="ghost"
+							size="icon"
+							aria-label={searchOpen ? 'Close search' : 'Open search'}
+							className="h-9 w-9 rounded-2xl lg:hidden"
+							onClick={() => setSearchOpen((v) => !v)}
+						>
+							{searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+						</Button>
+					</div>
+
+					<div className="hidden md:block">
+						<Label>Branch: Panacan Davao City</Label>
 					</div>
 				</div>
 			</div>
-			<div className="mr-auto flex items-center justify-end gap-4  w-full">
-				<div>
-					<Label>Branch: Panacan Davao City</Label>
-				</div>
-			</div>
+
+			{/* Collapsible search rows */}
+			{searchOpen ? (
+				<>
+					{/* Mobile search */}
+					<div className="pb-3 md:hidden">{searchInput}</div>
+					{/* Tablet search */}
+					<div className="hidden pb-3 md:block lg:hidden">{searchInput}</div>
+				</>
+			) : null}
 		</header>
 	)
 }
