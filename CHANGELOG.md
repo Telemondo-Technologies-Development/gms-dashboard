@@ -14,12 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added backend form handling using TanStack Form.
 - Added user and employee management module.
 - Integrated user and branch display in the application header.
+- Add analytics page with charts and tables for Branch Performance, Income Report, Membership growth, Payment Method, and Revenue vs Expense
 
 ### Changed
 - Refactored `AddMemberDialog` and `MemberDetailsDialog` to use a unified 2-column layout (Member Information vs. Billing/Subscription).
 - Split member name fields (First, Middle, Surname, Suffix) and added Status selection in `MemberDetailsDialog`.
 - Enhanced Sidebar navigation with smooth width transitions, text opacity animations, and improved toggle button styling.
 - Refined login logic and security by removing bypass code.
+- Minor design changes to the charts and tables of analytics page
 
 
 ## [0.2.0] - 2025-1-19
@@ -47,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add ExpenseTable.tsx 
 - Add expense-constants.ts and expense-types.ts to lib
 - Add useExpenseForm.ts
-- Add analytics page with charts and tables for Branch Performance, Income Report, Membership growth, Payment Method, and Revenue vs Expense
+
 
 ### Changed 
 - Added `created_by` and `updated_by` fields for tracking user actions.
@@ -55,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AddMemberDialog changed it to Shadcn dialog
 - AddExpenseDialog and ExpenseDetailsDialog changed to utilize Shadcn dialog
 - Modularized expense.tsx into different component files
-- Minor design changes to the charts and tables of analytics page
+
 
 ### Deleted
 - use-mobile hook unnecessary file no use

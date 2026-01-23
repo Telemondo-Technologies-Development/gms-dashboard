@@ -1,5 +1,6 @@
 import { billingSubscriptionSchema, paymentSchema, type BillingSubscription, type Payment } from '@/lib/schemas'
 import { mockMembers } from '@/lib/mock-members'
+import type { MemberInfo } from '@/types/membership/memberSchemas'
 
 const rawPayments = [
   {
@@ -112,7 +113,7 @@ export const mockPayments: Payment[] = paymentSchema.array().parse(rawPayments)
 
 function pickFirstMemberNameFromGroup(groupId: string): string {
   const group = mockMembers.find((m) => m.id === groupId)
-  const names = group?.members.map((m) => m.name) ?? []
+  const names = group?.members.map((m: MemberInfo) => m.name) ?? []
   return names.length > 1 ? `${names[0]} +${names.length - 1}` : (names[0] ?? 'Member')
 }
 
