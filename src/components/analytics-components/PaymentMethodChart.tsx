@@ -15,15 +15,15 @@ type Props = {
 const chartConfig = {
   Cash: {
     label: 'Cash',
-    color: 'hsl(var(--chart-1))',
+    color: '#4a5c92', 
   },
   Card: {
     label: 'Card',
-    color: 'hsl(var(--chart-2))',
+    color: '#324478', 
   },
   Online: {
     label: 'Online',
-    color: 'hsl(var(--chart-3))',
+    color: '#8b5cf6', 
   },
 }
 
@@ -59,7 +59,7 @@ export function PaymentMethodChart({ data }: Props) {
             {data.paymentMethods.map((entry) => (
               <Cell 
                 key={entry.method} 
-                fill={`var(--color-${entry.method})`}
+                fill={chartConfig[entry.method as keyof typeof chartConfig].color}
               />
             ))}
           </Pie>
@@ -70,12 +70,14 @@ export function PaymentMethodChart({ data }: Props) {
       <div className="space-y-2">
         {data.paymentMethods.map((method) => {
           const Icon = ICONS[method.method as keyof typeof ICONS]
+          const color = chartConfig[method.method as keyof typeof chartConfig].color
+          
           return (
             <div key={method.method} className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <div 
                   className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: `var(--color-${method.method})` }}
+                  style={{ backgroundColor: color }}
                 />
                 <Icon className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">{method.method}</span>

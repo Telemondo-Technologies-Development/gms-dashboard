@@ -17,11 +17,11 @@ type Props = {
 const chartConfig = {
   revenue: {
     label: 'Revenue',
-    color: 'hsl(var(--primary))',
+    color: '#4a5c92', 
   },
   expense: {
     label: 'Expenses',
-    color: 'hsl(var(--destructive))',
+    color: '#ea580c',
   },
 }
 
@@ -41,34 +41,38 @@ export function RevenueExpenseChart({ data, timeRange }: Props) {
   return (
     <ChartContainer config={chartConfig} className="h-[300px] w-full">
       <LineChart data={chartData}>
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
         <XAxis 
           dataKey="month" 
           tickLine={false}
           axisLine={false}
           tickMargin={8}
+          tick={{ fill: 'hsl(var(--muted-foreground))' }}
         />
         <YAxis 
           tickLine={false}
           axisLine={false}
           tickMargin={8}
           tickFormatter={formatCurrency}
+          tick={{ fill: 'hsl(var(--muted-foreground))' }}
         />
         <ChartTooltip content={<ChartTooltipContent />} />
         <ChartLegend content={<ChartLegendContent />} />
         <Line
           type="monotone"
           dataKey="revenue"
-          stroke="var(--color-revenue)"
-          strokeWidth={2}
-          dot={false}
+          stroke="#4a5c92"
+          strokeWidth={2.5}
+          dot={{ fill: '#4a5c92', r: 4 }}
+          activeDot={{ r: 6 }}
         />
         <Line
           type="monotone"
           dataKey="expense"
-          stroke="var(--color-expense)"
-          strokeWidth={2}
-          dot={false}
+          stroke="hsl(var(--destructive))"
+          strokeWidth={2.5}
+          dot={{ fill: 'hsl(var(--destructive))', r: 4 }}
+          activeDot={{ r: 6 }}
         />
       </LineChart>
     </ChartContainer>

@@ -103,9 +103,9 @@ function AnalyticsRoute() {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col p-6 gap-4">
-      {/* Header Section */}
-      <div className="flex items-center justify-between flex-shrink-0">
+    <div className="space-y-6">
+      {/* Header Section - Consistent with membership page */}
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Financial Analytics</h1>
           <p className="text-sm text-muted-foreground">
@@ -113,7 +113,7 @@ function AnalyticsRoute() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* Branch Selector */}
           <Select value={selectedBranch} onValueChange={setSelectedBranch}>
             <SelectTrigger className="w-48">
@@ -162,13 +162,13 @@ function AnalyticsRoute() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 gap-4 min-h-0 overflow-auto">
+      {/* Main Content - Updated spacing to match membership page */}
+      <div className="space-y-6">
         {/* Income Report Cards */}
         <IncomeReportCards data={analyticsData} branch={selectedBranch} />
 
         {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Revenue vs Expense Chart */}
           <Card className="lg:col-span-2">
             <CardHeader>
