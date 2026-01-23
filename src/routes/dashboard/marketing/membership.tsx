@@ -15,6 +15,7 @@ import { format } from 'date-fns'
 import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
 import type { AttendanceRecord } from '@/types/membership/memberSchemas'
 import type { MembershipSearchForm } from '@/types/membership/memberSchemas'
+import { Label } from '@/components/ui/label'
 
 
 export const Route = createFileRoute('/dashboard/marketing/membership')({
@@ -76,6 +77,11 @@ function MembershipRoute() {
         members: [
           {
             id: m.id,
+            firstName: m.firstName,
+            middleName: m.middleName,
+            surname: m.surname,
+            suffix: m.suffix,
+            status: m.status,
             name: fullName || 'Unknown',
             email: '',
             phone: '',
@@ -222,7 +228,7 @@ function MembershipRoute() {
                 </div>
               )}
 
-              <div className="text-xs text-muted-foreground mb-3">Tip: Click a row to view/edit full details and billing.</div>
+              <Label className="text-xs text-muted-foreground mb-3">Tip: Click a row to view/edit full details and billing.</Label>
 
               {filteredMembers.length === 0 ? (
                 <div className="text-center py-12">
@@ -346,7 +352,7 @@ function MembershipRoute() {
 
                 <Button type="button" variant="outline" className="h-24 flex flex-col gap-2" disabled>
                   <UserCheck className="h-8 w-8" />
-                  <span>Manual</span>
+                  <Label>Manual</Label>
                   <span className="text-xs text-muted-foreground">Search below</span>
                 </Button>
               </div>

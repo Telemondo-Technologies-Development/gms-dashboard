@@ -23,6 +23,11 @@ export interface AddMemberDialogProps {
 
 export interface MemberInfo {
   id: string
+  firstName: string
+  middleName?: string
+  surname: string
+  suffix?: string
+  status?: 'IN' | 'OUT' | 'UNDECIDED'
   name: string
   email: string
   phone: string

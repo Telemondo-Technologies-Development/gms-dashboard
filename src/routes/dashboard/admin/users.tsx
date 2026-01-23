@@ -196,21 +196,7 @@ function UsersPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-           {/* Header placeholder */}
-        </div>
-        <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={handleRefresh}>
-                <RefreshCw className="h-4 w-4" />
-            </Button>
-            <Button onClick={() => { setSelectedEmployee(null); setIsDialogOpen(true); }}>
-            <Plus className="mr-2 h-4 w-4" /> Add User
-            </Button>
-        </div>
-      </div>
-
+    <div className="p-4 space-y-6">
       {employeesError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -232,11 +218,21 @@ function UsersPage() {
       )}
 
       <Tabs defaultValue="employees" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="employees">Employees</TabsTrigger>
-          <TabsTrigger value="users">System Users</TabsTrigger>
-        </TabsList>
-        
+        <div className="flex items-center justify-between mb-4">
+           <TabsList className="grid w-75 grid-cols-2">
+              <TabsTrigger value="employees">Employees</TabsTrigger>
+              <TabsTrigger value="users">System Users</TabsTrigger>
+            </TabsList>
+            <div className="flex gap-2">
+                <Button variant="outline" size="icon" onClick={handleRefresh}>
+                    <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button onClick={() => { setSelectedEmployee(null); setIsDialogOpen(true); }}>
+                <Plus className="mr-2 h-4 w-4" /> Add User
+                </Button>
+            </div>
+        </div>
+       
         <TabsContent value="employees">
           <div className="rounded-md border bg-card">
             <Table>
