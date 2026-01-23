@@ -32,7 +32,7 @@ export function BranchPerformanceTable({ data }: Props) {
         </TableHeader>
         <TableBody>
           {sortedBranches.map((branch, index) => (
-            <TableRow key={branch.name}>
+            <TableRow key={branch.name} className="hover:bg-muted/50">
               <TableCell className="font-medium">
                 <div className="flex items-center gap-2">
                   {index === 0 && (

@@ -18,15 +18,15 @@ type Props = {
 const chartConfig = {
   total: {
     label: 'Total Members',
-    color: 'hsl(var(--primary))',
+    color: '#4a5c92',
   },
   new: {
     label: 'New Members',
-    color: 'hsl(var(--chart-2))',
+    color: '#10b981',
   },
   cancelled: {
     label: 'Cancelled',
-    color: 'hsl(var(--destructive))',
+    color: '#ea580c',
   },
 }
 
@@ -74,43 +74,56 @@ export function MembershipGrowthChart({ data, timeRange }: Props) {
 
       <ChartContainer config={chartConfig} className="h-[300px] w-full">
         <AreaChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <defs>
+            <linearGradient id="gradientTotal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#4a5c92" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#4a5c92" stopOpacity={0.05}/>
+            </linearGradient>
+            <linearGradient id="gradientNew" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
+            </linearGradient>
+            <linearGradient id="gradientCancelled" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0.05}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
           <XAxis 
             dataKey="month" 
             tickLine={false}
             axisLine={false}
             tickMargin={8}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
           />
           <YAxis 
             tickLine={false}
             axisLine={false}
             tickMargin={8}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
           <ChartLegend content={<ChartLegendContent />} />
           <Area
             type="monotone"
             dataKey="total"
-            stroke="var(--color-total)"
-            fill="var(--color-total)"
-            fillOpacity={0.2}
-            strokeWidth={2}
+            stroke="#4a5c92"
+            fill="url(#gradientTotal)"
+            strokeWidth={2.5}
           />
           <Area
             type="monotone"
             dataKey="new"
-            stroke="var(--color-new)"
-            fill="var(--color-new)"
-            fillOpacity={0.2}
-            strokeWidth={2}
+            stroke="#10b981"
+            fill="url(#gradientNew)"
+            strokeWidth={2.5}
           />
           <Area
             type="monotone"
             dataKey="cancelled"
-            stroke="var(--color-cancelled)"
-            fill="var(--color-cancelled)"
-            fillOpacity={0.2}
-            strokeWidth={2}
+            stroke="hsl(var(--destructive))"
+            fill="url(#gradientCancelled)"
+            strokeWidth={2.5}
           />
         </AreaChart>
       </ChartContainer>
