@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add ExpenseTable.tsx 
 - Add expense-constants.ts and expense-types.ts to lib
 - Add useExpenseForm.ts
-
+- Add analytics page with charts and tables for Branch Performance, Income Report, Membership growth, Payment Method, and Revenue vs Expense
 
 ### Changed 
 - Added `created_by` and `updated_by` fields for tracking user actions.
@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AddMemberDialog changed it to Shadcn dialog
 - AddExpenseDialog and ExpenseDetailsDialog changed to utilize Shadcn dialog
 - Modularized expense.tsx into different component files
+- Minor design changes to the charts and tables of analytics page
 
 ### Deleted
 - use-mobile hook unnecessary file no use
