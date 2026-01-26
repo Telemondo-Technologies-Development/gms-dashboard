@@ -9,53 +9,47 @@ import { DeleteConfirmDialog } from '../../../components/branch-components/Delet
 
 import { MultiBranchOverview } from '@/components/branch-components/branch/MultiBranchOverview';
 import { BranchList } from '@/components/branch-components/branch/BranchList';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useQuery } from '@tanstack/react-query';
+
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
 });
 
+const fetchBranchesFromApi = async () => {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
+  const url = `${base}/api/branch`;
+
+  const token = localStorage.getItem('auth_token');
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch branches.');
+  }
+
+  const result = await response.json();
+
+ 
+  if (!Array.isArray(result.data)) {
+    throw new Error('Invalid response format: Expected an array of branches.');
+  }
+
+  return result.data; 
+};
+
 function RouteComponent() {
-  const [branches, setBranches] = useState<BranchFormData[]>([
-    {
-      id: '1',
-      name: 'Matina Gym Fitness',
-      address: '123 Matina GSIS Davao City Philippines',
-      phone: '09171234567',
-      status: 'Active',
-      assignedStaff: [],
-      longitude: 125.5929,
-      latitude: 7.0618,
-      revenue: 50000,
-      expenses: 20000,
-      memberships: 150,
-    },
-    {
-      id: '2',
-      name: 'Panacan Gym Fitness',
-      address: '123 Panacan Davao City Philippines',
-      phone: '09179876543',
-      status: 'Maintenance',
-      assignedStaff: [],
-      longitude: 125.6478,
-      latitude: 7.1502,
-      revenue: 30000, 
-      expenses: 19000, 
-      memberships: 100, 
-    },
-    {
-      id: '3',
-      name: 'Toril Gym Fitness',
-      address: '123 Panacan Davao City Philippines',
-      phone: '09179876543',
-      status: 'Active',
-      assignedStaff: [],
-      longitude: 125.497874,
-      latitude: 7.014951,
-      revenue: 40000, 
-      expenses: 18000, 
-      memberships: 120,
-    },
-  ]);
+  const { data: branches = [], isFetching, refetch } = useQuery({
+    queryKey: ['branches'],
+    queryFn: fetchBranchesFromApi,
+  });
 
  
   const [dialogState, setDialogState] = useState({
@@ -77,7 +71,7 @@ function RouteComponent() {
     setDialogState((prev) => ({ ...prev, [dialog]: value }));
   };
 
-  const handleAddBranch = (branch: BranchFormData) => {
+  const handleAddBranch = async (branch: BranchFormData) => {
     const currentTimestamp = new Date().toISOString();
     const newBranch = {
       ...branch,
@@ -86,41 +80,112 @@ function RouteComponent() {
       created_at: currentTimestamp,
       updated_at: currentTimestamp,
     };
-
-    setBranches((prev) => [newBranch, ...prev]);
-
-
+  
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
+      const url = `${base}/api/branch`;
+  
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(newBranch),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to add branch.');
+      }
+  
+      const savedBranch = await response.json();
+      refetch(); // Refetch branches after adding
+    } catch (error) {
+      console.error(error);
+      alert('Failed to add branch. Please try again.');
+    }
   };
 
-  const handleSaveBranch = (updatedBranch: BranchFormData) => {
+  const handleSaveBranch = async (updatedBranch: BranchFormData) => {
     const currentTimestamp = new Date().toISOString();
     const branchWithUpdatedBy = {
       ...updatedBranch,
       updated_by: currentUserId,
       updated_at: currentTimestamp,
     };
-
-    setBranches((prev) =>
-      prev.map((branch) => (branch.id === updatedBranch.id ? branchWithUpdatedBy : branch))
-    );
-
-    // Send branchWithUpdatedBy to the backend
-    // Example: await api.updateBranch(branchWithUpdatedBy);
-  };
-
-  const handleRemoveBranch = () => {
-    if (branchToRemove) {
-      setBranches((prev) => prev.filter((branch) => branch.id !== branchToRemove.id));
-      toggleDialog('confirmDialogOpen', false);
-      setBranchToRemove(null);
-
-      // Send delete request to the backend
-      // Example: await api.deleteBranch(branchToRemove.id);
+  
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
+      const url = `${base}/api/branch/${updatedBranch.id}`;
+  
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(branchWithUpdatedBy),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update branch.');
+      }
+  
+      refetch(); // Refetch branches after updating
+    } catch (error) {
+      console.error(error);
+      alert('Failed to update branch. Please try again.');
     }
   };
 
-  const selectedBranch = selectedBranchId
-    ? branches.find((branch) => branch.id === selectedBranchId) ?? null
+const handleRemoveBranch = async () => {
+  if (branchToRemove) {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
+      const url = `${base}/api/branch/${branchToRemove.id}`;
+
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete branch.');
+      }
+
+      refetch(); // Refetch branches after deleting
+      toggleDialog('confirmDialogOpen', false);
+      setBranchToRemove(null);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to delete branch. Please try again.');
+    }
+  }
+};
+
+  interface Branch {
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    address: string;
+    created_by: string;
+    updated_by: string;
+    created_at: string;
+    updated_at: string;
+    assignedStaff?: StaffMember[];
+  }
+
+  const selectedBranch: Branch | null = selectedBranchId
+    ? branches.find((branch: Branch) => branch.id === selectedBranchId) ?? null
     : null;
 
   function handleUpdateStaff(newStaff: StaffMember[]): void {
@@ -132,11 +197,7 @@ function RouteComponent() {
         updated_at: new Date().toISOString(),
       };
 
-      setBranches((prev) =>
-        prev.map((branch) =>
-          branch.id === activeBranchForStaff.id ? updatedBranch : branch
-        )
-      );
+      refetch(); // Refetch branches from the backend to ensure data consistency
 
       setActiveBranchForStaff(updatedBranch);
 
@@ -150,24 +211,37 @@ function RouteComponent() {
       <div className="flex items-center justify-between">
         <div />
         <AddBranchDialog onAddBranch={handleAddBranch} />
-      </div>
-      <BranchList
-        branches={branches}
-        onSelectBranch={setSelectedBranchId}
-        onToggleDialog={toggleDialog}
-        onSetMapBranch={setMapBranch}
-        onSetBranchToRemove={setBranchToRemove}
-        onSetActiveBranchForStaff={setActiveBranchForStaff}
-      />
-      <MultiBranchOverview branches={branches} />
+      </div> 
+        <Tabs defaultValue='branches' >
+          <TabsList className="mb-10 flex space-x-6">
+            <TabsTrigger value="branches">Branches</TabsTrigger>
+            <TabsTrigger value="multiBranchDashboard">MultiBranchDashboard</TabsTrigger>
+          </TabsList>
 
+          <TabsContent value="branches">
+            <div>
+              <BranchList
+                branches={branches}
+                onSelectBranch={setSelectedBranchId}
+                onToggleDialog={toggleDialog}
+                onSetMapBranch={setMapBranch}
+                onSetBranchToRemove={setBranchToRemove}
+                onSetActiveBranchForStaff={setActiveBranchForStaff}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="multiBranchDashboard">
+            <MultiBranchOverview branches={branches} />
+          </TabsContent>
+        </Tabs>
+  
       <BranchDetailsDialog
         open={dialogState.detailsOpen}
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}
-        branch={selectedBranch}
+        branch={selectedBranch ? { ...selectedBranch, phone: '', status: 'Active', revenue: 0, expenses: 0, memberships: 0, assignedStaff: selectedBranch.assignedStaff || [] } : null}
         onSave={handleSaveBranch}
       />
-
+  
       <AssignStaffDialog
         open={dialogState.staffDialogOpen}
         onOpenChange={(open) => toggleDialog('staffDialogOpen', open)}
@@ -175,7 +249,7 @@ function RouteComponent() {
         staff={activeBranchForStaff?.assignedStaff || []}
         onUpdateStaff={handleUpdateStaff}
       />
-
+  
       <MapDialog
         open={dialogState.mapDialogOpen}
         onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
@@ -183,7 +257,7 @@ function RouteComponent() {
         longitude={mapBranch?.longitude || 0}
         address={mapBranch?.address || ''}
       />
-
+  
       <DeleteConfirmDialog
         isOpen={dialogState.confirmDialogOpen}
         branchName={branchToRemove?.name || null}

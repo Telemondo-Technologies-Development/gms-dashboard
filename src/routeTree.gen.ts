@@ -14,12 +14,15 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardSalesRouteImport } from './routes/dashboard/sales'
+import { Route as DashboardNavigationRouteImport } from './routes/dashboard/navigation'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as DashboardMarketingMembershipRouteImport } from './routes/dashboard/marketing/membership'
 import { Route as DashboardMarketingBranchRouteImport } from './routes/dashboard/marketing/branch'
 import { Route as DashboardMarketingAssetsRouteImport } from './routes/dashboard/marketing/assets'
 import { Route as DashboardBillingPaymentHistoryRouteImport } from './routes/dashboard/billing/payment-history'
+import { Route as DashboardAdminUsersRouteImport } from './routes/dashboard/admin/users'
 import { Route as DashboardAdminExpenseRouteImport } from './routes/dashboard/admin/expense'
+import { Route as DashboardAdminAnalyticsRouteImport } from './routes/dashboard/admin/analytics'
 
 const PostRoute = PostRouteImport.update({
   id: '/post',
@@ -44,6 +47,11 @@ const IndexRoute = IndexRouteImport.update({
 const DashboardSalesRoute = DashboardSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardNavigationRoute = DashboardNavigationRouteImport.update({
+  id: '/navigation',
+  path: '/navigation',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
@@ -75,9 +83,19 @@ const DashboardBillingPaymentHistoryRoute =
     path: '/billing/payment-history',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardAdminUsersRoute = DashboardAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardAdminExpenseRoute = DashboardAdminExpenseRouteImport.update({
   id: '/admin/expense',
   path: '/admin/expense',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAdminAnalyticsRoute = DashboardAdminAnalyticsRouteImport.update({
+  id: '/admin/analytics',
+  path: '/admin/analytics',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 
@@ -87,8 +105,11 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
+  '/dashboard/navigation': typeof DashboardNavigationRoute
   '/dashboard/sales': typeof DashboardSalesRoute
+  '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
   '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/assets': typeof DashboardMarketingAssetsRoute
   '/dashboard/marketing/branch': typeof DashboardMarketingBranchRoute
@@ -100,8 +121,11 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
+  '/dashboard/navigation': typeof DashboardNavigationRoute
   '/dashboard/sales': typeof DashboardSalesRoute
+  '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
   '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/assets': typeof DashboardMarketingAssetsRoute
   '/dashboard/marketing/branch': typeof DashboardMarketingBranchRoute
@@ -114,8 +138,11 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/post': typeof PostRoute
   '/auth/login': typeof AuthLoginRoute
+  '/dashboard/navigation': typeof DashboardNavigationRoute
   '/dashboard/sales': typeof DashboardSalesRoute
+  '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
   '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/assets': typeof DashboardMarketingAssetsRoute
   '/dashboard/marketing/branch': typeof DashboardMarketingBranchRoute
@@ -129,8 +156,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/post'
     | '/auth/login'
+    | '/dashboard/navigation'
     | '/dashboard/sales'
+    | '/dashboard/admin/analytics'
     | '/dashboard/admin/expense'
+    | '/dashboard/admin/users'
     | '/dashboard/billing/payment-history'
     | '/dashboard/marketing/assets'
     | '/dashboard/marketing/branch'
@@ -142,8 +172,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/post'
     | '/auth/login'
+    | '/dashboard/navigation'
     | '/dashboard/sales'
+    | '/dashboard/admin/analytics'
     | '/dashboard/admin/expense'
+    | '/dashboard/admin/users'
     | '/dashboard/billing/payment-history'
     | '/dashboard/marketing/assets'
     | '/dashboard/marketing/branch'
@@ -155,8 +188,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/post'
     | '/auth/login'
+    | '/dashboard/navigation'
     | '/dashboard/sales'
+    | '/dashboard/admin/analytics'
     | '/dashboard/admin/expense'
+    | '/dashboard/admin/users'
     | '/dashboard/billing/payment-history'
     | '/dashboard/marketing/assets'
     | '/dashboard/marketing/branch'
@@ -208,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSalesRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/navigation': {
+      id: '/dashboard/navigation'
+      path: '/navigation'
+      fullPath: '/dashboard/navigation'
+      preLoaderRoute: typeof DashboardNavigationRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/auth/login': {
       id: '/auth/login'
       path: '/auth/login'
@@ -243,6 +286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardBillingPaymentHistoryRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/admin/users': {
+      id: '/dashboard/admin/users'
+      path: '/admin/users'
+      fullPath: '/dashboard/admin/users'
+      preLoaderRoute: typeof DashboardAdminUsersRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/admin/expense': {
       id: '/dashboard/admin/expense'
       path: '/admin/expense'
@@ -250,12 +300,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAdminExpenseRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/admin/analytics': {
+      id: '/dashboard/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/dashboard/admin/analytics'
+      preLoaderRoute: typeof DashboardAdminAnalyticsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
   }
 }
 
 interface DashboardRouteRouteChildren {
+  DashboardNavigationRoute: typeof DashboardNavigationRoute
   DashboardSalesRoute: typeof DashboardSalesRoute
+  DashboardAdminAnalyticsRoute: typeof DashboardAdminAnalyticsRoute
   DashboardAdminExpenseRoute: typeof DashboardAdminExpenseRoute
+  DashboardAdminUsersRoute: typeof DashboardAdminUsersRoute
   DashboardBillingPaymentHistoryRoute: typeof DashboardBillingPaymentHistoryRoute
   DashboardMarketingAssetsRoute: typeof DashboardMarketingAssetsRoute
   DashboardMarketingBranchRoute: typeof DashboardMarketingBranchRoute
@@ -263,8 +323,11 @@ interface DashboardRouteRouteChildren {
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardNavigationRoute: DashboardNavigationRoute,
   DashboardSalesRoute: DashboardSalesRoute,
+  DashboardAdminAnalyticsRoute: DashboardAdminAnalyticsRoute,
   DashboardAdminExpenseRoute: DashboardAdminExpenseRoute,
+  DashboardAdminUsersRoute: DashboardAdminUsersRoute,
   DashboardBillingPaymentHistoryRoute: DashboardBillingPaymentHistoryRoute,
   DashboardMarketingAssetsRoute: DashboardMarketingAssetsRoute,
   DashboardMarketingBranchRoute: DashboardMarketingBranchRoute,

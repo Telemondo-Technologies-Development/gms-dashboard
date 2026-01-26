@@ -66,7 +66,6 @@ function RouteComponent() {
           throw new Error(`Login failed (${response.status}). ${rawText || 'Check server logs for details.'}`)
         }
 
-        // Backend sometimes returns an ApiResponse envelope instead of a plain token.
         const trimmed = rawText.trim()
         if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
           const maybeJson: unknown = JSON.parse(trimmed)
@@ -76,7 +75,6 @@ function RouteComponent() {
               throw new Error(envelope.data.message ?? 'Login failed.')
             }
             if (envelope.data.success === true) {
-              // success === true: token might be in data (string) or data.token
               const data = envelope.data.data
               if (typeof data === 'string' && data.trim()) {
                 return data
@@ -95,13 +93,11 @@ function RouteComponent() {
         }
         const parsed = loginResponseSchema.safeParse(rawText)
         if (parsed.success && parsed.data.trim()) {
-          // a plain token string was returned
           return parsed.data.trim()
         }
         throw new Error('Unexpected response from the login service.')
       } catch (error) {
         if (error instanceof Error) {
-          // This also covers typical browser CORS/network failures (often "Failed to fetch").
           throw new Error(error.message || 'Unable to reach the server.')
         }
         throw new Error('Unable to reach the server. Check the API URL and that the backend is running.')
@@ -112,11 +108,10 @@ function RouteComponent() {
         localStorage.setItem('auth_token', token)
         setLoginResponse(`Login success. Token: ${token}`)
       } else {
-        // No token returned — likely HttpOnly session cookie set by backend
+
         setLoginResponse('Login success. (No token returned; session cookie set)')
       }
 
-      // Give the user a moment to see the response, then redirect.
       window.setTimeout(() => {
         window.location.href = 'http://localhost:3000/dashboard'
       }, 800)
@@ -131,6 +126,11 @@ function RouteComponent() {
       setFormError(parsed.error.issues[0]?.message ?? 'Please check your login details.')
       return
     }
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('auth_email', parsed.data.email)
+    }
+
     setFormError(null)
     loginMutation.mutate(parsed.data)
   }

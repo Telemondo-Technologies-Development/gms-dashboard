@@ -1,7 +1,6 @@
 import React from 'react';
-import * as RechartsPrimitive from 'recharts';
 import { Card } from '@/components/ui/card';
-import { ChartContainer } from '@/components/ui/chart';
+import { ChartCard } from './ChartCard';
 
 interface MultiBranchOverviewProps {
   branches: {
@@ -29,66 +28,39 @@ export const MultiBranchOverview: React.FC<MultiBranchOverviewProps> = ({ branch
     value: branch.memberships,
   }));
 
+  // Calculate totals
+  const totalRevenue = branches.reduce((sum, branch) => sum + (branch.revenue || 0), 0).toFixed(2);
+  const totalExpenses = branches.reduce((sum, branch) => sum + (branch.expenses || 0), 0).toFixed(2);
+  const totalMemberships = branches.reduce((sum, branch) => sum + (branch.memberships || 0), 0);
+
   return (
-    <Card className="p-8 border py-26 border-zinc-100">
+    <Card className="p-8 py-26 border border-zinc-100">
       <h2 className="text-xl font-bold mb-4">Multi-Branch Overview</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Revenue Card */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold">Total Revenue</h3>
-          <p className="text-xl font-bold">
-            $
-            {branches
-              .reduce((sum, branch) => sum + (branch.revenue || 0), 0)
-              .toFixed(2)}
-          </p>
-          <ChartContainer
-            config={{ revenue: { color: '#4caf50' } }}
-          >
-            <RechartsPrimitive.BarChart data={revenueData}>
-              <RechartsPrimitive.XAxis dataKey="name" />
-              <RechartsPrimitive.YAxis />
-              <RechartsPrimitive.Bar dataKey="value" fill="var(--color-revenue)" />
-            </RechartsPrimitive.BarChart>
-          </ChartContainer>
-        </div>
-
-        {/* Expenses Card */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold">Total Expenses</h3>
-          <p className="text-xl font-bold">
-            $
-            {branches
-              .reduce((sum, branch) => sum + (branch.expenses || 0), 0)
-              .toFixed(2)}
-          </p>
-          <ChartContainer
-            config={{ expenses: { color: '#f44336' } }}
-          >
-            <RechartsPrimitive.BarChart data={expensesData}>
-              <RechartsPrimitive.XAxis dataKey="name" />
-              <RechartsPrimitive.YAxis />
-              <RechartsPrimitive.Bar dataKey="value" fill="var(--color-expenses)" />
-            </RechartsPrimitive.BarChart>
-          </ChartContainer>
-        </div>
-
-        {/* Memberships Card */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold">Total Memberships</h3>
-          <p className="text-xl font-bold">
-            {branches.reduce((sum, branch) => sum + (branch.memberships || 0), 0)}
-          </p>
-          <ChartContainer
-            config={{ memberships: { color: '#2196f3' } }}
-          >
-            <RechartsPrimitive.BarChart data={membershipsData}>
-              <RechartsPrimitive.XAxis dataKey="name" />
-              <RechartsPrimitive.YAxis />
-              <RechartsPrimitive.Bar dataKey="value" fill="var(--color-memberships)" />
-            </RechartsPrimitive.BarChart>
-          </ChartContainer>
-        </div>
+        <ChartCard
+          title="Total Revenue"
+          value={`₱${totalRevenue}`}
+          data={revenueData}
+          dataKey="value"
+          chartName="Revenue"
+          formatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
+        />
+        <ChartCard
+          title="Total Expenses"
+          value={`₱${totalExpenses}`}
+          data={expensesData}
+          dataKey="value"
+          chartName="Expenses"
+          formatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
+        />
+        <ChartCard
+          title="Total Memberships"
+          value={totalMemberships}
+          data={membershipsData}
+          dataKey="value"
+          chartName="Memberships"
+          formatter={(value) => `${value}`}
+        />
       </div>
     </Card>
   );

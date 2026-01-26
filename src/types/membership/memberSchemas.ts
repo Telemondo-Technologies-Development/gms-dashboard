@@ -23,6 +23,11 @@ export interface AddMemberDialogProps {
 
 export interface MemberInfo {
   id: string
+  firstName: string
+  middleName?: string
+  surname: string
+  suffix?: string
+  status?: 'IN' | 'OUT' | 'UNDECIDED'
   name: string
   email: string
   phone: string
@@ -46,6 +51,15 @@ export interface MemberDetailsDialogProps {
   onOpenChange: (open: boolean) => void
   memberGroup: MemberFormData | null
   onSave: (updated: MemberFormData) => void
+}
+export type MemberFormValues = {
+  createdById: string
+  firstName: string
+  middleName: string
+  surname: string
+  suffix: string
+  profilePictureId: string
+  status: 'IN' | 'OUT' | 'UNDECIDED'
 }
 
 

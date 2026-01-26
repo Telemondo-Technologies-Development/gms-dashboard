@@ -46,8 +46,7 @@ services:
     #      context: .
     #      dockerfile: Dockerfile
 
-    image: ghcr.io/telemondo-technologies-development/gms-backend-spring:dev
-
+    image: ghcr.io/telemondo-technologies-development/gms-backend-spring:0d01eab9870935b0df9d11db060dc57f3ea30af1
     restart: unless-stopped
     env_file: ./.env
     environment:
@@ -66,9 +65,24 @@ services:
     ports:
       - "${BACKEND_PORT}:8080"
 
+  minio:
+    image: minio/minio
+    container_name: minio_server
+    restart: unless-stopped
+    ports:
+      - "9000:9000"    # API port
+      - "9001:9001"    # Console UI port
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
 networks:
   mysql:
     driver: bridge
 
 volumes:
   db:
+  minio_data:

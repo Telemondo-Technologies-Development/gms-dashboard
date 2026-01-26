@@ -26,7 +26,6 @@ export const BranchList: React.FC<BranchListProps> = ({
   onSetActiveBranchForStaff,
 }) => {
   return (
-    <Card className="p-8 py-26 border border-zinc-100">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {branches.map((branch) => (
           <Card
@@ -103,6 +102,5 @@ export const BranchList: React.FC<BranchListProps> = ({
           </Card>
         ))}
       </div>
-    </Card>
   );
 };
