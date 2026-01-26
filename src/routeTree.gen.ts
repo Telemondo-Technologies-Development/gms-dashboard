@@ -21,6 +21,7 @@ import { Route as DashboardMarketingBranchRouteImport } from './routes/dashboard
 import { Route as DashboardMarketingAssetsRouteImport } from './routes/dashboard/marketing/assets'
 import { Route as DashboardBillingPaymentHistoryRouteImport } from './routes/dashboard/billing/payment-history'
 import { Route as DashboardAdminUsersRouteImport } from './routes/dashboard/admin/users'
+import { Route as DashboardAdminTrackingRouteImport } from './routes/dashboard/admin/tracking'
 import { Route as DashboardAdminExpenseRouteImport } from './routes/dashboard/admin/expense'
 import { Route as DashboardAdminAnalyticsRouteImport } from './routes/dashboard/admin/analytics'
 
@@ -88,6 +89,11 @@ const DashboardAdminUsersRoute = DashboardAdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardAdminTrackingRoute = DashboardAdminTrackingRouteImport.update({
+  id: '/admin/tracking',
+  path: '/admin/tracking',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardAdminExpenseRoute = DashboardAdminExpenseRouteImport.update({
   id: '/admin/expense',
   path: '/admin/expense',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/sales': typeof DashboardSalesRoute
   '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
   '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/tracking': typeof DashboardAdminTrackingRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/assets': typeof DashboardMarketingAssetsRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/dashboard/sales': typeof DashboardSalesRoute
   '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
   '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/tracking': typeof DashboardAdminTrackingRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/assets': typeof DashboardMarketingAssetsRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/dashboard/sales': typeof DashboardSalesRoute
   '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
   '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/tracking': typeof DashboardAdminTrackingRoute
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/assets': typeof DashboardMarketingAssetsRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/dashboard/sales'
     | '/dashboard/admin/analytics'
     | '/dashboard/admin/expense'
+    | '/dashboard/admin/tracking'
     | '/dashboard/admin/users'
     | '/dashboard/billing/payment-history'
     | '/dashboard/marketing/assets'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/dashboard/sales'
     | '/dashboard/admin/analytics'
     | '/dashboard/admin/expense'
+    | '/dashboard/admin/tracking'
     | '/dashboard/admin/users'
     | '/dashboard/billing/payment-history'
     | '/dashboard/marketing/assets'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/dashboard/sales'
     | '/dashboard/admin/analytics'
     | '/dashboard/admin/expense'
+    | '/dashboard/admin/tracking'
     | '/dashboard/admin/users'
     | '/dashboard/billing/payment-history'
     | '/dashboard/marketing/assets'
@@ -293,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAdminUsersRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/admin/tracking': {
+      id: '/dashboard/admin/tracking'
+      path: '/admin/tracking'
+      fullPath: '/dashboard/admin/tracking'
+      preLoaderRoute: typeof DashboardAdminTrackingRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/admin/expense': {
       id: '/dashboard/admin/expense'
       path: '/admin/expense'
@@ -315,6 +334,7 @@ interface DashboardRouteRouteChildren {
   DashboardSalesRoute: typeof DashboardSalesRoute
   DashboardAdminAnalyticsRoute: typeof DashboardAdminAnalyticsRoute
   DashboardAdminExpenseRoute: typeof DashboardAdminExpenseRoute
+  DashboardAdminTrackingRoute: typeof DashboardAdminTrackingRoute
   DashboardAdminUsersRoute: typeof DashboardAdminUsersRoute
   DashboardBillingPaymentHistoryRoute: typeof DashboardBillingPaymentHistoryRoute
   DashboardMarketingAssetsRoute: typeof DashboardMarketingAssetsRoute
@@ -327,6 +347,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardSalesRoute: DashboardSalesRoute,
   DashboardAdminAnalyticsRoute: DashboardAdminAnalyticsRoute,
   DashboardAdminExpenseRoute: DashboardAdminExpenseRoute,
+  DashboardAdminTrackingRoute: DashboardAdminTrackingRoute,
   DashboardAdminUsersRoute: DashboardAdminUsersRoute,
   DashboardBillingPaymentHistoryRoute: DashboardBillingPaymentHistoryRoute,
   DashboardMarketingAssetsRoute: DashboardMarketingAssetsRoute,
