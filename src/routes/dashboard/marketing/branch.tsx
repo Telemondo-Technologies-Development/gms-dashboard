@@ -219,17 +219,25 @@ const handleRemoveBranch = async () => {
           </TabsList>
 
           <TabsContent value="branches">
-            <div>
-              <BranchList
-                branches={branches}
-                onSelectBranch={setSelectedBranchId}
-                onToggleDialog={toggleDialog}
-                onSetMapBranch={setMapBranch}
-                onSetBranchToRemove={setBranchToRemove}
-                onSetActiveBranchForStaff={setActiveBranchForStaff}
-              />
-            </div>
-          </TabsContent>
+              <div>
+                {isFetching ? (
+                  <p>Loading branches...</p> // Show a loading message while fetching data
+                ) : branches.length > 0 ? (
+                  <BranchList
+                    branches={branches}
+                    onSelectBranch={setSelectedBranchId}
+                    onToggleDialog={toggleDialog}
+                    onSetMapBranch={setMapBranch}
+                    onSetBranchToRemove={setBranchToRemove}
+                    onSetActiveBranchForStaff={setActiveBranchForStaff}
+                  />
+                ) : (
+                  <div className="p-4 border rounded-md">
+                    <p>No branches available. Please check your backend or add a new branch.</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
           <TabsContent value="multiBranchDashboard">
             <MultiBranchOverview branches={branches} />
           </TabsContent>
