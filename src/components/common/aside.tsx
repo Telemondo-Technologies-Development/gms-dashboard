@@ -79,6 +79,7 @@ export default function Aside() {
 		{
 			title: "Admin",
 			items: [
+				{ label: "Overview", href: "/dashboard/admin/overview", icon: LayoutDashboard },
 				{ label: "Users", href: "/dashboard/admin/users", icon: Users },
 				{ label: "Roles & Access", href: "/dashboard/admin/access", icon: KeyRound },
 				{ label: "Audit Log", href: "/dashboard/admin/audit", icon: Shield },

@@ -1,32 +1,28 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Plus, Search, Package, AlertTriangle, CheckCircle, Calendar, Clock, Wrench, MapPin, Upload } from 'lucide-react'
+import { Search, Package, AlertTriangle, CheckCircle, Calendar, Clock, Wrench, MapPin } from 'lucide-react'
 import { format } from 'date-fns'
+import {
+  type Asset,
+  getAssetAge,
+  isAssetNearEOL,
+  assetNeedsMaintenance,
+  getConditionColor,
+  filterAssets,
+  getAssetsNeedingAttention,
+  calculateTotalAssetValue,
+  getOperationalAssetsCount,
+} from '@/lib/asset-utils'
+import { AddAssetDialog } from '@/components/asset-components/AddAssetDialog'
+import { AssetDetailsDialog } from '@/components/asset-components/AssetDetailsDialog'
+import { DeleteAssetDialog } from '@/components/asset-components/DeleteAssetDialog'
 
 export const Route = createFileRoute('/dashboard/marketing/assets')({
   component: RouteComponent,
 })
-
-interface Asset {
-  id: string
-  name: string
-  category: string
-  branch: string
-  purchaseDate: Date
-  price: number
-  lifespan: number
-  status: string
-  condition: string
-  serialNumber?: string
-  nextMaintenance?: Date
-  notes?: string
-}
 
 function RouteComponent() {
   const [assets, setAssets] = useState<Asset[]>([
@@ -61,36 +57,39 @@ function RouteComponent() {
   ])
 
   const [search, setSearch] = useState('')
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
-  const [formData, setFormData] = useState<Partial<Asset>>({})
 
-  const getAge = (date: Date) => Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24 * 30))
-  const isNearEOL = (asset: Asset) => getAge(asset.purchaseDate) >= asset.lifespan * 0.8
-  const needsMaintenance = (asset: Asset) => {
-    if (!asset.nextMaintenance) return false
-    const days = Math.floor((asset.nextMaintenance.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    return days <= 14 && days >= 0
+  const filtered = filterAssets(assets, search)
+  const needsAttention = getAssetsNeedingAttention(assets)
+  const totalValue = calculateTotalAssetValue(assets)
+  const operationalCount = getOperationalAssetsCount(assets)
+
+  const handleAddAsset = (newAsset: Omit<Asset, 'id'>) => {
+    setAssets((prev) => [{ id: crypto.randomUUID(), ...newAsset }, ...prev])
   }
 
-  const filtered = assets.filter((a) =>
-    a.name.toLowerCase().includes(search.toLowerCase()) ||
-    a.category.toLowerCase().includes(search.toLowerCase()) ||
-    a.branch.toLowerCase().includes(search.toLowerCase())
-  )
-
-  const needsAttention = assets.filter((a) => a.status === 'Needs Repair' || isNearEOL(a) || needsMaintenance(a))
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (selectedAsset) {
-      setAssets((prev) => prev.map((a) => (a.id === selectedAsset.id ? { ...a, ...formData } : a)))
-    } else {
-      setAssets((prev) => [{ id: crypto.randomUUID(), ...formData } as Asset, ...prev])
-    }
-    setDialogOpen(false)
-    setFormData({})
+  const handleUpdateAsset = (updatedAsset: Asset) => {
+    setAssets((prev) => prev.map((a) => (a.id === updatedAsset.id ? updatedAsset : a)))
     setSelectedAsset(null)
+  }
+
+  const handleDeleteAsset = (assetId: string) => {
+    setAssets((prev) => prev.filter((a) => a.id !== assetId))
+    setSelectedAsset(null)
+    setDetailsDialogOpen(false)
+  }
+
+  const handleAssetClick = (asset: Asset) => {
+    setSelectedAsset(asset)
+    setDetailsDialogOpen(true)
+  }
+
+  const handleOpenDeleteDialog = () => {
+    setDetailsDialogOpen(false)
+    setDeleteDialogOpen(true)
   }
 
   return (
@@ -100,10 +99,11 @@ function RouteComponent() {
           <h1 className="text-3xl font-bold">Asset Tracking</h1>
           <p className="text-muted-foreground">Monitor equipment, supplies, and maintenance schedules</p>
         </div>
-        <Button onClick={() => { setDialogOpen(true); setSelectedAsset(null); setFormData({}) }} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Asset
-        </Button>
+        <AddAssetDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onAddAsset={handleAddAsset}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -124,7 +124,7 @@ function RouteComponent() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₱{assets.reduce((sum, a) => sum + a.price, 0).toLocaleString()}</div>
+            <div className="text-2xl font-bold">₱{totalValue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Purchase value</p>
           </CardContent>
         </Card>
@@ -146,7 +146,7 @@ function RouteComponent() {
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{assets.filter((a) => a.status === 'Operational').length}</div>
+            <div className="text-2xl font-bold">{operationalCount}</div>
             <p className="text-xs text-muted-foreground">Ready to use</p>
           </CardContent>
         </Card>
@@ -170,19 +170,15 @@ function RouteComponent() {
 
           <div className="space-y-4">
             {filtered.map((asset) => {
-              const age = getAge(asset.purchaseDate)
-              const nearEOL = isNearEOL(asset)
-              const maintenanceDue = needsMaintenance(asset)
+              const age = getAssetAge(asset.purchaseDate)
+              const nearEOL = isAssetNearEOL(asset)
+              const maintenanceDue = assetNeedsMaintenance(asset)
 
               return (
                 <Card
                   key={asset.id}
                   className="p-4 cursor-pointer hover:bg-muted/50"
-                  onClick={() => {
-                    setSelectedAsset(asset)
-                    setFormData(asset)
-                    setDialogOpen(true)
-                  }}
+                  onClick={() => handleAssetClick(asset)}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -205,7 +201,7 @@ function RouteComponent() {
                         <div>
                           Age: {age}/{asset.lifespan} months
                         </div>
-                        <div>Condition: <span className={`font-medium ${asset.condition === 'Good' ? 'text-blue-600' : 'text-yellow-600'}`}>{asset.condition}</span></div>
+                        <div>Condition: <span className={`font-medium ${getConditionColor(asset.condition)}`}>{asset.condition}</span></div>
                       </div>
                       {asset.serialNumber && (
                         <div className="text-xs text-muted-foreground mt-1">SN: {asset.serialNumber}</div>
@@ -234,7 +230,7 @@ function RouteComponent() {
                   </div>
                   <div className="w-full bg-muted rounded-full h-1.5 mt-3">
                     <div
-                      className={`h-1.5 rounded-full ${nearEOL ? 'bg-destructive' : 'bg-primary'}`}
+                      className={`h-1.5 rounded-full ${nearEOL ? 'bg-red-500' : 'bg-blue-500'}`}
                       style={{ width: `${Math.min((age / asset.lifespan) * 100, 100)}%` }}
                     />
                   </div>
@@ -245,167 +241,20 @@ function RouteComponent() {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <form onSubmit={handleSubmit}>
-            <DialogHeader>
-              <DialogTitle>{selectedAsset ? 'Edit Asset' : 'Add New Asset'}</DialogTitle>
-              <DialogDescription>
-                {selectedAsset ? 'Update asset information and maintenance records' : 'Register a new equipment or supply item'}
-              </DialogDescription>
-            </DialogHeader>
+      <AssetDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        asset={selectedAsset}
+        onUpdateAsset={handleUpdateAsset}
+        onDeleteAsset={handleOpenDeleteDialog}
+      />
 
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Asset Name *</Label>
-                  <Input
-                    value={formData.name || ''}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Category *</Label>
-                  <select
-                    className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
-                    value={formData.category || 'Equipment'}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    required
-                  >
-                    <option value="Equipment">Equipment</option>
-                    <option value="Supplies">Supplies</option>
-                    <option value="Furniture">Furniture</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Branch *</Label>
-                  <select
-                    className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
-                    value={formData.branch || ''}
-                    onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
-                    required
-                  >
-                    <option value="">Select branch</option>
-                    <option value="Matina Gym Fitness">Matina Gym Fitness</option>
-                    <option value="Panacan Gym Fitness">Panacan Gym Fitness</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Serial Number</Label>
-                  <Input
-                    value={formData.serialNumber || ''}
-                    onChange={(e) => setFormData({ ...formData, serialNumber: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Purchase Date *</Label>
-                  <Input
-                    type="date"
-                    value={formData.purchaseDate ? format(formData.purchaseDate, 'yyyy-MM-dd') : ''}
-                    onChange={(e) => setFormData({ ...formData, purchaseDate: new Date(e.target.value) })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Price (₱) *</Label>
-                  <Input
-                    type="number"
-                    value={formData.price || 0}
-                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Lifespan (months) *</Label>
-                  <Input
-                    type="number"
-                    value={formData.lifespan || 60}
-                    onChange={(e) => setFormData({ ...formData, lifespan: parseInt(e.target.value) })}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Status *</Label>
-                  <select
-                    className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
-                    value={formData.status || 'Operational'}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    required
-                  >
-                    <option value="Operational">Operational</option>
-                    <option value="Needs Repair">Needs Repair</option>
-                    <option value="Under Maintenance">Under Maintenance</option>
-                    <option value="End of Life">End of Life</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Condition *</Label>
-                  <select
-                    className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background"
-                    value={formData.condition || 'Excellent'}
-                    onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
-                    required
-                  >
-                    <option value="Excellent">Excellent</option>
-                    <option value="Good">Good</option>
-                    <option value="Fair">Fair</option>
-                    <option value="Poor">Poor</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Next Maintenance Date</Label>
-                <Input
-                  type="date"
-                  value={formData.nextMaintenance ? format(formData.nextMaintenance, 'yyyy-MM-dd') : ''}
-                  onChange={(e) => setFormData({ ...formData, nextMaintenance: e.target.value ? new Date(e.target.value) : undefined })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Notes</Label>
-                <textarea
-                  className="w-full border border-input rounded-md px-3 py-2 text-sm bg-background min-h-[80px]"
-                  value={formData.notes || ''}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Photos & Receipts</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button type="button" variant="outline" className="w-full gap-2">
-                    <Upload className="h-4 w-4" />
-                    Upload Photos
-                  </Button>
-                  <Button type="button" variant="outline" className="w-full gap-2">
-                    <Upload className="h-4 w-4" />
-                    Upload Receipts
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">{selectedAsset ? 'Save Changes' : 'Add Asset'}</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <DeleteAssetDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        asset={selectedAsset}
+        onConfirmDelete={handleDeleteAsset}
+      />
     </div>
   )
 }
