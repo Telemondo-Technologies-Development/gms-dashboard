@@ -101,7 +101,7 @@ function RouteComponent() {
       }
   
       const savedBranch = await response.json();
-      refetch(); // Refetch branches after adding
+      refetch(); 
     } catch (error) {
       console.error(error);
       alert('Failed to add branch. Please try again.');
@@ -135,7 +135,7 @@ function RouteComponent() {
         throw new Error('Failed to update branch.');
       }
   
-      refetch(); // Refetch branches after updating
+      refetch(); 
     } catch (error) {
       console.error(error);
       alert('Failed to update branch. Please try again.');
@@ -161,7 +161,7 @@ const handleRemoveBranch = async () => {
         throw new Error('Failed to delete branch.');
       }
 
-      refetch(); // Refetch branches after deleting
+      refetch(); 
       toggleDialog('confirmDialogOpen', false);
       setBranchToRemove(null);
     } catch (error) {
@@ -197,7 +197,7 @@ const handleRemoveBranch = async () => {
         updated_at: new Date().toISOString(),
       };
 
-      refetch(); // Refetch branches from the backend to ensure data consistency
+      refetch(); 
 
       setActiveBranchForStaff(updatedBranch);
 
@@ -221,7 +221,7 @@ const handleRemoveBranch = async () => {
           <TabsContent value="branches">
               <div>
                 {isFetching ? (
-                  <p>Loading branches...</p> // Show a loading message while fetching data
+                  <p>Loading branches...</p> 
                 ) : branches.length > 0 ? (
                   <BranchList
                     branches={branches}
