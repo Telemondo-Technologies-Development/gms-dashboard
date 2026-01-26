@@ -136,78 +136,111 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background px-4 sm:px-6">
-      <Card className="w-full max-w-md shadow-lg shadow-primary mx-auto">
-        <div className="text-center flex flex-row justify-center p-3 mx-auto  items-center bg-primary-foreground rounded-full shadow-sm shadow-secondary">
-          <Dumbbell className="text-primary w-16 h-full flex justify-end items-center " />
+    <div className="flex h-screen w-full">
+      {/* Left Container - Branding/Hero */}
+      <div className="hidden lg:flex flex-1 items-center justify-center bg-gradient-to-r from-primary to-secondary border-r">
+        <div className="flex flex-col items-center space-y-6 text-center p-10 ">
+          <div className=" ">
+            <Dumbbell className="h-20 w-20 text-background" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold italic tracking-tight text-background">Gym Management System</h1>
+            <p className="text-muted text-xl">Staff & Admin Login Portal</p>
+          </div>
+          <div>
+            <p className="text-sm text-background/80 max-w-lg">
+              Manage your gym efficiently with our comprehensive system. Track members, schedule classes, and oversee staff all in one place.
+            </p>
+          </div>
         </div>
-        <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl italic text-primary">Welcome Back</CardTitle>
-          <CardDescription>Gym Management System - Staff & Admin Login</CardDescription>
-        </CardHeader>
+      </div>
 
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email or Username
-              </Label>
-              <Input
-                id="email"
-                type="text"
-                placeholder="Enter your username or email"
-                className="bg-input border-input py-5"
-                autoComplete="username"
-                value={formState.email}
-                onChange={(event) => setFormState((prev) => ({ ...prev, email: event.target.value }))}
-              />
+      {/* Right Container - Login Form */}
+      <div className="flex flex-1 items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-lg sm:shadow-primary/20">
+          <CardHeader className="space-y-2 text-center">
+            {/* Show Icon on specific mobile view only where left panel is hidden */}
+            <div className="lg:hidden mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <Dumbbell className="h-8 w-8 text-primary" />
             </div>
+            <CardTitle className="text-2xl font-bold italic text-primary">Welcome Back</CardTitle>
+            <CardDescription className="text-base">Enter your credentials to access your account</CardDescription>
+          </CardHeader>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                className="bg-input border-input py-5"
-                autoComplete="current-password"
-                value={formState.password}
-                onChange={(event) => setFormState((prev) => ({ ...prev, password: event.target.value }))}
-              />
-              <a href="#" className="text-xs text-destructive hover:underline flex p-0 text-right">
-                Forgot password?
-              </a>
+          <CardContent>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email or Username
+                </Label>
+                <Input
+                  id="email"
+                  type="text"
+                  placeholder="Enter your username or email"
+                  className="bg-input border-input py-5"
+                  autoComplete="username"
+                  value={formState.email}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, email: event.target.value }))}
+                />
+              </div>
 
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  className="bg-input border-input py-5"
+                  autoComplete="current-password"
+                  value={formState.password}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, password: event.target.value }))}
+                />
+                <div className="flex justify-end">
+                  <a 
+                    href="#" 
+                    className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
+              </div>  
+        
+              {(formError || loginMutation.error) && (
+                <p className="text-sm text-destructive font-medium text-center" role="alert">
+                  {formError ?? (loginMutation.error instanceof Error ? loginMutation.error.message : 'Login failed.')}
+                </p>
+              )}
 
-            {(formError || loginMutation.error) && (
-              <p className="text-sm text-destructive" role="alert">
-                {formError ?? (loginMutation.error instanceof Error ? loginMutation.error.message : 'Login failed.')}
-              </p>
-            )}
+              <Button
+                type="submit"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-5 font-semibold text-base transition-all"
+                disabled={loginMutation.isPending}
+              >
+                {loginMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>Signing In...</span>
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
 
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary text-primary-foreground"
-              disabled={loginMutation.isPending}
-            >
-              <Label>{loginMutation.isPending ? 'Signing In...' : 'Sign In'}</Label>
-            </Button>
+              {loginResponse && (
+                <p className="text-sm text-muted-foreground break-words text-center bg-muted/50 p-2 rounded-md" role="status">
+                  {loginResponse}
+                </p>
+              )}
 
-            {loginResponse && (
-              <p className="text-xs text-muted-foreground break-words" role="status">
-                {loginResponse}
-              </p>
-            )}
-
-            <div className="pt-2 text-center">
-              <p className="text-xs text-muted-foreground">Demo credentials - any username/password combination works</p>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              <div className="pt-4 text-center border-t mt-6">
+                <p className="text-xs text-muted-foreground">Do not share your credentials with anyone.</p>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

@@ -37,14 +37,14 @@ function NavLink({ href, icon: Icon, label, isActive, collapsed }: NavItem & { i
 				collapsed ? 'justify-center' : 'justify-start',
 				isActive
 					? 'bg-accent text-accent-foreground shadow-lg shadow-accent-foreground/10'
-					: 'hover:bg-accent hover:text-accent-foreground hover:shadow-lg shadow-accent-foreground/10'
+					: 'hover:bg-accent hover:text-primary hover:shadow-lg shadow-accent-foreground/10'
 			)}
 			aria-current={isActive ? 'page' : undefined}
 		>
-			<Icon className="h-4 w-4 shrink-0" />
+			<Icon className="h-4 w-4 shrink-0s" />
 			<span
 				className={cn(
-					'transition-all duration-300 ease-in-out overflow-hidden',
+					'transition-all duration-300 ease-in-out overflow-hidden hover:text-primary',
 					collapsed ? 'w-0 opacity-0 ml-0' : 'w-auto opacity-100 ml-2'
 				)}
 			>
@@ -59,7 +59,7 @@ function Section({ title, items, currentPath, collapsed }: NavSection & { curren
 		<section className="space-y-2">
 			<div
 				className={cn(
-					'px-2 text-xs font-medium text-muted-foreground transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap',
+					'px-2 text-xs font-medium text-muted-foreground transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap text-primary',
 					collapsed ? 'h-0 opacity-0' : 'h-auto opacity-100'
 				)}
 			>
@@ -151,11 +151,11 @@ export default function Aside() {
 							<div className="flex items-center">
 								<span
 									className={cn(
-										'text-md font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden',
+										'text-xl font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden',
 										collapsed ? 'w-0 opacity-0 px-0' : 'w-auto opacity-100'
 									)}
 								>
-									Gym Fitness
+									Dashboard
 								</span>
 							</div>
 							<button
