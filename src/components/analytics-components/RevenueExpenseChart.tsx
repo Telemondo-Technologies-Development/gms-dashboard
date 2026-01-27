@@ -1,4 +1,4 @@
-import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts'
+import { Line, LineChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { AlertCircle, CheckCircle } from 'lucide-react'
 import type { AnalyticsData } from '@/lib/analytics-data'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -70,47 +70,44 @@ export function RevenueExpenseChart({ data, timeRange }: Props) {
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto">
-        <div className="min-w-[500px]">
-          <ChartContainer config={chartConfig} className="h-[300px] w-full">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="month" 
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              />
-              <YAxis 
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tickFormatter={formatCurrency}
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#4a5c92"
-                strokeWidth={2.5}
-                dot={{ fill: '#4a5c92', r: 4 }}
-                activeDot={{ r: 6 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="expense"
-                stroke="hsl(var(--destructive))"
-                strokeWidth={2.5}
-                dot={{ fill: 'hsl(var(--destructive))', r: 4 }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ChartContainer>
-        </div>
-      </div>
+      {/* Chart Container */}
+      <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <XAxis 
+            dataKey="month" 
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+          />
+          <YAxis 
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            tickFormatter={formatCurrency}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+          />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <Line
+            type="monotone"
+            dataKey="revenue"
+            stroke="#4a5c92"
+            strokeWidth={2.5}
+            dot={{ fill: '#4a5c92', r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="expense"
+            stroke="hsl(var(--destructive))"
+            strokeWidth={2.5}
+            dot={{ fill: 'hsl(var(--destructive))', r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
+      </ChartContainer>
 
       {/* Actionable Insights */}
       {latestData && latestData.expense / latestData.revenue > 0.8 && (
