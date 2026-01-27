@@ -7,13 +7,18 @@ type Props = {
   branch: string
 }
 
-export function IncomeReportCards({ data }: Props) {
+export function IncomeReportCards({ data, branch }: Props) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-PH', {
       style: 'currency',
       currency: 'PHP',
       maximumFractionDigits: 0,
     }).format(value / 100)
+  }
+
+  // Validate data
+  if (!data.monthlyIncome || !data.annualIncome) {
+    return null
   }
 
   return (
@@ -29,15 +34,23 @@ export function IncomeReportCards({ data }: Props) {
             <div className="text-3xl font-bold">
               {formatCurrency(data.monthlyIncome.current)}
             </div>
-            <div className={`flex items-center gap-1 text-sm font-semibold ${
-              data.monthlyIncome.percentChange >= 0 ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {data.monthlyIncome.percentChange >= 0 ? (
-                <ArrowUp className="h-4 w-4" />
-              ) : (
-                <ArrowDown className="h-4 w-4" />
-              )}
-              {Math.abs(data.monthlyIncome.percentChange)}% from last month
+            <div className="flex items-center justify-between">
+              <div className={`flex items-center gap-1 text-sm font-semibold ${
+                data.monthlyIncome.percentChange >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {data.monthlyIncome.percentChange >= 0 ? (
+                  <ArrowUp className="h-4 w-4" />
+                ) : (
+                  <ArrowDown className="h-4 w-4" />
+                )}
+                <span className="sr-only">
+                  {data.monthlyIncome.percentChange >= 0 ? 'Increased' : 'Decreased'} by
+                </span>
+                {Math.abs(data.monthlyIncome.percentChange)}% from last month
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground pt-1">
+              Previous: {formatCurrency(data.monthlyIncome.previous)}
             </div>
           </div>
         </CardContent>
@@ -54,15 +67,23 @@ export function IncomeReportCards({ data }: Props) {
             <div className="text-3xl font-bold">
               {formatCurrency(data.annualIncome.current)}
             </div>
-            <div className={`flex items-center gap-1 text-sm font-semibold ${
-              data.annualIncome.percentChange >= 0 ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {data.annualIncome.percentChange >= 0 ? (
-                <ArrowUp className="h-4 w-4" />
-              ) : (
-                <ArrowDown className="h-4 w-4" />
-              )}
-              {Math.abs(data.annualIncome.percentChange)}% compared to 2024
+            <div className="flex items-center justify-between">
+              <div className={`flex items-center gap-1 text-sm font-semibold ${
+                data.annualIncome.percentChange >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {data.annualIncome.percentChange >= 0 ? (
+                  <ArrowUp className="h-4 w-4" />
+                ) : (
+                  <ArrowDown className="h-4 w-4" />
+                )}
+                <span className="sr-only">
+                  {data.annualIncome.percentChange >= 0 ? 'Increased' : 'Decreased'} by
+                </span>
+                {Math.abs(data.annualIncome.percentChange)}% compared to 2024
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground pt-1">
+              Previous: {formatCurrency(data.annualIncome.previous)}
             </div>
           </div>
         </CardContent>
