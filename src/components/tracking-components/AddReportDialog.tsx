@@ -6,19 +6,19 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Search } from 'lucide-react'; // Import Lucide React icon
 
-export default function AddReportDialog() {
+interface AddReportDialogProps {
+  onSubmit: (report: { date: string; type: string; description: string; filer: string; attachments: string }) => void;
+}
+
+export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [fileName, setFileName] = useState("No file chosen");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
-
-  // Example customer list
-  const customers = ['Customer 1', 'Customer 2', 'Customer 3', 'Customer 4'];
-
-  const filteredCustomers = customers.filter((customer) =>
-    customer.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [date, setDate] = useState('');
+  const [description, setDescription] = useState('');
+  const [staffMember, setStaffMember] = useState('');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -26,6 +26,18 @@ export default function AddReportDialog() {
     } else {
       setFileName("No file chosen");
     }
+  };
+
+  const handleSubmit = () => {
+    const newReport = {
+      date,
+      type: selectedCustomer || 'Unknown Type',
+      description,
+      filer: staffMember || 'Unknown Filer',
+      attachments: fileName,
+    };
+    onSubmit(newReport); // Pass the new report to the parent component
+    setIsOpen(false);
   };
 
   return (
@@ -55,7 +67,7 @@ export default function AddReportDialog() {
               <Search className="absolute left-3 top-2.5 text-gray-500" size={20} />
             </div>
             <div className="mt-2 max-h-40 overflow-y-auto border rounded-md">
-              {filteredCustomers.map((customer) => (
+              {['Positive - Commendation', 'Safety - Equipment Misuse', 'Behavioral Issue'].map((customer) => (
                 <div
                   key={customer}
                   className={`p-2 cursor-pointer hover:bg-gray-100 ${
@@ -72,7 +84,7 @@ export default function AddReportDialog() {
           {/* Date Integration */}
           <div className="grid gap-2">
             <Label htmlFor="date">Date Integration</Label>
-            <Input id="date" type="date" />
+            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
 
           {/* Detailed Description */}
@@ -83,13 +95,15 @@ export default function AddReportDialog() {
               placeholder="Describe the incident or commendation..."
               className="resize-none"
               rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
           {/* Staff Member */}
           <div className="grid gap-2">
             <Label htmlFor="staff">Staff Member</Label>
-            <Input id="staff" placeholder="Search or enter name" />
+            <Input id="staff" placeholder="Search or enter name" value={staffMember} onChange={(e) => setStaffMember(e.target.value)} />
           </div>
 
           {/* Attach Media */}
@@ -114,14 +128,7 @@ export default function AddReportDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700"
-            onClick={() => {
-              console.log(`Selected Customer: ${selectedCustomer}`);
-              setIsOpen(false);
-            }}
-          >
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleSubmit}>
             Submit Report
           </Button>
         </DialogFooter>
