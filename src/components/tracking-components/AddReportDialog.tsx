@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Search } from 'lucide-react'; 
+import { Search, X } from 'lucide-react'; 
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'; // Import dropdown components
+
 
 interface AddReportDialogProps {
   onSubmit: (report: { date: string; type: string; description: string; filer: string; attachments: string }) => void;
@@ -39,8 +41,26 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
     onSubmit(newReport); 
     setIsOpen(false);
   };
+  const [selectedReportType, setSelectedReportType] = useState<string>('Select Report Type'); // State for selected report type
 
-  return (
+
+const reportTypes = [
+    'Positive',
+    'Negative',
+    'Behavioral',
+    'Attendance-related',
+    'Safety Concerns',
+  ];
+
+const fakeCustomers = [
+  { id: 1, name: 'John Doe' },
+  { id: 2, name: 'Jane Smith' },
+  { id: 3, name: 'Michael Johnson' },
+  { id: 4, name: 'Emily Davis' },
+  { id: 5, name: 'Chris Brown' },
+];
+
+return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="default" className="bg-blue-600 hover:bg-blue-700">
@@ -62,24 +82,68 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
+                disabled={!!selectedCustomer} // Disable input when a customer is selected
               />
               <Search className="absolute left-3 top-2.5 text-gray-500" size={20} />
             </div>
             <div className="mt-2 max-h-40 overflow-y-auto border rounded-md">
-              {['Positive - Commendation', 'Safety - Equipment Misuse', 'Behavioral Issue'].map((customer) => (
-                <div
-                  key={customer}
-                  className={`p-2 cursor-pointer hover:bg-gray-100 ${
-                    selectedCustomer === customer ? 'bg-blue-100' : ''
-                  }`}
-                  onClick={() => setSelectedCustomer(customer)}
-                >
-                  {customer}
-                </div>
-              ))}
+              {!selectedCustomer && // Only show the customer list if no customer is selected
+                fakeCustomers
+                  .filter((customer) =>
+                    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map((customer) => (
+                    <div
+                      key={customer.id}
+                      className="p-2 cursor-pointer hover:bg-gray-100"
+                      onClick={() => setSelectedCustomer(customer.name)}
+                    >
+                      {customer.name}
+                    </div>
+                  ))}
             </div>
-          </div>
+            {selectedCustomer && (
+            <>
+                <div className="p-2 border rounded-md bg-blue-100 flex items-center justify-between">
+                <span>Selected Customer: {selectedCustomer}</span>
+                <button
+                    className="text-black hover:text-gray-700"
+                    onClick={() => {
+                    setSelectedCustomer(null); 
+                    setSearchQuery(''); 
+                    }}
+                >
+                    <X size={16} />
+                </button>
+                </div>
 
+                <div className="grid gap-2">
+                    <Label>Select Report Type</Label>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Input
+                            type="button"
+                            value={selectedReportType} // Display the selected report type
+                            className="w-full cursor-pointer text-left border border-gray-300 px-3 py-2"
+                            />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-full border border-gray-300 bg-white">
+                            {reportTypes.map((type) => (
+                            <DropdownMenuItem
+                                key={type}
+                                onClick={() => setSelectedReportType(type)} // Update the selected report type
+                                className="p-2 hover:bg-gray-100 cursor-pointer"
+                            >
+                                {type}
+                            </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </>
+            )}
+          </div>
+  
           <div className="grid gap-2">
             <Label htmlFor="date">Date Integration</Label>
             <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -95,12 +159,12 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-
+  
           <div className="grid gap-2">
             <Label htmlFor="staff">Staff Member</Label>
             <Input id="staff" placeholder="Search or enter name" value={staffMember} onChange={(e) => setStaffMember(e.target.value)} />
           </div>
-
+  
           <div className="grid gap-2">
             <Label htmlFor="media">Attach Media (Optional)</Label>
             <div
