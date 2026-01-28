@@ -1,73 +1,123 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import AddReportDialog from '@/components/tracking-components/AddReportDialog'; // Import AddReportDialog
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
+import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal'; // Modal for incident reports
+import AddReportDialog from '@/components/tracking-components/AddReportDialog'; // Dialog for adding new reports
 
 export const Route = createFileRoute('/dashboard/admin/tracking')({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const [reports, setReports] = useState([
-    {
-      date: 'Dec 10, 2025',
-      type: 'Positive - Commendation',
-      description: 'Helped a new member with form. Great leadership.',
-      filer: 'Alex Chen',
-      attachments: '1 image',
-    },
-    {
-      date: 'Nov 28, 2025',
-      type: 'Safety - Equipment Misuse',
-      description: 'Using machine incorrectly after spotting classes for a week.',
-      filer: 'Sarah Lee',
-      attachments: '1 image, 1 document',
-    },
+  const [customers, setCustomers] = useState([
+    { id: '1', name: 'Jane Doe', reports: [] },
+    { id: '2', name: 'John Smith', reports: [] },
   ]);
 
-  interface Report {
-    date: string;
-    type: string;
-    description: string;
-    filer: string;
-    attachments: string;
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredCustomers = customers.filter((customer) =>
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  interface Customer {
+    id: string;
+    name: string;
+    reports: any[]; // Replace `any` with a specific type if known
   }
 
-  const handleAddReport = (newReport: Report) => {
-    setReports((prevReports) => [...prevReports, newReport]);
+  const handleOpenModal = (customer: Customer): void => {
+    setSelectedCustomer(customer);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedCustomer(null);
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Reports: Jane Doe</h2>
-        <AddReportDialog onSubmit={handleAddReport} />
+        <h2 className="text-2xl font-bold tracking-tight">Incident Reports</h2>
+        <Button variant="outline">Refresh</Button>
       </div>
 
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle>Report Timeline</CardTitle>
-          <CardDescription>View all reports filed for this member.</CardDescription>
+      {/* Customers Table */}
+      <Card>
+        <CardHeader className="flex items-center justify-between">
+          <div>
+            <CardTitle>Customers</CardTitle>
+            <CardDescription>Click a customer to view incident reports.</CardDescription>
+          </div>
+          <AddReportDialog 
+            onSubmit={(report) => {
+              console.log('Report submitted:', report);
+              // Add logic to handle the submitted report here
+            }}
+          /> {/* Add New Report Button */}
         </CardHeader>
         <CardContent>
-          <div className="divide-y">
-            {reports.map((report, index) => (
-              <div key={index} className="py-4 first:pt-0">
-                <div className="flex flex-col gap-1">
-                  <p className={`font-semibold ${report.type.includes('Positive') ? 'text-green-600' : 'text-amber-600'}`}>
-                    {report.date}: {report.type}
-                  </p>
-                  <p className="text-slate-700">{report.description}</p>
-                  <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                    <span>Filer: {report.filer}</span>
-                    <span>Attached: {report.attachments}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center gap-2 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
           </div>
+
+          {filteredCustomers.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No customers found matching your search.</p>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Reports</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCustomers.map((customer) => (
+                    <TableRow
+                      key={customer.id}
+                      role="button"
+                      tabIndex={0}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleOpenModal(customer)}
+                    >
+                      <TableCell>{customer.name}</TableCell>
+                      <TableCell>{customer.reports.length} reports</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Incident Reports Modal */}
+      {selectedCustomer && (
+        <IncidentReportsModal
+          customer={selectedCustomer}
+          open={modalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }
