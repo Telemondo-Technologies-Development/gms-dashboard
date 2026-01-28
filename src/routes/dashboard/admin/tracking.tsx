@@ -13,7 +13,7 @@ export const Route = createFileRoute('/dashboard/admin/tracking')({
 });
 
 function RouteComponent() {
-  const [customers, setCustomers] = useState([
+  const [customers] = useState([
     { id: '1', name: 'Jane Doe', reports: [] },
     { id: '2', name: 'John Smith', reports: [] },
   ]);
@@ -29,7 +29,7 @@ function RouteComponent() {
   interface Customer {
     id: string;
     name: string;
-    reports: any[]; // Replace `any` with a specific type if known
+    reports: any[]; 
   }
 
   const handleOpenModal = (customer: Customer): void => {
@@ -60,9 +60,8 @@ function RouteComponent() {
           <AddReportDialog 
             onSubmit={(report) => {
               console.log('Report submitted:', report);
-              // Add logic to handle the submitted report here
             }}
-          /> {/* Add New Report Button */}
+          /> 
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2 mb-6">
