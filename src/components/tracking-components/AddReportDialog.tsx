@@ -82,12 +82,12 @@ return (
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
-                disabled={!!selectedCustomer} // Disable input when a customer is selected
+                disabled={!!selectedCustomer} 
               />
               <Search className="absolute left-3 top-2.5 text-gray-500" size={20} />
             </div>
             <div className="mt-2 max-h-40 overflow-y-auto border rounded-md">
-              {!selectedCustomer && // Only show the customer list if no customer is selected
+              {!selectedCustomer && 
                 fakeCustomers
                   .filter((customer) =>
                     customer.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -123,7 +123,7 @@ return (
                         <DropdownMenuTrigger asChild>
                             <Input
                             type="button"
-                            value={selectedReportType} // Display the selected report type
+                            value={selectedReportType} 
                             className="w-full cursor-pointer text-left border border-gray-300 px-3 py-2"
                             />
                         </DropdownMenuTrigger>
@@ -131,7 +131,7 @@ return (
                             {reportTypes.map((type) => (
                             <DropdownMenuItem
                                 key={type}
-                                onClick={() => setSelectedReportType(type)} // Update the selected report type
+                                onClick={() => setSelectedReportType(type)} 
                                 className="p-2 hover:bg-gray-100 cursor-pointer"
                             >
                                 {type}
