@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Search } from 'lucide-react'; // Import Lucide React icon
+import { Search } from 'lucide-react'; 
 
 interface AddReportDialogProps {
   onSubmit: (report: { date: string; type: string; description: string; filer: string; attachments: string }) => void;
@@ -36,7 +36,7 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
       filer: staffMember || 'Unknown Filer',
       attachments: fileName,
     };
-    onSubmit(newReport); // Pass the new report to the parent component
+    onSubmit(newReport); 
     setIsOpen(false);
   };
 
@@ -52,7 +52,6 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
           <DialogTitle className="text-xl">File New Report</DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 py-4">
-          {/* Customer Selection */}
           <div className="grid gap-2">
             <Label htmlFor="customer">Search Customer</Label>
             <div className="relative">
@@ -81,13 +80,10 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
             </div>
           </div>
 
-          {/* Date Integration */}
           <div className="grid gap-2">
             <Label htmlFor="date">Date Integration</Label>
             <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
-
-          {/* Detailed Description */}
           <div className="grid gap-2">
             <Label htmlFor="description">Detailed Description</Label>
             <Textarea
@@ -100,13 +96,11 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
             />
           </div>
 
-          {/* Staff Member */}
           <div className="grid gap-2">
             <Label htmlFor="staff">Staff Member</Label>
             <Input id="staff" placeholder="Search or enter name" value={staffMember} onChange={(e) => setStaffMember(e.target.value)} />
           </div>
 
-          {/* Attach Media */}
           <div className="grid gap-2">
             <Label htmlFor="media">Attach Media (Optional)</Label>
             <div

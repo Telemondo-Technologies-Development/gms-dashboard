@@ -39,13 +39,11 @@ function RouteComponent() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Reports: Jane Doe</h2>
         <AddReportDialog onSubmit={handleAddReport} />
       </div>
 
-      {/* Report Timeline Card */}
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle>Report Timeline</CardTitle>
