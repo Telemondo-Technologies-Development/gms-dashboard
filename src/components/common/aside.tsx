@@ -151,7 +151,7 @@ export default function Aside() {
 							<div className="flex items-center">
 								<span
 									className={cn(
-										'text-xl font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden',
+										'text-xl font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden text-primary',
 										collapsed ? 'w-0 opacity-0 px-0' : 'w-auto opacity-100'
 									)}
 								>

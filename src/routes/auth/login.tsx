@@ -30,13 +30,11 @@ export const Route = createFileRoute('/auth/login')({
 
 function RouteComponent() {
   const [formState, setFormState] = useState<LoginPayload>({
-    email: '',
+    username: '',
     password: '',
   })
   const [formError, setFormError] = useState<string | null>(null)
   const [loginResponse, setLoginResponse] = useState<string | null>(null)
-
-  const loginIdField = import.meta.env.VITE_LOGIN_ID_FIELD === 'username' ? 'username' : 'email'
 
   const loginMutation = useMutation({
     mutationFn: async (payload: LoginPayload) => {
@@ -44,10 +42,8 @@ function RouteComponent() {
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
       const url = `${base}/auth/login`
 
-      const requestBody =
-        loginIdField === 'username'
-          ? { username: payload.email, password: payload.password }
-          : { email: payload.email, password: payload.password }
+      // Backend expects { username, password } (username can be an email or username string).
+      const requestBody = { username: payload.username, password: payload.password }
 
       try {
         const response = await fetch(url, {
@@ -128,7 +124,7 @@ function RouteComponent() {
     }
 
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('auth_email', parsed.data.email)
+      window.localStorage.setItem('auth_username', parsed.data.username)
     }
 
     setFormError(null)
@@ -170,17 +166,17 @@ function RouteComponent() {
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
+                <Label htmlFor="username" className="text-sm font-medium">
                   Email or Username
                 </Label>
                 <Input
-                  id="email"
+                  id="username"
                   type="text"
                   placeholder="Enter your username or email"
                   className="bg-input border-input py-5"
                   autoComplete="username"
-                  value={formState.email}
-                  onChange={(event) => setFormState((prev) => ({ ...prev, email: event.target.value }))}
+                  value={formState.username}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, username: event.target.value }))}
                 />
               </div>
 
