@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
-import { Download, FileSpreadsheet, FileText, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react'
+import { Download, FileSpreadsheet, FileText, TrendingUp, AlertCircle } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -176,7 +176,7 @@ function AnalyticsRoute() {
 
   const branches = ['all', ...MOCK_ANALYTICS_DATA.branches.map(b => b.name)]
   
-  // Get filtered data based on selected branch - memoized for performance
+  // Get filtered data based on selected branch
   const analyticsData = useMemo(
     () => getFilteredData(selectedBranch),
     [selectedBranch]
@@ -222,7 +222,7 @@ function AnalyticsRoute() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
