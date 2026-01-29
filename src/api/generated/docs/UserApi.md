@@ -146,7 +146,7 @@ No authorization required
 
 ## getAllUsers
 
-> ApiResponseListUserTableDTO getAllUsers()
+> ApiResponseListUserTableDTO getAllUsers(pageable)
 
 Get all Users
 
@@ -163,8 +163,13 @@ async function example() {
   console.log("🚀 Testing  SDK...");
   const api = new UserApi();
 
+  const body = {
+    // Pageable
+    pageable: ...,
+  } satisfies GetAllUsersRequest;
+
   try {
-    const data = await api.getAllUsers();
+    const data = await api.getAllUsers(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -177,7 +182,10 @@ example().catch(console.error);
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
 
 ### Return type
 

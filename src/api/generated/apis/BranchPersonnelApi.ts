@@ -17,21 +17,30 @@ import * as runtime from '../runtime';
 import type {
   ApiResponseBranchPersonnelTableDTO,
   ApiResponseListBranchPersonnelTableDTO,
+  ApiResponseObjectStorage,
   ApiResponseUnit,
   BranchPersonnelPostDTO,
   BranchPersonnelPutDTO,
+  Pageable,
+  UploadBranchLogoRequest,
 } from '../models/index';
 import {
     ApiResponseBranchPersonnelTableDTOFromJSON,
     ApiResponseBranchPersonnelTableDTOToJSON,
     ApiResponseListBranchPersonnelTableDTOFromJSON,
     ApiResponseListBranchPersonnelTableDTOToJSON,
+    ApiResponseObjectStorageFromJSON,
+    ApiResponseObjectStorageToJSON,
     ApiResponseUnitFromJSON,
     ApiResponseUnitToJSON,
     BranchPersonnelPostDTOFromJSON,
     BranchPersonnelPostDTOToJSON,
     BranchPersonnelPutDTOFromJSON,
     BranchPersonnelPutDTOToJSON,
+    PageableFromJSON,
+    PageableToJSON,
+    UploadBranchLogoRequestFromJSON,
+    UploadBranchLogoRequestToJSON,
 } from '../models/index';
 
 export interface CreateBranchPersonnelRequest {
@@ -42,6 +51,10 @@ export interface DeleteBranchPersonnelRequest {
     id: string;
 }
 
+export interface GetAllBranchPersonnelRequest {
+    pageable: Pageable;
+}
+
 export interface GetBranchPersonnelRequest {
     id: string;
 }
@@ -49,6 +62,10 @@ export interface GetBranchPersonnelRequest {
 export interface UpdateBranchPersonnelRequest {
     id: string;
     branchPersonnelPutDTO: BranchPersonnelPutDTO;
+}
+
+export interface UploadBranchLogoOperationRequest {
+    uploadBranchLogoRequest?: UploadBranchLogoRequest;
 }
 
 /**
@@ -135,8 +152,19 @@ export class BranchPersonnelApi extends runtime.BaseAPI {
     /**
      * Get all Branch Personnel
      */
-    async getAllBranchPersonnelRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListBranchPersonnelTableDTO>> {
+    async getAllBranchPersonnelRaw(requestParameters: GetAllBranchPersonnelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListBranchPersonnelTableDTO>> {
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAllBranchPersonnel().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -156,8 +184,8 @@ export class BranchPersonnelApi extends runtime.BaseAPI {
     /**
      * Get all Branch Personnel
      */
-    async getAllBranchPersonnel(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListBranchPersonnelTableDTO> {
-        const response = await this.getAllBranchPersonnelRaw(initOverrides);
+    async getAllBranchPersonnel(requestParameters: GetAllBranchPersonnelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListBranchPersonnelTableDTO> {
+        const response = await this.getAllBranchPersonnelRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -242,6 +270,38 @@ export class BranchPersonnelApi extends runtime.BaseAPI {
      */
     async updateBranchPersonnel(requestParameters: UpdateBranchPersonnelRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseBranchPersonnelTableDTO> {
         const response = await this.updateBranchPersonnelRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Upload a branch logo into the object storage (public)
+     */
+    async uploadBranchLogoRaw(requestParameters: UploadBranchLogoOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseObjectStorage>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/branch/personnel/picture`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UploadBranchLogoRequestToJSON(requestParameters['uploadBranchLogoRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseObjectStorageFromJSON(jsonValue));
+    }
+
+    /**
+     * Upload a branch logo into the object storage (public)
+     */
+    async uploadBranchLogo(requestParameters: UploadBranchLogoOperationRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseObjectStorage> {
+        const response = await this.uploadBranchLogoRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -17,21 +17,30 @@ import * as runtime from '../runtime';
 import type {
   ApiResponseListMemberTableDTO,
   ApiResponseMemberTableDTO,
+  ApiResponseObjectStorage,
   ApiResponseUnit,
   MemberPostDTO,
   MemberPutDTO,
+  Pageable,
+  UploadBranchLogoRequest,
 } from '../models/index';
 import {
     ApiResponseListMemberTableDTOFromJSON,
     ApiResponseListMemberTableDTOToJSON,
     ApiResponseMemberTableDTOFromJSON,
     ApiResponseMemberTableDTOToJSON,
+    ApiResponseObjectStorageFromJSON,
+    ApiResponseObjectStorageToJSON,
     ApiResponseUnitFromJSON,
     ApiResponseUnitToJSON,
     MemberPostDTOFromJSON,
     MemberPostDTOToJSON,
     MemberPutDTOFromJSON,
     MemberPutDTOToJSON,
+    PageableFromJSON,
+    PageableToJSON,
+    UploadBranchLogoRequestFromJSON,
+    UploadBranchLogoRequestToJSON,
 } from '../models/index';
 
 export interface CreateMemberRequest {
@@ -42,6 +51,10 @@ export interface DeleteMemberRequest {
     id: string;
 }
 
+export interface GetAllMembersRequest {
+    pageable: Pageable;
+}
+
 export interface GetMemberRequest {
     id: string;
 }
@@ -49,6 +62,10 @@ export interface GetMemberRequest {
 export interface UpdateMemberRequest {
     id: string;
     memberPutDTO: MemberPutDTO;
+}
+
+export interface UploadMemberProfileRequest {
+    uploadBranchLogoRequest?: UploadBranchLogoRequest;
 }
 
 /**
@@ -135,8 +152,19 @@ export class MemberApi extends runtime.BaseAPI {
     /**
      * Get all Members
      */
-    async getAllUsers1Raw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListMemberTableDTO>> {
+    async getAllMembersRaw(requestParameters: GetAllMembersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListMemberTableDTO>> {
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAllMembers().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -156,8 +184,8 @@ export class MemberApi extends runtime.BaseAPI {
     /**
      * Get all Members
      */
-    async getAllUsers1(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListMemberTableDTO> {
-        const response = await this.getAllUsers1Raw(initOverrides);
+    async getAllMembers(requestParameters: GetAllMembersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListMemberTableDTO> {
+        const response = await this.getAllMembersRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -242,6 +270,38 @@ export class MemberApi extends runtime.BaseAPI {
      */
     async updateMember(requestParameters: UpdateMemberRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseMemberTableDTO> {
         const response = await this.updateMemberRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Upload a member profile picture into the object storage (public)
+     */
+    async uploadMemberProfileRaw(requestParameters: UploadMemberProfileRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseObjectStorage>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/member/picture`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UploadBranchLogoRequestToJSON(requestParameters['uploadBranchLogoRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseObjectStorageFromJSON(jsonValue));
+    }
+
+    /**
+     * Upload a member profile picture into the object storage (public)
+     */
+    async uploadMemberProfile(requestParameters: UploadMemberProfileRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseObjectStorage> {
+        const response = await this.uploadMemberProfileRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

@@ -21,6 +21,7 @@ import type {
   ApiResponseUnit,
   BranchPostDTO,
   BranchPutDTO,
+  Pageable,
 } from '../models/index';
 import {
     ApiResponseBranchEmployeesDTOFromJSON,
@@ -35,6 +36,8 @@ import {
     BranchPostDTOToJSON,
     BranchPutDTOFromJSON,
     BranchPutDTOToJSON,
+    PageableFromJSON,
+    PageableToJSON,
 } from '../models/index';
 
 export interface CreateBranchRequest {
@@ -43,6 +46,10 @@ export interface CreateBranchRequest {
 
 export interface DeleteBranchRequest {
     id: string;
+}
+
+export interface GetAllBranchesRequest {
+    pageable: Pageable;
 }
 
 export interface GetBranchRequest {
@@ -143,8 +150,19 @@ export class BranchApi extends runtime.BaseAPI {
     /**
      * Get all Branches
      */
-    async getAllBranchesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListBranchTableDTO>> {
+    async getAllBranchesRaw(requestParameters: GetAllBranchesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListBranchTableDTO>> {
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAllBranches().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -164,8 +182,8 @@ export class BranchApi extends runtime.BaseAPI {
     /**
      * Get all Branches
      */
-    async getAllBranches(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListBranchTableDTO> {
-        const response = await this.getAllBranchesRaw(initOverrides);
+    async getAllBranches(requestParameters: GetAllBranchesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListBranchTableDTO> {
+        const response = await this.getAllBranchesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

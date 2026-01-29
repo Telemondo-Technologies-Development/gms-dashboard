@@ -10,7 +10,7 @@ All URIs are relative to *http://localhost:8080*
 
 ## login
 
-> string login(logInDTO)
+> LogInResponse login(logInDTO)
 
 
 
@@ -53,7 +53,7 @@ example().catch(console.error);
 
 ### Return type
 
-**string**
+[**LogInResponse**](LogInResponse.md)
 
 ### Authorization
 

@@ -31,6 +31,12 @@ export interface ApiError {
      * @memberof ApiError
      */
     description: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ApiError
+     */
+    field?: string;
 }
 
 /**
@@ -54,6 +60,7 @@ export function ApiErrorFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         
         'code': json['code'],
         'description': json['description'],
+        'field': json['field'] == null ? undefined : json['field'],
     };
 }
 
@@ -70,6 +77,7 @@ export function ApiErrorToJSONTyped(value?: ApiError | null, ignoreDiscriminator
         
         'code': value['code'],
         'description': value['description'],
+        'field': value['field'],
     };
 }
 
