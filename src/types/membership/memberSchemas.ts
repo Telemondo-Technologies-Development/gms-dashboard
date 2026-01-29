@@ -29,8 +29,8 @@ export interface MemberInfo {
   suffix?: string
   status?: 'IN' | 'OUT' | 'UNDECIDED'
   name: string
-  email: string
-  phone: string
+  email?: string
+  phone?: string
 }
 
 export interface MemberFormData {
