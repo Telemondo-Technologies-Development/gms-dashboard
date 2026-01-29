@@ -87,10 +87,10 @@ function UsersPage() {
     isLoading: loadingEmployees, 
     error: employeesError,
     refetch: refetchEmployees
-  } = useQuery({
+  } = useQuery<EmployeeTableDTO[], Error>({
     queryKey: ['employees'],
     queryFn: async () => {
-      const response = await employeeApi.getAllUsers2()
+      const response = await employeeApi.getAllEmployees({ pageable: {} })
       if (!response.success) {
 			  throw new Error(response.message ?? 'Failed to fetch employees')
 		  }
@@ -103,10 +103,10 @@ function UsersPage() {
     isLoading: loadingUsers,
     error: usersError,
     refetch: refetchUsers
-  } = useQuery({
+  } = useQuery<UserTableDTO[], Error>({
     queryKey: ['users'],
     queryFn: async () => {
-      const response = await userApi.getAllUsers()
+      const response = await userApi.getAllUsers({ pageable: {} })
       if (!response.success) {
         throw new Error(response.message ?? 'Failed to fetch users')
       }
@@ -352,7 +352,7 @@ function UsersPage() {
                         </TableRow>
                     ) : (
                         users?.map((user: UserTableDTO) => {
-                            const linkedEmployee = employees?.find(e => e.id === user.actorId)
+                          const linkedEmployee = employees?.find((e) => e.id === user.actorId)
                             
                             return (
                                 <TableRow key={user.id}>
