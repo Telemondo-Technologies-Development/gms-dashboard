@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
+import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
+import { BranchApi } from '@/api/generated/apis/BranchApi'
 
 type JwtClaims = Record<string, unknown>
 
@@ -135,6 +137,51 @@ export default function Header() {
 		retry: false,
 	})
 
+	// Fetch user's branch personnel record
+	const branchPersonnelApi = new BranchPersonnelApi()
+	const branchPersonnelQuery = useQuery({
+		queryKey: ['branchPersonnel', currentUserQuery.data?.actorId],
+		enabled: !!currentUserQuery.data?.actorId,
+		queryFn: async () => {
+			const actorId = currentUserQuery.data?.actorId
+			if (!actorId) return null
+			try {
+				const response = await branchPersonnelApi.getAllBranchPersonnel({
+					pageable: {},
+				})
+				// Find the active branch personnel record for this employee
+				const personnelRecord = response.data?.find(
+					(record) => record.actorId === actorId && record.status === 'IN'
+				)
+				return personnelRecord ?? null
+			} catch (error) {
+				console.error('Failed to fetch branch personnel:', error)
+				return null
+			}
+		},
+		retry: false,
+	})
+
+	// Fetch branch details
+	const branchApi = new BranchApi()
+	const branchQuery = useQuery({
+		queryKey: ['branch', branchPersonnelQuery.data?.branchId],
+		enabled: !!branchPersonnelQuery.data?.branchId,
+		queryFn: async () => {
+			if (!branchPersonnelQuery.data?.branchId) return null
+			try {
+				const response = await branchApi.getBranch({
+					id: branchPersonnelQuery.data.branchId,
+				})
+				return response.data ?? null
+			} catch (error) {
+				console.error('Failed to fetch branch:', error)
+				return null
+			}
+		},
+		retry: false,
+	})
+
 	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? 'Account'
 	const searchInput = (
 		<div className="relative">
@@ -242,7 +289,9 @@ export default function Header() {
 					</div>
 
 					<div className="hidden md:block">
-						<Label>Branch: Panacan Davao City</Label>
+						<Label>
+							Branch: {branchQuery.isLoading ? 'Loading...' : (branchQuery.data?.name ?? 'Not Assigned')}
+						</Label>
 					</div>
 				</div>
 			</div>
