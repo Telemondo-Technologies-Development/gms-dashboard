@@ -131,8 +131,8 @@ function MembershipRoute() {
   const filteredMembers = members.filter(memberGroup =>
     memberGroup.members.some(m =>
       m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.phone.includes(searchQuery)
+      (m.email ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (m.phone ?? '').includes(searchQuery)
     ) ||
     memberGroup.membershipType.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -144,8 +144,8 @@ function MembershipRoute() {
   const filteredAttendanceMembers = members.filter(memberGroup =>
     memberGroup.members.some(m =>
       m.name.toLowerCase().includes(attendanceSearch.toLowerCase()) ||
-      m.email.toLowerCase().includes(attendanceSearch.toLowerCase()) ||
-      m.phone.includes(attendanceSearch)
+      (m.email ?? '').toLowerCase().includes(attendanceSearch.toLowerCase()) ||
+      (m.phone ?? '').includes(attendanceSearch)
     )
   )
 
@@ -374,8 +374,8 @@ function MembershipRoute() {
                       const matches = memberGroup.members.filter((m) => {
                         return (
                           m.name.toLowerCase().includes(query) ||
-                          m.email.toLowerCase().includes(query) ||
-                          m.phone.includes(attendanceSearch)
+                          (m.email ?? '').toLowerCase().includes(query) ||
+                          (m.phone ?? '').includes(attendanceSearch)
                         )
                       })
 
