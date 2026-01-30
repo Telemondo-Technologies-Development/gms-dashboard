@@ -5,7 +5,7 @@ import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
 import { AlertTriangle, CheckCircle2, Clock, Receipt, Search, XCircle } from 'lucide-react'
 
-import { usePaymentMethods, usePayments } from '@/hooks/usePaymentHistory'
+import { usePayment, usePaymentMethods, usePayments } from '@/hooks/usePaymentHistory'
 import {
   paymentHistoryFiltersSchema,
   type PaymentHistoryFilters,
@@ -13,20 +13,14 @@ import {
   type PaymentTableDTOParsed,
 } from '@/types/payment/paymentSchemas'
 
+import { PaymentDetailsDialog } from '@/components/payment-components/PaymentDetailsDialog'
+import { ReceiptDialog } from '@/components/payment-components/ReceiptDialog'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
 import {
   Select,
   SelectContent,
@@ -97,6 +91,7 @@ function validateFilters(value: PaymentHistoryFilters): string | undefined {
 
 function PaymentHistoryRoute() {
   const [detailsOpen, setDetailsOpen] = useState(false)
+  const [receiptOpen, setReceiptOpen] = useState(false)
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
 
   const defaultValues: PaymentHistoryFilters = {
@@ -130,10 +125,17 @@ function PaymentHistoryRoute() {
     return map
   }, [paymentMethods])
 
+  const paymentQuery = usePayment(selectedPaymentId)
+
   const selectedPayment = useMemo(() => {
+    if (paymentQuery.data) return paymentQuery.data
     if (!selectedPaymentId) return null
     return payments.find((p) => p.id === selectedPaymentId) ?? null
-  }, [payments, selectedPaymentId])
+  }, [paymentQuery.data, payments, selectedPaymentId])
+
+  const selectedPaymentLoading = !!selectedPaymentId && paymentQuery.isLoading && !selectedPayment
+  const selectedPaymentError =
+    paymentQuery.error instanceof Error ? paymentQuery.error.message : paymentQuery.error ? 'Failed to load payment.' : undefined
 
   const totals = useMemo(() => {
     const totalsByStatus: Record<DisplayStatus, number> = {
@@ -449,83 +451,32 @@ function PaymentHistoryRoute() {
         </div>
       </div>
 
-      <Dialog
+      <PaymentDetailsDialog
         open={detailsOpen}
         onOpenChange={(open) => {
           setDetailsOpen(open)
-          if (!open) setSelectedPaymentId(null)
+          if (!open) {
+            setReceiptOpen(false)
+            setSelectedPaymentId(null)
+          }
         }}
-      >
-        <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Payment details</DialogTitle>
-            <DialogDescription>
-              {selectedPayment ? 'Details from PaymentTableDTO.' : 'No payment selected.'}
-            </DialogDescription>
-          </DialogHeader>
+        paymentId={selectedPaymentId}
+        payment={selectedPayment}
+        loading={selectedPaymentLoading}
+        error={selectedPaymentError}
+        paymentMethodMap={paymentMethodById}
+        onPrintReceipt={() => setReceiptOpen(true)}
+      />
 
-          {selectedPayment ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <div className="text-xs text-muted-foreground">Payment ID</div>
-                  <div className="mt-1 break-all font-mono text-xs">{selectedPayment.id}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Invoice ID</div>
-                  <div className="mt-1 break-all font-mono text-xs">{selectedPayment.invoiceId}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Payment Method</div>
-                  <div className="mt-1 text-sm">
-                    {paymentMethodById.get(selectedPayment.paymentMethodId)?.name ?? '—'}
-                  </div>
-                  <div className="mt-1 break-all font-mono text-xs text-muted-foreground">
-                    {selectedPayment.paymentMethodId}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Amount</div>
-                  <div className="mt-1 text-sm font-semibold">
-                    {formatCurrency(selectedPayment.amount, 'PHP')}
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <div className="text-xs text-muted-foreground">API Status</div>
-                  <div className="mt-1 font-mono text-xs">{selectedPayment.status}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Display Status</div>
-                  <div className="mt-1">{statusBadge(mapDisplayStatus(selectedPayment))}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Paid At</div>
-                  <div className="mt-1 text-sm">
-                    {selectedPayment.paidAt ? format(new Date(selectedPayment.paidAt), 'PPpp') : '—'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground">Failure Reason</div>
-                  <div className="mt-1 text-sm">{selectedPayment.failureReason ?? '—'}</div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-muted-foreground">Select a row to view details.</div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDetailsOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ReceiptDialog
+        open={receiptOpen}
+        onOpenChange={setReceiptOpen}
+        paymentId={selectedPaymentId}
+        payment={selectedPayment}
+        loading={selectedPaymentLoading}
+        error={selectedPaymentError}
+        paymentMethodMap={paymentMethodById}
+      />
     </div>
   )
 }
