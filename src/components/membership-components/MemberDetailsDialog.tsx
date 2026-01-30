@@ -277,7 +277,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
                     <div className="text-sm font-medium">Member Information</div>
 
                     {members.map((m, index) => (
-                      <div key={m.id} className="rounded-lg border p-4 space-y-4">
+                      <div key={m.id} className="rounded-lg p-2 space-y-4">
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -337,25 +337,6 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
                                 <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
                               </SelectContent>
                             </Select>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor={`email-${m.id}`}>Email</Label>
-                            <Input
-                              id={`email-${m.id}`}
-                              type="email"
-                              value={m.email ?? ''}
-                              onChange={(e) => handleMemberFieldChange(index, 'email', e.target.value)}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor={`phone-${m.id}`}>Phone Number</Label>
-                            <Input
-                              id={`phone-${m.id}`}
-                              value={m.phone ?? ''}
-                              onChange={(e) => handleMemberFieldChange(index, 'phone', e.target.value)}
-                            />
                           </div>
                         </div>
                       </div>

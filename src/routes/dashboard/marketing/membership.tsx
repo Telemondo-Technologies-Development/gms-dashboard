@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Search, Mail, Phone, Calendar, QrCode, Fingerprint, UserCheck, Clock } from 'lucide-react'
+import { Search, Mail, Phone, Calendar, QrCode, Fingerprint, UserCheck, Clock, RefreshCw, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
 import type { AttendanceRecord } from '@/types/membership/memberSchemas'
@@ -192,10 +192,15 @@ function MembershipRoute() {
           <Button
             type="button"
             variant="outline"
+            size="icon"
             onClick={() => membersQuery.refetch()}
             disabled={membersQuery.isFetching}
           >
-            {membersQuery.isFetching ? 'Refreshing…' : 'Refresh'}
+            {membersQuery.isFetching ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
           </Button>
           <AddMemberDialog onAddMember={handleAddMember} />
         </div>
@@ -390,7 +395,7 @@ function MembershipRoute() {
                             {matches.map((member) => (
                               <div
                                 key={member.id}
-                                className="p-2 rounded-md flex hover:bg-accent-foreground items-center justify-between"
+                                className="p-2 rounded-md flex hover:bg-surface-container-low items-center justify-between"
                               >
                                 <div>
                                   <div className="font-medium">{member.name}</div>
