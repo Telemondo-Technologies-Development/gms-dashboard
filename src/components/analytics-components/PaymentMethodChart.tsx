@@ -1,5 +1,5 @@
 import { Pie, PieChart, Cell } from 'recharts'
-import { Banknote, CreditCard, Smartphone } from 'lucide-react'
+import { Banknote, CreditCard, Smartphone, type LucideIcon } from 'lucide-react'
 import type { AnalyticsData } from '@/lib/analytics-data'
 import {
   ChartContainer,
@@ -12,22 +12,15 @@ type Props = {
   branch: string
 }
 
-const chartConfig = {
-  Cash: {
-    label: 'Cash',
-    color: '#4a5c92', 
-  },
-  Card: {
-    label: 'Card',
-    color: '#324478', 
-  },
-  Online: {
-    label: 'Online',
-    color: '#8b5cf6', 
-  },
-}
+type PaymentMethod = 'Cash' | 'Card' | 'Online'
 
-const ICONS = {
+const chartConfig = {
+  Cash: { label: 'Cash', color: '#4a5c92' },
+  Card: { label: 'Card', color: '#324478' },
+  Online: { label: 'Online', color: '#8b5cf6' },
+} as const
+
+const ICONS: Record<PaymentMethod, LucideIcon> = {
   Cash: Banknote,
   Card: CreditCard,
   Online: Smartphone,
@@ -44,6 +37,7 @@ export function PaymentMethodChart({ data }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* Pie Chart */}
       <ChartContainer config={chartConfig} className="h-[200px] w-full">
         <PieChart>
           <Pie
@@ -59,7 +53,7 @@ export function PaymentMethodChart({ data }: Props) {
             {data.paymentMethods.map((entry) => (
               <Cell 
                 key={entry.method} 
-                fill={chartConfig[entry.method as keyof typeof chartConfig].color}
+                fill={chartConfig[entry.method as PaymentMethod].color}
               />
             ))}
           </Pie>
@@ -67,19 +61,20 @@ export function PaymentMethodChart({ data }: Props) {
         </PieChart>
       </ChartContainer>
 
+      {/* Legend with details */}
       <div className="space-y-2">
         {data.paymentMethods.map((method) => {
-          const Icon = ICONS[method.method as keyof typeof ICONS]
-          const color = chartConfig[method.method as keyof typeof chartConfig].color
+          const Icon = ICONS[method.method as PaymentMethod]
+          const color = chartConfig[method.method as PaymentMethod].color
           
           return (
             <div key={method.method} className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <div 
-                  className="w-3 h-3 rounded-full" 
+                  className="w-3 h-3 rounded-full flex-shrink-0" 
                   style={{ backgroundColor: color }}
                 />
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <span className="text-sm font-medium">{method.method}</span>
               </div>
               <div className="text-right">

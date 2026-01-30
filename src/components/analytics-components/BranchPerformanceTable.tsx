@@ -17,7 +17,7 @@ export function BranchPerformanceTable({ data }: Props) {
   }
 
   // Validate data
-  if (!data.branches || data.branches.length === 0) {
+  if (!data.branches?.length) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         No branch data available
@@ -42,6 +42,9 @@ export function BranchPerformanceTable({ data }: Props) {
         </TableHeader>
         <TableBody>
           {sortedBranches.map((branch, index) => {
+            const isTopPerformer = index === 0
+            const isHighGrowth = branch.growth >= 10
+            const isDeclining = branch.growth < 0
             const profitMargin = ((branch.profit / branch.revenue) * 100).toFixed(1)
             
             return (
@@ -49,23 +52,23 @@ export function BranchPerformanceTable({ data }: Props) {
                 <TableCell className="font-medium">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      {index === 0 && (
+                      {isTopPerformer && (
                         <TrendingUp className="h-4 w-4 text-green-600" />
                       )}
                       <span>{branch.name}</span>
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      {index === 0 && (
+                      {isTopPerformer && (
                         <Badge variant="default" className="text-xs bg-green-600">
                           Top Performer
                         </Badge>
                       )}
-                      {branch.growth < 0 && (
+                      {isDeclining && (
                         <Badge variant="destructive" className="text-xs">
                           Declining
                         </Badge>
                       )}
-                      {branch.growth >= 10 && (
+                      {isHighGrowth && (
                         <Badge variant="default" className="text-xs bg-blue-600">
                           High Growth
                         </Badge>
@@ -88,7 +91,7 @@ export function BranchPerformanceTable({ data }: Props) {
                   </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {branch.members}
+                  {branch.members.toLocaleString()}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className={`flex items-center justify-end gap-1 text-sm font-semibold ${

@@ -34,6 +34,17 @@ function ExpenseRoute() {
     : null
   const editForm = useExpenseEdit(selectedExpense)
 
+  // Filter expenses based on search query and branch
+  const filteredExpenses = expenses.filter(expense => {
+    const matchesSearch = 
+      expense.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      expense.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      expense.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesBranch = expense.branch === selectedBranch
+    
+    return matchesSearch && matchesBranch
+  })
+
   // Handle add expense
   const handleAddExpense = (e: FormEvent) => {
     e.preventDefault()
@@ -63,7 +74,7 @@ function ExpenseRoute() {
     e.preventDefault()
     if (!selectedExpense || !editForm.date) return
 
-    const updated: ExpenseFormData = {
+    const updatedExpense: ExpenseFormData = {
       ...selectedExpense,
       type: editForm.type,
       name: editForm.name,
@@ -76,7 +87,7 @@ function ExpenseRoute() {
       ...(editForm.type === 'salary' && { salaryType: editForm.salaryType }),
     }
 
-    setExpenses(prev => prev.map(e => (e.id === updated.id ? updated : e)))
+    setExpenses(prev => prev.map(e => (e.id === updatedExpense.id ? updatedExpense : e)))
     setIsEditing(false)
     setDetailsDialogOpen(false)
   }
@@ -90,18 +101,20 @@ function ExpenseRoute() {
     setSelectedExpenseId(null)
   }
 
-  const filteredExpenses = expenses.filter(expense =>
-    (expense.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expense.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expense.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
-    expense.branch === selectedBranch
-  )
-
+  // Handle row click
   const handleRowClick = (expense: ExpenseFormData) => {
     setSelectedExpenseId(expense.id)
     editForm.loadExpense(expense)
     setIsEditing(false)
     setDetailsDialogOpen(true)
+  }
+
+  // Handle cancel editing
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    if (selectedExpense) {
+      editForm.loadExpense(selectedExpense)
+    }
   }
 
   return (
@@ -136,7 +149,7 @@ function ExpenseRoute() {
           </Card>
         </div>
 
-        {/* Right Side - Table*/}
+        {/* Right Side - Table */}
         <div className="lg:col-span-2 flex flex-col min-h-0">
           <ExpenseTable
             expenses={filteredExpenses}
@@ -194,12 +207,7 @@ function ExpenseRoute() {
         setSalaryType={editForm.setSalaryType}
         onSubmit={handleSaveExpense}
         onDelete={() => setDeleteDialogOpen(true)}
-        onCancel={() => {
-          setIsEditing(false)
-          if (selectedExpense) {
-            editForm.loadExpense(selectedExpense)
-          }
-        }}
+        onCancel={handleCancelEdit}
       />
 
       <DeleteConfirmDialog

@@ -20,17 +20,18 @@ interface MonthlySpendingChartProps {
   branch: string
 }
 
+const MONTHS_TO_DISPLAY = 12
+
 export function MonthlySpendingChart({ expenses, branch }: MonthlySpendingChartProps) {
   const chartData = useMemo(() => {
     // Filter expenses by branch
     const branchExpenses = expenses.filter(e => e.branch === branch)
     
-    // Group by month (last 12 months)
-    const monthlyData: { [key: string]: number } = {}
+    // Initialize last 12 months with zero values
+    const monthlyData: Record<string, number> = {}
     const currentDate = new Date()
     
-    // Initialize last 12 months
-    for (let i = 11; i >= 0; i--) {
+    for (let i = MONTHS_TO_DISPLAY - 1; i >= 0; i--) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
       const monthKey = date.toLocaleString('en-US', { month: 'short', year: 'numeric' })
       monthlyData[monthKey] = 0
@@ -41,7 +42,7 @@ export function MonthlySpendingChart({ expenses, branch }: MonthlySpendingChartP
       const expenseDate = new Date(expense.date)
       const monthKey = expenseDate.toLocaleString('en-US', { month: 'short', year: 'numeric' })
       if (monthKey in monthlyData) {
-        monthlyData[monthKey] += Number.parseFloat(expense.amount)
+        monthlyData[monthKey] += parseFloat(expense.amount)
       }
     })
     
