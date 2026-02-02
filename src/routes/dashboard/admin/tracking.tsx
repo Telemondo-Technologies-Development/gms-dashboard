@@ -14,7 +14,7 @@ export const Route = createFileRoute('/dashboard/admin/tracking')({
 interface Customer {
   id: string;
   name: string;
-  branch: string; // Added branch property
+  branch: string; 
   reports: {
     date: string;
     type: string;
@@ -75,7 +75,7 @@ export default function Tracking() {
         return [
           ...prevCustomers,
           {
-            id: String(prevCustomers.length + 1), // Generate a new ID
+            id: String(prevCustomers.length + 1), 
             name: reportData.name,
             branch: reportData.branch,
             reports: [

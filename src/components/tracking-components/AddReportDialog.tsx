@@ -32,7 +32,7 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
         reportType,
         description: description.trim(),
         occurredAt,
-        createdBy: 'staff-id', // Replace with actual staff ID
+        createdBy: 'staff-id', 
         attachments,
       });
       setName('');
