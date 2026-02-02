@@ -318,8 +318,10 @@ export class BranchApi extends runtime.BaseAPI {
  * @export
  */
 export const GetBranchEmployeesStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
+    Active: 'ACTIVE',
+    Moved: 'MOVED',
+    Terminated: 'TERMINATED',
+    Resigned: 'RESIGNED',
     Undecided: 'UNDECIDED'
 } as const;
 export type GetBranchEmployeesStatusEnum = typeof GetBranchEmployeesStatusEnum[keyof typeof GetBranchEmployeesStatusEnum];

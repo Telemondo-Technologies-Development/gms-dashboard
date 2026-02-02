@@ -68,8 +68,8 @@ export interface BranchPutDTO {
  * @export
  */
 export const BranchPutDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
+    Active: 'ACTIVE',
+    Closed: 'CLOSED',
     Undecided: 'UNDECIDED'
 } as const;
 export type BranchPutDTOStatusEnum = typeof BranchPutDTOStatusEnum[keyof typeof BranchPutDTOStatusEnum];

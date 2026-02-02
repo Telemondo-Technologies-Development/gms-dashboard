@@ -7,6 +7,7 @@
 Name | Type
 ------------ | -------------
 `actorId` | string
+`branches` | [Array&lt;BranchListDTO&gt;](BranchListDTO.md)
 `email` | string
 
 ## Example
@@ -17,6 +18,7 @@ import type { LogInResponse } from ''
 // TODO: Update the object below with actual values
 const example = {
   "actorId": null,
+  "branches": null,
   "email": null,
 } satisfies LogInResponse
 

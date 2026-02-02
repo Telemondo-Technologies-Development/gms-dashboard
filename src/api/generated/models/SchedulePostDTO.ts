@@ -33,6 +33,12 @@ export interface SchedulePostDTO {
     createdById: string;
     /**
      * 
+     * @type {number}
+     * @memberof SchedulePostDTO
+     */
+    dayOfWeek?: number;
+    /**
+     * 
      * @type {string}
      * @memberof SchedulePostDTO
      */
@@ -45,10 +51,22 @@ export interface SchedulePostDTO {
     intervalValue: number;
     /**
      * 
+     * @type {boolean}
+     * @memberof SchedulePostDTO
+     */
+    isAdvancedSettingsAllowed: boolean;
+    /**
+     * 
      * @type {number}
      * @memberof SchedulePostDTO
      */
     leadTimeHours: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SchedulePostDTO
+     */
+    monthOfYear?: number;
     /**
      * 
      * @type {string}
@@ -67,6 +85,12 @@ export interface SchedulePostDTO {
      * @memberof SchedulePostDTO
      */
     timeToCompleteHours: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SchedulePostDTO
+     */
+    weekRank?: number;
 }
 
 
@@ -74,12 +98,22 @@ export interface SchedulePostDTO {
  * @export
  */
 export const SchedulePostDTOIntervalUnitEnum = {
-    Minute: 'MINUTE',
-    Hour: 'HOUR',
-    Day: 'DAY',
-    Week: 'WEEK',
-    Month: 'MONTH',
-    Year: 'YEAR'
+    Nanos: 'Nanos',
+    Micros: 'Micros',
+    Millis: 'Millis',
+    Seconds: 'Seconds',
+    Minutes: 'Minutes',
+    Hours: 'Hours',
+    HalfDays: 'HalfDays',
+    Days: 'Days',
+    Weeks: 'Weeks',
+    Months: 'Months',
+    Years: 'Years',
+    Decades: 'Decades',
+    Centuries: 'Centuries',
+    Millennia: 'Millennia',
+    Eras: 'Eras',
+    Forever: 'Forever'
 } as const;
 export type SchedulePostDTOIntervalUnitEnum = typeof SchedulePostDTOIntervalUnitEnum[keyof typeof SchedulePostDTOIntervalUnitEnum];
 
@@ -92,6 +126,7 @@ export function instanceOfSchedulePostDTO(value: object): value is SchedulePostD
     if (!('createdById' in value) || value['createdById'] === undefined) return false;
     if (!('intervalUnit' in value) || value['intervalUnit'] === undefined) return false;
     if (!('intervalValue' in value) || value['intervalValue'] === undefined) return false;
+    if (!('isAdvancedSettingsAllowed' in value) || value['isAdvancedSettingsAllowed'] === undefined) return false;
     if (!('leadTimeHours' in value) || value['leadTimeHours'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('startDate' in value) || value['startDate'] === undefined) return false;
@@ -111,12 +146,16 @@ export function SchedulePostDTOFromJSONTyped(json: any, ignoreDiscriminator: boo
         
         'assetId': json['assetId'],
         'createdById': json['createdById'],
+        'dayOfWeek': json['dayOfWeek'] == null ? undefined : json['dayOfWeek'],
         'intervalUnit': json['intervalUnit'],
         'intervalValue': json['intervalValue'],
+        'isAdvancedSettingsAllowed': json['isAdvancedSettingsAllowed'],
         'leadTimeHours': json['leadTimeHours'],
+        'monthOfYear': json['monthOfYear'] == null ? undefined : json['monthOfYear'],
         'name': json['name'],
         'startDate': (new Date(json['startDate'])),
         'timeToCompleteHours': json['timeToCompleteHours'],
+        'weekRank': json['weekRank'] == null ? undefined : json['weekRank'],
     };
 }
 
@@ -133,12 +172,16 @@ export function SchedulePostDTOToJSONTyped(value?: SchedulePostDTO | null, ignor
         
         'assetId': value['assetId'],
         'createdById': value['createdById'],
+        'dayOfWeek': value['dayOfWeek'],
         'intervalUnit': value['intervalUnit'],
         'intervalValue': value['intervalValue'],
+        'isAdvancedSettingsAllowed': value['isAdvancedSettingsAllowed'],
         'leadTimeHours': value['leadTimeHours'],
+        'monthOfYear': value['monthOfYear'],
         'name': value['name'],
         'startDate': value['startDate'].toISOString(),
         'timeToCompleteHours': value['timeToCompleteHours'],
+        'weekRank': value['weekRank'],
     };
 }
 

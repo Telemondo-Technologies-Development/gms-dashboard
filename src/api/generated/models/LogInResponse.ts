@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { BranchListDTO } from './BranchListDTO';
+import {
+    BranchListDTOFromJSON,
+    BranchListDTOFromJSONTyped,
+    BranchListDTOToJSON,
+    BranchListDTOToJSONTyped,
+} from './BranchListDTO';
+
 /**
  * 
  * @export
@@ -25,6 +33,12 @@ export interface LogInResponse {
      * @memberof LogInResponse
      */
     actorId: string;
+    /**
+     * 
+     * @type {Array<BranchListDTO>}
+     * @memberof LogInResponse
+     */
+    branches?: Array<BranchListDTO>;
     /**
      * 
      * @type {string}
@@ -53,6 +67,7 @@ export function LogInResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
     return {
         
         'actorId': json['actorId'],
+        'branches': json['branches'] == null ? undefined : ((json['branches'] as Array<any>).map(BranchListDTOFromJSON)),
         'email': json['email'],
     };
 }
@@ -69,6 +84,7 @@ export function LogInResponseToJSONTyped(value?: LogInResponse | null, ignoreDis
     return {
         
         'actorId': value['actorId'],
+        'branches': value['branches'] == null ? undefined : ((value['branches'] as Array<any>).map(BranchListDTOToJSON)),
         'email': value['email'],
     };
 }

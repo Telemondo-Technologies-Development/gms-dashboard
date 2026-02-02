@@ -74,8 +74,8 @@ export interface BranchTableDTO {
  * @export
  */
 export const BranchTableDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
+    Active: 'ACTIVE',
+    Closed: 'CLOSED',
     Undecided: 'UNDECIDED'
 } as const;
 export type BranchTableDTOStatusEnum = typeof BranchTableDTOStatusEnum[keyof typeof BranchTableDTOStatusEnum];

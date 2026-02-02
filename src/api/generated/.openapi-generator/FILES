@@ -78,6 +78,7 @@ docs/BillingCyclePutDTO.md
 docs/BillingCycleTableDTO.md
 docs/BranchApi.md
 docs/BranchEmployeesDTO.md
+docs/BranchListDTO.md
 docs/BranchPersonnelApi.md
 docs/BranchPersonnelPostDTO.md
 docs/BranchPersonnelPutDTO.md
@@ -194,6 +195,7 @@ models/BillingCyclePostDTO.ts
 models/BillingCyclePutDTO.ts
 models/BillingCycleTableDTO.ts
 models/BranchEmployeesDTO.ts
+models/BranchListDTO.ts
 models/BranchPersonnelPostDTO.ts
 models/BranchPersonnelPutDTO.ts
 models/BranchPersonnelTableDTO.ts

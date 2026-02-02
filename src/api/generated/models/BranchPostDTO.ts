@@ -68,8 +68,8 @@ export interface BranchPostDTO {
  * @export
  */
 export const BranchPostDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
+    Active: 'ACTIVE',
+    Closed: 'CLOSED',
     Undecided: 'UNDECIDED'
 } as const;
 export type BranchPostDTOStatusEnum = typeof BranchPostDTOStatusEnum[keyof typeof BranchPostDTOStatusEnum];
