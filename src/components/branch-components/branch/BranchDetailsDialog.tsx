@@ -92,51 +92,51 @@ export function BranchDetailsDialog({
             <div className="text-sm text-muted-foreground text-center py-4">No branch selected.</div>
           ) : (
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Branch Name</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <div className="space-y-4 border border-border p-4 rounded-2xl">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Branch Name</Label>
                   <Input
-                    id="phone"
-                    className="pl-10"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     required
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <select
-                  id="status"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-background"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as 'Active' | 'Maintenance')}
-                  required
-                >
-                  <option value="Active">Active</option>
-                  <option value="Maintenance">Maintenance</option>
-                </select>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      className="pl-10"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <select
+                    id="status"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-background"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as 'Active' | 'Maintenance')}
+                    required
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Maintenance">Maintenance</option>
+                  </select>
+                </div>
               </div>
             </div>
           )}

@@ -1,79 +1,125 @@
-import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
-import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal'; // Modal for incident reports
-import AddReportDialog from '@/components/tracking-components/AddReportDialog'; // Dialog for adding new reports
+import { Input } from '@/components/ui/input';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import AddReportDialog from '@/components/tracking-components/AddReportDialog';
+import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal';
 
 export const Route = createFileRoute('/dashboard/admin/tracking')({
-  component: RouteComponent,
+  component: Tracking,
 });
 
-function RouteComponent() {
-  const [customers] = useState([
-    { id: '1', name: 'Jane Doe', reports: [] },
-    { id: '2', name: 'John Smith', reports: [] },
-  ]);
+interface Customer {
+  id: string;
+  name: string;
+  branch: string; 
+  reports: {
+    date: string;
+    type: string;
+    description: string;
+    filer: string;
+    attachments: string[];
+  }[];
+}
 
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+export default function Tracking() {
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  interface Customer {
-    id: string;
-    name: string;
-    reports: any[]; 
-  }
+  const activeCustomerData = customers.find((c) => c.id === selectedCustomerId);
 
   const handleOpenModal = (customer: Customer): void => {
-    setSelectedCustomer(customer);
+    setSelectedCustomerId(customer.id);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    setSelectedCustomer(null);
+    setSelectedCustomerId(null);
   };
+
+  const handleAddReport = (reportData: {
+    name: string;
+    branch: string;
+    reportType: string;
+    description: string;
+    occurredAt: string;
+    createdBy: string;
+    attachments: File[];
+  }) => {
+    setCustomers((prevCustomers) => {
+      const existingCustomer = prevCustomers.find((customer) => customer.name === reportData.name && customer.branch === reportData.branch);
+      if (existingCustomer) {
+        return prevCustomers.map((customer) =>
+          customer.name === reportData.name && customer.branch === reportData.branch
+            ? {
+                ...customer,
+                reports: [
+                  ...customer.reports,
+                  {
+                    date: reportData.occurredAt,
+                    type: reportData.reportType,
+                    description: reportData.description,
+                    filer: reportData.createdBy,
+                    attachments: reportData.attachments.map((file) => URL.createObjectURL(file)),
+                  },
+                ],
+              }
+            : customer
+        );
+      } else {
+        return [
+          ...prevCustomers,
+          {
+            id: String(prevCustomers.length + 1), 
+            name: reportData.name,
+            branch: reportData.branch,
+            reports: [
+              {
+                date: reportData.occurredAt,
+                type: reportData.reportType,
+                description: reportData.description,
+                filer: reportData.createdBy,
+                attachments: reportData.attachments.map((file) => URL.createObjectURL(file)),
+              },
+            ],
+          },
+        ];
+      }
+    });
+  };
+
+  const filteredCustomers = customers.filter((customer) =>
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Incident Reports</h2>
-        <Button variant="outline">Refresh</Button>
+        <Button variant="outline" onClick={() => window.location.reload()}>Refresh</Button>
       </div>
 
-      {/* Customers Table */}
       <Card>
-        <CardHeader className="flex items-center justify-between">
+        <CardHeader className="flex items-center justify-between flex-row">
           <div>
             <CardTitle>Customers</CardTitle>
             <CardDescription>Click a customer to view incident reports.</CardDescription>
           </div>
-          <AddReportDialog 
-            onSubmit={(report) => {
-              console.log('Report submitted:', report);
-            }}
-          /> 
+          <AddReportDialog onSubmit={handleAddReport} />
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+            <Input
+              placeholder="Search by name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-sm"
+            />
           </div>
 
           {filteredCustomers.length === 0 ? (
@@ -86,6 +132,7 @@ function RouteComponent() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Branch</TableHead>
                     <TableHead>Reports</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -93,12 +140,11 @@ function RouteComponent() {
                   {filteredCustomers.map((customer) => (
                     <TableRow
                       key={customer.id}
-                      role="button"
-                      tabIndex={0}
                       className="cursor-pointer hover:bg-muted/50"
                       onClick={() => handleOpenModal(customer)}
                     >
-                      <TableCell>{customer.name}</TableCell>
+                      <TableCell className="font-medium">{customer.name}</TableCell>
+                      <TableCell>{customer.branch}</TableCell>
                       <TableCell>{customer.reports.length} reports</TableCell>
                     </TableRow>
                   ))}
@@ -109,10 +155,9 @@ function RouteComponent() {
         </CardContent>
       </Card>
 
-      {/* Incident Reports Modal */}
-      {selectedCustomer && (
+      {activeCustomerData && (
         <IncidentReportsModal
-          customer={selectedCustomer}
+          customer={activeCustomerData}
           open={modalOpen}
           onClose={handleCloseModal}
         />

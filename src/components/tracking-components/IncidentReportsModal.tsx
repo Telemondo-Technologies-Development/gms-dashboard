@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
 interface Customer {
@@ -8,7 +8,7 @@ interface Customer {
     type: string;
     description: string;
     filer: string;
-    attachments: string;
+    attachments: string[];
   }[];
 }
 
@@ -24,6 +24,9 @@ export default function IncidentReportsModal({ customer, open, onClose }: Incide
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Incident Reports for {customer.name}</DialogTitle>
+          <DialogDescription>
+            View all incident reports for the selected customer. If no reports are available, you can add a new one.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           {customer.reports.length === 0 ? (
@@ -31,10 +34,34 @@ export default function IncidentReportsModal({ customer, open, onClose }: Incide
           ) : (
             customer.reports.map((report, index) => (
               <div key={index} className="border rounded-md p-4">
-                <p className="font-semibold">{report.date}: {report.type}</p>
-                <p>{report.description}</p>
-                <p className="text-xs text-muted-foreground">Filer: {report.filer}</p>
-                <p className="text-xs text-muted-foreground">Attachments: {report.attachments}</p>
+                <p className="font-semibold">
+                  <span className="text-blue-600">{new Date(report.date).toLocaleString()}</span>:{' '}
+                  <span className="text-gray-800">{report.type}</span>
+                </p>
+                <p className="mt-2">{report.description}</p>
+                <div className="mt-2 text-sm text-gray-600">
+                  <p>
+                    <span className="font-semibold">Filed by:</span> {report.filer}
+                  </p>
+                  <p>
+                    <span className="font-semibold">Attachments:</span>{' '}
+                    {report.attachments.length > 0 ? (
+                      report.attachments.map((attachment, i) => (
+                        <a
+                          key={i}
+                          href={attachment}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          Attachment {i + 1}
+                        </a>
+                      ))
+                    ) : (
+                      'None'
+                    )}
+                  </p>
+                </div>
               </div>
             ))
           )}
