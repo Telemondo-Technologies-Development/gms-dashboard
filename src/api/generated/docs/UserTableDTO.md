@@ -7,8 +7,10 @@
 Name | Type
 ------------ | -------------
 `actorId` | string
+`createdAt` | Date
 `email` | string
 `id` | string
+`updatedAt` | Date
 
 ## Example
 
@@ -18,8 +20,10 @@ import type { UserTableDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "actorId": null,
+  "createdAt": null,
   "email": null,
   "id": null,
+  "updatedAt": null,
 } satisfies UserTableDTO
 
 console.log(example)

@@ -26,6 +26,12 @@ import type { AddMemberDialogProps, MemberFormData } from '@/types/membership/me
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
 import type { JwtClaims } from '@/types/user/userSchemas'
 import type { MemberFormValues } from '@/types/membership/memberSchemas'
+import { SubscriptionAvailedApi } from '@/api/generated/apis/SubscriptionAvailedApi'
+import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionApi'
+import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
+import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
+import type { BranchPersonnelTableDTO } from '@/api/generated/models/BranchPersonnelTableDTO'
+import { getAuthenticatedApi } from '@/lib/api-client'
 
 
 
@@ -116,17 +122,19 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   
-  // States for membership and billing (mirrored from MemberDetailsDialog)
+  // States for membership and billing
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [membershipType, setMembershipType] = useState('')
-  const [membershipDuration, setMembershipDuration] = useState('')
-  const [billingAmount, setBillingAmount] = useState('')
-  const [billingCycle, setBillingCycle] = useState('')
+  const [selectedSubscriptionId, setSelectedSubscriptionId] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('')
   const [membershipDetails, setMembershipDetails] = useState('')
 
   const queryClient = useQueryClient()
+  
+  // Initialize API clients
+  const subscriptionAvailedApi = getAuthenticatedApi(SubscriptionAvailedApi)
+  const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
+  const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
 
   const defaultValues: MemberFormValues = {
     createdById: '',
@@ -159,12 +167,55 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
 
   const createdByActorId = currentUserQuery.data?.actorId
   const currentUserEmail = currentUserQuery.data?.email ?? storedEmail
+  
+  // Fetch user's branch
+  const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
+    queryKey: ['branchPersonnel', createdByActorId],
+    enabled: !!createdByActorId,
+    queryFn: async () => {
+      if (!createdByActorId) return null
+      try {
+        const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: {} })
+        const record = response.data?.find(
+          (r: BranchPersonnelTableDTO) => r.actorId === createdByActorId && r.status === 'IN'
+        )
+        return record ?? null
+      } catch (error) {
+        console.error('Failed to fetch branch:', error)
+        return null
+      }
+    },
+    retry: false,
+  })
+  
+  // Fetch available subscription availed
+  const subscriptionsQuery = useQuery<SubscriptionAvailedTableDTO[]>({
+    queryKey: ['subscriptionAvailed'],
+    queryFn: async () => {
+      try {
+        console.log('Fetching subscription availed...')
+        const response = await subscriptionAvailedApi.getAllSubscriptionAvailed({ pageable: {} })
+        console.log('Subscription availed response:', response)
+        console.log('Subscription availed data:', response.data)
+        return response.data ?? []
+      } catch (error) {
+        console.error('Failed to fetch subscription availed:', error)
+        return []
+      }
+    },
+    retry: false,
+  })
+  
+  // No need to fetch billing cycles separately - they're included in SubscriptionAvailed
+  
+  const selectedSubscription = subscriptionsQuery.data?.find(
+    (s: SubscriptionAvailedTableDTO) => s.id === selectedSubscriptionId,
+  )
 
   const totalCost = useMemo(() => {
-    const amount = Number.parseFloat(billingAmount)
-    const safeAmount = Number.isFinite(amount) ? amount : 0
-    return (safeAmount * 1).toFixed(2) // 1 member being added
-  }, [billingAmount])
+    const amount = selectedSubscription?.amount ?? 0
+    return amount.toFixed(2)
+  }, [selectedSubscription])
 
   const createMemberMutation = useMutation({
     mutationFn: async (values: MemberFormValues) => {
@@ -172,7 +223,21 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       if (!createdById) {
         throw new Error('Missing actor id for the current user. Please log in again or ask admin to create an actor record.')
       }
+      
+      if (!selectedSubscriptionId) {
+        throw new Error('Please select a subscription plan.')
+      }
+      
+      if (!startDate) {
+        throw new Error('Please select a start date.')
+      }
+      
+      const branchId = branchPersonnelQuery.data?.branchId
+      if (!branchId) {
+        throw new Error('User branch not found. Please ensure you are assigned to a branch.')
+      }
 
+      // Step 1: Create Member
       const memberPostDTO = {
         createdById,
         firstName: values.firstName.trim(),
@@ -210,12 +275,33 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         throw new Error(envelope.message ?? 'Failed to create member.')
       }
 
-      return envelope.data
+      const member = envelope.data
+      
+      // Step 2: Create Member Subscription
+      try {
+        await memberSubscriptionApi.createMemberSubscription({
+          memberSubscriptionPostDTO: {
+            actorId: member.id,
+            branchId,
+            createdById,
+            startDate,
+            endDate,
+            status: 'ACTIVE',
+            subscriptionId: selectedSubscriptionId,
+          },
+        })
+      } catch (subError) {
+        console.error('Failed to create subscription:', subError)
+        throw new Error('Member created but failed to create subscription. Please add subscription manually.')
+      }
+
+      return member
     },
     onSuccess: (data) => {
       setSubmitError(null)
 
       void queryClient.invalidateQueries({ queryKey: ['members'] })
+      void queryClient.invalidateQueries({ queryKey: ['memberSubscriptions'] })
 
       const fullName = [data.firstName, data.middleName, data.surname, data.suffix].filter(Boolean).join(' ')
       const payload: MemberFormData = {
@@ -235,10 +321,10 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         ],
         startDate,
         endDate,
-        membershipType,
-        membershipDuration,
-        billingAmount,
-        billingCycle,
+        membershipType: selectedSubscription?.name ?? '',
+        membershipDuration: selectedSubscription ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}` : '',
+        billingAmount: selectedSubscription?.amount.toString() ?? '',
+        billingCycle: selectedSubscription ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}` : '',
         paymentMethod,
         membershipDetails,
         documents: [],
@@ -265,10 +351,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         // Reset local states
         setStartDate(undefined)
         setEndDate(undefined)
-        setMembershipType('')
-        setMembershipDuration('')
-        setBillingAmount('')
-        setBillingCycle('')
+        setSelectedSubscriptionId('')
         setPaymentMethod('')
         setMembershipDetails('')
       } catch (err: unknown) {
@@ -291,7 +374,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
-          Add New Member
+          New Member
         </Button>
       </DialogTrigger>
 
@@ -464,38 +547,43 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
 
                   <div className="space-y-4 border border-border p-4 rounded-2xl">
                     <div className="text-sm font-medium">Member Subscription</div>
+                    
+                    {subscriptionsQuery.isLoading ? (
+                      <div className="text-sm text-muted-foreground">Loading subscriptions...</div>
+                    ) : subscriptionsQuery.error ? (
+                      <div className="text-sm text-destructive">Failed to load subscriptions</div>
+                    ) : subscriptionsQuery.data && subscriptionsQuery.data.length === 0 ? (
+                      <div className="text-sm text-destructive">
+                        No subscriptions available. Please create subscriptions in the admin panel first.
+                        <br />
+                        <span className="text-xs">Debug: Query returned {subscriptionsQuery.data.length} items</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="subscription">Subscription Plan *</Label>
+                          <Select value={selectedSubscriptionId} onValueChange={setSelectedSubscriptionId}>
+                            <SelectTrigger id="subscription">
+                              <SelectValue placeholder="Select subscription plan" />
+                            </SelectTrigger>
+                            <SelectContent position="popper" sideOffset={4}>
+                              {subscriptionsQuery.data?.map((sub: SubscriptionAvailedTableDTO) => (
+                                <SelectItem key={sub.id} value={sub.id}>
+                                  {sub.name} - PHP {sub.amount.toFixed(2)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {selectedSubscription ? (
+                            <p className="text-xs text-muted-foreground">
+                              Interval: {selectedSubscription.intervalCount} {selectedSubscription.intervals} · Grace: {selectedSubscription.gracePeriodDays} days
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="membershipType">Membership Type</Label>
-                        <Select value={membershipType} onValueChange={setMembershipType}>
-                          <SelectTrigger id="membershipType">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="basic">Basic</SelectItem>
-                            <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="premium">Premium</SelectItem>
-                            <SelectItem value="vip">VIP</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="membershipDuration">Duration</Label>
-                        <Select value={membershipDuration} onValueChange={setMembershipDuration}>
-                          <SelectTrigger id="membershipDuration">
-                            <SelectValue placeholder="Select duration" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="day">Day Tour</SelectItem>
-                            <SelectItem value="1-month">1 Month</SelectItem>
-                            <SelectItem value="3-months">3 Months</SelectItem>
-                            <SelectItem value="6-months">6 Months</SelectItem>
-                            <SelectItem value="12-months">12 Months</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
                       <div className="space-y-2">
                         <Label>Start Date</Label>
                         <Popover>
@@ -554,32 +642,36 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
               <div className="space-y-4 border border-border p-4 rounded-2xl">
                 <div className="text-sm font-medium">Billing</div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="billingAmount">Amount (PHP)</Label>
-                  <Input
-                    id="billingAmount"
-                    type="number"
-                    step="0.01"
-                    value={billingAmount}
-                    onChange={(e) => setBillingAmount(e.target.value)}
-                  />
-                </div>
+                {selectedSubscription ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label>Subscription Plan</Label>
+                      <Input value={selectedSubscription.name} disabled />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Amount (PHP)</Label>
+                      <Input value={selectedSubscription.amount.toFixed(2)} disabled />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="billingCycle">Billing Cycle</Label>
-                  <Select value={billingCycle} onValueChange={setBillingCycle}>
-                    <SelectTrigger id="billingCycle">
-                      <SelectValue placeholder="Select cycle" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="day">Day (Day Tour)</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="quarterly">Quarterly</SelectItem>
-                      <SelectItem value="semi-annually">Semi-Annually</SelectItem>
-                      <SelectItem value="annually">Annually</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <div className="space-y-2">
+                      <Label>Billing Interval</Label>
+                      <Input
+                        value={`${selectedSubscription.intervalCount} ${selectedSubscription.intervals}`}
+                        disabled
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Grace Period (days)</Label>
+                      <Input value={String(selectedSubscription.gracePeriodDays)} disabled />
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    Please select a subscription plan to view billing details
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="paymentMethod">Mode of Payment</Label>
@@ -601,12 +693,18 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
 
                 <div className="rounded-2xl border bg-muted/50 p-4 space-y-3">
                   <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Subscription</span>
+                    <span className="font-medium">{selectedSubscription?.name || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Price</span>
-                    <span className="font-medium">PHP {billingAmount || '0.00'}</span>
+                    <span className="font-medium">PHP {selectedSubscription?.amount.toFixed(2) || '0.00'}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Billing cycle</span>
-                    <span className="font-medium">{billingCycle || '—'}</span>
+                    <span className="font-medium">
+                      {selectedSubscription ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}` : '—'}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Mode of payment</span>
@@ -650,7 +748,14 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
                   {([canSubmit, isSubmitting]) => (
                     <Button
                       type="submit"
-                      disabled={!form.state.values.createdById.trim() || !canSubmit || isSubmitting || createMemberMutation.isPending}
+                      disabled={
+                        !form.state.values.createdById.trim() || 
+                        !selectedSubscriptionId || 
+                        !startDate || 
+                        !canSubmit || 
+                        isSubmitting || 
+                        createMemberMutation.isPending
+                      }
                     >
                       {createMemberMutation.isPending ? 'Creating…' : 'Create Member'}
                     </Button>

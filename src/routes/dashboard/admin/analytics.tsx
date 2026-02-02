@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 
 import { RevenueExpenseChart } from '@/components/analytics-components/RevenueExpenseChart'
@@ -41,14 +40,13 @@ function getFilteredData(branch: string): AnalyticsData {
     return MOCK_ANALYTICS_DATA
   }
 
-  // Filter data for specific branch
   const branchData = MOCK_ANALYTICS_DATA.branches.find(b => b.name === branch)
   
   if (!branchData) {
     return MOCK_ANALYTICS_DATA
   }
 
-  // MOCK DATA
+  // Calculate branch ratio for proportional data distribution
   const branchRatio = branchData.revenue / MOCK_ANALYTICS_DATA.branches.reduce((sum, b) => sum + b.revenue, 0)
 
   return {
@@ -76,9 +74,9 @@ function getFilteredData(branch: string): AnalyticsData {
     paymentMethods: MOCK_ANALYTICS_DATA.paymentMethods.map(item => ({
       method: item.method,
       amount: Math.round(item.amount * branchRatio),
-      percentage: item.percentage, // Percentages remain the same
+      percentage: item.percentage,
     })),
-    branches: [branchData], // Only show the selected branch
+    branches: [branchData],
   }
 }
 
@@ -92,14 +90,16 @@ function KeyInsights({ data, branch }: { data: AnalyticsData; branch: string }) 
 
   if (branch !== 'all') {
     const currentBranch = data.branches[0]
+    const isGrowing = currentBranch.growth >= 0
+    
     return (
       <Alert>
         <TrendingUp className="h-4 w-4" />
         <AlertTitle>Branch Performance</AlertTitle>
         <AlertDescription>
-          {currentBranch.growth >= 0 ? (
+          {isGrowing ? (
             <>
-              <span className="font-semibold text-green-600">On track</span> - {currentBranch.name} is growing at {currentBranch.growth}% with {currentBranch.members} active members.
+              <span className="font-semibold text-green-600">On track</span> - {currentBranch.name} is growing at {currentBranch.growth}% with {currentBranch.members.toLocaleString()} active members.
             </>
           ) : (
             <>
@@ -116,44 +116,13 @@ function KeyInsights({ data, branch }: { data: AnalyticsData; branch: string }) 
       <TrendingUp className="h-4 w-4" />
       <AlertTitle>Key Insights</AlertTitle>
       <AlertDescription>
-        <span className="font-semibold">{topBranch.name}</span> is your top performer with {topBranch.growth}% growth and {topBranch.members} members. 
+        <span className="font-semibold">{topBranch.name}</span> is your top performer with {topBranch.growth}% growth and {topBranch.members.toLocaleString()} members. 
         Current profit margin: <span className="font-semibold">{profitMargin}%</span>.
         {decliningBranches.length > 0 && (
           <> {decliningBranches.map(b => b.name).join(', ')} {decliningBranches.length === 1 ? 'needs' : 'need'} attention.</>
         )}
       </AlertDescription>
     </Alert>
-  )
-}
-
-// Loading Skeleton Component
-function AnalyticsSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-48 mt-2" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-10 w-36" />
-          <Skeleton className="h-10 w-28" />
-        </div>
-      </div>
-      
-      <Skeleton className="h-24 w-full" />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Skeleton className="h-96 lg:col-span-2" />
-        <Skeleton className="h-96" />
-      </div>
-    </div>
   )
 }
 
@@ -171,7 +140,6 @@ function EmptyState({ message }: { message: string }) {
 function AnalyticsRoute() {
   const [selectedBranch, setSelectedBranch] = useState('all')
   const [timeRange, setTimeRange] = useState<TimeRange>('monthly')
-  const [isLoading, setIsLoading] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
 
   const branches = ['all', ...MOCK_ANALYTICS_DATA.branches.map(b => b.name)]
@@ -211,15 +179,12 @@ function AnalyticsRoute() {
     }
   }
 
-  // Show loading state
-  if (isLoading) {
-    return <AnalyticsSkeleton />
-  }
-
   // Check for empty data
-  if (!analyticsData.branches || analyticsData.branches.length === 0) {
+  if (!analyticsData.branches?.length) {
     return <EmptyState message="No data available for the selected branch" />
   }
+
+  const displayBranchName = selectedBranch === 'all' ? 'All Branches' : selectedBranch
 
   return (
     <div className="space-y-6 max-w-full">
@@ -228,7 +193,7 @@ function AnalyticsRoute() {
         <div>
           <h1 className="text-2xl font-semibold">Financial Analytics</h1>
           <p className="text-sm text-muted-foreground">
-            Currently viewing: {selectedBranch === 'all' ? 'All Branches' : selectedBranch}
+            Currently viewing: {displayBranchName}
           </p>
         </div>
 

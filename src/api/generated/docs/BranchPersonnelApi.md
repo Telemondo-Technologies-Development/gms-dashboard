@@ -9,6 +9,7 @@ All URIs are relative to *http://localhost:8080*
 | [**getAllBranchPersonnel**](BranchPersonnelApi.md#getallbranchpersonnel) | **GET** /api/branch/personnel | Get all Branch Personnel |
 | [**getBranchPersonnel**](BranchPersonnelApi.md#getbranchpersonnel) | **GET** /api/branch/personnel/{id} | Get a Branch Personnel by id |
 | [**updateBranchPersonnel**](BranchPersonnelApi.md#updatebranchpersonnel) | **PUT** /api/branch/personnel/{id} | Update a Branch Personnel by id |
+| [**uploadBranchLogo**](BranchPersonnelApi.md#uploadbranchlogooperation) | **POST** /api/branch/personnel/picture | Upload a branch logo into the object storage (public) |
 
 
 
@@ -144,7 +145,7 @@ No authorization required
 
 ## getAllBranchPersonnel
 
-> ApiResponseListBranchPersonnelTableDTO getAllBranchPersonnel()
+> ApiResponseListBranchPersonnelTableDTO getAllBranchPersonnel(pageable)
 
 Get all Branch Personnel
 
@@ -161,8 +162,13 @@ async function example() {
   console.log("🚀 Testing  SDK...");
   const api = new BranchPersonnelApi();
 
+  const body = {
+    // Pageable
+    pageable: ...,
+  } satisfies GetAllBranchPersonnelRequest;
+
   try {
-    const data = await api.getAllBranchPersonnel();
+    const data = await api.getAllBranchPersonnel(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -175,7 +181,10 @@ example().catch(console.error);
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
 
 ### Return type
 
@@ -313,6 +322,71 @@ example().catch(console.error);
 ### Return type
 
 [**ApiResponseBranchPersonnelTableDTO**](ApiResponseBranchPersonnelTableDTO.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## uploadBranchLogo
+
+> ApiResponseObjectStorage uploadBranchLogo(uploadBranchLogoRequest)
+
+Upload a branch logo into the object storage (public)
+
+### Example
+
+```ts
+import {
+  Configuration,
+  BranchPersonnelApi,
+} from '';
+import type { UploadBranchLogoOperationRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new BranchPersonnelApi();
+
+  const body = {
+    // UploadBranchLogoRequest (optional)
+    uploadBranchLogoRequest: ...,
+  } satisfies UploadBranchLogoOperationRequest;
+
+  try {
+    const data = await api.uploadBranchLogo(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **uploadBranchLogoRequest** | [UploadBranchLogoRequest](UploadBranchLogoRequest.md) |  | [Optional] |
+
+### Return type
+
+[**ApiResponseObjectStorage**](ApiResponseObjectStorage.md)
 
 ### Authorization
 

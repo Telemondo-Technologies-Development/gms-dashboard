@@ -6,9 +6,10 @@ All URIs are relative to *http://localhost:8080*
 |------------- | ------------- | -------------|
 | [**createMember**](MemberApi.md#createmember) | **POST** /api/member | Create a new Member |
 | [**deleteMember**](MemberApi.md#deletemember) | **DELETE** /api/member/{id} | Delete a Member by id |
-| [**getAllUsers1**](MemberApi.md#getallusers1) | **GET** /api/member | Get all Members |
+| [**getAllMembers**](MemberApi.md#getallmembers) | **GET** /api/member | Get all Members |
 | [**getMember**](MemberApi.md#getmember) | **GET** /api/member/{id} | Get a Member by id |
 | [**updateMember**](MemberApi.md#updatemember) | **PUT** /api/member/{id} | Update a Member by id |
+| [**uploadMemberProfile**](MemberApi.md#uploadmemberprofile) | **POST** /api/member/picture | Upload a member profile picture into the object storage (public) |
 
 
 
@@ -142,9 +143,9 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
-## getAllUsers1
+## getAllMembers
 
-> ApiResponseListMemberTableDTO getAllUsers1()
+> ApiResponseListMemberTableDTO getAllMembers(pageable)
 
 Get all Members
 
@@ -155,14 +156,19 @@ import {
   Configuration,
   MemberApi,
 } from '';
-import type { GetAllUsers1Request } from '';
+import type { GetAllMembersRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
   const api = new MemberApi();
 
+  const body = {
+    // Pageable
+    pageable: ...,
+  } satisfies GetAllMembersRequest;
+
   try {
-    const data = await api.getAllUsers1();
+    const data = await api.getAllMembers(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -175,7 +181,10 @@ example().catch(console.error);
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
 
 ### Return type
 
@@ -313,6 +322,71 @@ example().catch(console.error);
 ### Return type
 
 [**ApiResponseMemberTableDTO**](ApiResponseMemberTableDTO.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## uploadMemberProfile
+
+> ApiResponseObjectStorage uploadMemberProfile(uploadBranchLogoRequest)
+
+Upload a member profile picture into the object storage (public)
+
+### Example
+
+```ts
+import {
+  Configuration,
+  MemberApi,
+} from '';
+import type { UploadMemberProfileRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new MemberApi();
+
+  const body = {
+    // UploadBranchLogoRequest (optional)
+    uploadBranchLogoRequest: ...,
+  } satisfies UploadMemberProfileRequest;
+
+  try {
+    const data = await api.uploadMemberProfile(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **uploadBranchLogoRequest** | [UploadBranchLogoRequest](UploadBranchLogoRequest.md) |  | [Optional] |
+
+### Return type
+
+[**ApiResponseObjectStorage**](ApiResponseObjectStorage.md)
 
 ### Authorization
 

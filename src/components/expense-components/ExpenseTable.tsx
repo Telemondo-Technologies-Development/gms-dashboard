@@ -22,11 +22,28 @@ export function ExpenseTable({
   onAddClick,
   onRowClick,
 }: ExpenseTableProps) {
+  const formatAmount = (amount: string) => {
+    return `₱${parseFloat(amount).toLocaleString('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`
+  }
+
   const getReceiptBadge = (receipt: File | null) => {
-    if (receipt) {
-      return <Badge variant="default">Yes</Badge>
+    return receipt 
+      ? <Badge variant="default">Yes</Badge>
+      : <Badge variant="destructive">No</Badge>
+  }
+
+  const formatExpenseType = (type: string) => {
+    return type.replace('-', ' ')
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent, expense: ExpenseFormData) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onRowClick(expense)
     }
-    return <Badge variant="destructive">No</Badge>
   }
 
   return (
@@ -38,6 +55,7 @@ export function ExpenseTable({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col min-h-0">
+        {/* Search and Add Section */}
         <div className="flex items-center gap-2 mb-4 flex-shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -54,6 +72,7 @@ export function ExpenseTable({
           </Button>
         </div>
 
+        {/* Table Content */}
         {expenses.length === 0 ? (
           <div className="flex items-center justify-center flex-1">
             <p className="text-muted-foreground">
@@ -83,16 +102,11 @@ export function ExpenseTable({
                     tabIndex={0}
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => onRowClick(expense)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        onRowClick(expense)
-                      }
-                    }}
+                    onKeyDown={(e) => handleKeyDown(e, expense)}
                   >
                     <TableCell>
                       <Badge variant="secondary" className="capitalize">
-                        {expense.type.replace('-', ' ')}
+                        {formatExpenseType(expense.type)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -110,13 +124,12 @@ export function ExpenseTable({
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">
-                        ₱{Number.parseFloat(expense.amount).toLocaleString('en-PH', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
+                        {formatAmount(expense.amount)}
                       </div>
                     </TableCell>
-                    <TableCell className="text-center">{getReceiptBadge(expense.receipt)}</TableCell>
+                    <TableCell className="text-center">
+                      {getReceiptBadge(expense.receipt)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

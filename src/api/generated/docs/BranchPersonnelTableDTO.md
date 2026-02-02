@@ -9,11 +9,9 @@ Name | Type
 ------------ | -------------
 `actorId` | string
 `branchId` | string
-`createdAt` | Date
 `createdById` | string
 `id` | string
 `status` | string
-`updatedAt` | Date
 `updatedById` | string
 
 ## Example
@@ -25,11 +23,9 @@ import type { BranchPersonnelTableDTO } from ''
 const example = {
   "actorId": null,
   "branchId": null,
-  "createdAt": null,
   "createdById": null,
   "id": null,
   "status": null,
-  "updatedAt": null,
   "updatedById": null,
 } satisfies BranchPersonnelTableDTO
 

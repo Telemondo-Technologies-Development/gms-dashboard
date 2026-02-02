@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
+import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
+import { BranchApi } from '@/api/generated/apis/BranchApi'
 
 type JwtClaims = Record<string, unknown>
 
@@ -135,6 +137,51 @@ export default function Header() {
 		retry: false,
 	})
 
+	// Fetch user's branch personnel record
+	const branchPersonnelApi = new BranchPersonnelApi()
+	const branchPersonnelQuery = useQuery({
+		queryKey: ['branchPersonnel', currentUserQuery.data?.actorId],
+		enabled: !!currentUserQuery.data?.actorId,
+		queryFn: async () => {
+			const actorId = currentUserQuery.data?.actorId
+			if (!actorId) return null
+			try {
+				const response = await branchPersonnelApi.getAllBranchPersonnel({
+					pageable: {},
+				})
+				// Find the active branch personnel record for this employee
+				const personnelRecord = response.data?.find(
+					(record) => record.actorId === actorId && record.status === 'IN'
+				)
+				return personnelRecord ?? null
+			} catch (error) {
+				console.error('Failed to fetch branch personnel:', error)
+				return null
+			}
+		},
+		retry: false,
+	})
+
+	// Fetch branch details
+	const branchApi = new BranchApi()
+	const branchQuery = useQuery({
+		queryKey: ['branch', branchPersonnelQuery.data?.branchId],
+		enabled: !!branchPersonnelQuery.data?.branchId,
+		queryFn: async () => {
+			if (!branchPersonnelQuery.data?.branchId) return null
+			try {
+				const response = await branchApi.getBranch({
+					id: branchPersonnelQuery.data.branchId,
+				})
+				return response.data ?? null
+			} catch (error) {
+				console.error('Failed to fetch branch:', error)
+				return null
+			}
+		},
+		retry: false,
+	})
+
 	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? 'Account'
 	const searchInput = (
 		<div className="relative">
@@ -148,12 +195,12 @@ export default function Header() {
 				type="button"
 				variant="ghost"
 				size="icon"
-				className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-2xl"
+				className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 "
 				aria-label="Close search"
 				onClick={() => setSearchOpen(false)}
 			>
 				<X className="h-4 w-4" />
-			</Button>
+			</Button>	
 		</div>
 	)
 
@@ -166,7 +213,7 @@ export default function Header() {
 						variant="ghost"
 						size="icon"
 						aria-label="Notifications"
-						className="h-9 w-9 rounded-2xl"
+						className="h-9 w-9 "
 					>
 						<Bell className="h-5 w-5" />
 					</Button>
@@ -174,7 +221,7 @@ export default function Header() {
 						<Button
 							variant="ghost"
 							size="sm"
-							className="flex items-center gap-2 h-9 px-3 py-1 rounded-2xl"
+							className="flex items-center gap-2 h-9 px-3 py-1 "
 							aria-label="Account"
 						>
 							<User2 className="h-5 w-5" />
@@ -187,7 +234,7 @@ export default function Header() {
 						variant="ghost"
 						size="icon"
 						aria-label={searchOpen ? 'Close search' : 'Open search'}
-						className="h-9 w-9 rounded-2xl"
+						className="h-9 w-9"
 						onClick={() => setSearchOpen((v) => !v)}
 					>
 						{searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
@@ -196,11 +243,11 @@ export default function Header() {
 
 				{/* Tablet/Desktop layout */}
 				<div className="hidden w-full items-center justify-between md:flex">
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-2 ">
 						<Button
 							variant="ghost"
 							size="sm"
-							className="flex items-center gap-2 h-9 px-3 py-1 rounded-2xl"
+							className="flex items-center gap-2 h-9 px-3 py-1 "
 							aria-label="Account"
 						>
 							<User2 className="h-5 w-5" />
@@ -212,7 +259,7 @@ export default function Header() {
 							variant="ghost"
 							size="icon"
 							aria-label="Notifications"
-							className="h-9 w-9 rounded-2xl"
+							className="h-9 w-9 "
 						>
 							<Bell className="h-5 w-5" />
 						</Button>
@@ -242,7 +289,9 @@ export default function Header() {
 					</div>
 
 					<div className="hidden md:block">
-						<Label>Branch: Panacan Davao City</Label>
+						<Label>
+							Branch: {branchQuery.isLoading ? 'Loading...' : (branchQuery.data?.name ?? 'Not Assigned')}
+						</Label>
 					</div>
 				</div>
 			</div>

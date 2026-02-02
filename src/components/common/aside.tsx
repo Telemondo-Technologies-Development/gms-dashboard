@@ -59,7 +59,7 @@ function Section({ title, items, currentPath, collapsed }: NavSection & { curren
 		<section className="space-y-2">
 			<div
 				className={cn(
-					'px-2 text-xs font-medium text-muted-foreground transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap text-primary',
+					'px-2 text-xs font-medium transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap text-primary',
 					collapsed ? 'h-0 opacity-0' : 'h-auto opacity-100'
 				)}
 			>
@@ -141,7 +141,7 @@ export default function Aside() {
 			{/* Desktop/Tablet sidebar */}
 			<aside
 				className={cn(
-					'hidden h-full flex-col justify-between border-r bg-background p-4 md:flex transition-[width] duration-300 ease-in-out',
+					'hidden h-full flex-col justify-between border-r bg-background p-4 md:flex transition-[width] duration-300 ease-in-out ',
 					collapsed ? 'w-20' : 'w-64'
 				)}
 			>
@@ -151,15 +151,15 @@ export default function Aside() {
 							<div className="flex items-center">
 								<span
 									className={cn(
-										'text-xl font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden',
+										'text-xl font-semibold whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden text-primary',
 										collapsed ? 'w-0 opacity-0 px-0' : 'w-auto opacity-100'
 									)}
 								>
 									Dashboard
 								</span>
 							</div>
-							<button
-								className="h-8 w-8 rounded-lg border border-border bg-background flex items-center justify-center shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors"
+							<Button
+								className="h-8 w-8  border border-border bg-background flex items-center justify-center shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors"
 								aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
 								onClick={() => setCollapsed((v) => !v)}
 							>
@@ -168,7 +168,7 @@ export default function Aside() {
 								) : (
 									<PanelRightOpen className="h-4 w-4 text-muted-foreground" />
 								)}
-							</button>
+							</Button>
 						</div>
 					</div>
 

@@ -17,21 +17,30 @@ import * as runtime from '../runtime';
 import type {
   ApiResponseEmployeeTableDTO,
   ApiResponseListEmployeeTableDTO,
+  ApiResponseObjectStorage,
   ApiResponseUnit,
   EmployeePostDTO,
   EmployeePutDTO,
+  Pageable,
+  UploadBranchLogoRequest,
 } from '../models/index';
 import {
     ApiResponseEmployeeTableDTOFromJSON,
     ApiResponseEmployeeTableDTOToJSON,
     ApiResponseListEmployeeTableDTOFromJSON,
     ApiResponseListEmployeeTableDTOToJSON,
+    ApiResponseObjectStorageFromJSON,
+    ApiResponseObjectStorageToJSON,
     ApiResponseUnitFromJSON,
     ApiResponseUnitToJSON,
     EmployeePostDTOFromJSON,
     EmployeePostDTOToJSON,
     EmployeePutDTOFromJSON,
     EmployeePutDTOToJSON,
+    PageableFromJSON,
+    PageableToJSON,
+    UploadBranchLogoRequestFromJSON,
+    UploadBranchLogoRequestToJSON,
 } from '../models/index';
 
 export interface CreateEmployeeRequest {
@@ -42,6 +51,10 @@ export interface DeleteEmployeeRequest {
     id: string;
 }
 
+export interface GetAllEmployeesRequest {
+    pageable: Pageable;
+}
+
 export interface GetEmployeeRequest {
     id: string;
 }
@@ -49,6 +62,10 @@ export interface GetEmployeeRequest {
 export interface UpdateEmployeeRequest {
     id: string;
     employeePutDTO: EmployeePutDTO;
+}
+
+export interface UploadEmployeeProfileRequest {
+    uploadBranchLogoRequest?: UploadBranchLogoRequest;
 }
 
 /**
@@ -135,8 +152,19 @@ export class EmployeeApi extends runtime.BaseAPI {
     /**
      * Get all Employees
      */
-    async getAllUsers2Raw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListEmployeeTableDTO>> {
+    async getAllEmployeesRaw(requestParameters: GetAllEmployeesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListEmployeeTableDTO>> {
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAllEmployees().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -156,8 +184,8 @@ export class EmployeeApi extends runtime.BaseAPI {
     /**
      * Get all Employees
      */
-    async getAllUsers2(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListEmployeeTableDTO> {
-        const response = await this.getAllUsers2Raw(initOverrides);
+    async getAllEmployees(requestParameters: GetAllEmployeesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListEmployeeTableDTO> {
+        const response = await this.getAllEmployeesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -242,6 +270,38 @@ export class EmployeeApi extends runtime.BaseAPI {
      */
     async updateEmployee(requestParameters: UpdateEmployeeRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseEmployeeTableDTO> {
         const response = await this.updateEmployeeRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Upload an employee profile picture into the object storage (public)
+     */
+    async uploadEmployeeProfileRaw(requestParameters: UploadEmployeeProfileRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseObjectStorage>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/employee/picture`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UploadBranchLogoRequestToJSON(requestParameters['uploadBranchLogoRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseObjectStorageFromJSON(jsonValue));
+    }
+
+    /**
+     * Upload an employee profile picture into the object storage (public)
+     */
+    async uploadEmployeeProfile(requestParameters: UploadEmployeeProfileRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseObjectStorage> {
+        const response = await this.uploadEmployeeProfileRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

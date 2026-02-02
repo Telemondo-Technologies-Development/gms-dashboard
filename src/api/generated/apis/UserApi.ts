@@ -18,6 +18,7 @@ import type {
   ApiResponseListUserTableDTO,
   ApiResponseUnit,
   ApiResponseUserTableDTO,
+  Pageable,
   UserPostDTO,
   UserPutDTO,
 } from '../models/index';
@@ -28,6 +29,8 @@ import {
     ApiResponseUnitToJSON,
     ApiResponseUserTableDTOFromJSON,
     ApiResponseUserTableDTOToJSON,
+    PageableFromJSON,
+    PageableToJSON,
     UserPostDTOFromJSON,
     UserPostDTOToJSON,
     UserPutDTOFromJSON,
@@ -40,6 +43,10 @@ export interface CreateUserRequest {
 
 export interface DeleteUserRequest {
     id: string;
+}
+
+export interface GetAllUsersRequest {
+    pageable: Pageable;
 }
 
 export interface GetUserRequest {
@@ -137,8 +144,19 @@ export class UserApi extends runtime.BaseAPI {
     /**
      * Get all Users
      */
-    async getAllUsersRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListUserTableDTO>> {
+    async getAllUsersRaw(requestParameters: GetAllUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListUserTableDTO>> {
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAllUsers().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -158,8 +176,8 @@ export class UserApi extends runtime.BaseAPI {
     /**
      * Get all Users
      */
-    async getAllUsers(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListUserTableDTO> {
-        const response = await this.getAllUsersRaw(initOverrides);
+    async getAllUsers(requestParameters: GetAllUsersRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListUserTableDTO> {
+        const response = await this.getAllUsersRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

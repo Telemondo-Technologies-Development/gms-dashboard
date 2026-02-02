@@ -24,21 +24,21 @@ export interface LogInDTO {
      * @type {string}
      * @memberof LogInDTO
      */
-    email: string;
+    password: string;
     /**
      * 
      * @type {string}
      * @memberof LogInDTO
      */
-    password: string;
+    username: string;
 }
 
 /**
  * Check if a given object implements the LogInDTO interface.
  */
 export function instanceOfLogInDTO(value: object): value is LogInDTO {
-    if (!('email' in value) || value['email'] === undefined) return false;
     if (!('password' in value) || value['password'] === undefined) return false;
+    if (!('username' in value) || value['username'] === undefined) return false;
     return true;
 }
 
@@ -52,8 +52,8 @@ export function LogInDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
     }
     return {
         
-        'email': json['email'],
         'password': json['password'],
+        'username': json['username'],
     };
 }
 
@@ -68,8 +68,8 @@ export function LogInDTOToJSONTyped(value?: LogInDTO | null, ignoreDiscriminator
 
     return {
         
-        'email': value['email'],
         'password': value['password'],
+        'username': value['username'],
     };
 }
 

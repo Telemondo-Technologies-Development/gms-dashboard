@@ -16,10 +16,13 @@
 import * as runtime from '../runtime';
 import type {
   LogInDTO,
+  LogInResponse,
 } from '../models/index';
 import {
     LogInDTOFromJSON,
     LogInDTOToJSON,
+    LogInResponseFromJSON,
+    LogInResponseToJSON,
 } from '../models/index';
 
 export interface LoginRequest {
@@ -33,7 +36,7 @@ export class AuthApi extends runtime.BaseAPI {
 
     /**
      */
-    async loginRaw(requestParameters: LoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+    async loginRaw(requestParameters: LoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<LogInResponse>> {
         if (requestParameters['logInDTO'] == null) {
             throw new runtime.RequiredError(
                 'logInDTO',
@@ -58,16 +61,12 @@ export class AuthApi extends runtime.BaseAPI {
             body: LogInDTOToJSON(requestParameters['logInDTO']),
         }, initOverrides);
 
-        if (this.isJsonMime(response.headers.get('content-type'))) {
-            return new runtime.JSONApiResponse<string>(response);
-        } else {
-            return new runtime.TextApiResponse(response) as any;
-        }
+        return new runtime.JSONApiResponse(response, (jsonValue) => LogInResponseFromJSON(jsonValue));
     }
 
     /**
      */
-    async login(requestParameters: LoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+    async login(requestParameters: LoginRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<LogInResponse> {
         const response = await this.loginRaw(requestParameters, initOverrides);
         return await response.value();
     }
