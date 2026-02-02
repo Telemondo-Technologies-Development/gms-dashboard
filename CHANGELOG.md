@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Tracking Page : addedd a page for managing incident reports with customer specific details.
+- AddReportDialog : Dialog for adding new reports with customer.
+- IncidentReportsModal : A modal for viewing detailed report for a customer.
+- TrackingTable for displaying customers and their report counts.
 - Users & Employees split management UI with separate dialogs for system users vs. employees.
 - Users & Employees search across employees and system users.
 - Users & Employees employee list row click-to-edit interaction (no action column).
