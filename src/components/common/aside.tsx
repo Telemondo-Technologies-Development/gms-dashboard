@@ -141,7 +141,7 @@ export default function Aside() {
 			{/* Desktop/Tablet sidebar */}
 			<aside
 				className={cn(
-					'hidden h-full flex-col justify-between border-r bg-background p-4 md:flex transition-[width] duration-300 ease-in-out ',
+					'hidden h-full flex-col justify-between border-r bg-surface-container p-4 md:flex transition-[width] duration-300 ease-in-out ',
 					collapsed ? 'w-20' : 'w-64'
 				)}
 			>
