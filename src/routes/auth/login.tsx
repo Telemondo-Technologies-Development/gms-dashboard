@@ -7,6 +7,58 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiResponseEnvelopeSchema, loginResponseSchema, loginSchema, type LoginPayload } from '@/types/auth/loginSchemas'
+import { normalizeBranches } from '@/lib/auth-branches'
+import { clearAuthSession, setAuthSession } from '@/lib/auth-session'
+
+type JwtClaims = Record<string, unknown>
+
+function tryDecodeJwtClaims(token: string): JwtClaims | null {
+  if (!token) return null
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+
+  const payload = parts[1]
+  if (!payload) return null
+
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
+    if (typeof atob !== 'function') return null
+    const json = atob(padded)
+    const parsed: unknown = JSON.parse(json)
+    if (parsed && typeof parsed === 'object') return parsed as JwtClaims
+    return null
+  } catch {
+    return null
+  }
+}
+
+function getStringClaim(claims: JwtClaims | null, key: string): string | undefined {
+  if (!claims) return undefined
+  const value = claims[key]
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object'
+}
+
+function storeLoginIdentityFromPayload(payload: unknown): void {
+  if (typeof window === 'undefined') return
+  if (!isRecord(payload)) return
+
+  const actorIdRaw = payload['actorId']
+  const actorId = typeof actorIdRaw === 'string' && actorIdRaw.trim() ? actorIdRaw.trim() : null
+
+  const emailOrUsernameRaw = payload['email']
+  const username = typeof emailOrUsernameRaw === 'string' && emailOrUsernameRaw.trim() ? emailOrUsernameRaw.trim() : null
+  const email = username && username.includes('@') ? username : null
+
+  const branches = normalizeBranches(payload['branches'])
+
+  // Payload-login mode: cookie-based auth, so clear any stale token.
+  setAuthSession({ token: null, actorId, username, email, branches })
+}
 
 export const Route = createFileRoute('/auth/login')({
   component: RouteComponent,
@@ -30,13 +82,11 @@ export const Route = createFileRoute('/auth/login')({
 
 function RouteComponent() {
   const [formState, setFormState] = useState<LoginPayload>({
-    email: '',
+    username: '',
     password: '',
   })
   const [formError, setFormError] = useState<string | null>(null)
   const [loginResponse, setLoginResponse] = useState<string | null>(null)
-
-  const loginIdField = import.meta.env.VITE_LOGIN_ID_FIELD === 'username' ? 'username' : 'email'
 
   const loginMutation = useMutation({
     mutationFn: async (payload: LoginPayload) => {
@@ -44,10 +94,8 @@ function RouteComponent() {
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
       const url = `${base}/auth/login`
 
-      const requestBody =
-        loginIdField === 'username'
-          ? { username: payload.email, password: payload.password }
-          : { email: payload.email, password: payload.password }
+      // Backend expects { username, password } (username can be an email or username string).
+      const requestBody = { username: payload.username, password: payload.password }
 
       try {
         const response = await fetch(url, {
@@ -77,15 +125,38 @@ function RouteComponent() {
             if (envelope.data.success === true) {
               const data = envelope.data.data
               if (typeof data === 'string' && data.trim()) {
-                return data
+                const maybeJsonString = data.trim()
+                if (maybeJsonString.startsWith('{') || maybeJsonString.startsWith('[')) {
+                  try {
+                    const parsedJson: unknown = JSON.parse(maybeJsonString)
+                    if (parsedJson && typeof parsedJson === 'object' && !Array.isArray(parsedJson)) {
+                      storeLoginIdentityFromPayload(parsedJson)
+                      // No real token in this mode (cookie-based auth)
+                      return ''
+                    }
+                  } catch {
+                    // fall through
+                  }
+                }
+
+                setAuthSession({ branches: [] })
+                return maybeJsonString
               }
               if (
                 typeof data === 'object' &&
                 data !== null &&
-                'token' in data &&
-                typeof (data as { token?: unknown }).token === 'string'
+                !Array.isArray(data)
               ) {
-                return (data as { token: string }).token
+                const branches = normalizeBranches((data as { branches?: unknown }).branches)
+                storeLoginIdentityFromPayload({ ...(data as Record<string, unknown>), branches })
+
+                const maybeToken = (data as { token?: unknown }).token
+                if (typeof maybeToken === 'string' && maybeToken.trim()) {
+                  return maybeToken.trim()
+                }
+
+                // Cookie-based login success; no token returned.
+                return ''
               }
               throw new Error(envelope.data.message ?? 'Login succeeded, but no token was returned.')
             }
@@ -105,9 +176,22 @@ function RouteComponent() {
     },
     onSuccess: async (token) => {
       if (typeof token === 'string' && token.trim()) {
-        localStorage.setItem('auth_token', token)
+        setAuthSession({ token: token.trim() })
+
+        const claims = tryDecodeJwtClaims(token)
+        const claimEmail =
+          getStringClaim(claims, 'email') ??
+          getStringClaim(claims, 'preferred_username') ??
+          getStringClaim(claims, 'upn')
+
+        if (claimEmail && claimEmail.includes('@')) {
+          setAuthSession({ email: claimEmail })
+        }
+
         setLoginResponse(`Login success. Token: ${token}`)
       } else {
+        // Important: don't keep stale tokens around (it makes the UI appear stuck on the previous user).
+        setAuthSession({ token: null })
 
         setLoginResponse('Login success. (No token returned; session cookie set)')
       }
@@ -128,7 +212,13 @@ function RouteComponent() {
     }
 
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('auth_email', parsed.data.email)
+      // Clear any previous user identity so the header can't get stuck.
+      clearAuthSession()
+      setAuthSession({
+        username: parsed.data.username,
+        email: parsed.data.username.includes('@') ? parsed.data.username : null,
+        branches: [],
+      })
     }
 
     setFormError(null)
@@ -136,78 +226,111 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background px-4 sm:px-6">
-      <Card className="w-full max-w-md shadow-lg shadow-primary mx-auto">
-        <div className="text-center flex flex-row justify-center p-3 mx-auto  items-center bg-primary-foreground rounded-full shadow-sm shadow-secondary">
-          <Dumbbell className="text-primary w-16 h-full flex justify-end items-center " />
+    <div className="flex h-screen w-full">
+      {/* Left Container - Branding/Hero */}
+      <div className="hidden lg:flex flex-1 items-center justify-center bg-linear-to-r from-primary to-secondary border-r">
+        <div className="flex flex-col items-center space-y-6 text-center p-10 ">
+          <div className=" ">
+            <Dumbbell className="h-20 w-20 text-background" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold italic tracking-tight text-background">Gym Management System</h1>
+            <p className="text-muted text-xl">Staff & Admin Login Portal</p>
+          </div>
+          <div>
+            <p className="text-sm text-background/80 max-w-lg">
+              Manage your gym efficiently with our comprehensive system. Track members, schedule classes, and oversee staff all in one place.
+            </p>
+          </div>
         </div>
-        <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl italic text-primary">Welcome Back</CardTitle>
-          <CardDescription>Gym Management System - Staff & Admin Login</CardDescription>
-        </CardHeader>
+      </div>
 
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email or Username
-              </Label>
-              <Input
-                id="email"
-                type="text"
-                placeholder="Enter your username or email"
-                className="bg-input border-input py-5"
-                autoComplete="username"
-                value={formState.email}
-                onChange={(event) => setFormState((prev) => ({ ...prev, email: event.target.value }))}
-              />
+      {/* Right Container - Login Form */}
+      <div className="flex flex-1 items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
+        <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-lg sm:shadow-primary/20">
+          <CardHeader className="space-y-2 text-center">
+            {/* Show Icon on specific mobile view only where left panel is hidden */}
+            <div className="lg:hidden mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <Dumbbell className="h-8 w-8 text-primary" />
             </div>
+            <CardTitle className="text-2xl font-bold italic text-primary">Welcome Back</CardTitle>
+            <CardDescription className="text-base">Enter your credentials to access your account</CardDescription>
+          </CardHeader>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                className="bg-input border-input py-5"
-                autoComplete="current-password"
-                value={formState.password}
-                onChange={(event) => setFormState((prev) => ({ ...prev, password: event.target.value }))}
-              />
-              <a href="#" className="text-xs text-destructive hover:underline flex p-0 text-right">
-                Forgot password?
-              </a>
+          <CardContent>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-sm font-medium">
+                  Email or Username
+                </Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Enter your username or email"
+                  className=" border-input py-5"
+                  autoComplete="username"
+                  value={formState.username}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, username: event.target.value }))}
+                />
+              </div>
 
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  className="border-input py-5"
+                  autoComplete="current-password"
+                  value={formState.password}
+                  onChange={(event) => setFormState((prev) => ({ ...prev, password: event.target.value }))}
+                />
+                <div className="flex justify-end">
+                  <a 
+                    href="#" 
+                    className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
+              </div>  
+        
+              {(formError || loginMutation.error) && (
+                <p className="text-sm text-destructive font-medium text-center" role="alert">
+                  {formError ?? (loginMutation.error instanceof Error ? loginMutation.error.message : 'Login failed.')}
+                </p>
+              )}
 
-            {(formError || loginMutation.error) && (
-              <p className="text-sm text-destructive" role="alert">
-                {formError ?? (loginMutation.error instanceof Error ? loginMutation.error.message : 'Login failed.')}
-              </p>
-            )}
+              <Button
+                type="submit"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-5 font-semibold text-base transition-all"
+                disabled={loginMutation.isPending}
+              >
+                {loginMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span>Signing In...</span>
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
 
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary text-primary-foreground"
-              disabled={loginMutation.isPending}
-            >
-              <Label>{loginMutation.isPending ? 'Signing In...' : 'Sign In'}</Label>
-            </Button>
+              {loginResponse && (
+                <p className="text-sm text-muted-foreground wrap-break-word text-center bg-muted/50 p-2 rounded-md" role="status">
+                  {loginResponse}
+                </p>
+              )}
 
-            {loginResponse && (
-              <p className="text-xs text-muted-foreground break-words" role="status">
-                {loginResponse}
-              </p>
-            )}
-
-            <div className="pt-2 text-center">
-              <p className="text-xs text-muted-foreground">Demo credentials - any username/password combination works</p>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              <div className="pt-4 text-center border-t mt-6">
+                <p className="text-xs text-muted-foreground">Do not share your credentials with anyone.</p>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

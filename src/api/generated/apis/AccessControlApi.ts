@@ -21,6 +21,7 @@ import type {
   ApiResponseRolePermissionTableDTO,
   ApiResponseRoleTableDTO,
   ApiResponseUnit,
+  Pageable,
   RolePermissionDTO,
   RolePostDTO,
   RolePutDTO,
@@ -38,6 +39,8 @@ import {
     ApiResponseRoleTableDTOToJSON,
     ApiResponseUnitFromJSON,
     ApiResponseUnitToJSON,
+    PageableFromJSON,
+    PageableToJSON,
     RolePermissionDTOFromJSON,
     RolePermissionDTOToJSON,
     RolePostDTOFromJSON,
@@ -61,6 +64,10 @@ export interface DeleteRoleRequest {
 export interface DeleteRolePermissionsRequest {
     id: string;
     rolePermissionDTO: RolePermissionDTO;
+}
+
+export interface GetAllRolesRequest {
+    pageable: Pageable;
 }
 
 export interface GetPermissionRequest {
@@ -280,8 +287,19 @@ export class AccessControlApi extends runtime.BaseAPI {
     /**
      * Get all Roles
      */
-    async getAllRolesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListRoleTableDTO>> {
+    async getAllRolesRaw(requestParameters: GetAllRolesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListRoleTableDTO>> {
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAllRoles().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -301,8 +319,8 @@ export class AccessControlApi extends runtime.BaseAPI {
     /**
      * Get all Roles
      */
-    async getAllRoles(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListRoleTableDTO> {
-        const response = await this.getAllRolesRaw(initOverrides);
+    async getAllRoles(requestParameters: GetAllRolesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListRoleTableDTO> {
+        const response = await this.getAllRolesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

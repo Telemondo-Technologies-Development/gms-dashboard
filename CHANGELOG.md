@@ -10,6 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Tracking Page : addedd a page for managing incident reports with customer specific details.
+- AddReportDialog : Dialog for adding new reports with customer.
+- IncidentReportsModal : A modal for viewing detailed report for a customer.
+- TrackingTable for displaying customers and their report counts.
+- Users & Employees split management UI with separate dialogs for system users vs. employees.
+- Users & Employees search across employees and system users.
+- Users & Employees employee list row click-to-edit interaction (no action column).
+- Membership: aligned member + subscription handling with backend DTO shapes (MemberPostDTO/MemberPutDTO, MemberSubscriptionPostDTO/MemberSubscriptionPutDTO).
+- Membership: improved refresh UX with an in-button loading spinner.
+- Payment History: filters and export support for payment history.
+- API generation: OpenAPI client generation integrated (generated TypeScript API under `src/api/generated` from `openapi.json`).
+
+### Changed
+- Users & Employees: refined schemas to match backend response fields (e.g., user timestamps) and separated employee form schema from system-user creation.
+- Membership: refactored member creation flow to validate payloads via Zod schemas before API calls.
+
+
+
+## [0.3.0] - 2026-1-26
+
+
+### Added
 - Integrated MultiBranchOverview for displaying branch summaries ( using shadcn tabs).
 - Added API integration for fetching data.
 - Implemented backend connection Schema and TanStack Query integration.
@@ -27,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Minor design changes to the charts and tables of analytics page
 
 
-## [0.2.0] - 2025-1-19
+## [0.2.0] - 2026-1-19
 
 
 ### Added 
@@ -66,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - use-mobile hook unnecessary file no use
 
 
-## [0.1.0] - 2025-1-12 
+## [0.1.0] - 2026-1-12 
 
 ### Added
 - Branch Management Module : Implemented centralized control for gym locations with status tracking ('Active'/'Maintenance').

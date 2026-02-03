@@ -1,6 +1,7 @@
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
-import { ArrowDown, ArrowUp, Users } from 'lucide-react'
+import { ArrowDown, ArrowUp, Users, AlertCircle } from 'lucide-react'
 import type { AnalyticsData } from '@/lib/analytics-data'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   ChartContainer,
   ChartTooltip,
@@ -30,48 +31,90 @@ const chartConfig = {
   },
 }
 
+type MetricCardProps = {
+  icon: React.ReactNode
+  label: string
+  value: number | string
+  subtitle: string | React.ReactNode
+  className?: string
+}
+
+function MetricCard({ icon, label, value, subtitle, className }: MetricCardProps) {
+  return (
+    <div className="rounded-lg border p-3">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+        {icon}
+        {label}
+      </div>
+      <div className={`text-xl font-bold ${className || ''}`}>{value}</div>
+      <div className="text-xs text-muted-foreground">{subtitle}</div>
+    </div>
+  )
+}
+
 export function MembershipGrowthChart({ data, timeRange }: Props) {
+  // Validate data
+  if (!data.membershipGrowth?.length) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        No membership data available
+      </div>
+    )
+  }
+
   const chartData = timeRange === 'monthly' 
     ? data.membershipGrowth 
     : data.membershipGrowth.filter((_, i) => i % 3 === 0)
 
   const latestMonth = chartData[chartData.length - 1]
   const previousMonth = chartData[chartData.length - 2]
+  
+  if (!latestMonth || !previousMonth) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Insufficient data to display trends
+      </div>
+    )
+  }
+
   const netGrowth = latestMonth.total - previousMonth.total
   const growthPercentage = ((netGrowth / previousMonth.total) * 100).toFixed(1)
+  const retentionRate = (((latestMonth.total - latestMonth.new) / previousMonth.total) * 100).toFixed(1)
+  const isPositiveGrowth = parseFloat(growthPercentage) >= 0
 
   return (
     <div className="space-y-4">
+      {/* Summary Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="rounded-lg border p-3">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-            <Users className="h-3.5 w-3.5" />
-            Total Members
-          </div>
-          <div className="text-xl font-bold">{latestMonth.total}</div>
-          <div className={`flex items-center gap-1 text-xs ${parseFloat(growthPercentage) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {parseFloat(growthPercentage) >= 0 ? (
-              <ArrowUp className="h-3 w-3" />
-            ) : (
-              <ArrowDown className="h-3 w-3" />
-            )}
-            {Math.abs(parseFloat(growthPercentage))}% from last month
-          </div>
-        </div>
-
-        <div className="rounded-lg border p-3">
-          <div className="text-xs text-muted-foreground mb-1">New Members</div>
-          <div className="text-xl font-bold text-green-600">{latestMonth.new}</div>
-          <div className="text-xs text-muted-foreground">This month</div>
-        </div>
-
-        <div className="rounded-lg border p-3">
-          <div className="text-xs text-muted-foreground mb-1">Cancelled</div>
-          <div className="text-xl font-bold text-red-600">{latestMonth.cancelled}</div>
-          <div className="text-xs text-muted-foreground">This month</div>
-        </div>
+        <MetricCard
+          icon={<Users className="h-3.5 w-3.5" />}
+          label="Total Members"
+          value={latestMonth.total.toLocaleString()}
+          subtitle={
+            <span className={`flex items-center gap-1 ${isPositiveGrowth ? 'text-green-600' : 'text-red-600'}`}>
+              {isPositiveGrowth ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+              <span className="sr-only">{isPositiveGrowth ? 'Increased' : 'Decreased'} by</span>
+              {Math.abs(parseFloat(growthPercentage))}% from last month
+            </span>
+          }
+        />
+        <MetricCard
+          icon={null}
+          label="New Members"
+          value={latestMonth.new.toLocaleString()}
+          subtitle="This month"
+          className="text-green-600"
+        />
+        <MetricCard
+          icon={null}
+          label="Cancelled"
+          value={latestMonth.cancelled.toLocaleString()}
+          subtitle={`Retention: ${retentionRate}%`}
+          className="text-red-600"
+        />
       </div>
 
+      {/* Chart */}
       <ChartContainer config={chartConfig} className="h-[300px] w-full">
         <AreaChart data={chartData}>
           <defs>
@@ -127,6 +170,16 @@ export function MembershipGrowthChart({ data, timeRange }: Props) {
           />
         </AreaChart>
       </ChartContainer>
+
+      {/* Alert for high cancellation rate */}
+      {latestMonth.cancelled > latestMonth.new * 0.3 && (
+        <Alert className="border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-200">
+          <AlertCircle className="h-4 w-4 !text-orange-600 dark:!text-orange-400" />
+          <AlertDescription className="text-xs">
+            <span className="font-semibold">High cancellation rate detected.</span> Consider reviewing member satisfaction and retention strategies.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   )
 }

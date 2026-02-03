@@ -1,10 +1,8 @@
-import { useMemo, useRef } from 'react'
+import { useRef } from 'react'
+import { useReactToPrint } from 'react-to-print'
 import { format } from 'date-fns'
-import { AlertTriangle, CalendarClock, CheckCircle2, Printer, XCircle } from 'lucide-react'
+import { AlertTriangle, Printer } from 'lucide-react'
 
-import type { Payment, PaymentStatus } from '@/lib/schemas'
-
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,177 +13,145 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
+import type { PaymentTableDTOParsed, PaymentMethodTableDTOParsed } from '@/types/payment/paymentSchemas'
 
-import { amountDueCents, formatMoney } from '@/components/payment-components/billing-utils'
-
-function statusBadge(status: PaymentStatus) {
-  switch (status) {
-    case 'paid':
-      return (
-        <Badge className="gap-1" variant="default">
-          <CheckCircle2 className="h-3.5 w-3.5" />Paid
-        </Badge>
-      )
-    case 'failed':
-      return (
-        <Badge className="gap-1" variant="destructive">
-          <XCircle className="h-3.5 w-3.5" />Failed
-        </Badge>
-      )
-    case 'overdue':
-      return (
-        <Badge className="gap-1" variant="destructive">
-          <AlertTriangle className="h-3.5 w-3.5" />Overdue
-        </Badge>
-      )
-    case 'upcoming':
-      return (
-        <Badge className="gap-1" variant="outline">
-          <CalendarClock className="h-3.5 w-3.5" />Upcoming
-        </Badge>
-      )
-  }
+interface ReceiptProps {
+  payment: PaymentTableDTOParsed
+  paymentMethod?: PaymentMethodTableDTOParsed
 }
 
-function printHtml(title: string, html: string) {
-  const w = window.open('', '_blank', 'noopener,noreferrer')
-  if (!w) return
+export function Receipt({ payment, paymentMethod }: ReceiptProps) {
+  return (
+    <div className="w-full bg-white p-8 text-black" id="receipt-content">
+      <div className="mb-6 text-center">
+        <h1 className="text-2xl font-bold uppercase tracking-wider">Official Receipt</h1>
+        <p className="text-sm text-muted-foreground">Gym Management System</p>
+      </div>
 
-  w.document.open()
-  w.document.write(`<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${title}</title>
-  <style>
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 24px; }
-    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; max-width: 720px; margin: 0 auto; }
-    .muted { color: #6b7280; }
-    .row { display:flex; justify-content:space-between; gap:12px; }
-    table { width: 100%; border-collapse: collapse; }
-    td { padding: 8px 0; border-top: 1px solid #f3f4f6; }
-    td:last-child { text-align: right; font-weight: 600; }
-    .total td { border-top: 1px solid #e5e7eb; font-size: 14px; }
-  </style>
-</head>
-<body>
-  ${html}
-</body>
-</html>`)
-  w.document.close()
+      <div className="mb-6 flex justify-between border-b pb-4">
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase">Date</p>
+          <p>{payment.paidAt ? format(new Date(payment.paidAt), 'PPP') : '—'}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs font-semibold text-muted-foreground uppercase">Receipt #</p>
+          <p className="font-mono">{payment.id.slice(0, 8).toUpperCase()}</p>
+        </div>
+      </div>
 
-  w.focus()
-  // Give the browser a tick to layout before printing.
-  setTimeout(() => {
-    w.print()
-    w.close()
-  }, 50)
+      <div className="mb-8 space-y-2">
+         <div className="flex justify-between">
+          <span>Invoice ID</span>
+          <span className="font-mono">{payment.invoiceId}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Payment Method</span>
+          <span>{paymentMethod?.name ?? payment.paymentMethodId}</span>
+        </div>
+        <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
+          <span>Total Amount</span>
+          <span>
+            {new Intl.NumberFormat('en-PH', {
+              style: 'currency',
+              currency: 'PHP',
+            }).format(payment.amount)}
+          </span>
+        </div>
+      </div>
+
+      <div className="text-center text-xs text-muted-foreground mt-12 pt-4 border-t">
+        <p>Thank you for your business!</p>
+        <p>This is a computer generated receipt.</p>
+      </div>
+    </div>
+  )
 }
 
-export function ReceiptDialog(props: {
+interface ReceiptDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  payment: Payment | null
-  status: PaymentStatus | null
-}) {
-  const { open, onOpenChange, payment, status } = props
-  const printRef = useRef<HTMLDivElement | null>(null)
+  paymentId?: string | null
+  payment: PaymentTableDTOParsed | null
+  loading?: boolean
+  error?: string
+  paymentMethodMap: Map<string, PaymentMethodTableDTOParsed>
+}
 
-  const lineItems = useMemo(() => {
-    if (!payment) return []
-    return [
-      { label: 'Base', amount: formatMoney(payment.baseAmountCents, payment.currency) },
-      { label: 'Convenience fee', amount: formatMoney(payment.convenienceFeeCents, payment.currency) },
-      { label: 'Discount', amount: `-${formatMoney(payment.discountCents, payment.currency)}` },
-      { label: 'Total', amount: formatMoney(amountDueCents(payment), payment.currency), total: true },
-    ] as const
-  }, [payment])
+export function ReceiptDialog({
+  open,
+  onOpenChange,
+  paymentId,
+  payment,
+  loading,
+  error,
+  paymentMethodMap,
+}: ReceiptDialogProps) {
+  const contentRef = useRef<HTMLDivElement>(null)
+  const handlePrint = useReactToPrint({
+    contentRef,
+    documentTitle: `Receipt-${payment?.id}`,
+  })
+
+  const method = payment ? paymentMethodMap.get(payment.paymentMethodId) : undefined
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Receipt</DialogTitle>
-          <DialogDescription>Preview a receipt using Shadcn components (printable).</DialogDescription>
+          <DialogTitle>Print Receipt</DialogTitle>
+          <DialogDescription>
+            {payment ? (
+              <>Preview of the receipt for payment {payment.id}</>
+            ) : loading ? (
+              <>Loading payment…</>
+            ) : paymentId ? (
+              <>Payment not found.</>
+            ) : (
+              <>No payment selected.</>
+            )}
+          </DialogDescription>
         </DialogHeader>
 
-        {!payment || !status ? (
-          <div className="text-sm text-muted-foreground">No payment selected.</div>
-        ) : (
-          <div ref={printRef} className="rounded-lg border p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-sm font-semibold">Gym Fitness</div>
-                <div className="text-xs text-muted-foreground">Receipt ID: {payment.id}</div>
-              </div>
-              {statusBadge(status)}
-            </div>
-
-            <Separator className="my-4" />
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <div className="text-xs text-muted-foreground">Member</div>
-                <div className="text-sm font-medium">{payment.memberName}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Due date</div>
-                <div className="text-sm font-medium">{format(payment.dueDate, 'PP')}</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Paid at</div>
-                <div className="text-sm font-medium">
-                  {payment.paidAt ? format(payment.paidAt, 'PPpp') : '—'}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Method / reference</div>
-                <div className="text-sm font-medium">
-                  {payment.method ?? '—'}
-                  {payment.reference ? ` • ${payment.reference}` : ''}
-                </div>
-              </div>
-            </div>
-
-            <Separator className="my-4" />
-
-            <div className="text-xs text-muted-foreground">Description</div>
-            <div className="text-sm font-medium">{payment.description}</div>
-
-            <div className="mt-4 rounded-md border">
-              <Table>
-                <TableBody>
-                  {lineItems.map((li) => (
-                    <TableRow key={li.label} className={'total' in li ? 'font-semibold' : undefined}>
-                      <TableCell className="text-muted-foreground">{li.label}</TableCell>
-                      <TableCell className="text-right">{li.amount}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            <div className="mt-4 text-xs text-muted-foreground">Generated on {format(new Date(), 'PPpp')}</div>
+        {error ? (
+          <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            {error}
           </div>
-        )}
+        ) : loading ? (
+          <div className="rounded-md border p-6 text-sm text-muted-foreground">Loading receipt preview…</div>
+        ) : payment ? (
+          <>
+            <div className="rounded-md border bg-gray-50 p-4">
+              <div ref={contentRef} className="mx-auto max-w-75 bg-white shadow-sm">
+                <Receipt payment={payment} paymentMethod={method} />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div className="text-sm font-medium text-foreground">Notes</div>
+              <div>Based on PaymentTableDTO fields.</div>
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4" />
+                <span>
+                  Display status is derived from <span className="font-mono text-xs">paidAt</span> and
+                  <span className="font-mono text-xs"> failureReason</span>.
+                </span>
+              </div>
+              <div>
+                API status: <span className="font-mono text-xs">IN | OUT | UNDECIDED</span>
+              </div>
+            </div>
+          </>
+        ) : null}
 
         <DialogFooter>
-          {payment && status && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (!printRef.current) return
-                printHtml(`Receipt - ${payment.id}`, `<div class="card">${printRef.current.innerHTML}</div>`)
-              }}
-            >
-              <Printer className="mr-2 h-4 w-4" />
-              Print
-            </Button>
-          )}
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            Cancel
+          </Button>
+          <Button onClick={() => handlePrint && handlePrint()} disabled={!payment || !!loading || !!error}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print
           </Button>
         </DialogFooter>
       </DialogContent>

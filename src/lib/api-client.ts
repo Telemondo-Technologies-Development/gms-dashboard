@@ -1,5 +1,5 @@
 import { Configuration } from '@/api/generated/runtime'
-import { UserApi, EmployeeApi } from '@/api/generated/apis'
+import { UserApi, EmployeeApi, PaymentApi, InvoiceApi } from '@/api/generated/apis'
 
 const getConfiguration = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : undefined
@@ -19,6 +19,8 @@ const getConfiguration = () => {
 
 export const userApi = new UserApi(getConfiguration())
 export const employeeApi = new EmployeeApi(getConfiguration())
+export const paymentApi = new PaymentApi(getConfiguration())
+export const invoiceApi = new InvoiceApi(getConfiguration())
 
 // Helper to refresh configuration if token changes (basic approach)
 export const getAuthenticatedApi = <T>(ApiClass: new (config: Configuration) => T): T => {

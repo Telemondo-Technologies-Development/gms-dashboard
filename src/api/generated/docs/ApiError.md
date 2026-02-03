@@ -8,6 +8,7 @@ Name | Type
 ------------ | -------------
 `code` | string
 `description` | string
+`field` | string
 
 ## Example
 
@@ -18,6 +19,7 @@ import type { ApiError } from ''
 const example = {
   "code": null,
   "description": null,
+  "field": null,
 } satisfies ApiError
 
 console.log(example)

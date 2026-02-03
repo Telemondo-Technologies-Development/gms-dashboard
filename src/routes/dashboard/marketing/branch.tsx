@@ -101,7 +101,7 @@ function RouteComponent() {
       }
   
       const savedBranch = await response.json();
-      refetch(); // Refetch branches after adding
+      refetch(); 
     } catch (error) {
       console.error(error);
       alert('Failed to add branch. Please try again.');
@@ -135,7 +135,7 @@ function RouteComponent() {
         throw new Error('Failed to update branch.');
       }
   
-      refetch(); // Refetch branches after updating
+      refetch(); 
     } catch (error) {
       console.error(error);
       alert('Failed to update branch. Please try again.');
@@ -161,7 +161,7 @@ const handleRemoveBranch = async () => {
         throw new Error('Failed to delete branch.');
       }
 
-      refetch(); // Refetch branches after deleting
+      refetch(); 
       toggleDialog('confirmDialogOpen', false);
       setBranchToRemove(null);
     } catch (error) {
@@ -197,7 +197,7 @@ const handleRemoveBranch = async () => {
         updated_at: new Date().toISOString(),
       };
 
-      refetch(); // Refetch branches from the backend to ensure data consistency
+      refetch(); 
 
       setActiveBranchForStaff(updatedBranch);
 
@@ -219,17 +219,25 @@ const handleRemoveBranch = async () => {
           </TabsList>
 
           <TabsContent value="branches">
-            <div>
-              <BranchList
-                branches={branches}
-                onSelectBranch={setSelectedBranchId}
-                onToggleDialog={toggleDialog}
-                onSetMapBranch={setMapBranch}
-                onSetBranchToRemove={setBranchToRemove}
-                onSetActiveBranchForStaff={setActiveBranchForStaff}
-              />
-            </div>
-          </TabsContent>
+              <div>
+                {isFetching ? (
+                  <p>Loading branches...</p> 
+                ) : branches.length > 0 ? (
+                  <BranchList
+                    branches={branches}
+                    onSelectBranch={setSelectedBranchId}
+                    onToggleDialog={toggleDialog}
+                    onSetMapBranch={setMapBranch}
+                    onSetBranchToRemove={setBranchToRemove}
+                    onSetActiveBranchForStaff={setActiveBranchForStaff}
+                  />
+                ) : (
+                  <div className="p-4 border rounded-md">
+                    <p>No branches available. Please check your backend or add a new branch.</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
           <TabsContent value="multiBranchDashboard">
             <MultiBranchOverview branches={branches} />
           </TabsContent>

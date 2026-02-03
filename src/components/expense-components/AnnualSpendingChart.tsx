@@ -20,17 +20,18 @@ interface AnnualSpendingChartProps {
   branch: string
 }
 
+const YEARS_TO_DISPLAY = 5
+
 export function AnnualSpendingChart({ expenses, branch }: AnnualSpendingChartProps) {
   const chartData = useMemo(() => {
     // Filter expenses by branch
     const branchExpenses = expenses.filter(e => e.branch === branch)
     
-    // Group by year (last 5 years)
-    const yearlyData: { [key: string]: number } = {}
+    // Initialize last 5 years with zero values
+    const yearlyData: Record<string, number> = {}
     const currentYear = new Date().getFullYear()
     
-    // Initialize last 5 years
-    for (let i = 4; i >= 0; i--) {
+    for (let i = YEARS_TO_DISPLAY - 1; i >= 0; i--) {
       const year = (currentYear - i).toString()
       yearlyData[year] = 0
     }
@@ -39,7 +40,7 @@ export function AnnualSpendingChart({ expenses, branch }: AnnualSpendingChartPro
     branchExpenses.forEach(expense => {
       const expenseYear = new Date(expense.date).getFullYear().toString()
       if (expenseYear in yearlyData) {
-        yearlyData[expenseYear] += Number.parseFloat(expense.amount)
+        yearlyData[expenseYear] += parseFloat(expense.amount)
       }
     })
     

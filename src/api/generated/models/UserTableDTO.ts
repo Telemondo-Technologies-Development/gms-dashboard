@@ -27,6 +27,12 @@ export interface UserTableDTO {
     actorId?: string;
     /**
      * 
+     * @type {Date}
+     * @memberof UserTableDTO
+     */
+    createdAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof UserTableDTO
      */
@@ -37,14 +43,22 @@ export interface UserTableDTO {
      * @memberof UserTableDTO
      */
     id: string;
+    /**
+     * 
+     * @type {Date}
+     * @memberof UserTableDTO
+     */
+    updatedAt: Date;
 }
 
 /**
  * Check if a given object implements the UserTableDTO interface.
  */
 export function instanceOfUserTableDTO(value: object): value is UserTableDTO {
+    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -59,8 +73,10 @@ export function UserTableDTOFromJSONTyped(json: any, ignoreDiscriminator: boolea
     return {
         
         'actorId': json['actorId'] == null ? undefined : json['actorId'],
+        'createdAt': (new Date(json['createdAt'])),
         'email': json['email'],
         'id': json['id'],
+        'updatedAt': (new Date(json['updatedAt'])),
     };
 }
 
@@ -76,8 +92,10 @@ export function UserTableDTOToJSONTyped(value?: UserTableDTO | null, ignoreDiscr
     return {
         
         'actorId': value['actorId'],
+        'createdAt': value['createdAt'].toISOString(),
         'email': value['email'],
         'id': value['id'],
+        'updatedAt': value['updatedAt'].toISOString(),
     };
 }
 

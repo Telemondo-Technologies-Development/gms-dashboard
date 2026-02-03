@@ -145,7 +145,7 @@ No authorization required
 
 ## getAllBranches
 
-> ApiResponseListBranchTableDTO getAllBranches()
+> ApiResponseListBranchTableDTO getAllBranches(pageable)
 
 Get all Branches
 
@@ -162,8 +162,13 @@ async function example() {
   console.log("🚀 Testing  SDK...");
   const api = new BranchApi();
 
+  const body = {
+    // Pageable
+    pageable: ...,
+  } satisfies GetAllBranchesRequest;
+
   try {
-    const data = await api.getAllBranches();
+    const data = await api.getAllBranches(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -176,7 +181,10 @@ example().catch(console.error);
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
 
 ### Return type
 
@@ -287,7 +295,7 @@ async function example() {
   const body = {
     // string
     id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
-    // 'IN' | 'OUT' | 'UNDECIDED' (optional)
+    // 'ACTIVE' | 'MOVED' | 'TERMINATED' | 'RESIGNED' | 'UNDECIDED' (optional)
     status: status_example,
   } satisfies GetBranchEmployeesRequest;
 
@@ -309,7 +317,7 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **id** | `string` |  | [Defaults to `undefined`] |
-| **status** | `IN`, `OUT`, `UNDECIDED` |  | [Optional] [Defaults to `undefined`] [Enum: IN, OUT, UNDECIDED] |
+| **status** | `ACTIVE`, `MOVED`, `TERMINATED`, `RESIGNED`, `UNDECIDED` |  | [Optional] [Defaults to `undefined`] [Enum: ACTIVE, MOVED, TERMINATED, RESIGNED, UNDECIDED] |
 
 ### Return type
 

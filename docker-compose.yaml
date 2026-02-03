@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   mysql:
     image: mysql:8.0
@@ -9,27 +11,24 @@ services:
     ports:
       - "${DB_PORT}:3306"
     networks:
-      - mysql
+      - app-network
     volumes:
       - db:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    restart: always
+    restart: unless-stopped
+    env_file: ./.env
     environment:
       PMA_ARBITRARY: 1
       PMA_HOST: mysql
       PMA_PORT: 3306
-    volumes:
-      - ./php-make/upload.ini:/usr/local/etc/php/php.ini
     depends_on:
-      - mysql
-    links:
-      - mysql
-    networks:
       - mysql
     ports:
       - "${PHPMYADMIN_PORT}:80"
+    networks:
+      - app-network
 
   nats:
     image: nats:2.12.0
@@ -38,49 +37,54 @@ services:
       - "${NATS_LOCAL_PORT}:${NATS_DOCKER_PORT}"
       - "${NATS_MONITOR_LOCAL_PORT}:${NATS_MONITOR_DOCKER_PORT}"
     networks:
-      - mysql
-
-  backend:
-    #    # local build for testing
-    #    build:
-    #      context: .
-    #      dockerfile: Dockerfile
-
-    image: ghcr.io/telemondo-technologies-development/gms-backend-spring:0d01eab9870935b0df9d11db060dc57f3ea30af1
-    restart: unless-stopped
-    env_file: ./.env
-    environment:
-      DB_HOST: "${DB_HOST}"
-      DB_PORT: "${DB_CONTAINER_PORT}"
-
-      SPRING_PROFILES_ACTIVE: dev
-
-      NATS_URL: "nats://nats:${NATS_DOCKER_PORT}"
-
-    depends_on:
-      - mysql
-      - nats
-    networks:
-      - mysql
-    ports:
-      - "${BACKEND_PORT}:8080"
+      - app-network
 
   minio:
     image: minio/minio
     container_name: minio_server
     restart: unless-stopped
+    env_file: ./.env
     ports:
-      - "9000:9000"    # API port
-      - "9001:9001"    # Console UI port
-    environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: password123
+      - "${MINIO_API_PORT}:9000"    # API
+      - "${MINIO_CONSOLE_PORT}:9001" # Web Console
     command: server /data --console-address ":9001"
+    networks:
+      - app-network
     volumes:
       - minio_data:/data
+  backend:
+    image: ghcr.io/telemondo-technologies-development/gms-backend-spring:dev
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      DB_HOST: "${DB_HOST}"
+      DB_PORT: "${DB_CONTAINER_PORT}"
+      DB_NAME: "${DB_NAME}"
+      DB_USER: "${DB_USER}"
+      DB_PASS: "${DB_PASS}"
+
+      MINIO_URL: "http://minio:9000"
+      MINIO_ACCESS_KEY: "${MINIO_ROOT_USER}"
+      MINIO_SECRET_KEY: "${MINIO_ROOT_PASSWORD}"
+      # Some Spring configs bind accessKey/secretKey as a single token (accesskey)
+      # rather than two tokens (access.key) when reading from env vars.
+      MINIO_ACCESSKEY: "${MINIO_ROOT_USER}"
+      MINIO_SECRETKEY: "${MINIO_ROOT_PASSWORD}"
+
+      NATS_URL: "nats://nats:${NATS_DOCKER_PORT}"
+      SPRING_PROFILES_ACTIVE: dev
+
+    depends_on:
+      - mysql
+      - nats
+      - minio
+    ports:
+      - "${BACKEND_PORT}:8080"
+    networks:
+      - app-network
 
 networks:
-  mysql:
+  app-network:
     driver: bridge
 
 volumes:

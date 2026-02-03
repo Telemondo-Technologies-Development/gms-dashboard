@@ -33,12 +33,6 @@ export interface BranchPersonnelTableDTO {
     branchId: string;
     /**
      * 
-     * @type {Date}
-     * @memberof BranchPersonnelTableDTO
-     */
-    createdAt: Date;
-    /**
-     * 
      * @type {string}
      * @memberof BranchPersonnelTableDTO
      */
@@ -57,12 +51,6 @@ export interface BranchPersonnelTableDTO {
     status: BranchPersonnelTableDTOStatusEnum;
     /**
      * 
-     * @type {Date}
-     * @memberof BranchPersonnelTableDTO
-     */
-    updatedAt: Date;
-    /**
-     * 
      * @type {string}
      * @memberof BranchPersonnelTableDTO
      */
@@ -74,8 +62,10 @@ export interface BranchPersonnelTableDTO {
  * @export
  */
 export const BranchPersonnelTableDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
+    Active: 'ACTIVE',
+    Moved: 'MOVED',
+    Terminated: 'TERMINATED',
+    Resigned: 'RESIGNED',
     Undecided: 'UNDECIDED'
 } as const;
 export type BranchPersonnelTableDTOStatusEnum = typeof BranchPersonnelTableDTOStatusEnum[keyof typeof BranchPersonnelTableDTOStatusEnum];
@@ -87,10 +77,8 @@ export type BranchPersonnelTableDTOStatusEnum = typeof BranchPersonnelTableDTOSt
 export function instanceOfBranchPersonnelTableDTO(value: object): value is BranchPersonnelTableDTO {
     if (!('actorId' in value) || value['actorId'] === undefined) return false;
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
-    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
-    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -106,11 +94,9 @@ export function BranchPersonnelTableDTOFromJSONTyped(json: any, ignoreDiscrimina
         
         'actorId': json['actorId'],
         'branchId': json['branchId'],
-        'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'id': json['id'],
         'status': json['status'],
-        'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
 }
@@ -128,11 +114,9 @@ export function BranchPersonnelTableDTOToJSONTyped(value?: BranchPersonnelTableD
         
         'actorId': value['actorId'],
         'branchId': value['branchId'],
-        'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'id': value['id'],
         'status': value['status'],
-        'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],
     };
 }

@@ -339,7 +339,7 @@ No authorization required
 
 ## getAllRoles
 
-> ApiResponseListRoleTableDTO getAllRoles()
+> ApiResponseListRoleTableDTO getAllRoles(pageable)
 
 Get all Roles
 
@@ -356,8 +356,13 @@ async function example() {
   console.log("🚀 Testing  SDK...");
   const api = new AccessControlApi();
 
+  const body = {
+    // Pageable
+    pageable: ...,
+  } satisfies GetAllRolesRequest;
+
   try {
-    const data = await api.getAllRoles();
+    const data = await api.getAllRoles(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -370,7 +375,10 @@ example().catch(console.error);
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
 
 ### Return type
 

@@ -5,6 +5,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
+import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
+import { BranchApi } from '@/api/generated/apis/BranchApi'
+import { getAuthenticatedApi } from '@/lib/api-client'
+import type { BranchPersonnelTableDTO, BranchTableDTO } from '@/api/generated/models'
+import { BranchPersonnelTableDTOStatusEnum } from '@/api/generated/models'
+import { useAuthSession } from '@/lib/auth-session'
 
 type JwtClaims = Record<string, unknown>
 
@@ -96,12 +102,14 @@ async function fetchUserByEmail(email: string, token?: string): Promise<UserTabl
 
 export default function Header() {
 	const [searchOpen, setSearchOpen] = useState(false)
+	const session = useAuthSession()
 
 	const identity = useMemo(() => {
 		if (typeof window === 'undefined') return null
 
-		const token = window.localStorage.getItem('auth_token') ?? undefined
-		const storedEmail = window.localStorage.getItem('auth_email') ?? undefined
+		const token = session.token ?? undefined
+		const storedEmail = session.email ?? undefined
+		const storedUsername = session.username ?? undefined
 
 		const claims = token ? tryDecodeJwtClaims(token) : null
 		const claimEmail =
@@ -109,33 +117,93 @@ export default function Header() {
 			getStringClaim(claims, 'preferred_username') ??
 			getStringClaim(claims, 'upn')
 
+		const resolvedEmail =
+			(claimEmail && claimEmail.includes('@') ? claimEmail : undefined) ??
+			(storedEmail && storedEmail.includes('@') ? storedEmail : undefined)
+
 		const sub = getStringClaim(claims, 'sub')
 		const userId = sub && looksLikeUuid(sub) ? sub : undefined
 
 		return {
 			token,
-			email: claimEmail ?? storedEmail,
+			email: resolvedEmail,
+			username: storedUsername,
+			actorId: session.actorId ?? undefined,
 			userId,
 		}
-	}, [])
+	}, [session.actorId, session.email, session.token, session.username])
+
+	const storedBranches = session.branches
 
 	const currentUserQuery = useQuery({
-		queryKey: ['currentUser', identity?.userId ?? null, identity?.email ?? null],
+		queryKey: ['currentUser', identity?.userId ?? null, identity?.email ?? null, identity?.token ?? null],
 		enabled: typeof window !== 'undefined' && !!identity && (!!identity.userId || !!identity.email),
 		queryFn: async () => {
 			if (!identity) return null
 			if (identity.userId) {
-				return await fetchUserById(identity.userId, identity.token)
+				return await fetchUserById(identity.userId, identity.token ?? undefined)
 			}
 			if (identity.email) {
-				return await fetchUserByEmail(identity.email, identity.token)
+				return await fetchUserByEmail(identity.email, identity.token ?? undefined)
 			}
 			return null
 		},
 		retry: false,
 	})
 
-	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? 'Account'
+	// Fetch user's branch personnel record
+	const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
+		queryKey: [
+			'branchPersonnel',
+			identity?.actorId ?? null,
+			currentUserQuery.data?.actorId ?? null,
+			currentUserQuery.data?.id ?? null,
+			identity?.token ?? null,
+		],
+		enabled: !!identity?.actorId || !!currentUserQuery.data?.actorId || !!currentUserQuery.data?.id,
+		queryFn: async () => {
+			const storedActorId = identity?.actorId
+			const actorId = currentUserQuery.data?.actorId
+			const userTableId = currentUserQuery.data?.id
+			if (!storedActorId && !actorId && !userTableId) return null
+			const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
+			const response = await branchPersonnelApi.getAllBranchPersonnel({
+				pageable: { page: 0, size: 1000 },
+			})
+			if (!response.success) {
+				throw new Error(response.message ?? 'Failed to fetch branch personnel.')
+			}
+			const items = response.data ?? []
+			const matchIds = new Set(
+				[storedActorId, actorId, userTableId].filter((v): v is string => typeof v === 'string' && v.length > 0),
+			)
+			const personnelRecord =
+				items.find((record) => matchIds.has(record.actorId) && record.status === BranchPersonnelTableDTOStatusEnum.Active) ??
+				null
+			return personnelRecord
+		},
+		retry: false,
+	})
+
+	// Fetch branch details
+	const branchQuery = useQuery<BranchTableDTO | null>({
+		queryKey: ['branch', branchPersonnelQuery.data?.branchId ?? null, identity?.token ?? null],
+		enabled: !!branchPersonnelQuery.data?.branchId,
+		queryFn: async () => {
+			const branchId = branchPersonnelQuery.data?.branchId
+			if (!branchId) return null
+			const branchApi = getAuthenticatedApi(BranchApi)
+			const response = await branchApi.getBranch({ id: branchId })
+			if (!response.success) {
+				throw new Error(response.message ?? 'Failed to fetch branch details.')
+			}
+			return response.data ?? null
+		},
+		retry: false,
+	})
+
+	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? identity?.username ?? 'Account'
+	const displayBranchName = branchQuery.data?.name ?? storedBranches[0]?.name ?? 'No Branch Assigned'
 	const searchInput = (
 		<div className="relative">
 			<Input
@@ -148,17 +216,17 @@ export default function Header() {
 				type="button"
 				variant="ghost"
 				size="icon"
-				className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-2xl"
+				className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 "
 				aria-label="Close search"
 				onClick={() => setSearchOpen(false)}
 			>
 				<X className="h-4 w-4" />
-			</Button>
+			</Button>	
 		</div>
 	)
 
 	return (
-		<header className="border-b px-4 shadow-sm shadow-accent-foreground/10 md:px-6">
+		<header className="border-b px-4 shadow-sm shadow-accent-foreground/10 md:px-6 bg-surface-container">
 			<div className="flex h-16 items-center justify-between">
 				{/* Mobile layout */}
 				<div className="flex w-full items-center md:hidden">
@@ -166,7 +234,7 @@ export default function Header() {
 						variant="ghost"
 						size="icon"
 						aria-label="Notifications"
-						className="h-9 w-9 rounded-2xl"
+						className="h-9 w-9 "
 					>
 						<Bell className="h-5 w-5" />
 					</Button>
@@ -174,7 +242,7 @@ export default function Header() {
 						<Button
 							variant="ghost"
 							size="sm"
-							className="flex items-center gap-2 h-9 px-3 py-1 rounded-2xl"
+							className="flex items-center gap-2 h-9 px-3 py-1 "
 							aria-label="Account"
 						>
 							<User2 className="h-5 w-5" />
@@ -187,7 +255,7 @@ export default function Header() {
 						variant="ghost"
 						size="icon"
 						aria-label={searchOpen ? 'Close search' : 'Open search'}
-						className="h-9 w-9 rounded-2xl"
+						className="h-9 w-9"
 						onClick={() => setSearchOpen((v) => !v)}
 					>
 						{searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
@@ -196,11 +264,11 @@ export default function Header() {
 
 				{/* Tablet/Desktop layout */}
 				<div className="hidden w-full items-center justify-between md:flex">
-					<div className="flex items-center gap-2">
+					<div className="flex items-center gap-2 ">
 						<Button
 							variant="ghost"
 							size="sm"
-							className="flex items-center gap-2 h-9 px-3 py-1 rounded-2xl"
+							className="flex items-center gap-2 h-9 px-3 py-1 "
 							aria-label="Account"
 						>
 							<User2 className="h-5 w-5" />
@@ -212,7 +280,7 @@ export default function Header() {
 							variant="ghost"
 							size="icon"
 							aria-label="Notifications"
-							className="h-9 w-9 rounded-2xl"
+							className="h-9 w-9 "
 						>
 							<Bell className="h-5 w-5" />
 						</Button>
@@ -241,8 +309,13 @@ export default function Header() {
 						</Button>
 					</div>
 
-					<div className="hidden md:block">
-						<Label>Branch: Panacan Davao City</Label>
+					<div className="hidden md:flex flex-col items-end gap-0.5">
+						<Label className="text-xs text-muted-foreground">
+							{currentUserQuery.isLoading ? 'Loading...' : displayEmail}
+						</Label>
+						<Label className="text-sm font-semibold text-foreground">
+							{branchQuery.isLoading ? 'Loading branch...' : displayBranchName}
+						</Label>
 					</div>
 				</div>
 			</div>

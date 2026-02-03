@@ -11,9 +11,756 @@
     }
   ],
   "paths": {
+    "/api/asset": {
+      "get": {
+        "operationId": "getAllAssets",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListAssetTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all assets",
+        "tags": [
+          "Asset"
+        ]
+      },
+      "post": {
+        "operationId": "createAsset",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create an asset",
+        "tags": [
+          "Asset"
+        ]
+      }
+    },
+    "/api/asset/category": {
+      "get": {
+        "operationId": "getAllAssetCategories",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListAssetCategoryTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Asset Categories",
+        "tags": [
+          "Asset Category"
+        ]
+      },
+      "post": {
+        "operationId": "createAssetCategory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetCategoryPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetCategoryTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Asset Category",
+        "tags": [
+          "Asset Category"
+        ]
+      }
+    },
+    "/api/asset/category/{id}": {
+      "delete": {
+        "operationId": "deleteAssetCategory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Asset Category by id",
+        "tags": [
+          "Asset Category"
+        ]
+      },
+      "get": {
+        "operationId": "getAssetCategory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetCategoryTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Asset Category by id",
+        "tags": [
+          "Asset Category"
+        ]
+      },
+      "put": {
+        "operationId": "updateAssetCategory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetCategoryPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetCategoryTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Asset Category by id",
+        "tags": [
+          "Asset Category"
+        ]
+      }
+    },
+    "/api/asset/maintenance": {
+      "get": {
+        "operationId": "getAllMaintenance",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListAssetMaintenanceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all maintenance logs (paginated)",
+        "tags": [
+          "Asset Maintenance"
+        ]
+      }
+    },
+    "/api/asset/maintenance/schedule": {
+      "get": {
+        "operationId": "getAllSchedules",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListScheduleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Maintenance Schedule"
+        ]
+      },
+      "post": {
+        "operationId": "createSchedule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulePostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseScheduleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Maintenance Schedule"
+        ]
+      }
+    },
+    "/api/asset/maintenance/schedule/{id}": {
+      "delete": {
+        "operationId": "deleteSchedule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Maintenance Schedule"
+        ]
+      },
+      "get": {
+        "operationId": "getAsset_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseScheduleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get an asset by ID",
+        "tags": [
+          "Maintenance Schedule"
+        ]
+      },
+      "put": {
+        "operationId": "updateSchedule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SchedulePutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseScheduleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Maintenance Schedule"
+        ]
+      }
+    },
+    "/api/asset/maintenance/{id}": {
+      "get": {
+        "operationId": "getMaintenanceById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetMaintenanceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a maintenance log by id",
+        "tags": [
+          "Asset Maintenance"
+        ]
+      },
+      "patch": {
+        "operationId": "updateMaintenanceStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetMaintenancePatchDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetMaintenanceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update maintenance status, description, files, and completion date",
+        "tags": [
+          "Asset Maintenance"
+        ]
+      }
+    },
+    "/api/asset/{id}": {
+      "delete": {
+        "operationId": "deleteAsset",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete an asset by ID",
+        "tags": [
+          "Asset"
+        ]
+      },
+      "get": {
+        "operationId": "getAsset",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get an asset by ID",
+        "tags": [
+          "Asset"
+        ]
+      },
+      "put": {
+        "operationId": "updateAsset",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update an asset by ID",
+        "tags": [
+          "Asset"
+        ]
+      }
+    },
+    "/api/billingCycle": {
+      "get": {
+        "operationId": "getAllBillingCycles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBillingCycleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Billing Cycles",
+        "tags": [
+          "Billing Cycle"
+        ]
+      },
+      "post": {
+        "operationId": "createBillingCycle",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BillingCyclePostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBillingCycleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Billing Cycle",
+        "tags": [
+          "Billing Cycle"
+        ]
+      }
+    },
+    "/api/billingCycle/{id}": {
+      "delete": {
+        "operationId": "deleteBillingCycle",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Billing Cycle by id",
+        "tags": [
+          "Billing Cycle"
+        ]
+      },
+      "get": {
+        "operationId": "getBillingCycle",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBillingCycleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Billing Cycle by id",
+        "tags": [
+          "Billing Cycle"
+        ]
+      },
+      "put": {
+        "operationId": "updateBillingCycle",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BillingCyclePutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBillingCycleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Billing Cycle by id",
+        "tags": [
+          "Billing Cycle"
+        ]
+      }
+    },
     "/api/branch": {
       "get": {
         "operationId": "getAllBranches",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -64,6 +811,16 @@
     "/api/branch/personnel": {
       "get": {
         "operationId": "getAllBranchPersonnel",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -106,6 +863,45 @@
           }
         },
         "summary": "Create a new Branch Personnel",
+        "tags": [
+          "Branch Personnel"
+        ]
+      }
+    },
+    "/api/branch/personnel/picture": {
+      "post": {
+        "operationId": "uploadBranchLogo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Upload a branch logo into the object storage (public)",
         "tags": [
           "Branch Personnel"
         ]
@@ -335,8 +1131,10 @@
             "schema": {
               "type": "string",
               "enum": [
-                "IN",
-                "OUT",
+                "ACTIVE",
+                "MOVED",
+                "TERMINATED",
+                "RESIGNED",
                 "UNDECIDED"
               ]
             }
@@ -362,7 +1160,17 @@
     },
     "/api/employee": {
       "get": {
-        "operationId": "getAllUsers_2",
+        "operationId": "getAllEmployees",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -405,6 +1213,45 @@
           }
         },
         "summary": "Create a new Employee",
+        "tags": [
+          "Employee"
+        ]
+      }
+    },
+    "/api/employee/picture": {
+      "post": {
+        "operationId": "uploadEmployeeProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Upload an employee profile picture into the object storage (public)",
         "tags": [
           "Employee"
         ]
@@ -512,9 +1359,181 @@
         ]
       }
     },
+    "/api/invoice": {
+      "get": {
+        "operationId": "getAllInvoices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListInvoiceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Invoices",
+        "tags": [
+          "Invoice"
+        ]
+      },
+      "post": {
+        "operationId": "createInvoice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoicePostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInvoiceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Invoice",
+        "tags": [
+          "Invoice"
+        ]
+      }
+    },
+    "/api/invoice/{id}": {
+      "delete": {
+        "operationId": "deleteInvoice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete an Invoice by id",
+        "tags": [
+          "Invoice"
+        ]
+      },
+      "get": {
+        "operationId": "getInvoice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInvoiceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get an Invoice by id",
+        "tags": [
+          "Invoice"
+        ]
+      },
+      "put": {
+        "operationId": "updateInvoice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoicePutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInvoiceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update an Invoice by id",
+        "tags": [
+          "Invoice"
+        ]
+      }
+    },
     "/api/member": {
       "get": {
-        "operationId": "getAllUsers_1",
+        "operationId": "getAllMembers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -559,6 +1578,207 @@
         "summary": "Create a new Member",
         "tags": [
           "Member"
+        ]
+      }
+    },
+    "/api/member/picture": {
+      "post": {
+        "operationId": "uploadMemberProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Upload a member profile picture into the object storage (public)",
+        "tags": [
+          "Member"
+        ]
+      }
+    },
+    "/api/member/subscription": {
+      "get": {
+        "operationId": "getAllMemberSubscriptions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListMemberSubscriptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all MemberSubscriptions",
+        "tags": [
+          "Member Subscription"
+        ]
+      },
+      "post": {
+        "operationId": "createMemberSubscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberSubscriptionPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberSubscriptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new MemberSubscription",
+        "tags": [
+          "Member Subscription"
+        ]
+      }
+    },
+    "/api/member/subscription/{id}": {
+      "delete": {
+        "operationId": "deleteMemberSubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a MemberSubscription by id",
+        "tags": [
+          "Member Subscription"
+        ]
+      },
+      "get": {
+        "operationId": "getMemberSubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberSubscriptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a MemberSubscription by id",
+        "tags": [
+          "Member Subscription"
+        ]
+      },
+      "put": {
+        "operationId": "updateMemberSubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberSubscriptionPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberSubscriptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a MemberSubscription by id",
+        "tags": [
+          "Member Subscription"
         ]
       }
     },
@@ -664,6 +1884,330 @@
         ]
       }
     },
+    "/api/payment": {
+      "get": {
+        "operationId": "getAllPayments",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListPaymentTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Payments",
+        "tags": [
+          "Payment"
+        ]
+      },
+      "post": {
+        "operationId": "createPayment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePaymentTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Payment",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payment/method": {
+      "get": {
+        "operationId": "getAllPaymentMethods",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListPaymentMethodTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Payment Methods",
+        "tags": [
+          "Payment"
+        ]
+      },
+      "post": {
+        "operationId": "createPaymentMethod",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentMethodPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePaymentMethodTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Payment Method",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payment/method/{id}": {
+      "delete": {
+        "operationId": "deletePaymentMethod",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Payment Method by id",
+        "tags": [
+          "Payment"
+        ]
+      },
+      "get": {
+        "operationId": "getPaymentMethod",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePaymentMethodTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Payment Method with its Permissions by id",
+        "tags": [
+          "Payment"
+        ]
+      },
+      "put": {
+        "operationId": "updatePaymentMethod",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentMethodPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePaymentMethodTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Payment Method by id",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
+    "/api/payment/{id}": {
+      "delete": {
+        "operationId": "deletePayment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Payment by id",
+        "tags": [
+          "Payment"
+        ]
+      },
+      "get": {
+        "operationId": "getPayment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePaymentTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Payment by id",
+        "tags": [
+          "Payment"
+        ]
+      },
+      "put": {
+        "operationId": "updatePayment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePaymentTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Payment by id",
+        "tags": [
+          "Payment"
+        ]
+      }
+    },
     "/api/permission": {
       "get": {
         "operationId": "getAllPermissions",
@@ -753,6 +2297,16 @@
     "/api/role": {
       "get": {
         "operationId": "getAllRoles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -984,9 +2538,629 @@
         ]
       }
     },
+    "/api/storage/upload": {
+      "post": {
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "bucket",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Upload a file into the object storage",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/storage/upload/asset/document": {
+      "post": {
+        "operationId": "uploadAssetDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "(private)",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/storage/upload/asset/maintenance": {
+      "post": {
+        "operationId": "uploadMaintenanceRecord",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "(private)",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/storage/upload/expense/receipt": {
+      "post": {
+        "operationId": "uploadExpenseReceipt",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "(private)",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/storage/upload/payment-method/doc": {
+      "post": {
+        "operationId": "uploadPaymentMethodDoc",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "(private)",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/storage/upload/report/attachment": {
+      "post": {
+        "operationId": "uploadReportAttachment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "(private)",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/storage/{id}": {
+      "delete": {
+        "operationId": "deleteFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "delete a file from object storage and database",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/storage/{id}/url": {
+      "get": {
+        "operationId": "getUrl",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseString"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a file from the object storage by ID",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/subscription": {
+      "get": {
+        "operationId": "getAllSubscriptions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListSubscriptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Subscriptions",
+        "tags": [
+          "Subscription"
+        ]
+      },
+      "post": {
+        "operationId": "createSubscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSubscriptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Subscription",
+        "tags": [
+          "Subscription"
+        ]
+      }
+    },
+    "/api/subscription/{id}": {
+      "delete": {
+        "operationId": "deleteSubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Subscription by id",
+        "tags": [
+          "Subscription"
+        ]
+      },
+      "get": {
+        "operationId": "getSubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSubscriptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Subscription by id",
+        "tags": [
+          "Subscription"
+        ]
+      },
+      "put": {
+        "operationId": "updateSubscription",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSubscriptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Subscription by id",
+        "tags": [
+          "Subscription"
+        ]
+      }
+    },
+    "/api/subscriptionAvailed": {
+      "get": {
+        "operationId": "getAllSubscriptionAvailed",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListSubscriptionAvailedTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Subscription Availed",
+        "tags": [
+          "Subscription Availed"
+        ]
+      },
+      "post": {
+        "operationId": "createSubscriptionAvailed",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionAvailedPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSubscriptionAvailedTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Subscription Availed",
+        "tags": [
+          "Subscription Availed"
+        ]
+      }
+    },
+    "/api/subscriptionAvailed/{id}": {
+      "delete": {
+        "operationId": "deleteSubscriptionAvailed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Subscription Availed by id",
+        "tags": [
+          "Subscription Availed"
+        ]
+      },
+      "get": {
+        "operationId": "getSubscriptionAvailed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSubscriptionAvailedTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Subscription Availed by id",
+        "tags": [
+          "Subscription Availed"
+        ]
+      }
+    },
     "/api/user": {
       "get": {
         "operationId": "getAllUsers",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1155,7 +3329,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/LogInResponse"
                 }
               }
             },
@@ -1178,11 +3352,138 @@
           },
           "description": {
             "type": "string"
+          },
+          "field": {
+            "type": "string"
           }
         },
         "required": [
           "code",
           "description"
+        ]
+      },
+      "ApiResponseAssetCategoryTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AssetCategoryTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseAssetMaintenanceTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AssetMaintenanceTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseAssetTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AssetTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseBillingCycleTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BillingCycleTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
         ]
       },
       "ApiResponseBranchEmployeesDTO": {
@@ -1283,6 +3584,173 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/EmployeeTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseInvoiceTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/InvoiceTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListAssetCategoryTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetCategoryTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListAssetMaintenanceTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetMaintenanceTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListAssetTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListBillingCycleTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BillingCycleTableDTO"
+            }
           },
           "errors": {
             "type": "array",
@@ -1411,6 +3879,74 @@
           "timestamp"
         ]
       },
+      "ApiResponseListInvoiceTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListMemberSubscriptionTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberSubscriptionTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListMemberTableDTO": {
         "type": "object",
         "properties": {
@@ -1418,6 +3954,74 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MemberTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListPaymentMethodTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentMethodTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListPaymentTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentTableDTO"
             }
           },
           "errors": {
@@ -1513,6 +4117,108 @@
           "timestamp"
         ]
       },
+      "ApiResponseListScheduleTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListSubscriptionAvailedTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionAvailedTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListSubscriptionTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubscriptionTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListUserTableDTO": {
         "type": "object",
         "properties": {
@@ -1521,6 +4227,37 @@
             "items": {
               "$ref": "#/components/schemas/UserTableDTO"
             }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseMemberSubscriptionTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MemberSubscriptionTableDTO"
           },
           "errors": {
             "type": "array",
@@ -1578,11 +4315,104 @@
           "timestamp"
         ]
       },
+      "ApiResponseObjectStorage": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ObjectStorage"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseOptionalPermission": {
         "type": "object",
         "properties": {
           "data": {
             "$ref": "#/components/schemas/Permission"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponsePaymentMethodTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PaymentMethodTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponsePaymentTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PaymentTableDTO"
           },
           "errors": {
             "type": "array",
@@ -1671,6 +4501,130 @@
           "timestamp"
         ]
       },
+      "ApiResponseScheduleTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ScheduleTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseString": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseSubscriptionAvailedTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SubscriptionAvailedTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseSubscriptionTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SubscriptionTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseUnit": {
         "type": "object",
         "properties": {
@@ -1730,6 +4684,422 @@
           "timestamp"
         ]
       },
+      "AssetCategoryPostDTO": {
+        "type": "object",
+        "description": "Format for Asset Category create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdById",
+          "name"
+        ]
+      },
+      "AssetCategoryPutDTO": {
+        "type": "object",
+        "description": "Format for Asset Category update",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "updatedById"
+        ]
+      },
+      "AssetCategoryTableDTO": {
+        "type": "object",
+        "description": "Format for Asset Category read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "AssetMaintenancePatchDTO": {
+        "type": "object",
+        "properties": {
+          "completionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "OVERDUE",
+              "COMPLETED",
+              "SKIPPED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "objectIds",
+          "status",
+          "updatedById"
+        ]
+      },
+      "AssetMaintenanceTableDTO": {
+        "type": "object",
+        "description": "Format for Asset Maintenance Log read",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "completionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maintenanceDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maintenanceScheduleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "dueDate",
+          "id",
+          "maintenanceDate",
+          "objectIds",
+          "status"
+        ]
+      },
+      "AssetPostDTO": {
+        "type": "object",
+        "properties": {
+          "assetCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endOfLife": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDateRangeValid": {
+            "type": "boolean"
+          },
+          "manufacturedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "remarks": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "assetCategoryId",
+          "branchId",
+          "createdById",
+          "isDateRangeValid",
+          "name",
+          "objectIds"
+        ]
+      },
+      "AssetPutDTO": {
+        "type": "object",
+        "properties": {
+          "assetCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endOfLife": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isDateRangeValid": {
+            "type": "boolean"
+          },
+          "manufacturedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "assetCategoryId",
+          "branchId",
+          "isDateRangeValid",
+          "name",
+          "objectIds",
+          "updatedById"
+        ]
+      },
+      "AssetTableDTO": {
+        "type": "object",
+        "properties": {
+          "assetCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endOfLife": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "manufacturedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "assetCategoryId",
+          "branchId",
+          "id",
+          "name",
+          "objectIds"
+        ]
+      },
+      "BillingCyclePostDTO": {
+        "type": "object",
+        "description": "Format for Billing Cycle create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gracePeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intervalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intervals": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdById",
+          "gracePeriodDays",
+          "intervalCount",
+          "intervals",
+          "name"
+        ]
+      },
+      "BillingCyclePutDTO": {
+        "type": "object",
+        "description": "Format for Billing Cycle update",
+        "properties": {
+          "gracePeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intervalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intervals": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "gracePeriodDays",
+          "intervalCount",
+          "intervals",
+          "name",
+          "updatedById"
+        ]
+      },
+      "BillingCycleTableDTO": {
+        "type": "object",
+        "description": "Format for Billing Cycle read",
+        "properties": {
+          "gracePeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intervalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intervals": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "gracePeriodDays",
+          "id",
+          "intervalCount",
+          "intervals",
+          "name"
+        ]
+      },
       "BranchEmployeesDTO": {
         "type": "object",
         "description": "Format for Branch with Personnel read",
@@ -1746,6 +5116,22 @@
         },
         "required": [
           "branch"
+        ]
+      },
+      "BranchListDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ]
       },
       "BranchPersonnelPostDTO": {
@@ -1767,8 +5153,10 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
               "UNDECIDED"
             ]
           }
@@ -1795,8 +5183,10 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
               "UNDECIDED"
             ]
           },
@@ -1824,10 +5214,6 @@
             "type": "string",
             "format": "uuid"
           },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -1839,14 +5225,12 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
               "UNDECIDED"
             ]
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
           },
           "updatedById": {
             "type": "string",
@@ -1856,10 +5240,8 @@
         "required": [
           "actorId",
           "branchId",
-          "createdAt",
           "id",
-          "status",
-          "updatedAt"
+          "status"
         ]
       },
       "BranchPostDTO": {
@@ -1874,10 +5256,12 @@
             "format": "uuid"
           },
           "latitude": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^-?\\d{1,3}\\.\\d{6,15}$"
           },
           "longitude": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^-?\\d{1,3}\\.\\d{6,15}$"
           },
           "name": {
             "type": "string"
@@ -1889,8 +5273,8 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "CLOSED",
               "UNDECIDED"
             ]
           }
@@ -1912,10 +5296,12 @@
             "type": "string"
           },
           "latitude": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^-?\\d{1,3}\\.\\d{6,15}$"
           },
           "longitude": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^-?\\d{1,3}\\.\\d{6,15}$"
           },
           "name": {
             "type": "string"
@@ -1927,8 +5313,8 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "CLOSED",
               "UNDECIDED"
             ]
           },
@@ -1969,8 +5355,8 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "CLOSED",
               "UNDECIDED"
             ]
           }
@@ -1990,10 +5376,6 @@
         "properties": {
           "address": {
             "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           },
           "createdById": {
             "type": "string",
@@ -2015,14 +5397,10 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "CLOSED",
               "UNDECIDED"
             ]
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
           },
           "updatedById": {
             "type": "string",
@@ -2031,13 +5409,11 @@
         },
         "required": [
           "address",
-          "createdAt",
           "id",
           "latitude",
           "longitude",
           "name",
-          "status",
-          "updatedAt"
+          "status"
         ]
       },
       "EmployeeInBranchDTO": {
@@ -2060,13 +5436,17 @@
         "description": "Format for Employee create",
         "properties": {
           "contactNo": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 25,
+            "minLength": 11
           },
           "firstName": {
             "type": "string"
           },
           "middleName": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "profilePictureId": {
             "type": "string",
@@ -2081,7 +5461,9 @@
             ]
           },
           "suffix": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "surname": {
             "type": "string"
@@ -2103,13 +5485,17 @@
         "description": "Format for Employee update",
         "properties": {
           "contactNo": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 25,
+            "minLength": 11
           },
           "firstName": {
             "type": "string"
           },
           "middleName": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "profilePictureId": {
             "type": "string",
@@ -2124,7 +5510,9 @@
             ]
           },
           "suffix": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "surname": {
             "type": "string"
@@ -2212,19 +5600,216 @@
           "surname"
         ]
       },
+      "InvoicePostDTO": {
+        "type": "object",
+        "description": "Format for Invoice create",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gracePeriodDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "memberSubscriptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ISSUED",
+              "PAID",
+              "OVERDUE"
+            ]
+          },
+          "subscriptionAvailedId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "systemGenerated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "createdById",
+          "dueDate",
+          "gracePeriodDate",
+          "memberSubscriptionId",
+          "status",
+          "subscriptionAvailedId",
+          "subtotal"
+        ]
+      },
+      "InvoicePutDTO": {
+        "type": "object",
+        "description": "Format for Invoice update",
+        "properties": {
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gracePeriodDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ISSUED",
+              "PAID",
+              "OVERDUE"
+            ]
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "dueDate",
+          "gracePeriodDate",
+          "status",
+          "subtotal",
+          "updatedById"
+        ]
+      },
+      "InvoiceTableDTO": {
+        "type": "object",
+        "description": "Format for Invoice read",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gracePeriodDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "memberSubscriptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ISSUED",
+              "PAID",
+              "OVERDUE"
+            ]
+          },
+          "subscriptionAvailedId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "systemGenerated": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "number"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "createdById",
+          "dueDate",
+          "gracePeriodDate",
+          "id",
+          "issuedAt",
+          "status",
+          "subtotal",
+          "systemGenerated",
+          "total"
+        ]
+      },
       "LogInDTO": {
         "type": "object",
         "properties": {
-          "email": {
+          "password": {
             "type": "string"
           },
-          "password": {
+          "username": {
             "type": "string"
           }
         },
         "required": [
-          "email",
-          "password"
+          "password",
+          "username"
+        ]
+      },
+      "LogInResponse": {
+        "type": "object",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branches": {
+            "type": "array",
+            "nullable": true,
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/BranchListDTO"
+            }
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "actorId",
+          "branches",
+          "email"
         ]
       },
       "MemberPostDTO": {
@@ -2239,7 +5824,9 @@
             "type": "string"
           },
           "middleName": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "profilePictureId": {
             "type": "string",
@@ -2254,7 +5841,9 @@
             ]
           },
           "suffix": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "surname": {
             "type": "string"
@@ -2275,7 +5864,9 @@
             "type": "string"
           },
           "middleName": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "profilePictureId": {
             "type": "string",
@@ -2290,7 +5881,9 @@
             ]
           },
           "suffix": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "surname": {
             "type": "string"
@@ -2305,6 +5898,154 @@
           "status",
           "surname",
           "updatedById"
+        ]
+      },
+      "MemberSubscriptionPostDTO": {
+        "type": "object",
+        "description": "Format for MemberSubscription create",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CANCELED",
+              "DONE"
+            ]
+          },
+          "subscriptionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "createdById",
+          "startDate",
+          "status",
+          "subscriptionId"
+        ]
+      },
+      "MemberSubscriptionPutDTO": {
+        "type": "object",
+        "description": "Format for MemberSubscription update",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CANCELED",
+              "DONE"
+            ]
+          },
+          "subscriptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updateCurrentSubscription": {
+            "type": "boolean"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "status",
+          "subscriptionId",
+          "updateCurrentSubscription",
+          "updatedById"
+        ]
+      },
+      "MemberSubscriptionTableDTO": {
+        "type": "object",
+        "description": "Format for MemberSubscription read",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CANCELED",
+              "DONE"
+            ]
+          },
+          "subscriptionAvailedId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "id",
+          "startDate",
+          "status"
         ]
       },
       "MemberTableDTO": {
@@ -2355,6 +6096,65 @@
           "surname"
         ]
       },
+      "ObjectStorage": {
+        "type": "object",
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tags": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "bucket",
+          "createdAt",
+          "fileKey",
+          "fileSize",
+          "id",
+          "mimeType",
+          "name",
+          "status",
+          "tags",
+          "updatedAt"
+        ]
+      },
       "PageMetadata": {
         "type": "object",
         "properties": {
@@ -2380,6 +6180,231 @@
           "pageIndex",
           "pageSize",
           "totalCount"
+        ]
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PaymentMethodPostDTO": {
+        "type": "object",
+        "description": "Format for Payment Method create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdById",
+          "name"
+        ]
+      },
+      "PaymentMethodPutDTO": {
+        "type": "object",
+        "description": "Format for Payment Method update",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "updatedById"
+        ]
+      },
+      "PaymentMethodTableDTO": {
+        "type": "object",
+        "description": "Format for Payment Method read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "PaymentPostDTO": {
+        "type": "object",
+        "description": "Format for Payment create",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "failureReason": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
+          },
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentMethodId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNum": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "createdById",
+          "invoiceId",
+          "paymentMethodId",
+          "status"
+        ]
+      },
+      "PaymentPutDTO": {
+        "type": "object",
+        "description": "Format for Payment update",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "failureReason": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentMethodId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "amount",
+          "paymentMethodId",
+          "status",
+          "updatedById"
+        ]
+      },
+      "PaymentTableDTO": {
+        "type": "object",
+        "description": "Format for Payment read",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "failureReason": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "paymentMethodId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNum": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "amount",
+          "createdById",
+          "id",
+          "invoiceId",
+          "paymentMethodId",
+          "status"
         ]
       },
       "Permission": {
@@ -2522,6 +6547,422 @@
           "name"
         ]
       },
+      "SchedulePostDTO": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 7,
+            "minimum": 1
+          },
+          "intervalUnit": {
+            "type": "string",
+            "enum": [
+              "Nanos",
+              "Micros",
+              "Millis",
+              "Seconds",
+              "Minutes",
+              "Hours",
+              "HalfDays",
+              "Days",
+              "Weeks",
+              "Months",
+              "Years",
+              "Decades",
+              "Centuries",
+              "Millennia",
+              "Eras",
+              "Forever"
+            ]
+          },
+          "intervalValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isAdvancedSettingsAllowed": {
+            "type": "boolean"
+          },
+          "leadTimeHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monthOfYear": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 12,
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeToCompleteHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "weekRank": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": -1
+          }
+        },
+        "required": [
+          "assetId",
+          "createdById",
+          "intervalUnit",
+          "intervalValue",
+          "isAdvancedSettingsAllowed",
+          "leadTimeHours",
+          "name",
+          "startDate",
+          "timeToCompleteHours"
+        ]
+      },
+      "SchedulePutDTO": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 7,
+            "minimum": 1
+          },
+          "intervalUnit": {
+            "type": "string",
+            "enum": [
+              "Nanos",
+              "Micros",
+              "Millis",
+              "Seconds",
+              "Minutes",
+              "Hours",
+              "HalfDays",
+              "Days",
+              "Weeks",
+              "Months",
+              "Years",
+              "Decades",
+              "Centuries",
+              "Millennia",
+              "Eras",
+              "Forever"
+            ]
+          },
+          "intervalValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isAdvancedSettingsAllowed": {
+            "type": "boolean"
+          },
+          "leadTimeHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monthOfYear": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 12,
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeToCompleteHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "weekRank": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": -1
+          }
+        },
+        "required": [
+          "active",
+          "intervalUnit",
+          "intervalValue",
+          "isAdvancedSettingsAllowed",
+          "leadTimeHours",
+          "name",
+          "startDate",
+          "timeToCompleteHours",
+          "updatedById"
+        ]
+      },
+      "ScheduleTableDTO": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intervalUnit": {
+            "type": "string",
+            "enum": [
+              "Nanos",
+              "Micros",
+              "Millis",
+              "Seconds",
+              "Minutes",
+              "Hours",
+              "HalfDays",
+              "Days",
+              "Weeks",
+              "Months",
+              "Years",
+              "Decades",
+              "Centuries",
+              "Millennia",
+              "Eras",
+              "Forever"
+            ]
+          },
+          "intervalValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "leadTimeHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monthOfYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeToCompleteHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "weekRank": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "active",
+          "assetId",
+          "id",
+          "intervalUnit",
+          "intervalValue",
+          "leadTimeHours",
+          "name",
+          "startDate",
+          "timeToCompleteHours"
+        ]
+      },
+      "SubscriptionAvailedPostDTO": {
+        "type": "object",
+        "description": "Format for Subscription Availed create",
+        "properties": {
+          "subscriptionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "subscriptionId"
+        ]
+      },
+      "SubscriptionAvailedTableDTO": {
+        "type": "object",
+        "description": "Format for Subscription Availed read",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "gracePeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "intervalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "intervals": {
+            "type": "string",
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "gracePeriodDays",
+          "id",
+          "intervalCount",
+          "intervals",
+          "name"
+        ]
+      },
+      "SubscriptionPostDTO": {
+        "type": "object",
+        "description": "Format for Subscription create",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "billingCycleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "amount",
+          "billingCycleId",
+          "createdById",
+          "description",
+          "name"
+        ]
+      },
+      "SubscriptionPutDTO": {
+        "type": "object",
+        "description": "Format for Subscription update",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "billingCycleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "amount",
+          "billingCycleId",
+          "description",
+          "name",
+          "updatedById"
+        ]
+      },
+      "SubscriptionTableDTO": {
+        "type": "object",
+        "description": "Format for Subscription read",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "billingCycleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "amount",
+          "billingCycleId",
+          "createdAt",
+          "description",
+          "id",
+          "name",
+          "updatedAt"
+        ]
+      },
       "UserPostDTO": {
         "type": "object",
         "properties": {
@@ -2529,7 +6970,9 @@
             "type": "string"
           },
           "password": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 8
           }
         },
         "required": [
@@ -2555,17 +6998,27 @@
             "type": "string",
             "format": "uuid"
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "email": {
             "type": "string"
           },
           "id": {
             "type": "string",
             "format": "uuid"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
+          "createdAt",
           "email",
-          "id"
+          "id",
+          "updatedAt"
         ]
       }
     }

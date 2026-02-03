@@ -50,8 +50,10 @@ export interface BranchPersonnelPutDTO {
  * @export
  */
 export const BranchPersonnelPutDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
+    Active: 'ACTIVE',
+    Moved: 'MOVED',
+    Terminated: 'TERMINATED',
+    Resigned: 'RESIGNED',
     Undecided: 'UNDECIDED'
 } as const;
 export type BranchPersonnelPutDTOStatusEnum = typeof BranchPersonnelPutDTOStatusEnum[keyof typeof BranchPersonnelPutDTOStatusEnum];

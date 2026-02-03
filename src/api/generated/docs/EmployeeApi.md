@@ -6,9 +6,10 @@ All URIs are relative to *http://localhost:8080*
 |------------- | ------------- | -------------|
 | [**createEmployee**](EmployeeApi.md#createemployee) | **POST** /api/employee | Create a new Employee |
 | [**deleteEmployee**](EmployeeApi.md#deleteemployee) | **DELETE** /api/employee/{id} | Delete an Employee by id |
-| [**getAllUsers2**](EmployeeApi.md#getallusers2) | **GET** /api/employee | Get all Employees |
+| [**getAllEmployees**](EmployeeApi.md#getallemployees) | **GET** /api/employee | Get all Employees |
 | [**getEmployee**](EmployeeApi.md#getemployee) | **GET** /api/employee/{id} | Get an Employee by id |
 | [**updateEmployee**](EmployeeApi.md#updateemployee) | **PUT** /api/employee/{id} | Update an Employee by id |
+| [**uploadEmployeeProfile**](EmployeeApi.md#uploademployeeprofile) | **POST** /api/employee/picture | Upload an employee profile picture into the object storage (public) |
 
 
 
@@ -142,9 +143,9 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
-## getAllUsers2
+## getAllEmployees
 
-> ApiResponseListEmployeeTableDTO getAllUsers2()
+> ApiResponseListEmployeeTableDTO getAllEmployees(pageable)
 
 Get all Employees
 
@@ -155,14 +156,19 @@ import {
   Configuration,
   EmployeeApi,
 } from '';
-import type { GetAllUsers2Request } from '';
+import type { GetAllEmployeesRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
   const api = new EmployeeApi();
 
+  const body = {
+    // Pageable
+    pageable: ...,
+  } satisfies GetAllEmployeesRequest;
+
   try {
-    const data = await api.getAllUsers2();
+    const data = await api.getAllEmployees(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -175,7 +181,10 @@ example().catch(console.error);
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
 
 ### Return type
 
@@ -313,6 +322,71 @@ example().catch(console.error);
 ### Return type
 
 [**ApiResponseEmployeeTableDTO**](ApiResponseEmployeeTableDTO.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## uploadEmployeeProfile
+
+> ApiResponseObjectStorage uploadEmployeeProfile(uploadBranchLogoRequest)
+
+Upload an employee profile picture into the object storage (public)
+
+### Example
+
+```ts
+import {
+  Configuration,
+  EmployeeApi,
+} from '';
+import type { UploadEmployeeProfileRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new EmployeeApi();
+
+  const body = {
+    // UploadBranchLogoRequest (optional)
+    uploadBranchLogoRequest: ...,
+  } satisfies UploadEmployeeProfileRequest;
+
+  try {
+    const data = await api.uploadEmployeeProfile(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **uploadBranchLogoRequest** | [UploadBranchLogoRequest](UploadBranchLogoRequest.md) |  | [Optional] |
+
+### Return type
+
+[**ApiResponseObjectStorage**](ApiResponseObjectStorage.md)
 
 ### Authorization
 

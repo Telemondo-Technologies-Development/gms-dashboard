@@ -27,12 +27,6 @@ export interface BranchTableDTO {
     address: string;
     /**
      * 
-     * @type {Date}
-     * @memberof BranchTableDTO
-     */
-    createdAt: Date;
-    /**
-     * 
      * @type {string}
      * @memberof BranchTableDTO
      */
@@ -69,12 +63,6 @@ export interface BranchTableDTO {
     status: BranchTableDTOStatusEnum;
     /**
      * 
-     * @type {Date}
-     * @memberof BranchTableDTO
-     */
-    updatedAt: Date;
-    /**
-     * 
      * @type {string}
      * @memberof BranchTableDTO
      */
@@ -86,8 +74,8 @@ export interface BranchTableDTO {
  * @export
  */
 export const BranchTableDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
+    Active: 'ACTIVE',
+    Closed: 'CLOSED',
     Undecided: 'UNDECIDED'
 } as const;
 export type BranchTableDTOStatusEnum = typeof BranchTableDTOStatusEnum[keyof typeof BranchTableDTOStatusEnum];
@@ -98,13 +86,11 @@ export type BranchTableDTOStatusEnum = typeof BranchTableDTOStatusEnum[keyof typ
  */
 export function instanceOfBranchTableDTO(value: object): value is BranchTableDTO {
     if (!('address' in value) || value['address'] === undefined) return false;
-    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('latitude' in value) || value['latitude'] === undefined) return false;
     if (!('longitude' in value) || value['longitude'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
-    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -119,14 +105,12 @@ export function BranchTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     return {
         
         'address': json['address'],
-        'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'id': json['id'],
         'latitude': json['latitude'],
         'longitude': json['longitude'],
         'name': json['name'],
         'status': json['status'],
-        'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
 }
@@ -143,14 +127,12 @@ export function BranchTableDTOToJSONTyped(value?: BranchTableDTO | null, ignoreD
     return {
         
         'address': value['address'],
-        'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'id': value['id'],
         'latitude': value['latitude'],
         'longitude': value['longitude'],
         'name': value['name'],
         'status': value['status'],
-        'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],
     };
 }
