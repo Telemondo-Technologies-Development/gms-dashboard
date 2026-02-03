@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from '@tanstack/react-form'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { CalendarIcon, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogClose,
@@ -23,101 +24,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { apiResponseMemberTableSchema, memberPostDtoSchema } from '@/types/membership/memberSchemas'
 import type { AddMemberDialogProps, MemberFormData } from '@/types/membership/memberSchemas'
-import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
-import type { JwtClaims } from '@/types/user/userSchemas'
 import type { MemberFormValues } from '@/types/membership/memberSchemas'
-import { SubscriptionAvailedApi } from '@/api/generated/apis/SubscriptionAvailedApi'
 import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionApi'
-import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
+import { SubscriptionApi } from '@/api/generated/apis/SubscriptionApi'
+import { MemberApi } from '@/api/generated/apis/MemberApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
-import type { BranchPersonnelTableDTO } from '@/api/generated/models/BranchPersonnelTableDTO'
-import { BranchPersonnelTableDTOStatusEnum } from '@/api/generated/models/BranchPersonnelTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAuthSession } from '@/lib/auth-session'
+import { AddBillingDialog } from '@/components/membership-components/AddBillingForm'
+import { useAddMemberDialogData } from '@/hooks/useAddMemberDialogData'
+import { useBillingActions } from '@/hooks/useBillingActions'
+import { memberQueryKeys } from '@/lib/QueryKeys'
 
-
-
-function tryDecodeJwtClaims(token: string): JwtClaims | null {
-  const parts = token.split('.')
-  if (parts.length !== 3) return null
-  const payload = parts[1]
-  if (!payload) return null
-
-  try {
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
-    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
-    if (typeof atob !== 'function') return null
-    const json = atob(padded)
-    const parsed: unknown = JSON.parse(json)
-    return parsed && typeof parsed === 'object' ? (parsed as JwtClaims) : null
-  } catch {
-    return null
-  }
-}
-
-function getStringClaim(claims: JwtClaims | null, key: string): string | undefined {
-  if (!claims) return undefined
-  const value = claims[key]
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
 
 function looksLikeUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-}
-
-async function fetchJsonOrThrow(url: string, token?: string): Promise<unknown> {
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    credentials: 'include',
-  })
-
-  const rawText = await response.text().catch(() => '')
-  if (!response.ok) {
-    throw new Error(`Request failed (${response.status}). ${rawText || 'Check server logs for details.'}`)
-  }
-
-  try {
-    return JSON.parse(rawText)
-  } catch {
-    throw new Error('Unexpected response from the server (invalid JSON).')
-  }
-}
-
-async function fetchUserById(userId: string, token?: string): Promise<UserTable> {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-  const url = `${base}/api/user/${encodeURIComponent(userId)}`
-
-  const json = await fetchJsonOrThrow(url, token)
-  const parsed = apiResponseUserTableSchema.safeParse(json)
-  if (!parsed.success) {
-    throw new Error('Failed to validate user response.')
-  }
-  if (!parsed.data.success) {
-    throw new Error(parsed.data.message ?? 'Failed to fetch user.')
-  }
-  return parsed.data.data
-}
-
-async function fetchUserByEmail(email: string, token?: string): Promise<UserTable | null> {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-  const url = `${base}/api/user`
-
-  const json = await fetchJsonOrThrow(url, token)
-  const parsed = apiResponseListUserTableSchema.safeParse(json)
-  if (!parsed.success) {
-    throw new Error('Failed to validate users response.')
-  }
-  if (!parsed.data.success) {
-    throw new Error(parsed.data.message ?? 'Failed to fetch users.')
-  }
-
-  const needle = email.trim().toLowerCase()
-  return parsed.data.data.find((u) => u.email.toLowerCase() === needle) ?? null
 }
 
 export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
@@ -130,15 +51,27 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('')
+  const [paymentMethodId, setPaymentMethodId] = useState('')
+  const [paymentMethodName, setPaymentMethodName] = useState('')
   const [membershipDetails, setMembershipDetails] = useState('')
 
   const queryClient = useQueryClient()
-  
+
+  const {
+    token,
+    currentUserQuery,
+    resolvedActorId,
+    currentUserEmail,
+    branchPersonnelQuery,
+    subscriptionsQuery,
+  } = useAddMemberDialogData(session)
+
+  const { ensureInvoiceForSubscription, createPaymentIfNeeded } = useBillingActions()
+
   // Initialize API clients
-  const subscriptionAvailedApi = getAuthenticatedApi(SubscriptionAvailedApi)
   const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
-  const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
+  const subscriptionApi = getAuthenticatedApi(SubscriptionApi)
+  const memberApi = getAuthenticatedApi(MemberApi)
 
   const defaultValues: MemberFormValues = {
     createdById: '',
@@ -150,70 +83,6 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
     status: 'IN',
   }
 
-  const token = session.token ?? ''
-  const storedEmail = session.email ?? ''
-  const storedUsername = session.username ?? ''
-  const storedActorId = session.actorId ?? ''
-  const claims = token ? tryDecodeJwtClaims(token) : null
-  const authUserId = (() => {
-    const sub = getStringClaim(claims, 'sub')
-    return sub && looksLikeUuid(sub) ? sub : undefined
-  })()
-
-  const currentUserQuery = useQuery({
-    queryKey: ['currentUser', authUserId ?? null, storedEmail || null],
-    enabled: typeof window !== 'undefined' && (!!authUserId || !!storedEmail),
-    queryFn: async () => {
-      if (authUserId) return await fetchUserById(authUserId, token)
-      if (storedEmail) return await fetchUserByEmail(storedEmail, token)
-      return null
-    },
-    retry: false,
-  })
-
-  const createdByActorId = currentUserQuery.data?.actorId
-  const resolvedActorId = createdByActorId ?? (storedActorId || undefined)
-  const currentUserEmail = currentUserQuery.data?.email ?? storedEmail ?? storedUsername
-  
-  // Fetch user's branch
-  const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
-    queryKey: ['branchPersonnel', resolvedActorId ?? null, token || null],
-    enabled: !!resolvedActorId,
-    queryFn: async () => {
-      if (!resolvedActorId) return null
-      const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } })
-      if (!response.success) {
-        throw new Error(response.message ?? 'Failed to fetch branch personnel.')
-      }
-      const record =
-        response.data?.find(
-          (r) => r.actorId === resolvedActorId && r.status === BranchPersonnelTableDTOStatusEnum.Active,
-        ) ?? null
-      return record
-    },
-    retry: false,
-  })
-  
-  // Fetch available subscription availed
-  const subscriptionsQuery = useQuery<SubscriptionAvailedTableDTO[]>({
-    queryKey: ['subscriptionAvailed'],
-    queryFn: async () => {
-      try {
-        console.log('Fetching subscription availed...')
-        const response = await subscriptionAvailedApi.getAllSubscriptionAvailed({ pageable: {} })
-        console.log('Subscription availed response:', response)
-        console.log('Subscription availed data:', response.data)
-        return response.data ?? []
-      } catch (error) {
-        console.error('Failed to fetch subscription availed:', error)
-        return []
-      }
-    },
-    retry: false,
-  })
-  
-  // No need to fetch billing cycles separately - they're included in SubscriptionAvailed
-  
   const selectedSubscription = subscriptionsQuery.data?.find(
     (s: SubscriptionAvailedTableDTO) => s.id === selectedSubscriptionId,
   )
@@ -288,27 +157,91 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
 
       const member = envelope.data
 
-      const memberActorId = member.actorId
+      // Ensure we have a valid actorId; poll briefly if missing
+      let memberActorId = member.actorId ?? null
       if (!memberActorId) {
-        throw new Error('Member actor id is missing. Cannot create a subscription for this member.')
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            const refreshed = await memberApi.getMember({ id: member.id })
+            if (refreshed.success && refreshed.data?.actorId) {
+              memberActorId = refreshed.data.actorId
+              break
+            }
+          } catch (_) {
+            // ignore and retry
+          }
+          await new Promise((r) => setTimeout(r, 400))
+        }
       }
+      // Final fallback to member.id if actorId is still unavailable
+      const effectiveMemberActorId = memberActorId ?? member.id
       
       // Step 2: Create Member Subscription
+      let createdMemberSubscriptionId: string | undefined
+      let createdInvoiceId: string | undefined
       try {
-        await memberSubscriptionApi.createMemberSubscription({
+        // Map SubscriptionAvailed -> Subscription id when possible
+        let subscriptionIdToUse: string = selectedSubscriptionId
+        if (selectedSubscription) {
+          try {
+            const subsResp = await subscriptionApi.getAllSubscriptions({ pageable: { page: 0, size: 500 } })
+            const list = subsResp.data ?? []
+            const match = list.find(
+              (s) => s.name.trim().toLowerCase() === selectedSubscription.name.trim().toLowerCase() && s.amount === selectedSubscription.amount,
+            )
+            if (match) subscriptionIdToUse = match.id
+          } catch (mapErr) {
+            console.warn('Failed to map availed to subscription; using selected id:', mapErr)
+          }
+        }
+        const subEnvelope = await memberSubscriptionApi.createMemberSubscription({
           memberSubscriptionPostDTO: {
-            actorId: memberActorId,
+            actorId: effectiveMemberActorId,
             branchId,
             createdById,
             startDate,
             endDate,
             status: 'ACTIVE',
-            subscriptionId: selectedSubscriptionId,
+            subscriptionId: subscriptionIdToUse,
           },
         })
+        if (!subEnvelope.success || !subEnvelope.data) {
+          throw new Error(subEnvelope.message ?? 'Failed to create subscription.')
+        }
+        createdMemberSubscriptionId = subEnvelope.data.id
+
+        // Step 2b: Ensure an invoice exists for this subscription (even if payment is not recorded yet)
+        if (createdMemberSubscriptionId && selectedSubscription) {
+          const dueDate = startDate ?? new Date()
+          const graceDays = selectedSubscription.gracePeriodDays ?? 0
+          createdInvoiceId = await ensureInvoiceForSubscription({
+            actorId: effectiveMemberActorId,
+            branchId,
+            createdById,
+            memberSubscriptionId: createdMemberSubscriptionId,
+            subscriptionAvailedId: selectedSubscriptionId,
+            dueDate,
+            gracePeriodDays: graceDays,
+            subtotal: selectedSubscription.amount,
+          })
+        }
       } catch (subError) {
         console.error('Failed to create subscription:', subError)
         throw new Error('Member created but failed to create subscription. Please add subscription manually.')
+      }
+
+      // Step 3: Optionally create a Payment linked to the invoice
+      try {
+        await createPaymentIfNeeded({
+          paymentMethodId,
+          invoiceId: createdInvoiceId,
+          createdById,
+          amount: selectedSubscription?.amount ?? 0,
+          paidAt: new Date(),
+        })
+      } catch (payError) {
+        // Do not block member creation if payment fails; log for debugging
+        console.warn('Payment creation skipped or failed:', payError)
       }
 
       return member
@@ -316,8 +249,8 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
     onSuccess: (data) => {
       setSubmitError(null)
 
-      void queryClient.invalidateQueries({ queryKey: ['members'] })
-      void queryClient.invalidateQueries({ queryKey: ['memberSubscriptions'] })
+      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
+      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscription] })
 
       const fullName = [data.firstName, data.middleName, data.surname, data.suffix].filter(Boolean).join(' ')
       const payload: MemberFormData = {
@@ -342,7 +275,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         membershipDuration: selectedSubscription ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}` : '',
         billingAmount: selectedSubscription?.amount.toString() ?? '',
         billingCycle: selectedSubscription ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}` : '',
-        paymentMethod,
+        paymentMethod: paymentMethodName,
         membershipDetails,
         documents: [],
       }
@@ -369,7 +302,8 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         setStartDate(undefined)
         setEndDate(undefined)
         setSelectedSubscriptionId('')
-        setPaymentMethod('')
+        setPaymentMethodId('')
+        setPaymentMethodName('')
         setMembershipDetails('')
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to create member.'
@@ -385,6 +319,251 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       form.setFieldValue('createdById', resolvedActorId)
     }
   }, [resolvedActorId, form])
+
+  function MemberSubscriptionDetailsCard() {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>Member & Subscription Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-8">
+          <div className="space-y-6">
+            <h3 className="font-semibold leading-none tracking-tight">Member Information</h3>
+            <form.Field name="createdById">
+              {(field) => (
+                <input
+                  type="hidden"
+                  name={field.name}
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+              )}
+            </form.Field>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form.Field
+                name="firstName"
+                validators={{
+                  onChange: ({ value }) => (!value.trim() ? 'First name is required.' : undefined),
+                }}
+              >
+                {(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor={field.name}>First name</Label>
+                    <Input
+                      id={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="First name"
+                    />
+                    {field.state.meta.isTouched && field.state.meta.errors.length ? (
+                      <p className="text-sm text-destructive" role="alert">
+                        {field.state.meta.errors[0]}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+              </form.Field>
+
+              <form.Field name="middleName">
+                {(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor={field.name}>Middle name (optional)</Label>
+                    <Input
+                      id={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="Middle name"
+                    />
+                  </div>
+                )}
+              </form.Field>
+
+              <form.Field
+                name="surname"
+                validators={{
+                  onChange: ({ value }) => (!value.trim() ? 'Surname is required.' : undefined),
+                }}
+              >
+                {(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor={field.name}>Surname</Label>
+                    <Input
+                      id={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="Surname"
+                    />
+                    {field.state.meta.isTouched && field.state.meta.errors.length ? (
+                      <p className="text-sm text-destructive" role="alert">
+                        {field.state.meta.errors[0]}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+              </form.Field>
+
+              <form.Field name="suffix">
+                {(field) => (
+                  <div className="space-y-2">
+                    <Label htmlFor={field.name}>Suffix (optional)</Label>
+                    <Input
+                      id={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="Suffix"
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+
+            <form.Field
+              name="profilePictureId"
+              validators={{
+                onChange: ({ value }) => {
+                  const trimmed = value.trim()
+                  if (!trimmed) return undefined
+                  return looksLikeUuid(trimmed) ? undefined : 'Must be a UUID.'
+                },
+              }}
+            >
+              {(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor={field.name}>Profile picture id (optional)</Label>
+                  <Input
+                    id={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="UUID"
+                  />
+                  {field.state.meta.isTouched && field.state.meta.errors.length ? (
+                    <p className="text-sm text-destructive" role="alert">
+                      {field.state.meta.errors[0]}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Backend expects an existing uploaded image id.</p>
+                  )}
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field name="status">
+              {(field) => (
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select value={field.state.value} onValueChange={(v) => field.handleChange(v as MemberFormValues['status'])}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="IN">IN</SelectItem>
+                      <SelectItem value="OUT">OUT</SelectItem>
+                      <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </form.Field>
+          </div>
+
+          <div className="space-y-6 pt-4 border-t">
+            <h3 className="font-semibold leading-none tracking-tight">Subscription Details</h3>
+            {subscriptionsQuery.isLoading ? (
+              <div className="text-sm text-muted-foreground">Loading subscriptions...</div>
+            ) : subscriptionsQuery.error ? (
+              <div className="text-sm text-destructive">Failed to load subscriptions</div>
+            ) : subscriptionsQuery.data && subscriptionsQuery.data.length === 0 ? (
+              <div className="text-sm text-destructive">
+                No subscriptions available. Please create subscriptions in the admin panel first.
+                <br />
+                <span className="text-xs">Debug: Query returned {subscriptionsQuery.data.length} items</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="subscription">Subscription Plan *</Label>
+                  <Select value={selectedSubscriptionId} onValueChange={setSelectedSubscriptionId}>
+                    <SelectTrigger id="subscription">
+                      <SelectValue placeholder="Select subscription plan" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" sideOffset={4}>
+                      {subscriptionsQuery.data?.map((sub: SubscriptionAvailedTableDTO) => (
+                        <SelectItem key={sub.id} value={sub.id}>
+                          {sub.name} - PHP {sub.amount.toFixed(2)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedSubscription ? (
+                    <p className="text-xs text-muted-foreground">
+                      Interval: {selectedSubscription.intervalCount} {selectedSubscription.intervals} · Grace:{' '}
+                      {selectedSubscription.gracePeriodDays} days
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn('w-full justify-start text-left font-normal', !startDate && 'text-muted-foreground')}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {startDate ? format(startDate, 'PPP') : 'Pick a date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className={cn('w-full justify-start text-left font-normal', !endDate && 'text-muted-foreground')}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? format(endDate, 'PPP') : 'Pick a date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="membershipDetails">Additional Details</Label>
+              <Textarea
+                id="membershipDetails"
+                value={membershipDetails}
+                onChange={(e) => setMembershipDetails(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -407,333 +586,23 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
             e.stopPropagation()
             void form.handleSubmit()
           }}
-          className="space-y-6"
+          className=""
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column: Member Information */}
             <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="">
-                  <div className="space-y-4 border border-border p-4 rounded-2xl mb-4" >
-                    <div className="text-sm font-medium">Member Information</div>
-                    <form.Field name="createdById">
-                      {(field) => (
-                        <input
-                          type="hidden"
-                          name={field.name}
-                          value={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                        />
-                      )}
-                    </form.Field>
-
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <form.Field
-                        name="firstName"
-                        validators={{
-                          onChange: ({ value }) => (!value.trim() ? 'First name is required.' : undefined),
-                        }}
-                      >
-                        {(field) => (
-                          <div className="space-y-2">
-                            <Label htmlFor={field.name}>First name</Label>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="Juan"
-                            />
-                            {field.state.meta.isTouched && field.state.meta.errors.length ? (
-                              <p className="text-sm text-destructive" role="alert">
-                                {field.state.meta.errors[0]}
-                              </p>
-                            ) : null}
-                          </div>
-                        )}
-                      </form.Field>
-
-                      <form.Field name="middleName">
-                        {(field) => (
-                          <div className="space-y-2">
-                            <Label htmlFor={field.name}>Middle name (optional)</Label>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="D."
-                            />
-                          </div>
-                        )}
-                      </form.Field>
-
-                      <form.Field
-                        name="surname"
-                        validators={{
-                          onChange: ({ value }) => (!value.trim() ? 'Surname is required.' : undefined),
-                        }}
-                      >
-                        {(field) => (
-                          <div className="space-y-2">
-                            <Label htmlFor={field.name}>Surname</Label>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="Dela Cruz"
-                            />
-                            {field.state.meta.isTouched && field.state.meta.errors.length ? (
-                              <p className="text-sm text-destructive" role="alert">
-                                {field.state.meta.errors[0]}
-                              </p>
-                            ) : null}
-                          </div>
-                        )}
-                      </form.Field>
-
-                      <form.Field name="suffix">
-                        {(field) => (
-                          <div className="space-y-2">
-                            <Label htmlFor={field.name}>Suffix (optional)</Label>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="Jr."
-                            />
-                          </div>
-                        )}
-                      </form.Field>
-                    </div>
-
-                    <form.Field
-                      name="profilePictureId"
-                      validators={{
-                        onChange: ({ value }) => {
-                          const trimmed = value.trim()
-                          if (!trimmed) return undefined
-                          return looksLikeUuid(trimmed) ? undefined : 'Must be a UUID.'
-                        },
-                      }}
-                    >
-                      {(field) => (
-                        <div className="space-y-2">
-                          <Label htmlFor={field.name}>Profile picture id (optional)</Label>
-                          <Input
-                            id={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            placeholder="UUID"
-                          />
-                          {field.state.meta.isTouched && field.state.meta.errors.length ? (
-                            <p className="text-sm text-destructive" role="alert">
-                              {field.state.meta.errors[0]}
-                            </p>
-                          ) : (
-                            <p className="text-xs text-muted-foreground">
-                              Backend expects an existing uploaded image id.
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </form.Field>
-
-                    <form.Field name="status">
-                      {(field) => (
-                        <div className="space-y-2">
-                          <Label>Status</Label>
-                          <Select value={field.state.value} onValueChange={(v) => field.handleChange(v as MemberFormValues['status'])}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="IN">IN</SelectItem>
-                              <SelectItem value="OUT">OUT</SelectItem>
-                              <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </form.Field>
-                  </div>
-
-                  <div className="space-y-4 border border-border p-4 rounded-2xl">
-                    <div className="text-sm font-medium">Member Subscription</div>
-                    
-                    {subscriptionsQuery.isLoading ? (
-                      <div className="text-sm text-muted-foreground">Loading subscriptions...</div>
-                    ) : subscriptionsQuery.error ? (
-                      <div className="text-sm text-destructive">Failed to load subscriptions</div>
-                    ) : subscriptionsQuery.data && subscriptionsQuery.data.length === 0 ? (
-                      <div className="text-sm text-destructive">
-                        No subscriptions available. Please create subscriptions in the admin panel first.
-                        <br />
-                        <span className="text-xs">Debug: Query returned {subscriptionsQuery.data.length} items</span>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="subscription">Subscription Plan *</Label>
-                          <Select value={selectedSubscriptionId} onValueChange={setSelectedSubscriptionId}>
-                            <SelectTrigger id="subscription">
-                              <SelectValue placeholder="Select subscription plan" />
-                            </SelectTrigger>
-                            <SelectContent position="popper" sideOffset={4}>
-                              {subscriptionsQuery.data?.map((sub: SubscriptionAvailedTableDTO) => (
-                                <SelectItem key={sub.id} value={sub.id}>
-                                  {sub.name} - PHP {sub.amount.toFixed(2)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {selectedSubscription ? (
-                            <p className="text-xs text-muted-foreground">
-                              Interval: {selectedSubscription.intervalCount} {selectedSubscription.intervals} · Grace: {selectedSubscription.gracePeriodDays} days
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Start Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={cn('w-full justify-start text-left font-normal', !startDate && 'text-muted-foreground')}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {startDate ? format(startDate, 'PPP') : 'Pick a date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>End Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={cn('w-full justify-start text-left font-normal', !endDate && 'text-muted-foreground')}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {endDate ? format(endDate, 'PPP') : 'Pick a date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="membershipDetails">Additional Details</Label>
-                      <Textarea
-                        id="membershipDetails"
-                        value={membershipDetails}
-                        onChange={(e) => setMembershipDetails(e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <MemberSubscriptionDetailsCard />
             </div>
 
-            {/* Right Column: Membership & Billing */}
-            <div className="space-y-6">
-              <div className="space-y-4 border border-border p-4 rounded-2xl">
-                <div className="text-sm font-medium">Billing</div>
-
-                {selectedSubscription ? (
-                  <>
-                    <div className="space-y-2">
-                      <Label>Subscription Plan</Label>
-                      <Input value={selectedSubscription.name} disabled />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>Amount (PHP)</Label>
-                      <Input value={selectedSubscription.amount.toFixed(2)} disabled />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Billing Interval</Label>
-                      <Input
-                        value={`${selectedSubscription.intervalCount} ${selectedSubscription.intervals}`}
-                        disabled
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Grace Period (days)</Label>
-                      <Input value={String(selectedSubscription.gracePeriodDays)} disabled />
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    Please select a subscription plan to view billing details
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="paymentMethod">Mode of Payment</Label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                    <SelectTrigger id="paymentMethod">
-                      <SelectValue placeholder="Select payment method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">Cash</SelectItem>
-                      <SelectItem value="gcash">GCash</SelectItem>
-                      <SelectItem value="paymaya">PayMaya</SelectItem>
-                      <SelectItem value="credit-card">Credit Card</SelectItem>
-                      <SelectItem value="debit-card">Debit Card</SelectItem>
-                      <SelectItem value="bank-transfer">Bank Transfer</SelectItem>
-                      <SelectItem value="online">Other Online Payment</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="rounded-2xl border bg-muted/50 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Subscription</span>
-                    <span className="font-medium">{selectedSubscription?.name || '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Price</span>
-                    <span className="font-medium">PHP {selectedSubscription?.amount.toFixed(2) || '0.00'}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Billing cycle</span>
-                    <span className="font-medium">
-                      {selectedSubscription ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}` : '—'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Mode of payment</span>
-                    <span className="font-medium">{paymentMethod || '—'}</span>
-                  </div>
-                  <div className="border-t pt-3 flex items-center justify-between">
-                    <span className="font-semibold">Total</span>
-                    <span className="text-2xl font-bold text-primary">PHP {totalCost}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Right Column: Billing */}
+            <AddBillingDialog
+              selectedSubscription={selectedSubscription ?? null}
+              paymentMethodId={paymentMethodId}
+              onPaymentMethodChange={(id, name) => {
+                setPaymentMethodId(id)
+                setPaymentMethodName(name)
+              }}
+              totalCost={totalCost}
+            />
           </div>
 
           <div className="flex items-center justify-between">
@@ -751,9 +620,11 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
               ) : null}
             </div>
             
-            <div className="flex items-center gap-2 w-full  justify-evenly ">
+            <div className="flex items-center gap-2 w-full  justify-evenly mt-4 ">
               <div className="w-full">
-                <Label>User: {currentUserQuery.isLoading ? 'Loading…' : (currentUserEmail || '—')}  </Label>
+                <Label>
+                  User: {currentUserQuery.isLoading ? 'Loading…' : (currentUserEmail || '—')}
+                </Label>
               </div>
               <div className="w-full justify-end flex gap-2">
                 <DialogClose asChild>
