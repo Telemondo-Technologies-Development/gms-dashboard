@@ -36,7 +36,7 @@ function NavLink({ href, icon: Icon, label, isActive, collapsed }: NavItem & { i
 				'flex items-center rounded-lg p-2 text-md transition-colors whitespace-nowrap',
 				collapsed ? 'justify-center' : 'justify-start',
 				isActive
-					? 'bg-accent text-accent-foreground shadow-lg shadow-accent-foreground/10'
+					? 'bg-accent shadow-lg shadow-accent-foreground/10 text-primary'
 					: 'hover:bg-accent hover:text-primary hover:shadow-lg shadow-accent-foreground/10'
 			)}
 			aria-current={isActive ? 'page' : undefined}
@@ -59,7 +59,7 @@ function Section({ title, items, currentPath, collapsed }: NavSection & { curren
 		<section className="space-y-2">
 			<div
 				className={cn(
-					'px-2 text-xs font-medium transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap text-primary',
+					'px-2 text-xs font-medium transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap text-muted-foreground',
 					collapsed ? 'h-0 opacity-0' : 'h-auto opacity-100'
 				)}
 			>
@@ -221,7 +221,7 @@ export default function Aside() {
 								className={
 									'relative flex w-16 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] transition-colors ' +
 									(isActive
-										? 'text-foreground after:absolute after:top-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-primary'
+										? 'text-primary'
 										: 'text-muted-foreground hover:text-foreground')
 								}
 								aria-current={isActive ? 'page' : undefined}

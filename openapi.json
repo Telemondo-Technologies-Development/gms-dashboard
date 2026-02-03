@@ -5808,6 +5808,7 @@
         },
         "required": [
           "actorId",
+          "branches",
           "email"
         ]
       },

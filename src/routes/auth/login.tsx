@@ -7,6 +7,58 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiResponseEnvelopeSchema, loginResponseSchema, loginSchema, type LoginPayload } from '@/types/auth/loginSchemas'
+import { normalizeBranches } from '@/lib/auth-branches'
+import { clearAuthSession, setAuthSession } from '@/lib/auth-session'
+
+type JwtClaims = Record<string, unknown>
+
+function tryDecodeJwtClaims(token: string): JwtClaims | null {
+  if (!token) return null
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+
+  const payload = parts[1]
+  if (!payload) return null
+
+  try {
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
+    if (typeof atob !== 'function') return null
+    const json = atob(padded)
+    const parsed: unknown = JSON.parse(json)
+    if (parsed && typeof parsed === 'object') return parsed as JwtClaims
+    return null
+  } catch {
+    return null
+  }
+}
+
+function getStringClaim(claims: JwtClaims | null, key: string): string | undefined {
+  if (!claims) return undefined
+  const value = claims[key]
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object'
+}
+
+function storeLoginIdentityFromPayload(payload: unknown): void {
+  if (typeof window === 'undefined') return
+  if (!isRecord(payload)) return
+
+  const actorIdRaw = payload['actorId']
+  const actorId = typeof actorIdRaw === 'string' && actorIdRaw.trim() ? actorIdRaw.trim() : null
+
+  const emailOrUsernameRaw = payload['email']
+  const username = typeof emailOrUsernameRaw === 'string' && emailOrUsernameRaw.trim() ? emailOrUsernameRaw.trim() : null
+  const email = username && username.includes('@') ? username : null
+
+  const branches = normalizeBranches(payload['branches'])
+
+  // Payload-login mode: cookie-based auth, so clear any stale token.
+  setAuthSession({ token: null, actorId, username, email, branches })
+}
 
 export const Route = createFileRoute('/auth/login')({
   component: RouteComponent,
@@ -73,15 +125,38 @@ function RouteComponent() {
             if (envelope.data.success === true) {
               const data = envelope.data.data
               if (typeof data === 'string' && data.trim()) {
-                return data
+                const maybeJsonString = data.trim()
+                if (maybeJsonString.startsWith('{') || maybeJsonString.startsWith('[')) {
+                  try {
+                    const parsedJson: unknown = JSON.parse(maybeJsonString)
+                    if (parsedJson && typeof parsedJson === 'object' && !Array.isArray(parsedJson)) {
+                      storeLoginIdentityFromPayload(parsedJson)
+                      // No real token in this mode (cookie-based auth)
+                      return ''
+                    }
+                  } catch {
+                    // fall through
+                  }
+                }
+
+                setAuthSession({ branches: [] })
+                return maybeJsonString
               }
               if (
                 typeof data === 'object' &&
                 data !== null &&
-                'token' in data &&
-                typeof (data as { token?: unknown }).token === 'string'
+                !Array.isArray(data)
               ) {
-                return (data as { token: string }).token
+                const branches = normalizeBranches((data as { branches?: unknown }).branches)
+                storeLoginIdentityFromPayload({ ...(data as Record<string, unknown>), branches })
+
+                const maybeToken = (data as { token?: unknown }).token
+                if (typeof maybeToken === 'string' && maybeToken.trim()) {
+                  return maybeToken.trim()
+                }
+
+                // Cookie-based login success; no token returned.
+                return ''
               }
               throw new Error(envelope.data.message ?? 'Login succeeded, but no token was returned.')
             }
@@ -101,9 +176,22 @@ function RouteComponent() {
     },
     onSuccess: async (token) => {
       if (typeof token === 'string' && token.trim()) {
-        localStorage.setItem('auth_token', token)
+        setAuthSession({ token: token.trim() })
+
+        const claims = tryDecodeJwtClaims(token)
+        const claimEmail =
+          getStringClaim(claims, 'email') ??
+          getStringClaim(claims, 'preferred_username') ??
+          getStringClaim(claims, 'upn')
+
+        if (claimEmail && claimEmail.includes('@')) {
+          setAuthSession({ email: claimEmail })
+        }
+
         setLoginResponse(`Login success. Token: ${token}`)
       } else {
+        // Important: don't keep stale tokens around (it makes the UI appear stuck on the previous user).
+        setAuthSession({ token: null })
 
         setLoginResponse('Login success. (No token returned; session cookie set)')
       }
@@ -124,7 +212,13 @@ function RouteComponent() {
     }
 
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('auth_username', parsed.data.username)
+      // Clear any previous user identity so the header can't get stuck.
+      clearAuthSession()
+      setAuthSession({
+        username: parsed.data.username,
+        email: parsed.data.username.includes('@') ? parsed.data.username : null,
+        branches: [],
+      })
     }
 
     setFormError(null)
@@ -134,7 +228,7 @@ function RouteComponent() {
   return (
     <div className="flex h-screen w-full">
       {/* Left Container - Branding/Hero */}
-      <div className="hidden lg:flex flex-1 items-center justify-center bg-gradient-to-r from-primary to-secondary border-r">
+      <div className="hidden lg:flex flex-1 items-center justify-center bg-linear-to-r from-primary to-secondary border-r">
         <div className="flex flex-col items-center space-y-6 text-center p-10 ">
           <div className=" ">
             <Dumbbell className="h-20 w-20 text-background" />
@@ -173,7 +267,7 @@ function RouteComponent() {
                   id="username"
                   type="text"
                   placeholder="Enter your username or email"
-                  className="bg-input border-input py-5"
+                  className=" border-input py-5"
                   autoComplete="username"
                   value={formState.username}
                   onChange={(event) => setFormState((prev) => ({ ...prev, username: event.target.value }))}
@@ -188,7 +282,7 @@ function RouteComponent() {
                   id="password"
                   type="password"
                   placeholder="Enter your password"
-                  className="bg-input border-input py-5"
+                  className="border-input py-5"
                   autoComplete="current-password"
                   value={formState.password}
                   onChange={(event) => setFormState((prev) => ({ ...prev, password: event.target.value }))}
@@ -225,7 +319,7 @@ function RouteComponent() {
               </Button>
 
               {loginResponse && (
-                <p className="text-sm text-muted-foreground break-words text-center bg-muted/50 p-2 rounded-md" role="status">
+                <p className="text-sm text-muted-foreground wrap-break-word text-center bg-muted/50 p-2 rounded-md" role="status">
                   {loginResponse}
                 </p>
               )}
