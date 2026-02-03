@@ -100,3 +100,54 @@ export const paymentHistoryFiltersSchema = z
 	)
 
 export type PaymentHistoryFilters = z.infer<typeof paymentHistoryFiltersSchema>
+
+// Invoice schemas for linking payments to invoices
+export const invoiceStatusSchema = z.enum(['DRAFT', 'ISSUED', 'PAID', 'OVERDUE'])
+export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
+
+const coerceDate = z.preprocess((value) => {
+	if (value instanceof Date) return value
+	const d = new Date(String(value))
+	return d
+}, z.date())
+
+export const invoiceTableDTOSchema = z.object({
+	actorId: z.string().optional(),
+	branchId: z.string().optional(),
+	createdById: z.string(),
+	dueDate: coerceDate,
+	gracePeriodDate: coerceDate,
+	id: z.string(),
+	issuedAt: coerceDate,
+	memberSubscriptionId: z.string().optional(),
+	status: invoiceStatusSchema,
+	subscriptionAvailedId: z.string().optional(),
+	subtotal: z.coerce.number(),
+	systemGenerated: z.boolean(),
+	total: z.coerce.number(),
+	updatedById: z.string().optional(),
+})
+
+export type InvoiceTableDTOParsed = z.infer<typeof invoiceTableDTOSchema>
+
+export const apiResponseListInvoiceTableDTOSchema = z.object({
+	data: z.array(invoiceTableDTOSchema).optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export type ApiResponseListInvoiceTableDTOParsed = z.infer<typeof apiResponseListInvoiceTableDTOSchema>
+
+export const apiResponseInvoiceTableDTOSchema = z.object({
+	data: invoiceTableDTOSchema.optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export type ApiResponseInvoiceTableDTOParsed = z.infer<typeof apiResponseInvoiceTableDTOSchema>
