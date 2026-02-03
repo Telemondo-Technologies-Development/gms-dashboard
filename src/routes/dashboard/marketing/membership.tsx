@@ -22,6 +22,10 @@ export const Route = createFileRoute('/dashboard/marketing/membership')({
   component: MembershipRoute,
 })
 
+const MEMBER_QUERY_KEYS = {
+  members: 'members',
+}
+
 
 async function fetchMembersFromApi() {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
@@ -64,7 +68,7 @@ function MembershipRoute() {
   const attendanceSearch = form.watch('attendanceSearch')
 
   const membersQuery = useQuery({
-    queryKey: ['members'],
+    queryKey: [MEMBER_QUERY_KEYS.members],
     queryFn: fetchMembersFromApi,
   })
 

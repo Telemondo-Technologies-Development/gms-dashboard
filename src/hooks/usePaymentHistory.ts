@@ -9,12 +9,18 @@ import {
   apiResponsePaymentTableDTOSchema,
 } from '@/types/payment/paymentSchemas'
 
+
+const PAYMENT_QUERY_KEYS = {
+  payments: 'payments',
+  paymentMethods: 'payment-methods',
+}
+
 /**
  * Hook to fetch all payments with pagination
  */
 export function usePayments(page: number = 0, size: number = 100) {
   return useQuery({
-    queryKey: ['payments', page, size],
+    queryKey: [PAYMENT_QUERY_KEYS.payments, page, size],
     queryFn: async () => {
       const api = getAuthenticatedApi(PaymentApi)
       const response = await api.getAllPayments({
@@ -37,7 +43,7 @@ export function usePayments(page: number = 0, size: number = 100) {
  */
 export function usePayment(id: string | null) {
   return useQuery({
-    queryKey: ['payment', id],
+    queryKey: [PAYMENT_QUERY_KEYS.payments, id],
     queryFn: async () => {
       if (!id) return null
       const api = getAuthenticatedApi(PaymentApi)
@@ -56,7 +62,7 @@ export function usePayment(id: string | null) {
  */
 export function usePaymentMethods(page: number = 0, size: number = 50) {
   return useQuery({
-    queryKey: ['payment-methods', page, size],
+    queryKey: [PAYMENT_QUERY_KEYS.paymentMethods, page, size],
     queryFn: async () => {
       const api = getAuthenticatedApi(PaymentApi)
       const response = await api.getAllPaymentMethods({
