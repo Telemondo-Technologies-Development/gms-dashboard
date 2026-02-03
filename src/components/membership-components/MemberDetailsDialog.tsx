@@ -23,11 +23,11 @@ import { Textarea } from '@/components/ui/textarea'
 import type { MemberDetailsDialogProps } from '@/types/membership/memberSchemas'
 import { SubscriptionAvailedApi } from '@/api/generated/apis/SubscriptionAvailedApi'
 import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionApi'
-import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import type { MemberSubscriptionTableDTO } from '@/api/generated/models/MemberSubscriptionTableDTO'
-import type { BranchPersonnelTableDTO } from '@/api/generated/models/BranchPersonnelTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
+import { getStoredAuthBranches } from '@/lib/auth-branches'
+import { useAuthSession } from '@/lib/auth-session'
 
 
 
@@ -47,7 +47,10 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
   // Initialize API clients
   const subscriptionAvailedApi = getAuthenticatedApi(SubscriptionAvailedApi)
   const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
-  const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
+
+  const session = useAuthSession()
+
+  const memberActorId = memberGroup?.actorId ?? memberGroup?.id ?? null
   
   // Fetch available subscription availed
   const subscriptionsQuery = useQuery<SubscriptionAvailedTableDTO[]>({
@@ -72,38 +75,18 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
   
   // Fetch member's current subscription
   const memberSubscriptionQuery = useQuery<MemberSubscriptionTableDTO | null>({
-    queryKey: ['memberSubscription', memberGroup?.id],
-    enabled: open && !!memberGroup?.id,
+    queryKey: ['memberSubscription', memberActorId],
+    enabled: open && !!memberActorId,
     queryFn: async () => {
-      if (!memberGroup?.id) return null
+      if (!memberActorId) return null
       try {
         const response = await memberSubscriptionApi.getAllMemberSubscriptions({ pageable: {} })
         const subscription = response.data?.find(
-          (sub: MemberSubscriptionTableDTO) => sub.actorId === memberGroup.id && sub.status === 'ACTIVE'
+          (sub: MemberSubscriptionTableDTO) => sub.actorId === memberActorId && sub.status === 'ACTIVE'
         )
         return subscription ?? null
       } catch (error) {
         console.error('Failed to fetch member subscription:', error)
-        return null
-      }
-    },
-    retry: false,
-  })
-
-  // Fetch member branch as a fallback (in case MemberSubscription record is missing branchId)
-  const memberBranchQuery = useQuery<BranchPersonnelTableDTO | null>({
-    queryKey: ['memberBranch', memberGroup?.id],
-    enabled: open && !!memberGroup?.id,
-    queryFn: async () => {
-      if (!memberGroup?.id) return null
-      try {
-        const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: {} })
-        const record = response.data?.find(
-          (r: BranchPersonnelTableDTO) => r.actorId === memberGroup.id && r.status === 'IN',
-        )
-        return record ?? null
-      } catch (error) {
-        console.error('Failed to fetch member branch:', error)
         return null
       }
     },
@@ -153,22 +136,17 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
       }
       
       const memberSub = memberSubscriptionQuery.data
-      const branchId = memberSub?.branchId ?? memberBranchQuery.data?.branchId
+      const branchId = memberSub?.branchId ?? getStoredAuthBranches()[0]?.id
       if (!branchId) {
-        throw new Error('Member branch information not found. Please assign this member to a branch first.')
+        throw new Error('Branch not found. Please ensure your user is assigned to a branch and try again.')
       }
       
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
-      const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('auth_email') : null
-      
-      if (!token && !storedEmail) {
-        throw new Error('User not authenticated')
-      }
+      // Auth may be token-based or cookie-based; if the UI reached here, proceed.
       
       // Get current user's actor ID from localStorage or token
       const updatedById = memberSub?.updatedById || memberSub?.createdById
       if (!updatedById) {
-        throw new Error('Cannot determine user ID')
+        throw new Error(`Cannot determine user ID (current session: ${session.username ?? session.email ?? 'unknown'})`)
       }
       
       if (currentMemberSubscriptionId) {
@@ -176,7 +154,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
         await memberSubscriptionApi.updateMemberSubscription({
           id: currentMemberSubscriptionId,
           memberSubscriptionPutDTO: {
-            actorId: memberGroup.id,
+            actorId: memberActorId ?? memberGroup.id,
             branchId,
             startDate,
             endDate,
@@ -195,7 +173,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
         
         await memberSubscriptionApi.createMemberSubscription({
           memberSubscriptionPostDTO: {
-            actorId: memberGroup.id,
+            actorId: memberActorId ?? memberGroup.id,
             branchId,
             createdById,
             startDate,
@@ -207,7 +185,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
       }
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['memberSubscription', memberGroup?.id] })
+      void queryClient.invalidateQueries({ queryKey: ['memberSubscription', memberActorId] })
       void queryClient.invalidateQueries({ queryKey: ['members'] })
     },
   })

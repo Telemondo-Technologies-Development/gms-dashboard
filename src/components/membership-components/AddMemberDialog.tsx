@@ -31,7 +31,9 @@ import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionAp
 import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import type { BranchPersonnelTableDTO } from '@/api/generated/models/BranchPersonnelTableDTO'
+import { BranchPersonnelTableDTOStatusEnum } from '@/api/generated/models/BranchPersonnelTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
+import { useAuthSession } from '@/lib/auth-session'
 
 
 
@@ -121,6 +123,8 @@ async function fetchUserByEmail(email: string, token?: string): Promise<UserTabl
 export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const session = useAuthSession()
   
   // States for membership and billing
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
@@ -146,8 +150,10 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
     status: 'IN',
   }
 
-  const token = typeof window !== 'undefined' ? (localStorage.getItem('auth_token') ?? '') : ''
-  const storedEmail = typeof window !== 'undefined' ? (localStorage.getItem('auth_email') ?? '') : ''
+  const token = session.token ?? ''
+  const storedEmail = session.email ?? ''
+  const storedUsername = session.username ?? ''
+  const storedActorId = session.actorId ?? ''
   const claims = token ? tryDecodeJwtClaims(token) : null
   const authUserId = (() => {
     const sub = getStringClaim(claims, 'sub')
@@ -166,24 +172,24 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   })
 
   const createdByActorId = currentUserQuery.data?.actorId
-  const currentUserEmail = currentUserQuery.data?.email ?? storedEmail
+  const resolvedActorId = createdByActorId ?? (storedActorId || undefined)
+  const currentUserEmail = currentUserQuery.data?.email ?? storedEmail ?? storedUsername
   
   // Fetch user's branch
   const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
-    queryKey: ['branchPersonnel', createdByActorId],
-    enabled: !!createdByActorId,
+    queryKey: ['branchPersonnel', resolvedActorId ?? null, token || null],
+    enabled: !!resolvedActorId,
     queryFn: async () => {
-      if (!createdByActorId) return null
-      try {
-        const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: {} })
-        const record = response.data?.find(
-          (r: BranchPersonnelTableDTO) => r.actorId === createdByActorId && r.status === 'IN'
-        )
-        return record ?? null
-      } catch (error) {
-        console.error('Failed to fetch branch:', error)
-        return null
+      if (!resolvedActorId) return null
+      const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } })
+      if (!response.success) {
+        throw new Error(response.message ?? 'Failed to fetch branch personnel.')
       }
+      const record =
+        response.data?.find(
+          (r) => r.actorId === resolvedActorId && r.status === BranchPersonnelTableDTOStatusEnum.Active,
+        ) ?? null
+      return record
     },
     retry: false,
   })
@@ -232,9 +238,14 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         throw new Error('Please select a start date.')
       }
       
-      const branchId = branchPersonnelQuery.data?.branchId
+      const branchId =
+        branchPersonnelQuery.data?.branchId ??
+        // Fallback: if login response included branches, use the primary one.
+        session.primaryBranchId
       if (!branchId) {
-        throw new Error('User branch not found. Please ensure you are assigned to a branch.')
+        throw new Error(
+          'User branch not found. Please ensure you are assigned to a branch (BranchPersonnel) or that your login response includes branches.',
+        )
       }
 
       // Step 1: Create Member
@@ -276,12 +287,17 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       }
 
       const member = envelope.data
+
+      const memberActorId = member.actorId
+      if (!memberActorId) {
+        throw new Error('Member actor id is missing. Cannot create a subscription for this member.')
+      }
       
       // Step 2: Create Member Subscription
       try {
         await memberSubscriptionApi.createMemberSubscription({
           memberSubscriptionPostDTO: {
-            actorId: member.id,
+            actorId: memberActorId,
             branchId,
             createdById,
             startDate,
@@ -306,14 +322,15 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       const fullName = [data.firstName, data.middleName, data.surname, data.suffix].filter(Boolean).join(' ')
       const payload: MemberFormData = {
         id: data.id,
+        actorId: data.actorId ?? null,
         members: [
           {
             id: data.id,
             firstName: data.firstName,
-            middleName: data.middleName,
+            middleName: data.middleName ?? null,
             surname: data.surname,
-            suffix: data.suffix,
-            status: data.status,
+            suffix: data.suffix ?? null,
+            status: data.status ?? null,
             name: fullName || 'Unknown',
             email: '',
             phone: '',
@@ -362,12 +379,12 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   })
 
   useEffect(() => {
-    if (!createdByActorId) return
+    if (!resolvedActorId) return
     const current = form.state.values.createdById
-    if (current !== createdByActorId) {
-      form.setFieldValue('createdById', createdByActorId)
+    if (current !== resolvedActorId) {
+      form.setFieldValue('createdById', resolvedActorId)
     }
-  }, [createdByActorId, form])
+  }, [resolvedActorId, form])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -74,14 +74,15 @@ function MembershipRoute() {
       const fullName = [m.firstName, m.middleName, m.surname, m.suffix].filter(Boolean).join(' ')
       return {
         id: m.id,
+        actorId: m.actorId ?? null,
         members: [
           {
             id: m.id,
             firstName: m.firstName,
-            middleName: m.middleName,
+            middleName: m.middleName ?? null,
             surname: m.surname,
-            suffix: m.suffix,
-            status: m.status,
+            suffix: m.suffix ?? null,
+            status: m.status ?? null,
             name: fullName || 'Unknown',
             email: '',
             phone: '',
@@ -222,7 +223,7 @@ function MembershipRoute() {
                   <Input
                     placeholder="Search by name, email, phone, or membership type..."
                     {...form.register('searchQuery')}
-                    className="pl-9"
+                    className="pl-9 rounded-2xl"
                   />
                 </div>
               </div>
