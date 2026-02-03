@@ -5,11 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
-import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
-import { BranchApi } from '@/api/generated/apis/BranchApi'
-import { getAuthenticatedApi } from '@/lib/api-client'
-import type { BranchPersonnelTableDTO, BranchTableDTO } from '@/api/generated/models'
-import { BranchPersonnelTableDTOStatusEnum } from '@/api/generated/models'
 import { useAuthSession } from '@/lib/auth-session'
 
 type JwtClaims = Record<string, unknown>
@@ -133,8 +128,6 @@ export default function Header() {
 		}
 	}, [session.actorId, session.email, session.token, session.username])
 
-	const storedBranches = session.branches
-
 	const currentUserQuery = useQuery({
 		queryKey: ['currentUser', identity?.userId ?? null, identity?.email ?? null, identity?.token ?? null],
 		enabled: typeof window !== 'undefined' && !!identity && (!!identity.userId || !!identity.email),
@@ -151,59 +144,8 @@ export default function Header() {
 		retry: false,
 	})
 
-	// Fetch user's branch personnel record
-	const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
-		queryKey: [
-			'branchPersonnel',
-			identity?.actorId ?? null,
-			currentUserQuery.data?.actorId ?? null,
-			currentUserQuery.data?.id ?? null,
-			identity?.token ?? null,
-		],
-		enabled: !!identity?.actorId || !!currentUserQuery.data?.actorId || !!currentUserQuery.data?.id,
-		queryFn: async () => {
-			const storedActorId = identity?.actorId
-			const actorId = currentUserQuery.data?.actorId
-			const userTableId = currentUserQuery.data?.id
-			if (!storedActorId && !actorId && !userTableId) return null
-			const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
-			const response = await branchPersonnelApi.getAllBranchPersonnel({
-				pageable: { page: 0, size: 1000 },
-			})
-			if (!response.success) {
-				throw new Error(response.message ?? 'Failed to fetch branch personnel.')
-			}
-			const items = response.data ?? []
-			const matchIds = new Set(
-				[storedActorId, actorId, userTableId].filter((v): v is string => typeof v === 'string' && v.length > 0),
-			)
-			const personnelRecord =
-				items.find((record) => matchIds.has(record.actorId) && record.status === BranchPersonnelTableDTOStatusEnum.Active) ??
-				null
-			return personnelRecord
-		},
-		retry: false,
-	})
-
-	// Fetch branch details
-	const branchQuery = useQuery<BranchTableDTO | null>({
-		queryKey: ['branch', branchPersonnelQuery.data?.branchId ?? null, identity?.token ?? null],
-		enabled: !!branchPersonnelQuery.data?.branchId,
-		queryFn: async () => {
-			const branchId = branchPersonnelQuery.data?.branchId
-			if (!branchId) return null
-			const branchApi = getAuthenticatedApi(BranchApi)
-			const response = await branchApi.getBranch({ id: branchId })
-			if (!response.success) {
-				throw new Error(response.message ?? 'Failed to fetch branch details.')
-			}
-			return response.data ?? null
-		},
-		retry: false,
-	})
-
 	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? identity?.username ?? 'Account'
-	const displayBranchName = branchQuery.data?.name ?? storedBranches[0]?.name ?? 'No Branch Assigned'
+	const displayBranchName = session.primaryBranchName ?? 'No Branch Assigned'
 	const searchInput = (
 		<div className="relative">
 			<Input
@@ -266,7 +208,7 @@ export default function Header() {
 				<div className="hidden w-full items-center justify-between md:flex">
 					<div className="flex items-center gap-2 ">
 						<Button
-							variant="ghost"
+							variant="outline"
 							size="sm"
 							className="flex items-center gap-2 h-9 px-3 py-1 "
 							aria-label="Account"
@@ -277,7 +219,7 @@ export default function Header() {
 							</span>
 						</Button>
 						<Button
-							variant="ghost"
+							variant="outline"
 							size="icon"
 							aria-label="Notifications"
 							className="h-9 w-9 "
@@ -291,7 +233,7 @@ export default function Header() {
 								<Input
 									type="text"
 									placeholder="Search..."
-									className="pl-9 pr-3 py-2 h-9 w-full rounded-2xl bg-muted focus:bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring"
+									className="pl-9 pr-3 py-2 h-9 w-full rounded-2xl bg-muted focus:bg-surface border border-input focus:outline-none focus:ring-2 focus:ring-ring"
 								/>
 								<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
 							</div>
@@ -310,11 +252,8 @@ export default function Header() {
 					</div>
 
 					<div className="hidden md:flex flex-col items-end gap-0.5">
-						<Label className="text-xs text-muted-foreground">
-							{currentUserQuery.isLoading ? 'Loading...' : displayEmail}
-						</Label>
 						<Label className="text-sm font-semibold text-foreground">
-							{branchQuery.isLoading ? 'Loading branch...' : displayBranchName}
+							Branch: {displayBranchName}
 						</Label>
 					</div>
 				</div>

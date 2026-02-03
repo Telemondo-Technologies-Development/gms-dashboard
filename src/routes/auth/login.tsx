@@ -161,6 +161,13 @@ function RouteComponent() {
               throw new Error(envelope.data.message ?? 'Login succeeded, but no token was returned.')
             }
           }
+
+          // Some backends return the identity payload directly (not wrapped in the envelope).
+          // In that case, treat it as cookie-based auth (no JWT token string) and store branches.
+          if (maybeJson && typeof maybeJson === 'object' && !Array.isArray(maybeJson)) {
+            storeLoginIdentityFromPayload(maybeJson)
+            return ''
+          }
         }
         const parsed = loginResponseSchema.safeParse(rawText)
         if (parsed.success && parsed.data.trim()) {
