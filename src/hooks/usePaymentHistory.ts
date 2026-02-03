@@ -74,9 +74,6 @@ export function usePaymentMethods(page: number = 0, size: number = 50) {
   })
 }
 
-/**
- * Extended payment type with related invoice and member information
- */
 export interface PaymentWithDetails extends PaymentTableDTO {
   invoice?: InvoiceTableDTO
   paymentMethod?: PaymentMethodTableDTO
@@ -84,24 +81,21 @@ export interface PaymentWithDetails extends PaymentTableDTO {
   description?: string
 }
 
-/**
- * Map API payment status to display status
- */
+
 export function mapPaymentStatus(
   payment: PaymentTableDTO,
   invoice?: InvoiceTableDTO
 ): 'paid' | 'failed' | 'overdue' | 'upcoming' {
-  // If payment has paidAt date, it's paid
+
   if (payment.paidAt) {
     return 'paid'
   }
 
-  // Check if payment has failure reason
   if (payment.failureReason) {
     return 'failed'
   }
 
-  // Check invoice status if available
+
   if (invoice) {
     if (invoice.status === 'OVERDUE') {
       return 'overdue'
@@ -116,13 +110,10 @@ export function mapPaymentStatus(
     }
   }
 
-  // Default to upcoming
+
   return 'upcoming'
 }
 
-/**
- * Format payment amount from cents to currency
- */
 export function formatPaymentAmount(amountCents: number, currency: string = 'PHP'): string {
   const amount = amountCents / 100
   return new Intl.NumberFormat('en-PH', {

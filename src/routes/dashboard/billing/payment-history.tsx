@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
-import { AlertTriangle, CheckCircle2, Clock, Receipt, Search, XCircle } from 'lucide-react'
+import { AlertTriangle, CalendarIcon, CheckCircle2, Clock, Receipt, Search, XCircle } from 'lucide-react'
 
 import { usePayment, usePaymentMethods, usePayments } from '@/hooks/usePaymentHistory'
 import {
@@ -16,11 +16,14 @@ import {
 import { PaymentDetailsDialog } from '@/components/payment-components/PaymentDetailsDialog'
 import { ReceiptDialog } from '@/components/payment-components/ReceiptDialog'
 
+import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Select,
   SelectContent,
@@ -243,7 +246,7 @@ function PaymentHistoryRoute() {
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
                       placeholder="Search id, invoice, method, status…"
-                      className="pl-9"
+                      className="pl-9 rounded-2xl"
                     />
                   )}
                 </form.Field>
@@ -252,11 +255,34 @@ function PaymentHistoryRoute() {
               <div className="md:col-span-3">
                 <form.Field name="fromDate">
                   {(field) => (
-                    <Input
-                      type="date"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !field.state.value && 'text-muted-foreground',
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.state.value ? (
+                            format(new Date(field.state.value), 'PPP')
+                          ) : (
+                            <span>Pick a from date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={field.state.value ? new Date(field.state.value) : undefined}
+                          onSelect={(date) =>
+                            field.handleChange(date ? format(date, 'yyyy-MM-dd') : '')
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   )}
                 </form.Field>
               </div>
@@ -264,11 +290,34 @@ function PaymentHistoryRoute() {
               <div className="md:col-span-3">
                 <form.Field name="toDate">
                   {(field) => (
-                    <Input
-                      type="date"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
+                            !field.state.value && 'text-muted-foreground',
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.state.value ? (
+                            format(new Date(field.state.value), 'PPP')
+                          ) : (
+                            <span>Pick a to date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={field.state.value ? new Date(field.state.value) : undefined}
+                          onSelect={(date) =>
+                            field.handleChange(date ? format(date, 'yyyy-MM-dd') : '')
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   )}
                 </form.Field>
               </div>

@@ -1,11 +1,11 @@
 import { z } from 'zod'
 
-const coerceOptionalDate = z.preprocess((value) => {
-	if (value == null || value === '') return undefined
+const coerceNullableDate = z.preprocess((value) => {
+	if (value == null || value === '') return null
 	if (value instanceof Date) return value
 	const date = new Date(String(value))
-	return Number.isNaN(date.getTime()) ? undefined : date
-}, z.date().optional())
+	return Number.isNaN(date.getTime()) ? null : date
+}, z.date().nullable())
 
 export const pageMetadataSchema = z.object({
 	pageCount: z.coerce.number(),
@@ -22,38 +22,22 @@ export type PaymentStatus = z.infer<typeof paymentStatusSchema>
 export const paymentTableDTOSchema = z.object({
 	amount: z.coerce.number(),
 	createdById: z.string(),
-	failureReason: z
-		.string()
-		.optional()
-		.nullable()
-		.transform((value) => value ?? undefined),
+	failureReason: z.string().nullable().default(null),
 	id: z.string(),
 	invoiceId: z.string(),
-	paidAt: coerceOptionalDate,
+	paidAt: coerceNullableDate,
 	paymentMethodId: z.string(),
 	status: paymentStatusSchema,
-	updatedById: z
-		.string()
-		.optional()
-		.nullable()
-		.transform((value) => value ?? undefined),
+	updatedById: z.string().nullable().default(null),
 })
 
 export type PaymentTableDTOParsed = z.infer<typeof paymentTableDTOSchema>
 
 export const paymentMethodTableDTOSchema = z.object({
-	createdById: z
-		.string()
-		.optional()
-		.nullable()
-		.transform((value) => value ?? undefined),
+	createdById: z.string().nullable().default(null),
 	id: z.string(),
 	name: z.string(),
-	updatedById: z
-		.string()
-		.optional()
-		.nullable()
-		.transform((value) => value ?? undefined),
+	updatedById: z.string().nullable().default(null),
 })
 
 export type PaymentMethodTableDTOParsed = z.infer<typeof paymentMethodTableDTOSchema>

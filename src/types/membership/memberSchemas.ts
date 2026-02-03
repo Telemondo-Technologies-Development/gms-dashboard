@@ -25,17 +25,18 @@ export interface AddMemberDialogProps {
 export interface MemberInfo {
   id: string
   firstName: string
-  middleName?: string
+  middleName: string | null
   surname: string
-  suffix?: string
-  status?: 'IN' | 'OUT' | 'UNDECIDED'
+  suffix: string | null
+  status: 'IN' | 'OUT' | 'UNDECIDED' | null
   name: string
-  email?: string
-  phone?: string
+  email: string | null
+  phone: string | null
 }
 
 export interface MemberFormData {
   id: string
+  actorId: string | null
   members: MemberInfo[]
   startDate?: Date
   endDate?: Date
@@ -81,15 +82,15 @@ export const memberPutDtoSchema = z.object({
 export type MemberPutDto = z.infer<typeof memberPutDtoSchema>
 
 export const memberTableDataSchema = z.object({
-  actorId: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
-  createdById: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
+  actorId: z.string().uuid().nullable().default(null),
+  createdById: z.string().uuid().nullable().default(null),
   firstName: z.string(),
   id: z.string().uuid(),
-  middleName: z.string().nullable().optional().transform((v) => v ?? undefined),
+  middleName: z.string().nullable().default(null),
   status: memberStatusSchema,
-  suffix: z.string().nullable().optional().transform((v) => v ?? undefined),
+  suffix: z.string().nullable().default(null),
   surname: z.string(),
-  updatedById: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
+  updatedById: z.string().uuid().nullable().default(null),
 })
 
 export type MemberTableData = z.infer<typeof memberTableDataSchema>
@@ -107,23 +108,23 @@ export type MemberFormValues = {
 
 // API response schemas
 export const apiErrorSchema = z.object({
-  code: z.string().optional(),
-  description: z.string().optional(),
-  field: z.string().optional(),
+  code: z.string().nullable().default(null),
+  description: z.string().nullable().default(null),
+  field: z.string().nullable().default(null),
 })
 
 export const apiMetaSchema = z.object({
-  pageCount: z.number().optional(),
-  pageIndex: z.number().optional(),
-  pageSize: z.number().optional(),
-  totalCount: z.number().optional(),
+  pageCount: z.number().nullable().default(null),
+  pageIndex: z.number().nullable().default(null),
+  pageSize: z.number().nullable().default(null),
+  totalCount: z.number().nullable().default(null),
 })
 
 export const apiResponseMemberTableSchema = z.object({
   data: memberTableDataSchema,
-  errors: z.array(apiErrorSchema).nullable().optional().transform((v) => v ?? undefined),
+  errors: z.array(apiErrorSchema).nullable().default(null),
   message: z.string().optional(),
-  meta: apiMetaSchema.nullable().optional().transform((v) => v ?? undefined),
+  meta: apiMetaSchema.nullable().default(null),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -132,9 +133,9 @@ export type ApiResponseMemberTable = z.infer<typeof apiResponseMemberTableSchema
 
 export const apiResponseListMemberTableSchema = z.object({
   data: z.array(memberTableDataSchema),
-  errors: z.array(apiErrorSchema).nullable().optional().transform((v) => v ?? undefined),
+  errors: z.array(apiErrorSchema).nullable().default(null),
   message: z.string().optional(),
-  meta: apiMetaSchema.nullable().optional().transform((v) => v ?? undefined),
+  meta: apiMetaSchema.nullable().default(null),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -146,7 +147,7 @@ export const memberSubscriptionPostDtoSchema = z.object({
   actorId: z.string().uuid(),
   branchId: z.string().uuid(),
   createdById: z.string().uuid(),
-  endDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().nullable(),
   startDate: z.string().datetime(),
   status: subscriptionStatusSchema,
   subscriptionId: z.string().uuid(),
@@ -157,11 +158,11 @@ export type MemberSubscriptionPostDto = z.infer<typeof memberSubscriptionPostDto
 export const memberSubscriptionPutDtoSchema = z.object({
   actorId: z.string().uuid(),
   branchId: z.string().uuid(),
-  endDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().nullable(),
   startDate: z.string().datetime(),
   status: subscriptionStatusSchema,
   subscriptionId: z.string().uuid(),
-  updateCurrentSubscription: z.boolean().optional(),
+  updateCurrentSubscription: z.boolean().nullable(),
   updatedById: z.string().uuid(),
 })
 
@@ -170,13 +171,13 @@ export type MemberSubscriptionPutDto = z.infer<typeof memberSubscriptionPutDtoSc
 export const memberSubscriptionTableDataSchema = z.object({
   actorId: z.string().uuid(),
   branchId: z.string().uuid(),
-  createdById: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
-  endDate: z.string().datetime().nullable().optional().transform((v) => v ?? undefined),
+  createdById: z.string().uuid().nullable().default(null),
+  endDate: z.string().datetime().nullable().default(null),
   id: z.string().uuid(),
   startDate: z.string().datetime(),
   status: subscriptionStatusSchema,
-  subscriptionAvailedId: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
-  updatedById: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
+  subscriptionAvailedId: z.string().uuid().nullable().default(null),
+  updatedById: z.string().uuid().nullable().default(null),
 })
 
 export type MemberSubscriptionTableData = z.infer<typeof memberSubscriptionTableDataSchema>

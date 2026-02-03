@@ -14,20 +14,20 @@ export const pageMetadataSchema = z.object({
 })
 
 export const userTableSchema = z.object({
-  actorId: z.string().uuid().nullable().optional().transform((v) => v ?? undefined),
-  createdAt: z.string().datetime().optional(),
+  actorId: z.string().uuid().nullable().default(null),
+  createdAt: z.string().datetime().nullable().default(null),
   email: z.string(),
   id: z.string().uuid(),
-  updatedAt: z.string().datetime().optional(),
+  updatedAt: z.string().datetime().nullable().default(null),
 })
 
 export type UserTable = z.infer<typeof userTableSchema>
 
 export const apiResponseUserTableSchema = z.object({
   data: userTableSchema,
-  errors: z.array(apiErrorSchema).nullable().optional().transform((v) => v ?? undefined),
+  errors: z.array(apiErrorSchema).nullable().default(null),
   message: z.string().optional(),
-  meta: pageMetadataSchema.nullable().optional().transform((v) => v ?? undefined),
+  meta: pageMetadataSchema.nullable().default(null),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -36,9 +36,9 @@ export type ApiResponseUserTable = z.infer<typeof apiResponseUserTableSchema>
 
 export const apiResponseListUserTableSchema = z.object({
   data: z.array(userTableSchema),
-  errors: z.array(apiErrorSchema).nullable().optional().transform((v) => v ?? undefined),
+  errors: z.array(apiErrorSchema).nullable().default(null),
   message: z.string().optional(),
-  meta: pageMetadataSchema.nullable().optional().transform((v) => v ?? undefined),
+  meta: pageMetadataSchema.nullable().default(null),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
