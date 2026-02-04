@@ -15,7 +15,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Textarea } from '@/components/ui/textarea';
 
 interface AddReportDialogProps {
-  members: { id: string; name: string }[]; // Pass the list of members from the membership data
+  members: { id: string; name: string }[]; 
+  branches: { id: string; name: string }[];
   onSubmit: (reportData: {
     name: string;
     branch: string;
@@ -27,10 +28,12 @@ interface AddReportDialogProps {
   }) => void;
 }
 
-export default function AddReportDialog({ members, onSubmit }: AddReportDialogProps) {
+export default function AddReportDialog({ members, branches, onSubmit }: AddReportDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [branch, setBranch] = useState('');
+  const [filteredBranches, setFilteredBranches] = useState(branches);
+  const [isSearchingBranch, setIsSearchingBranch] = useState(false);
   const [reportType, setReportType] = useState('');
   const [description, setDescription] = useState('');
   const [occurredAt, setOccurredAt] = useState('');
@@ -49,6 +52,24 @@ export default function AddReportDialog({ members, onSubmit }: AddReportDialogPr
       );
     }
   }, [name, members, isSearching]);
+
+  useEffect(() => {
+    if (branch.trim() === '' || !isSearchingBranch) {
+      setFilteredBranches([]);
+    } else {
+      setFilteredBranches(
+        branches.filter((b) =>
+          b.name.toLowerCase().includes(branch.toLowerCase())
+        )
+      );
+    }
+  }, [branch, branches, isSearchingBranch]);
+
+  const handleSelectBranch = (branchName: string) => {
+    setBranch(branchName);
+    setIsSearchingBranch(false);
+    setFilteredBranches([]);
+  };
 
   const handleSelectMember = (memberName: string) => {
     setName(memberName);
@@ -92,7 +113,7 @@ export default function AddReportDialog({ members, onSubmit }: AddReportDialogPr
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 border border-border p-4 rounded-2xl">
-        <div className="space-y-2">
+        <div className="space-y-2 relative z-50">
             <Label htmlFor="customerName">Customer Name</Label>
             <Input
                 id="customerName"
@@ -120,14 +141,34 @@ export default function AddReportDialog({ members, onSubmit }: AddReportDialogPr
               </div>
             )}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <Label htmlFor="branchName">Branch Name</Label>
             <Input
               id="branchName"
-              placeholder="Enter branch name"
+              placeholder="Search branch..."
               value={branch}
-              onChange={(e) => setBranch(e.target.value)}
+              autoComplete="off"
+              onChange={(e) => {
+                setBranch(e.target.value);
+                setIsSearchingBranch(true);
+              }}
+              onFocus={() => {
+                if (branch.length > 0) setIsSearchingBranch(true);
+              }}
             />
+            {filteredBranches.length > 0 && (
+              <div className="absolute z-50 w-full border bg-popover text-popover-foreground rounded-md shadow-md max-h-40 overflow-y-auto mt-1">
+                {filteredBranches.map((b) => (
+                  <div
+                    key={b.id}
+                    className="p-2 hover:bg-muted cursor-pointer"
+                    onClick={() => handleSelectBranch(b.name)}
+                  >
+                    {b.name}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="reportType">Report Type</Label>

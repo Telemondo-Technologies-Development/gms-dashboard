@@ -8,6 +8,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import AddReportDialog from '@/components/tracking-components/AddReportDialog';
 import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal';
 import { fetchMembersFromApi } from '@/routes/dashboard/marketing/membership';
+import { fetchBranchesFromApi } from '@/routes/dashboard/marketing/branch';
 
 export const Route = createFileRoute('/dashboard/admin/tracking')({
   component: Tracking,
@@ -31,6 +32,15 @@ export default function Tracking() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const branchesQuery = useQuery({ queryKey: ['branches'], queryFn: fetchBranchesFromApi });
+
+  // 3. Format the branch data
+  const branchOptions = useMemo(() => {
+    return (branchesQuery.data ?? []).map((b: any) => ({
+      id: b.id,
+      name: b.name,
+    }));
+  }, [branchesQuery.data]);
 
   // Fetch members using React Query
   const membersQuery = useQuery({
@@ -43,7 +53,7 @@ export default function Tracking() {
     return apiMembers.map((m) => ({
       id: m.id,
       name: `${m.firstName} ${m.surname}`,
-      branch: 'Unknown', // Default value since 'branch' does not exist on the type
+      branch: 'Unknown', 
     }));
   }, [membersQuery.data]);
 
@@ -134,6 +144,7 @@ export default function Tracking() {
           <AddReportDialog
             onSubmit={handleAddReport}
             members={members}
+            branches={branchOptions}
           />
         </CardHeader>
         <CardContent>
