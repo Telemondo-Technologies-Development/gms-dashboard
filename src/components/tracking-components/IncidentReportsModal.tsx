@@ -30,10 +30,12 @@ export default function IncidentReportsModal({ customer, open, onClose }: Incide
         </DialogHeader>
         <div className="space-y-4">
           {customer.reports.length === 0 ? (
-            <p className="text-muted-foreground">No incident reports found for this customer.</p>
+            <div className="border border-border p-4 rounded-2xl text-muted-foreground">
+              No incident reports found for this customer.
+            </div>
           ) : (
             customer.reports.map((report, index) => (
-              <div key={index} className="border rounded-md p-4">
+              <div key={index} className="border border-border p-4 rounded-2xl">
                 <p className="font-semibold">
                   <span className="text-blue-600">{new Date(report.date).toLocaleString()}</span>:{' '}
                   <span className="text-gray-800">{report.type}</span>

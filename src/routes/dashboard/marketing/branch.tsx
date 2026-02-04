@@ -17,7 +17,7 @@ export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
 });
 
-const fetchBranchesFromApi = async () => {
+export const fetchBranchesFromApi = async () => {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
   const url = `${base}/api/branch`;
