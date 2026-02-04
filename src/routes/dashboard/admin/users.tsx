@@ -40,6 +40,8 @@ function UsersPage() {
   const queryClient = useQueryClient()
   const employeeApi = getAuthenticatedApi(EmployeeApi)
   const userApi = getAuthenticatedApi(UserApi)
+  const employeeQueryKeys = ['employees']
+  const userQueryKeys = ['users'] 
 
   const { 
     data: employees, 
@@ -47,7 +49,7 @@ function UsersPage() {
     error: employeesError,
     refetch: refetchEmployees
   } = useQuery<EmployeeTableDTO[], Error>({
-    queryKey: ['employees'],
+    queryKey: [employeeQueryKeys],
     queryFn: async () => {
       const response = await employeeApi.getAllEmployees({ pageable: {} })
       if (!response.success) {
@@ -63,7 +65,7 @@ function UsersPage() {
     error: usersError,
     refetch: refetchUsers
   } = useQuery<UserTableDTO[], Error>({
-    queryKey: ['users'],
+    queryKey: [userQueryKeys],
     queryFn: async () => {
       const response = await userApi.getAllUsers({ pageable: {} })
       if (!response.success) {
@@ -115,7 +117,7 @@ function UsersPage() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
+      queryClient.invalidateQueries({ queryKey: [employeeQueryKeys] })
       setIsEmployeeDialogOpen(false)
       setSelectedEmployee(null)
     },
@@ -126,7 +128,7 @@ function UsersPage() {
       await employeeApi.deleteEmployee({ id })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
+      queryClient.invalidateQueries({ queryKey: [employeeQueryKeys] })
     },
   })
 
@@ -140,7 +142,7 @@ function UsersPage() {
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: [userQueryKeys] })
       setIsUserDialogOpen(false)
     },
   })
@@ -204,7 +206,7 @@ function UsersPage() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search employees or users..."
-              className="pl-9"
+              className="pl-9 rounded-2xl"
             />
           </div>
 

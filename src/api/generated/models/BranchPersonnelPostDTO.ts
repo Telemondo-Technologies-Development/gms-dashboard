@@ -50,8 +50,10 @@ export interface BranchPersonnelPostDTO {
  * @export
  */
 export const BranchPersonnelPostDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
+    Active: 'ACTIVE',
+    Moved: 'MOVED',
+    Terminated: 'TERMINATED',
+    Resigned: 'RESIGNED',
     Undecided: 'UNDECIDED'
 } as const;
 export type BranchPersonnelPostDTOStatusEnum = typeof BranchPersonnelPostDTOStatusEnum[keyof typeof BranchPersonnelPostDTOStatusEnum];

@@ -7,13 +7,17 @@
 Name | Type
 ------------ | -------------
 `active` | boolean
+`dayOfWeek` | number
 `intervalUnit` | string
 `intervalValue` | number
+`isAdvancedSettingsAllowed` | boolean
 `leadTimeHours` | number
+`monthOfYear` | number
 `name` | string
 `startDate` | Date
 `timeToCompleteHours` | number
 `updatedById` | string
+`weekRank` | number
 
 ## Example
 
@@ -23,13 +27,17 @@ import type { SchedulePutDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "active": null,
+  "dayOfWeek": null,
   "intervalUnit": null,
   "intervalValue": null,
+  "isAdvancedSettingsAllowed": null,
   "leadTimeHours": null,
+  "monthOfYear": null,
   "name": null,
   "startDate": null,
   "timeToCompleteHours": null,
   "updatedById": null,
+  "weekRank": null,
 } satisfies SchedulePutDTO
 
 console.log(example)

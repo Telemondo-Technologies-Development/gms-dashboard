@@ -14,6 +14,7 @@ Name | Type
 `invoiceId` | string
 `paidAt` | Date
 `paymentMethodId` | string
+`referenceNum` | string
 `status` | string
 `updatedById` | string
 
@@ -31,6 +32,7 @@ const example = {
   "invoiceId": null,
   "paidAt": null,
   "paymentMethodId": null,
+  "referenceNum": null,
   "status": null,
   "updatedById": null,
 } satisfies PaymentTableDTO

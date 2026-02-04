@@ -60,6 +60,12 @@ export interface PaymentPostDTO {
      * @type {string}
      * @memberof PaymentPostDTO
      */
+    referenceNum?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PaymentPostDTO
+     */
     status: PaymentPostDTOStatusEnum;
 }
 
@@ -103,6 +109,7 @@ export function PaymentPostDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
         'invoiceId': json['invoiceId'],
         'paidAt': json['paidAt'] == null ? undefined : (new Date(json['paidAt'])),
         'paymentMethodId': json['paymentMethodId'],
+        'referenceNum': json['referenceNum'] == null ? undefined : json['referenceNum'],
         'status': json['status'],
     };
 }
@@ -124,6 +131,7 @@ export function PaymentPostDTOToJSONTyped(value?: PaymentPostDTO | null, ignoreD
         'invoiceId': value['invoiceId'],
         'paidAt': value['paidAt'] == null ? value['paidAt'] : value['paidAt'].toISOString(),
         'paymentMethodId': value['paymentMethodId'],
+        'referenceNum': value['referenceNum'],
         'status': value['status'],
     };
 }

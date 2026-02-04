@@ -54,6 +54,7 @@ export * from './BillingCyclePostDTO';
 export * from './BillingCyclePutDTO';
 export * from './BillingCycleTableDTO';
 export * from './BranchEmployeesDTO';
+export * from './BranchListDTO';
 export * from './BranchPersonnelPostDTO';
 export * from './BranchPersonnelPutDTO';
 export * from './BranchPersonnelTableDTO';

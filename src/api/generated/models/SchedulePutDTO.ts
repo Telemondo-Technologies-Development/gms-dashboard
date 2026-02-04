@@ -27,6 +27,12 @@ export interface SchedulePutDTO {
     active: boolean;
     /**
      * 
+     * @type {number}
+     * @memberof SchedulePutDTO
+     */
+    dayOfWeek?: number;
+    /**
+     * 
      * @type {string}
      * @memberof SchedulePutDTO
      */
@@ -39,10 +45,22 @@ export interface SchedulePutDTO {
     intervalValue: number;
     /**
      * 
+     * @type {boolean}
+     * @memberof SchedulePutDTO
+     */
+    isAdvancedSettingsAllowed: boolean;
+    /**
+     * 
      * @type {number}
      * @memberof SchedulePutDTO
      */
     leadTimeHours: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SchedulePutDTO
+     */
+    monthOfYear?: number;
     /**
      * 
      * @type {string}
@@ -67,6 +85,12 @@ export interface SchedulePutDTO {
      * @memberof SchedulePutDTO
      */
     updatedById: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof SchedulePutDTO
+     */
+    weekRank?: number;
 }
 
 
@@ -74,12 +98,22 @@ export interface SchedulePutDTO {
  * @export
  */
 export const SchedulePutDTOIntervalUnitEnum = {
-    Minute: 'MINUTE',
-    Hour: 'HOUR',
-    Day: 'DAY',
-    Week: 'WEEK',
-    Month: 'MONTH',
-    Year: 'YEAR'
+    Nanos: 'Nanos',
+    Micros: 'Micros',
+    Millis: 'Millis',
+    Seconds: 'Seconds',
+    Minutes: 'Minutes',
+    Hours: 'Hours',
+    HalfDays: 'HalfDays',
+    Days: 'Days',
+    Weeks: 'Weeks',
+    Months: 'Months',
+    Years: 'Years',
+    Decades: 'Decades',
+    Centuries: 'Centuries',
+    Millennia: 'Millennia',
+    Eras: 'Eras',
+    Forever: 'Forever'
 } as const;
 export type SchedulePutDTOIntervalUnitEnum = typeof SchedulePutDTOIntervalUnitEnum[keyof typeof SchedulePutDTOIntervalUnitEnum];
 
@@ -91,6 +125,7 @@ export function instanceOfSchedulePutDTO(value: object): value is SchedulePutDTO
     if (!('active' in value) || value['active'] === undefined) return false;
     if (!('intervalUnit' in value) || value['intervalUnit'] === undefined) return false;
     if (!('intervalValue' in value) || value['intervalValue'] === undefined) return false;
+    if (!('isAdvancedSettingsAllowed' in value) || value['isAdvancedSettingsAllowed'] === undefined) return false;
     if (!('leadTimeHours' in value) || value['leadTimeHours'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('startDate' in value) || value['startDate'] === undefined) return false;
@@ -110,13 +145,17 @@ export function SchedulePutDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     return {
         
         'active': json['active'],
+        'dayOfWeek': json['dayOfWeek'] == null ? undefined : json['dayOfWeek'],
         'intervalUnit': json['intervalUnit'],
         'intervalValue': json['intervalValue'],
+        'isAdvancedSettingsAllowed': json['isAdvancedSettingsAllowed'],
         'leadTimeHours': json['leadTimeHours'],
+        'monthOfYear': json['monthOfYear'] == null ? undefined : json['monthOfYear'],
         'name': json['name'],
         'startDate': (new Date(json['startDate'])),
         'timeToCompleteHours': json['timeToCompleteHours'],
         'updatedById': json['updatedById'],
+        'weekRank': json['weekRank'] == null ? undefined : json['weekRank'],
     };
 }
 
@@ -132,13 +171,17 @@ export function SchedulePutDTOToJSONTyped(value?: SchedulePutDTO | null, ignoreD
     return {
         
         'active': value['active'],
+        'dayOfWeek': value['dayOfWeek'],
         'intervalUnit': value['intervalUnit'],
         'intervalValue': value['intervalValue'],
+        'isAdvancedSettingsAllowed': value['isAdvancedSettingsAllowed'],
         'leadTimeHours': value['leadTimeHours'],
+        'monthOfYear': value['monthOfYear'],
         'name': value['name'],
         'startDate': value['startDate'].toISOString(),
         'timeToCompleteHours': value['timeToCompleteHours'],
         'updatedById': value['updatedById'],
+        'weekRank': value['weekRank'],
     };
 }
 

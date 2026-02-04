@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
-import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
-import { BranchApi } from '@/api/generated/apis/BranchApi'
+import { useAuthSession } from '@/lib/auth-session'
 
 type JwtClaims = Record<string, unknown>
 
@@ -98,12 +97,14 @@ async function fetchUserByEmail(email: string, token?: string): Promise<UserTabl
 
 export default function Header() {
 	const [searchOpen, setSearchOpen] = useState(false)
+	const session = useAuthSession()
 
 	const identity = useMemo(() => {
 		if (typeof window === 'undefined') return null
 
-		const token = window.localStorage.getItem('auth_token') ?? undefined
-		const storedEmail = window.localStorage.getItem('auth_email') ?? undefined
+		const token = session.token ?? undefined
+		const storedEmail = session.email ?? undefined
+		const storedUsername = session.username ?? undefined
 
 		const claims = token ? tryDecodeJwtClaims(token) : null
 		const claimEmail =
@@ -111,78 +112,40 @@ export default function Header() {
 			getStringClaim(claims, 'preferred_username') ??
 			getStringClaim(claims, 'upn')
 
+		const resolvedEmail =
+			(claimEmail && claimEmail.includes('@') ? claimEmail : undefined) ??
+			(storedEmail && storedEmail.includes('@') ? storedEmail : undefined)
+
 		const sub = getStringClaim(claims, 'sub')
 		const userId = sub && looksLikeUuid(sub) ? sub : undefined
 
 		return {
 			token,
-			email: claimEmail ?? storedEmail,
+			email: resolvedEmail,
+			username: storedUsername,
+			actorId: session.actorId ?? undefined,
 			userId,
 		}
-	}, [])
+	}, [session.actorId, session.email, session.token, session.username])
 
 	const currentUserQuery = useQuery({
-		queryKey: ['currentUser', identity?.userId ?? null, identity?.email ?? null],
+		queryKey: ['currentUser', identity?.userId ?? null, identity?.email ?? null, identity?.token ?? null],
 		enabled: typeof window !== 'undefined' && !!identity && (!!identity.userId || !!identity.email),
 		queryFn: async () => {
 			if (!identity) return null
 			if (identity.userId) {
-				return await fetchUserById(identity.userId, identity.token)
+				return await fetchUserById(identity.userId, identity.token ?? undefined)
 			}
 			if (identity.email) {
-				return await fetchUserByEmail(identity.email, identity.token)
+				return await fetchUserByEmail(identity.email, identity.token ?? undefined)
 			}
 			return null
 		},
 		retry: false,
 	})
 
-	// Fetch user's branch personnel record
-	const branchPersonnelApi = new BranchPersonnelApi()
-	const branchPersonnelQuery = useQuery({
-		queryKey: ['branchPersonnel', currentUserQuery.data?.actorId],
-		enabled: !!currentUserQuery.data?.actorId,
-		queryFn: async () => {
-			const actorId = currentUserQuery.data?.actorId
-			if (!actorId) return null
-			try {
-				const response = await branchPersonnelApi.getAllBranchPersonnel({
-					pageable: {},
-				})
-				// Find the active branch personnel record for this employee
-				const personnelRecord = response.data?.find(
-					(record) => record.actorId === actorId && record.status === 'IN'
-				)
-				return personnelRecord ?? null
-			} catch (error) {
-				console.error('Failed to fetch branch personnel:', error)
-				return null
-			}
-		},
-		retry: false,
-	})
-
-	// Fetch branch details
-	const branchApi = new BranchApi()
-	const branchQuery = useQuery({
-		queryKey: ['branch', branchPersonnelQuery.data?.branchId],
-		enabled: !!branchPersonnelQuery.data?.branchId,
-		queryFn: async () => {
-			if (!branchPersonnelQuery.data?.branchId) return null
-			try {
-				const response = await branchApi.getBranch({
-					id: branchPersonnelQuery.data.branchId,
-				})
-				return response.data ?? null
-			} catch (error) {
-				console.error('Failed to fetch branch:', error)
-				return null
-			}
-		},
-		retry: false,
-	})
-
-	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? 'Account'
+	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? identity?.username ?? 'Account'
+	const displayBranchName = session.primaryBranchName ?? 'No Branch Assigned'
 	const searchInput = (
 		<div className="relative">
 			<Input
@@ -205,7 +168,7 @@ export default function Header() {
 	)
 
 	return (
-		<header className="border-b px-4 shadow-sm shadow-accent-foreground/10 md:px-6">
+		<header className="border-b px-4 shadow-sm shadow-accent-foreground/10 md:px-6 bg-surface-container">
 			<div className="flex h-16 items-center justify-between">
 				{/* Mobile layout */}
 				<div className="flex w-full items-center md:hidden">
@@ -245,7 +208,7 @@ export default function Header() {
 				<div className="hidden w-full items-center justify-between md:flex">
 					<div className="flex items-center gap-2 ">
 						<Button
-							variant="ghost"
+							variant="outline"
 							size="sm"
 							className="flex items-center gap-2 h-9 px-3 py-1 "
 							aria-label="Account"
@@ -256,7 +219,7 @@ export default function Header() {
 							</span>
 						</Button>
 						<Button
-							variant="ghost"
+							variant="outline"
 							size="icon"
 							aria-label="Notifications"
 							className="h-9 w-9 "
@@ -270,7 +233,7 @@ export default function Header() {
 								<Input
 									type="text"
 									placeholder="Search..."
-									className="pl-9 pr-3 py-2 h-9 w-full rounded-2xl bg-muted focus:bg-background border border-input focus:outline-none focus:ring-2 focus:ring-ring"
+									className="pl-9 pr-3 py-2 h-9 w-full rounded-2xl bg-muted focus:bg-surface border border-input focus:outline-none focus:ring-2 focus:ring-ring"
 								/>
 								<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
 							</div>
@@ -288,9 +251,9 @@ export default function Header() {
 						</Button>
 					</div>
 
-					<div className="hidden md:block">
-						<Label>
-							Branch: {branchQuery.isLoading ? 'Loading...' : (branchQuery.data?.name ?? 'Not Assigned')}
+					<div className="hidden md:flex flex-col items-end gap-0.5">
+						<Label className="text-sm font-semibold text-foreground">
+							Branch: {displayBranchName}
 						</Label>
 					</div>
 				</div>

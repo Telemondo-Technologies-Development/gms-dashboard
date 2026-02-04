@@ -8,12 +8,16 @@ Name | Type
 ------------ | -------------
 `assetId` | string
 `createdById` | string
+`dayOfWeek` | number
 `intervalUnit` | string
 `intervalValue` | number
+`isAdvancedSettingsAllowed` | boolean
 `leadTimeHours` | number
+`monthOfYear` | number
 `name` | string
 `startDate` | Date
 `timeToCompleteHours` | number
+`weekRank` | number
 
 ## Example
 
@@ -24,12 +28,16 @@ import type { SchedulePostDTO } from ''
 const example = {
   "assetId": null,
   "createdById": null,
+  "dayOfWeek": null,
   "intervalUnit": null,
   "intervalValue": null,
+  "isAdvancedSettingsAllowed": null,
   "leadTimeHours": null,
+  "monthOfYear": null,
   "name": null,
   "startDate": null,
   "timeToCompleteHours": null,
+  "weekRank": null,
 } satisfies SchedulePostDTO
 
 console.log(example)

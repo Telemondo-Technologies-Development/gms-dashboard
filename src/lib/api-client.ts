@@ -1,8 +1,15 @@
 import { Configuration } from '@/api/generated/runtime'
 import { UserApi, EmployeeApi, PaymentApi, InvoiceApi } from '@/api/generated/apis'
+import { readPersistedAuthToken, readAuthSession } from '@/lib/auth-session'
 
 const getConfiguration = () => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : undefined
+  // Prefer Zustand-persisted session token; fallback to legacy localStorage key
+  const session = readAuthSession()
+  const persistedToken = readPersistedAuthToken()
+  const token =
+    session.token ??
+    persistedToken ??
+    (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : undefined)
   
   // Force relative path in DEV to usage Vite proxy to avoid CORS
   // In PROD, use the env var or empty string

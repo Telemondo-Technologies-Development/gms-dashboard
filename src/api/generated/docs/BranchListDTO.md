@@ -1,37 +1,24 @@
 
-# PaymentPostDTO
+# BranchListDTO
 
-Format for Payment create
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`amount` | number
-`createdById` | string
-`failureReason` | string
-`invoiceId` | string
-`paidAt` | Date
-`paymentMethodId` | string
-`referenceNum` | string
-`status` | string
+`id` | string
+`name` | string
 
 ## Example
 
 ```typescript
-import type { PaymentPostDTO } from ''
+import type { BranchListDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "amount": null,
-  "createdById": null,
-  "failureReason": null,
-  "invoiceId": null,
-  "paidAt": null,
-  "paymentMethodId": null,
-  "referenceNum": null,
-  "status": null,
-} satisfies PaymentPostDTO
+  "id": null,
+  "name": null,
+} satisfies BranchListDTO
 
 console.log(example)
 
@@ -40,7 +27,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as PaymentPostDTO
+const exampleParsed = JSON.parse(exampleJSON) as BranchListDTO
 console.log(exampleParsed)
 ```
 

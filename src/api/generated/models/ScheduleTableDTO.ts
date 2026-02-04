@@ -39,6 +39,12 @@ export interface ScheduleTableDTO {
     createdById?: string;
     /**
      * 
+     * @type {number}
+     * @memberof ScheduleTableDTO
+     */
+    dayOfWeek?: number;
+    /**
+     * 
      * @type {string}
      * @memberof ScheduleTableDTO
      */
@@ -63,6 +69,12 @@ export interface ScheduleTableDTO {
     leadTimeHours: number;
     /**
      * 
+     * @type {number}
+     * @memberof ScheduleTableDTO
+     */
+    monthOfYear?: number;
+    /**
+     * 
      * @type {string}
      * @memberof ScheduleTableDTO
      */
@@ -79,6 +91,12 @@ export interface ScheduleTableDTO {
      * @memberof ScheduleTableDTO
      */
     timeToCompleteHours: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ScheduleTableDTO
+     */
+    weekRank?: number;
 }
 
 
@@ -86,12 +104,22 @@ export interface ScheduleTableDTO {
  * @export
  */
 export const ScheduleTableDTOIntervalUnitEnum = {
-    Minute: 'MINUTE',
-    Hour: 'HOUR',
-    Day: 'DAY',
-    Week: 'WEEK',
-    Month: 'MONTH',
-    Year: 'YEAR'
+    Nanos: 'Nanos',
+    Micros: 'Micros',
+    Millis: 'Millis',
+    Seconds: 'Seconds',
+    Minutes: 'Minutes',
+    Hours: 'Hours',
+    HalfDays: 'HalfDays',
+    Days: 'Days',
+    Weeks: 'Weeks',
+    Months: 'Months',
+    Years: 'Years',
+    Decades: 'Decades',
+    Centuries: 'Centuries',
+    Millennia: 'Millennia',
+    Eras: 'Eras',
+    Forever: 'Forever'
 } as const;
 export type ScheduleTableDTOIntervalUnitEnum = typeof ScheduleTableDTOIntervalUnitEnum[keyof typeof ScheduleTableDTOIntervalUnitEnum];
 
@@ -125,13 +153,16 @@ export function ScheduleTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bo
         'active': json['active'],
         'assetId': json['assetId'],
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
+        'dayOfWeek': json['dayOfWeek'] == null ? undefined : json['dayOfWeek'],
         'id': json['id'],
         'intervalUnit': json['intervalUnit'],
         'intervalValue': json['intervalValue'],
         'leadTimeHours': json['leadTimeHours'],
+        'monthOfYear': json['monthOfYear'] == null ? undefined : json['monthOfYear'],
         'name': json['name'],
         'startDate': (new Date(json['startDate'])),
         'timeToCompleteHours': json['timeToCompleteHours'],
+        'weekRank': json['weekRank'] == null ? undefined : json['weekRank'],
     };
 }
 
@@ -149,13 +180,16 @@ export function ScheduleTableDTOToJSONTyped(value?: ScheduleTableDTO | null, ign
         'active': value['active'],
         'assetId': value['assetId'],
         'createdById': value['createdById'],
+        'dayOfWeek': value['dayOfWeek'],
         'id': value['id'],
         'intervalUnit': value['intervalUnit'],
         'intervalValue': value['intervalValue'],
         'leadTimeHours': value['leadTimeHours'],
+        'monthOfYear': value['monthOfYear'],
         'name': value['name'],
         'startDate': value['startDate'].toISOString(),
         'timeToCompleteHours': value['timeToCompleteHours'],
+        'weekRank': value['weekRank'],
     };
 }
 

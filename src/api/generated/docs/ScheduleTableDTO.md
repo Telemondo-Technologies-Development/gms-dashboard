@@ -9,13 +9,16 @@ Name | Type
 `active` | boolean
 `assetId` | string
 `createdById` | string
+`dayOfWeek` | number
 `id` | string
 `intervalUnit` | string
 `intervalValue` | number
 `leadTimeHours` | number
+`monthOfYear` | number
 `name` | string
 `startDate` | Date
 `timeToCompleteHours` | number
+`weekRank` | number
 
 ## Example
 
@@ -27,13 +30,16 @@ const example = {
   "active": null,
   "assetId": null,
   "createdById": null,
+  "dayOfWeek": null,
   "id": null,
   "intervalUnit": null,
   "intervalValue": null,
   "leadTimeHours": null,
+  "monthOfYear": null,
   "name": null,
   "startDate": null,
   "timeToCompleteHours": null,
+  "weekRank": null,
 } satisfies ScheduleTableDTO
 
 console.log(example)

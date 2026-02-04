@@ -66,6 +66,12 @@ export interface PaymentTableDTO {
      * @type {string}
      * @memberof PaymentTableDTO
      */
+    referenceNum?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PaymentTableDTO
+     */
     status: PaymentTableDTOStatusEnum;
     /**
      * 
@@ -117,6 +123,7 @@ export function PaymentTableDTOFromJSONTyped(json: any, ignoreDiscriminator: boo
         'invoiceId': json['invoiceId'],
         'paidAt': json['paidAt'] == null ? undefined : (new Date(json['paidAt'])),
         'paymentMethodId': json['paymentMethodId'],
+        'referenceNum': json['referenceNum'] == null ? undefined : json['referenceNum'],
         'status': json['status'],
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
@@ -140,6 +147,7 @@ export function PaymentTableDTOToJSONTyped(value?: PaymentTableDTO | null, ignor
         'invoiceId': value['invoiceId'],
         'paidAt': value['paidAt'] == null ? value['paidAt'] : value['paidAt'].toISOString(),
         'paymentMethodId': value['paymentMethodId'],
+        'referenceNum': value['referenceNum'],
         'status': value['status'],
         'updatedById': value['updatedById'],
     };

@@ -1131,8 +1131,10 @@
             "schema": {
               "type": "string",
               "enum": [
-                "IN",
-                "OUT",
+                "ACTIVE",
+                "MOVED",
+                "TERMINATED",
+                "RESIGNED",
                 "UNDECIDED"
               ]
             }
@@ -5116,6 +5118,22 @@
           "branch"
         ]
       },
+      "BranchListDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
       "BranchPersonnelPostDTO": {
         "type": "object",
         "description": "Format for Branch Personnel create",
@@ -5135,8 +5153,10 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
               "UNDECIDED"
             ]
           }
@@ -5163,8 +5183,10 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
               "UNDECIDED"
             ]
           },
@@ -5203,8 +5225,10 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
               "UNDECIDED"
             ]
           },
@@ -5249,8 +5273,8 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "CLOSED",
               "UNDECIDED"
             ]
           }
@@ -5289,8 +5313,8 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "CLOSED",
               "UNDECIDED"
             ]
           },
@@ -5331,8 +5355,8 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "CLOSED",
               "UNDECIDED"
             ]
           }
@@ -5373,8 +5397,8 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
+              "ACTIVE",
+              "CLOSED",
               "UNDECIDED"
             ]
           },
@@ -5770,12 +5794,21 @@
             "type": "string",
             "format": "uuid"
           },
+          "branches": {
+            "type": "array",
+            "nullable": true,
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/BranchListDTO"
+            }
+          },
           "email": {
             "type": "string"
           }
         },
         "required": [
           "actorId",
+          "branches",
           "email"
         ]
       },
@@ -6257,6 +6290,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "referenceNum": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -6343,6 +6381,9 @@
           "paymentMethodId": {
             "type": "string",
             "format": "uuid"
+          },
+          "referenceNum": {
+            "type": "string"
           },
           "status": {
             "type": "string",
@@ -6517,24 +6558,49 @@
             "type": "string",
             "format": "uuid"
           },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 7,
+            "minimum": 1
+          },
           "intervalUnit": {
             "type": "string",
             "enum": [
-              "MINUTE",
-              "HOUR",
-              "DAY",
-              "WEEK",
-              "MONTH",
-              "YEAR"
+              "Nanos",
+              "Micros",
+              "Millis",
+              "Seconds",
+              "Minutes",
+              "Hours",
+              "HalfDays",
+              "Days",
+              "Weeks",
+              "Months",
+              "Years",
+              "Decades",
+              "Centuries",
+              "Millennia",
+              "Eras",
+              "Forever"
             ]
           },
           "intervalValue": {
             "type": "integer",
             "format": "int32"
           },
+          "isAdvancedSettingsAllowed": {
+            "type": "boolean"
+          },
           "leadTimeHours": {
             "type": "integer",
             "format": "int32"
+          },
+          "monthOfYear": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 12,
+            "minimum": 1
           },
           "name": {
             "type": "string"
@@ -6546,6 +6612,12 @@
           "timeToCompleteHours": {
             "type": "integer",
             "format": "int32"
+          },
+          "weekRank": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": -1
           }
         },
         "required": [
@@ -6553,6 +6625,7 @@
           "createdById",
           "intervalUnit",
           "intervalValue",
+          "isAdvancedSettingsAllowed",
           "leadTimeHours",
           "name",
           "startDate",
@@ -6565,24 +6638,49 @@
           "active": {
             "type": "boolean"
           },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 7,
+            "minimum": 1
+          },
           "intervalUnit": {
             "type": "string",
             "enum": [
-              "MINUTE",
-              "HOUR",
-              "DAY",
-              "WEEK",
-              "MONTH",
-              "YEAR"
+              "Nanos",
+              "Micros",
+              "Millis",
+              "Seconds",
+              "Minutes",
+              "Hours",
+              "HalfDays",
+              "Days",
+              "Weeks",
+              "Months",
+              "Years",
+              "Decades",
+              "Centuries",
+              "Millennia",
+              "Eras",
+              "Forever"
             ]
           },
           "intervalValue": {
             "type": "integer",
             "format": "int32"
           },
+          "isAdvancedSettingsAllowed": {
+            "type": "boolean"
+          },
           "leadTimeHours": {
             "type": "integer",
             "format": "int32"
+          },
+          "monthOfYear": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 12,
+            "minimum": 1
           },
           "name": {
             "type": "string"
@@ -6598,12 +6696,19 @@
           "updatedById": {
             "type": "string",
             "format": "uuid"
+          },
+          "weekRank": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": -1
           }
         },
         "required": [
           "active",
           "intervalUnit",
           "intervalValue",
+          "isAdvancedSettingsAllowed",
           "leadTimeHours",
           "name",
           "startDate",
@@ -6625,6 +6730,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -6632,12 +6741,22 @@
           "intervalUnit": {
             "type": "string",
             "enum": [
-              "MINUTE",
-              "HOUR",
-              "DAY",
-              "WEEK",
-              "MONTH",
-              "YEAR"
+              "Nanos",
+              "Micros",
+              "Millis",
+              "Seconds",
+              "Minutes",
+              "Hours",
+              "HalfDays",
+              "Days",
+              "Weeks",
+              "Months",
+              "Years",
+              "Decades",
+              "Centuries",
+              "Millennia",
+              "Eras",
+              "Forever"
             ]
           },
           "intervalValue": {
@@ -6645,6 +6764,10 @@
             "format": "int32"
           },
           "leadTimeHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monthOfYear": {
             "type": "integer",
             "format": "int32"
           },
@@ -6656,6 +6779,10 @@
             "format": "date-time"
           },
           "timeToCompleteHours": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "weekRank": {
             "type": "integer",
             "format": "int32"
           }
