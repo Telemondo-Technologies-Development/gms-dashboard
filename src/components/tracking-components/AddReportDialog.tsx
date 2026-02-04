@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Textarea } from '@/components/ui/textarea';
 
 interface AddReportDialogProps {
+  members: { id: string; name: string }[]; // Pass the list of members from the membership data
   onSubmit: (reportData: {
     name: string;
     branch: string;
@@ -26,7 +27,7 @@ interface AddReportDialogProps {
   }) => void;
 }
 
-export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
+export default function AddReportDialog({ members, onSubmit }: AddReportDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [branch, setBranch] = useState('');
@@ -34,6 +35,26 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
   const [description, setDescription] = useState('');
   const [occurredAt, setOccurredAt] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [filteredMembers, setFilteredMembers] = useState(members);
+  const [isSearching, setIsSearching] = useState(false); 
+
+  useEffect(() => {
+    if (name.trim() === '' || !isSearching) {
+      setFilteredMembers([]);
+    } else {
+      setFilteredMembers(
+        members.filter((member) =>
+          member.name.toLowerCase().includes(name.toLowerCase())
+        )
+      );
+    }
+  }, [name, members, isSearching]);
+
+  const handleSelectMember = (memberName: string) => {
+    setName(memberName);
+    setIsSearching(false); 
+    setFilteredMembers([]); 
+  };
 
   const handleSubmit = () => {
     if (name.trim() && branch.trim() && reportType && description.trim() && occurredAt) {
@@ -71,14 +92,33 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 border border-border p-4 rounded-2xl">
-          <div className="space-y-2">
+        <div className="space-y-2">
             <Label htmlFor="customerName">Customer Name</Label>
             <Input
-              id="customerName"
-              placeholder="Enter customer name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+                id="customerName"
+                placeholder="Search customer name..."
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setIsSearching(true); 
+                }}
+                onFocus={() => {
+                  if (name.length > 0) setIsSearching(true);
+                }}
+              />
+            {filteredMembers.length > 0 && (
+              <div className="absolute z-10 w-full border bg-popover text-popover-foreground rounded-md shadow-md max-h-40 overflow-y-auto mt-1">
+                {filteredMembers.map((member) => (
+                  <div
+                    key={member.id}
+                    className="p-2 hover:bg-muted cursor-pointer"
+                    onClick={() => handleSelectMember(member.name)}
+                  >
+                    {member.name}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="branchName">Branch Name</Label>
@@ -121,15 +161,6 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
               type="datetime-local"
               value={occurredAt}
               onChange={(e) => setOccurredAt(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="attachments">Attachments</Label>
-            <Input
-              id="attachments"
-              type="file"
-              multiple
-              onChange={(e) => setAttachments(e.target.files ? Array.from(e.target.files) : [])}
             />
           </div>
         </div>

@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import AddReportDialog from '@/components/tracking-components/AddReportDialog';
 import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal';
+import { fetchMembersFromApi } from '@/routes/dashboard/marketing/membership';
 
 export const Route = createFileRoute('/dashboard/admin/tracking')({
   component: Tracking,
@@ -14,7 +16,7 @@ export const Route = createFileRoute('/dashboard/admin/tracking')({
 interface Customer {
   id: string;
   name: string;
-  branch: string; 
+  branch: string;
   reports: {
     date: string;
     type: string;
@@ -29,6 +31,21 @@ export default function Tracking() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch members using React Query
+  const membersQuery = useQuery({
+    queryKey: ['members'],
+    queryFn: fetchMembersFromApi,
+  });
+
+  const members = useMemo(() => {
+    const apiMembers = membersQuery.data ?? [];
+    return apiMembers.map((m) => ({
+      id: m.id,
+      name: `${m.firstName} ${m.surname}`,
+      branch: 'Unknown', // Default value since 'branch' does not exist on the type
+    }));
+  }, [membersQuery.data]);
 
   const activeCustomerData = customers.find((c) => c.id === selectedCustomerId);
 
@@ -52,7 +69,9 @@ export default function Tracking() {
     attachments: File[];
   }) => {
     setCustomers((prevCustomers) => {
-      const existingCustomer = prevCustomers.find((customer) => customer.name === reportData.name && customer.branch === reportData.branch);
+      const existingCustomer = prevCustomers.find(
+        (customer) => customer.name === reportData.name && customer.branch === reportData.branch
+      );
       if (existingCustomer) {
         return prevCustomers.map((customer) =>
           customer.name === reportData.name && customer.branch === reportData.branch
@@ -75,7 +94,7 @@ export default function Tracking() {
         return [
           ...prevCustomers,
           {
-            id: String(prevCustomers.length + 1), 
+            id: String(prevCustomers.length + 1),
             name: reportData.name,
             branch: reportData.branch,
             reports: [
@@ -101,7 +120,9 @@ export default function Tracking() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Incident Reports</h2>
-        <Button variant="outline" onClick={() => window.location.reload()}>Refresh</Button>
+        <Button variant="outline" onClick={() => membersQuery.refetch()}>
+          Refresh
+        </Button>
       </div>
 
       <Card>
@@ -110,7 +131,10 @@ export default function Tracking() {
             <CardTitle>Customers</CardTitle>
             <CardDescription>Click a customer to view incident reports.</CardDescription>
           </div>
-          <AddReportDialog onSubmit={handleAddReport} />
+          <AddReportDialog
+            onSubmit={handleAddReport}
+            members={members}
+          />
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2 mb-6">

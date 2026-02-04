@@ -61,19 +61,20 @@ function hasPersistedToken(): boolean {
 }
 
 
-async function fetchMembersFromApi() {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-  const url = `${base}/api/member`
+export async function fetchMembersFromApi() {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const base = import.meta.env.DEV ? '' : apiBaseUrl || '';
+  const url = `${base}/api/member`;
 
-  const token = readPersistedAuthToken() ?? localStorage.getItem('auth_token')
+  const token = readPersistedAuthToken() ?? localStorage.getItem('auth_token');
   const response = await fetch(url, {
     method: 'GET',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     credentials: 'include',
-  })
+  });
+
 
   const rawText = await response.text().catch(() => '')
   if (!response.ok) {
