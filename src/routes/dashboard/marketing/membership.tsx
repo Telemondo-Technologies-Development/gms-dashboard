@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import type { MemberFormData, MemberInfo } from '@/types/membership/memberSchemas'
+import { format } from 'date-fns'
+import { Search, QrCode, Fingerprint, UserCheck, Clock } from 'lucide-react'
+
+import type { MemberFormData, MemberInfo, AttendanceRecord, MembershipSearchForm } from '@/types/membership/memberSchemas'
 import MembersTable from '@/components/membership-components/MembersTable'
 import { MemberDetailsDialog } from '@/components/membership-components/MemberDetailsDialog'
 import { Input } from '@/components/ui/input'
@@ -9,69 +12,11 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Search, QrCode, Fingerprint, UserCheck, Clock } from 'lucide-react'
-import { format } from 'date-fns'
-import type { AttendanceRecord } from '@/types/membership/memberSchemas'
-import type { MembershipSearchForm } from '@/types/membership/memberSchemas'
 import { Label } from '@/components/ui/label'
-
 
 export const Route = createFileRoute('/dashboard/marketing/membership')({
   component: MembershipRoute,
 })
-
-
-const EMPTY_INVOICES: InvoiceTableDTOParsed[] = []
-
-function getDebugBillingFlag(): boolean {
-  if (typeof window === 'undefined') return false
-  const params = new URLSearchParams(window.location.search)
-  if (params.get('debugBilling') === '1' || params.get('debug') === '1') return true
-  return window.localStorage.getItem('debugBilling') === '1'
-}
-
-function safeErrorMessage(error: unknown): string | undefined {
-  if (!error) return undefined
-  if (error instanceof Error) return error.message
-  return String(error)
-}
-
-function hasPersistedToken(): boolean {
-  if (typeof window === 'undefined') return false
-  try {
-    return !!(readPersistedAuthToken() ?? window.localStorage.getItem('auth_token'))
-  } catch {
-    return false
-  }
-}
-
-
-async function fetchMembersFromApi() {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-  const url = `${base}/api/member`
-
-  const token = readPersistedAuthToken() ?? localStorage.getItem('auth_token')
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    credentials: 'include',
-  })
-
-  const rawText = await response.text().catch(() => '')
-  if (!response.ok) {
-    throw new Error(`Failed to load members (${response.status}). ${rawText || 'Check server logs for details.'}`)
-  }
-
-  const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
-  const envelope = apiResponseListMemberTableSchema.parse(parsedJson)
-  if (!envelope.success) {
-    throw new Error(envelope.message ?? 'Failed to load members.')
-  }
-  return envelope.data
-}
 
 function MembershipRoute() {
   const [members, setMembers] = useState<MemberFormData[]>([])
@@ -111,10 +56,9 @@ function MembershipRoute() {
     return icons[method]
   }
 
-  const todayAttendance = attendanceRecords.filter(record => {
-    const today = new Date()
-    const recordDate = new Date(record.checkInTime)
-    return recordDate.toDateString() === today.toDateString()
+  const todayAttendance = attendanceRecords.filter((record) => {
+    const today = new Date().toDateString()
+    return new Date(record.checkInTime).toDateString() === today
   })
 
   return (
