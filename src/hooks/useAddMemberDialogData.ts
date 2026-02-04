@@ -9,7 +9,7 @@ import { getAuthenticatedApi } from '@/lib/api-client'
 import type { AuthSession } from '@/lib/auth-session'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable, type JwtClaims } from '@/types/user/userSchemas'
 
-import {userQueryKeys, branchQueryKeys,subscriptionAvailedQueryKeys} from '@/lib/QueryKeys'
+import { userQueryKeys, branchQueryKeys, subscriptionAvailedQueryKeys } from '@/lib/QueryKeys'
 
 
 
@@ -96,7 +96,8 @@ async function fetchUserByEmail(email: string, token?: string): Promise<UserTabl
   return parsed.data.data.find((u) => u.email.toLowerCase() === needle) ?? null
 }
 
-export function useAddMemberDialogData(session: AuthSession) {
+export function useAddMemberDialogData(options: { session: AuthSession; open: boolean }) {
+  const { session, open } = options
   const token = session.token ?? ''
   const storedEmail = session.email ?? ''
   const storedUsername = session.username ?? ''
@@ -110,7 +111,7 @@ export function useAddMemberDialogData(session: AuthSession) {
 
   const currentUserQuery = useQuery({
     queryKey: [userQueryKeys.currentUser, authUserId ?? null, storedEmail || null],
-    enabled: typeof window !== 'undefined' && (!!authUserId || !!storedEmail),
+    enabled: typeof window !== 'undefined' && open && (!!authUserId || !!storedEmail),
     queryFn: async () => {
       if (authUserId) return await fetchUserById(authUserId, token)
       if (storedEmail) return await fetchUserByEmail(storedEmail, token)
@@ -129,7 +130,7 @@ export function useAddMemberDialogData(session: AuthSession) {
 
   const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
     queryKey: [branchQueryKeys.branches, resolvedActorId ?? null, token || null],
-    enabled: !!resolvedActorId,
+    enabled: open && !!resolvedActorId,
     queryFn: async () => {
       if (!resolvedActorId) return null
       const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } })
@@ -148,15 +149,22 @@ export function useAddMemberDialogData(session: AuthSession) {
 
   const subscriptionsQuery = useQuery<SubscriptionAvailedTableDTO[]>({
     queryKey: [subscriptionAvailedQueryKeys.subscriptionAvailed, token || null],
-    enabled: typeof window !== 'undefined',
+    enabled: typeof window !== 'undefined' && open,
     queryFn: async () => {
-      const response = await subscriptionAvailedApi.getAllSubscriptionAvailed({ pageable: {} })
+      const response = await subscriptionAvailedApi.getAllSubscriptionAvailed({
+        pageable: {
+          page: 0,
+          size: 500,
+          sort: ['name,asc'],
+        },
+      })
       if (!response.success) {
         throw new Error(response.message ?? 'Failed to fetch subscription availed.')
       }
       return response.data ?? []
     },
     retry: false,
+    staleTime: 60_000,
   })
 
   return {

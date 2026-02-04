@@ -17,27 +17,44 @@ export function useMemberDetailsDialogData(options: { open: boolean; memberActor
     queryKey: [subscriptionAvailedQueryKeys.subscriptionAvailed],
     enabled: open,
     queryFn: async () => {
-      const response = await subscriptionAvailedApi.getAllSubscriptionAvailed({ pageable: {} })
+      const response = await subscriptionAvailedApi.getAllSubscriptionAvailed({
+        pageable: {
+          page: 0,
+          size: 500,
+          sort: ['name,asc'],
+        },
+      })
       if (!response.success) {
         throw new Error(response.message ?? 'Failed to fetch subscription availed.')
       }
       return response.data ?? []
     },
     retry: false,
+    staleTime: 60000,
   })
 
   const memberSubscriptionQuery = useQuery<MemberSubscriptionTableDTO | null>({
-    queryKey: [memberQueryKeys.memberSubscription, memberActorId],
+    queryKey: [memberQueryKeys.memberSubscriptions, memberActorId],
     enabled: open && !!memberActorId,
     queryFn: async () => {
       if (!memberActorId) return null
-      const response = await memberSubscriptionApi.getAllMemberSubscriptions({ pageable: {} })
+      const response = await memberSubscriptionApi.getAllMemberSubscriptions({
+        pageable: {
+          page: 0,
+          size: 500,
+          sort: ['startDate,desc'],
+        },
+      })
+      if (response.success === false) {
+        throw new Error(response.message ?? 'Failed to fetch member subscriptions.')
+      }
       const subscription =
         response.data?.find((sub: MemberSubscriptionTableDTO) => sub.actorId === memberActorId && sub.status === 'ACTIVE') ??
         null
       return subscription
     },
     retry: false,
+    staleTime: 30000,
   })
 
   return { subscriptionsQuery, memberSubscriptionQuery }

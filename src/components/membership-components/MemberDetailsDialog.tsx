@@ -10,6 +10,7 @@ import { Calendar } from '@/components/ui/calendar'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -45,8 +46,6 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
   const [currentMemberSubscriptionId, setCurrentMemberSubscriptionId] = useState<string | undefined>(undefined)
   
   const queryClient = useQueryClient()
-  
-  // Initialize API clients
   const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
 
   const session = useAuthSession()
@@ -76,14 +75,11 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
     setStartDate(memberGroup.startDate)
     setEndDate(memberGroup.endDate)
     setDocuments(memberGroup.documents)
-    // MemberFormData stores a display string, not a DB id.
     setPaymentMethodName(memberGroup.paymentMethod)
     setPaymentMethodId('')
     setMembershipDetails(memberGroup.membershipDetails)
     
-    // Set subscription from backend data if available
     if (memberSubscriptionQuery.data) {
-      // Note: MemberSubscriptionTableDTO has subscriptionAvailedId, need to query SubscriptionAvailed to get subscriptionId
       setCurrentMemberSubscriptionId(memberSubscriptionQuery.data.id)
       if (memberSubscriptionQuery.data.startDate) {
         setStartDate(new Date(memberSubscriptionQuery.data.startDate))
@@ -112,21 +108,18 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
       const memberSub = memberSubscriptionQuery.data
       const branchId = memberSub?.branchId ?? session.primaryBranchId
       if (!branchId) {
-        throw new Error('Branch not found. Please ensure your user is assigned to a branch and try again.')
+        throw new Error('Branch not found. Please ensure your user is assigned to a branch.')
       }
       
-      // Auth may be token-based or cookie-based; if the UI reached here, proceed.
-      
-      // Get current user's actor ID from localStorage or token
       const updatedById = memberSub?.updatedById || memberSub?.createdById
       if (!updatedById) {
-        throw new Error(`Cannot determine user ID (current session: ${session.username ?? session.email ?? 'unknown'})`)
+        throw new Error(`Cannot determine user ID for session: ${session.username ?? session.email ?? 'unknown'}`)
       }
       
       let resultingMemberSubscriptionId: string | undefined = currentMemberSubscriptionId
       let creatorIdForPayment = updatedById
+      
       if (currentMemberSubscriptionId) {
-        // Update existing subscription
         await memberSubscriptionApi.updateMemberSubscription({
           id: currentMemberSubscriptionId,
           memberSubscriptionPutDTO: {
@@ -141,11 +134,8 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
           },
         })
       } else {
-        // Create new subscription (if none exists)
         const createdById = memberSub?.createdById || updatedById
-        if (!createdById) {
-          throw new Error('Cannot determine creator ID')
-        }
+        if (!createdById) throw new Error('Cannot determine creator ID')
         
         const createResp = await memberSubscriptionApi.createMemberSubscription({
           memberSubscriptionPostDTO: {
@@ -167,7 +157,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
       return { memberSubscriptionId: resultingMemberSubscriptionId, createdById: creatorIdForPayment }
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscription, memberActorId] })
+      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscriptions, memberActorId] })
       void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
     },
   })
@@ -193,46 +183,42 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
         subscriptionResult = await updateSubscriptionMutation.mutateAsync()
       }
 
-      // Ensure an invoice exists even if payment is not recorded yet
       let ensuredInvoiceId: string | undefined
       try {
         if (!canEditBilling) {
-          // Billing is locked for non-admin users when an active subscription exists.
           ensuredInvoiceId = undefined
-        }
-        const memberSubscriptionId = subscriptionResult?.memberSubscriptionId ?? currentMemberSubscriptionId
-        const createdById = subscriptionResult?.createdById ?? memberSubscriptionQuery.data?.createdById
-        const branchId = memberSubscriptionQuery.data?.branchId ?? session.primaryBranchId
-        if (canEditBilling && memberSubscriptionId && selectedSubscription && createdById && branchId) {
-          const dueDate = startDate ?? new Date()
-          const graceDays = selectedSubscription.gracePeriodDays ?? 0
-          const actorId = memberActorId ?? memberGroup.id
+        } else {
+          const memberSubscriptionId = subscriptionResult?.memberSubscriptionId ?? currentMemberSubscriptionId
+          const createdById = subscriptionResult?.createdById ?? memberSubscriptionQuery.data?.createdById
+          const branchId = memberSubscriptionQuery.data?.branchId ?? session.primaryBranchId
+          
+          if (memberSubscriptionId && selectedSubscription && createdById && branchId) {
+            const dueDate = startDate ?? new Date()
+            const actorId = memberActorId ?? memberGroup.id
 
-          ensuredInvoiceId = await ensureInvoiceForSubscription({
-            actorId,
-            branchId,
-            createdById,
-            memberSubscriptionId,
-            subscriptionAvailedId: selectedSubscriptionId,
-            dueDate,
-            gracePeriodDays: graceDays,
-            subtotal: selectedSubscription.amount,
-          })
+            ensuredInvoiceId = await ensureInvoiceForSubscription({
+              actorId,
+              branchId,
+              createdById,
+              memberSubscriptionId,
+              subscriptionAvailedId: selectedSubscriptionId,
+              dueDate,
+              gracePeriodDays: selectedSubscription.gracePeriodDays ?? 0,
+              subtotal: selectedSubscription.amount,
+            })
+          }
         }
       } catch (invError) {
-        console.warn('Invoice creation skipped or failed (details dialog):', invError)
+        console.warn('Invoice creation skipped or failed:', invError)
       }
 
-      // Create payment if method selected and we can resolve an invoice
       try {
-        if (!canEditBilling) {
-          // Billing is locked.
-          // Member info edits are still allowed.
-          throw new Error('Billing locked')
-        }
+        if (!canEditBilling) throw new Error('Billing locked')
+        
         const memberSubscriptionId = subscriptionResult?.memberSubscriptionId ?? currentMemberSubscriptionId
         const createdById = subscriptionResult?.createdById ?? memberSubscriptionQuery.data?.createdById
         const branchId = memberSubscriptionQuery.data?.branchId ?? session.primaryBranchId
+        
         if (memberSubscriptionId && selectedSubscription && createdById && branchId) {
           await createPaymentIfNeeded({
             paymentMethodId,
@@ -244,7 +230,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
         }
       } catch (payError) {
         if (!(payError instanceof Error && payError.message === 'Billing locked')) {
-          console.warn('Payment creation skipped or failed (details dialog):', payError)
+          console.warn('Payment creation skipped or failed:', payError)
         }
       }
       
@@ -280,6 +266,9 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
         <form onSubmit={handleSubmit} className="space-y-6">
           <DialogHeader>
             <DialogTitle>Member Details</DialogTitle>
+            <DialogDescription>
+              View and update member information, subscription dates, and billing.
+            </DialogDescription>
           </DialogHeader>
 
           {!memberGroup ? (
@@ -370,7 +359,11 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
                       {subscriptionsQuery.isLoading ? (
                         <div className="text-sm text-muted-foreground">Loading subscriptions...</div>
                       ) : subscriptionsQuery.error ? (
-                        <div className="text-sm text-destructive">Failed to load subscriptions</div>
+                        <div className="text-sm text-destructive">
+                          {subscriptionsQuery.error instanceof Error
+                            ? subscriptionsQuery.error.message
+                            : 'Failed to load subscriptions.'}
+                        </div>
                       ) : subscriptionsQuery.data && subscriptionsQuery.data.length === 0 ? (
                         <div className="text-sm text-destructive">
                           No subscriptions available. Please create subscriptions in the admin panel first.

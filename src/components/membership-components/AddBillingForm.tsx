@@ -26,12 +26,17 @@ export function AddBillingDialog({
   disabled = false,
   loadPaymentMethods = true,
 }: AddBillingDialogProps) {
+  const NONE_PAYMENT_METHOD_VALUE = '__none__'
+  const EMPTY_PAYMENT_METHODS_VALUE = '__empty_payment_methods__'
+
   const paymentApi = getAuthenticatedApi(PaymentApi)
 
   const paymentMethodsQuery = useQuery<PaymentMethodTableDTOParsed[]>({
     queryKey: [paymentQueryKeys.paymentMethods],
     enabled: loadPaymentMethods,
     staleTime: 5 * 60 * 1000,
+    retry: false,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await paymentApi.getAllPaymentMethods({ pageable: { page: 0, size: 200 } })
       const parsed = apiResponseListPaymentMethodTableDTOSchema.parse(response)
@@ -39,7 +44,10 @@ export function AddBillingDialog({
     },
   })
 
-  const paymentMethods = paymentMethodsQuery.data ?? []
+  const paymentMethods = (paymentMethodsQuery.data ?? []).filter((m) => {
+    const id = typeof m.id === 'string' ? m.id.trim() : ''
+    return id.length > 0 && id !== NONE_PAYMENT_METHOD_VALUE && id !== EMPTY_PAYMENT_METHODS_VALUE
+  })
   const selectedPaymentMethodName = paymentMethods.find((m) => m.id === paymentMethodId)?.name ?? ''
 
   return (
@@ -92,7 +100,8 @@ export function AddBillingDialog({
             value={paymentMethodId}
             disabled={disabled}
             onValueChange={(id) => {
-              if (id === '__none__') {
+              if (id === EMPTY_PAYMENT_METHODS_VALUE) return
+              if (id === NONE_PAYMENT_METHOD_VALUE) {
                 onPaymentMethodChange('', '')
                 return
               }
@@ -104,7 +113,7 @@ export function AddBillingDialog({
               <SelectValue placeholder="Select payment method" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__none__">No payment recorded</SelectItem>
+              <SelectItem value={NONE_PAYMENT_METHOD_VALUE}>No payment recorded</SelectItem>
               {paymentMethods.length ? (
                 paymentMethods.map((m) => (
                   <SelectItem key={m.id} value={m.id}>
@@ -112,7 +121,7 @@ export function AddBillingDialog({
                   </SelectItem>
                 ))
               ) : (
-                <SelectItem value="__none__" disabled>
+                <SelectItem value={EMPTY_PAYMENT_METHODS_VALUE} disabled>
                   No payment methods found
                 </SelectItem>
               )}

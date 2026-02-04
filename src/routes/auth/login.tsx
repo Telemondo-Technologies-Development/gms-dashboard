@@ -6,58 +6,28 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { apiResponseEnvelopeSchema, loginResponseSchema, loginSchema, type LoginPayload } from '@/types/auth/loginSchemas'
+import { apiResponseEnvelopeSchema, loginSchema, type LoginPayload } from '@/types/auth/loginSchemas'
 import { normalizeBranches } from '@/lib/auth-branches'
 import { clearAuthSession, setAuthSession } from '@/lib/auth-session'
-
-type JwtClaims = Record<string, unknown>
-
-function tryDecodeJwtClaims(token: string): JwtClaims | null {
-  if (!token) return null
-  const parts = token.split('.')
-  if (parts.length !== 3) return null
-
-  const payload = parts[1]
-  if (!payload) return null
-
-  try {
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
-    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
-    if (typeof atob !== 'function') return null
-    const json = atob(padded)
-    const parsed: unknown = JSON.parse(json)
-    if (parsed && typeof parsed === 'object') return parsed as JwtClaims
-    return null
-  } catch {
-    return null
-  }
-}
-
-function getStringClaim(claims: JwtClaims | null, key: string): string | undefined {
-  if (!claims) return undefined
-  const value = claims[key]
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object'
 }
 
-function storeLoginIdentityFromPayload(payload: unknown): void {
+function storeLoginIdentityFromPayload(payload: unknown, token?: string | null): void {
   if (typeof window === 'undefined') return
   if (!isRecord(payload)) return
 
   const actorIdRaw = payload['actorId']
   const actorId = typeof actorIdRaw === 'string' && actorIdRaw.trim() ? actorIdRaw.trim() : null
 
-  const emailOrUsernameRaw = payload['email']
+  const emailOrUsernameRaw = payload['email'] ?? payload['username']
   const username = typeof emailOrUsernameRaw === 'string' && emailOrUsernameRaw.trim() ? emailOrUsernameRaw.trim() : null
   const email = username && username.includes('@') ? username : null
 
   const branches = normalizeBranches(payload['branches'])
 
-  // Payload-login mode: cookie-based auth, so clear any stale token.
-  setAuthSession({ token: null, actorId, username, email, branches })
+  setAuthSession({ token: token ?? null, actorId, username, email, branches })
 }
 
 export const Route = createFileRoute('/auth/login')({
@@ -94,16 +64,12 @@ function RouteComponent() {
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
       const url = `${base}/auth/login`
 
-      // Backend expects { username, password } (username can be an email or username string).
       const requestBody = { username: payload.username, password: payload.password }
 
       try {
         const response = await fetch(url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          // Include credentials so HttpOnly session cookies are set by the browser.
+          headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
           body: JSON.stringify(requestBody),
         })
@@ -115,64 +81,56 @@ function RouteComponent() {
         }
 
         const trimmed = rawText.trim()
-        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-          const maybeJson: unknown = JSON.parse(trimmed)
-          const envelope = apiResponseEnvelopeSchema.safeParse(maybeJson)
-          if (envelope.success) {
-            if (envelope.data.success === false) {
-              throw new Error(envelope.data.message ?? 'Login failed.')
-            }
-            if (envelope.data.success === true) {
-              const data = envelope.data.data
-              if (typeof data === 'string' && data.trim()) {
-                const maybeJsonString = data.trim()
-                if (maybeJsonString.startsWith('{') || maybeJsonString.startsWith('[')) {
-                  try {
-                    const parsedJson: unknown = JSON.parse(maybeJsonString)
-                    if (parsedJson && typeof parsedJson === 'object' && !Array.isArray(parsedJson)) {
-                      storeLoginIdentityFromPayload(parsedJson)
-                      // No real token in this mode (cookie-based auth)
-                      return ''
-                    }
-                  } catch {
-                    // fall through
-                  }
-                }
+        if (!trimmed || !(trimmed.startsWith('{') || trimmed.startsWith('['))) {
+          throw new Error('Unexpected response format from login service.')
+        }
 
-                setAuthSession({ branches: [] })
-                return maybeJsonString
-              }
-              if (
-                typeof data === 'object' &&
-                data !== null &&
-                !Array.isArray(data)
-              ) {
-                const branches = normalizeBranches((data as { branches?: unknown }).branches)
-                storeLoginIdentityFromPayload({ ...(data as Record<string, unknown>), branches })
+        const jsonData: unknown = JSON.parse(trimmed)
+        const envelope = apiResponseEnvelopeSchema.safeParse(jsonData)
 
-                const maybeToken = (data as { token?: unknown }).token
-                if (typeof maybeToken === 'string' && maybeToken.trim()) {
-                  return maybeToken.trim()
-                }
-
-                // Cookie-based login success; no token returned.
-                return ''
-              }
-              throw new Error(envelope.data.message ?? 'Login succeeded, but no token was returned.')
-            }
+        if (envelope.success) {
+          if (envelope.data.success === false) {
+            throw new Error(envelope.data.message ?? 'Login failed.')
           }
 
-          // Some backends return the identity payload directly (not wrapped in the envelope).
-          // In that case, treat it as cookie-based auth (no JWT token string) and store branches.
-          if (maybeJson && typeof maybeJson === 'object' && !Array.isArray(maybeJson)) {
-            storeLoginIdentityFromPayload(maybeJson)
-            return ''
+          const data = envelope.data.data
+
+          // Token returned as string in envelope
+          if (typeof data === 'string' && data.trim()) {
+            const token = data.trim()
+            // Try parsing if it's nested JSON (some backends do this)
+            if (token.startsWith('{')) {
+              try {
+                const parsed: unknown = JSON.parse(token)
+                if (isRecord(parsed)) {
+                  const extractedToken = typeof parsed['token'] === 'string' ? parsed['token'].trim() : null
+                  storeLoginIdentityFromPayload(parsed, extractedToken)
+                  return extractedToken ?? ''
+                }
+              } catch {
+                // Not nested JSON, treat as raw token
+              }
+            }
+            return token
           }
+
+          // Token + identity payload in envelope.data
+          if (isRecord(data)) {
+            const token = typeof data['token'] === 'string' ? data['token'].trim() : null
+            storeLoginIdentityFromPayload(data, token)
+            return token ?? ''
+          }
+
+          throw new Error('Login succeeded but returned unexpected data format.')
         }
-        const parsed = loginResponseSchema.safeParse(rawText)
-        if (parsed.success && parsed.data.trim()) {
-          return parsed.data.trim()
+
+        // Direct payload (not wrapped in envelope) - cookie-based auth
+        if (isRecord(jsonData)) {
+          const token = typeof jsonData['token'] === 'string' ? jsonData['token'].trim() : null
+          storeLoginIdentityFromPayload(jsonData, token)
+          return token ?? ''
         }
+
         throw new Error('Unexpected response from the login service.')
       } catch (error) {
         if (error instanceof Error) {
@@ -183,24 +141,9 @@ function RouteComponent() {
     },
     onSuccess: async (token) => {
       if (typeof token === 'string' && token.trim()) {
-        setAuthSession({ token: token.trim() })
-
-        const claims = tryDecodeJwtClaims(token)
-        const claimEmail =
-          getStringClaim(claims, 'email') ??
-          getStringClaim(claims, 'preferred_username') ??
-          getStringClaim(claims, 'upn')
-
-        if (claimEmail && claimEmail.includes('@')) {
-          setAuthSession({ email: claimEmail })
-        }
-
-        setLoginResponse(`Login success. Token: ${token}`)
+        setLoginResponse(`Login success. Token received.`)
       } else {
-        // Important: don't keep stale tokens around (it makes the UI appear stuck on the previous user).
-        setAuthSession({ token: null })
-
-        setLoginResponse('Login success. (No token returned; session cookie set)')
+        setLoginResponse('Login success. (Session cookie set)')
       }
 
       window.setTimeout(() => {
@@ -253,7 +196,7 @@ function RouteComponent() {
       </div>
 
       {/* Right Container - Login Form */}
-      <div className="flex flex-1 items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-1 items-center justify-center bg-surface px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-lg sm:shadow-primary/20">
           <CardHeader className="space-y-2 text-center">
             {/* Show Icon on specific mobile view only where left panel is hidden */}

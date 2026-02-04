@@ -51,7 +51,7 @@ function UsersPage() {
   } = useQuery<EmployeeTableDTO[], Error>({
     queryKey: [employeeQueryKeys],
     queryFn: async () => {
-      const response = await employeeApi.getAllEmployees({ pageable: {} })
+      const response = await employeeApi.getAllEmployees({ pageable: { page: 0, size: 500 } })
       if (!response.success) {
 			  throw new Error(response.message ?? 'Failed to fetch employees')
 		  }
@@ -67,7 +67,7 @@ function UsersPage() {
   } = useQuery<UserTableDTO[], Error>({
     queryKey: [userQueryKeys],
     queryFn: async () => {
-      const response = await userApi.getAllUsers({ pageable: {} })
+      const response = await userApi.getAllUsers({ pageable: { page: 0, size: 500 } })
       if (!response.success) {
         throw new Error(response.message ?? 'Failed to fetch users')
       }

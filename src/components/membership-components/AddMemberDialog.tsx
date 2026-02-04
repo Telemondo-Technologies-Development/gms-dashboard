@@ -37,17 +37,14 @@ import { useBillingActions } from '@/hooks/useBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 
 
-function looksLikeUuid(value: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-}
+const looksLikeUuid = (value: string): boolean =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
 
 export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const session = useAuthSession()
-  
-  // States for membership and billing
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState('')
@@ -64,11 +61,10 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
     currentUserEmail,
     branchPersonnelQuery,
     subscriptionsQuery,
-  } = useAddMemberDialogData(session)
+  } = useAddMemberDialogData({ session, open })
 
   const { ensureInvoiceForSubscription, createPaymentIfNeeded } = useBillingActions()
 
-  // Initialize API clients
   const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
   const subscriptionApi = getAuthenticatedApi(SubscriptionApi)
   const memberApi = getAuthenticatedApi(MemberApi)
@@ -107,24 +103,18 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         throw new Error('Please select a start date.')
       }
       
-      const branchId =
-        branchPersonnelQuery.data?.branchId ??
-        // Fallback: if login response included branches, use the primary one.
-        session.primaryBranchId
+      const branchId = branchPersonnelQuery.data?.branchId ?? session.primaryBranchId
       if (!branchId) {
-        throw new Error(
-          'User branch not found. Please ensure you are assigned to a branch (BranchPersonnel) or that your login response includes branches.',
-        )
+        throw new Error('User branch not found. Please ensure you are assigned to a branch.')
       }
 
-      // Step 1: Create Member
       const memberPostDTO = {
         createdById,
         firstName: values.firstName.trim(),
-        middleName: values.middleName.trim() ? values.middleName.trim() : undefined,
-        profilePictureId: values.profilePictureId.trim() ? values.profilePictureId.trim() : undefined,
+        middleName: values.middleName.trim() || undefined,
+        profilePictureId: values.profilePictureId.trim() || undefined,
         surname: values.surname.trim(),
-        suffix: values.suffix.trim() ? values.suffix.trim() : undefined,
+        suffix: values.suffix.trim() || undefined,
         status: values.status,
       }
 
@@ -132,9 +122,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
 
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-      const url = `${base}/api/member`
-
-      const response = await fetch(url, {
+      const response = await fetch(`${base}/api/member`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,8 +145,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
 
       const member = envelope.data
 
-      // Ensure we have a valid actorId; poll briefly if missing
-      let memberActorId = member.actorId ?? null
+      let memberActorId = member.actorId
       if (!memberActorId) {
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
@@ -167,31 +154,27 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
               memberActorId = refreshed.data.actorId
               break
             }
-          } catch (_) {
-            // ignore and retry
+          } catch {
+            // Retry on error
           }
           await new Promise((r) => setTimeout(r, 400))
         }
       }
-      // Final fallback to member.id if actorId is still unavailable
       const effectiveMemberActorId = memberActorId ?? member.id
       
-      // Step 2: Create Member Subscription
       let createdMemberSubscriptionId: string | undefined
       let createdInvoiceId: string | undefined
       try {
-        // Map SubscriptionAvailed -> Subscription id when possible
         let subscriptionIdToUse: string = selectedSubscriptionId
         if (selectedSubscription) {
           try {
             const subsResp = await subscriptionApi.getAllSubscriptions({ pageable: { page: 0, size: 500 } })
-            const list = subsResp.data ?? []
-            const match = list.find(
+            const match = (subsResp.data ?? []).find(
               (s) => s.name.trim().toLowerCase() === selectedSubscription.name.trim().toLowerCase() && s.amount === selectedSubscription.amount,
             )
             if (match) subscriptionIdToUse = match.id
-          } catch (mapErr) {
-            console.warn('Failed to map availed to subscription; using selected id:', mapErr)
+          } catch {
+            console.warn('Failed to map subscription; using selected id')
           }
         }
         const subEnvelope = await memberSubscriptionApi.createMemberSubscription({
@@ -210,10 +193,8 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         }
         createdMemberSubscriptionId = subEnvelope.data.id
 
-        // Step 2b: Ensure an invoice exists for this subscription (even if payment is not recorded yet)
         if (createdMemberSubscriptionId && selectedSubscription) {
           const dueDate = startDate ?? new Date()
-          const graceDays = selectedSubscription.gracePeriodDays ?? 0
           createdInvoiceId = await ensureInvoiceForSubscription({
             actorId: effectiveMemberActorId,
             branchId,
@@ -221,7 +202,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
             memberSubscriptionId: createdMemberSubscriptionId,
             subscriptionAvailedId: selectedSubscriptionId,
             dueDate,
-            gracePeriodDays: graceDays,
+            gracePeriodDays: selectedSubscription.gracePeriodDays ?? 0,
             subtotal: selectedSubscription.amount,
           })
         }
@@ -230,7 +211,6 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         throw new Error('Member created but failed to create subscription. Please add subscription manually.')
       }
 
-      // Step 3: Optionally create a Payment linked to the invoice
       try {
         await createPaymentIfNeeded({
           paymentMethodId,
@@ -240,7 +220,6 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
           paidAt: new Date(),
         })
       } catch (payError) {
-        // Do not block member creation if payment fails; log for debugging
         console.warn('Payment creation skipped or failed:', payError)
       }
 
@@ -250,7 +229,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       setSubmitError(null)
 
       void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
-      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscription] })
+      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscriptions] })
 
       const fullName = [data.firstName, data.middleName, data.surname, data.suffix].filter(Boolean).join(' ')
       const payload: MemberFormData = {
@@ -298,7 +277,6 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         await createMemberMutation.mutateAsync(value)
         setOpen(false)
         form.reset()
-        // Reset local states
         setStartDate(undefined)
         setEndDate(undefined)
         setSelectedSubscriptionId('')

@@ -3,7 +3,6 @@ import { ZodError } from 'zod'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { PaymentApi, InvoiceApi } from '@/api/generated/apis'
 import type { PaymentTableDTO, InvoiceTableDTO, PaymentMethodTableDTO } from '@/api/generated/models'
-import { useAuthStore } from '@/lib/auth-session'
 
 import {
   apiResponseListPaymentMethodTableDTOSchema,
@@ -29,22 +28,10 @@ function zodIssueSummary(error: ZodError, maxIssues: number = 3): string {
     .join('; ')
 }
 
-function isDebugBillingEnabled(): boolean {
-  if (typeof window === 'undefined') return false
-  try {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('debugBilling') === '1' || params.get('debug') === '1') return true
-    return window.localStorage.getItem('debugBilling') === '1'
-  } catch {
-    return false
-  }
-}
-
 /**
  * Hook to fetch all payments with pagination
  */
 export function usePayments(page: number = 0, size: number = 100) {
-  const token = useAuthStore((state) => state.token)
   return useQuery({
     queryKey: [PAYMENT_QUERY_KEYS.payments, page, size],
     queryFn: async () => {
@@ -67,7 +54,6 @@ export function usePayments(page: number = 0, size: number = 100) {
         throw error
       }
     },
-    enabled: !!token || (import.meta.env.DEV && isDebugBillingEnabled()),
     refetchOnMount: 'always',
     staleTime: 30000, // 30 seconds
   })
@@ -77,7 +63,6 @@ export function usePayments(page: number = 0, size: number = 100) {
  * Hook to fetch a single payment by ID
  */
 export function usePayment(id: string | null) {
-  const token = useAuthStore((state) => state.token)
   return useQuery({
     queryKey: [PAYMENT_QUERY_KEYS.payments, id],
     queryFn: async () => {
@@ -95,7 +80,7 @@ export function usePayment(id: string | null) {
         throw error
       }
     },
-    enabled: !!id && (!!token || (import.meta.env.DEV && isDebugBillingEnabled())),
+    enabled: !!id,
     refetchOnMount: 'always',
     staleTime: 30000,
   })
@@ -105,7 +90,6 @@ export function usePayment(id: string | null) {
  * Hook to fetch all payment methods
  */
 export function usePaymentMethods(page: number = 0, size: number = 50) {
-  const token = useAuthStore((state) => state.token)
   return useQuery({
     queryKey: [PAYMENT_QUERY_KEYS.paymentMethods, page, size],
     queryFn: async () => {
@@ -128,7 +112,6 @@ export function usePaymentMethods(page: number = 0, size: number = 50) {
         throw error
       }
     },
-    enabled: !!token || (import.meta.env.DEV && isDebugBillingEnabled()),
     refetchOnMount: 'always',
     staleTime: 60000, // 1 minute
   })
@@ -138,7 +121,6 @@ export function usePaymentMethods(page: number = 0, size: number = 50) {
  * Hook to fetch all invoices with pagination
  */
 export function useInvoices(page: number = 0, size: number = 200) {
-  const token = useAuthStore((state) => state.token)
   return useQuery({
     queryKey: [PAYMENT_QUERY_KEYS.paymentInvoices, page, size],
     queryFn: async () => {
@@ -161,7 +143,6 @@ export function useInvoices(page: number = 0, size: number = 200) {
         throw error
       }
     },
-    enabled: !!token || (import.meta.env.DEV && isDebugBillingEnabled()),
     refetchOnMount: 'always',
     staleTime: 30000,
   })
