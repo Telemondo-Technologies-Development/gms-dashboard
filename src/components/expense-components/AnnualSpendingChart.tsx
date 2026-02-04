@@ -22,6 +22,34 @@ interface AnnualSpendingChartProps {
 
 const YEARS_TO_DISPLAY = 5
 
+// Custom Tooltip Component
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        style={{
+          backgroundColor: 'white',
+          border: '1px solid #e5e7eb',
+          borderRadius: '0.5rem',
+          padding: '8px 12px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        }}
+      >
+        <p style={{ color: '#000000', fontWeight: 'bold', marginBottom: '4px', fontSize: '14px' }}>
+          {label}
+        </p>
+        <p style={{ color: '#005BB0', margin: 0, fontSize: '14px' }}>
+          Amount: ₱{payload[0].value.toLocaleString('en-PH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </p>
+      </div>
+    )
+  }
+  return null
+}
+
 export function AnnualSpendingChart({ expenses, branch }: AnnualSpendingChartProps) {
   const chartData = useMemo(() => {
     // Filter expenses by branch
@@ -67,18 +95,7 @@ export function AnnualSpendingChart({ expenses, branch }: AnnualSpendingChartPro
             tickFormatter={(value) => `₱${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip 
-            contentStyle={{
-              backgroundColor: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              color: '#000000',
-              padding: '8px 12px',
-            }}
-            formatter={(value: number) => [
-              `₱${value.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-              'Amount'
-            ]}
-            labelStyle={{ color: '#000000', fontWeight: 'bold', marginBottom: '4px' }}
+            content={<CustomTooltip />}
             cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
           />
           <Bar 
