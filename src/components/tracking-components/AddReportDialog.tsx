@@ -1,7 +1,18 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 interface AddReportDialogProps {
   onSubmit: (reportData: {
@@ -32,7 +43,7 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
         reportType,
         description: description.trim(),
         occurredAt,
-        createdBy: 'staff-id', 
+        createdBy: 'staff-id',
         attachments,
       });
       setName('');
@@ -59,43 +70,68 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
             Fill out the form below to add a new report for a customer.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <Input
-            placeholder="Enter customer name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <Input
-            placeholder="Enter branch name"
-            value={branch}
-            onChange={(e) => setBranch(e.target.value)}
-          />
-          <select value={reportType} onChange={(e) => setReportType(e.target.value)} className="w-full">
-            <option value="">Select Report Type</option>
-            <option value="positive">Positive</option>
-            <option value="negative">Negative</option>
-            <option value="behavioral">Behavioral</option>
-            <option value="attendance-related">Attendance-related</option>
-            <option value="safety-concerns">Safety Concerns</option>
-          </select>
-          <textarea
-            placeholder="Enter report description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full"
-          />
-          <Input
-            type="datetime-local"
-            value={occurredAt}
-            onChange={(e) => setOccurredAt(e.target.value)}
-            placeholder="Occurred At"
-          />
-          <input
-            type="file"
-            multiple
-            onChange={(e) => setAttachments(e.target.files ? Array.from(e.target.files) : [])}
-            className="w-full"
-          />
+        <div className="space-y-4 border border-border p-4 rounded-2xl">
+          <div className="space-y-2">
+            <Label htmlFor="customerName">Customer Name</Label>
+            <Input
+              id="customerName"
+              placeholder="Enter customer name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="branchName">Branch Name</Label>
+            <Input
+              id="branchName"
+              placeholder="Enter branch name"
+              value={branch}
+              onChange={(e) => setBranch(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reportType">Report Type</Label>
+            <Select value={reportType} onValueChange={setReportType}>
+              <SelectTrigger id="reportType">
+                <SelectValue placeholder="Select Report Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="positive">Positive</SelectItem>
+                <SelectItem value="negative">Negative</SelectItem>
+                <SelectItem value="behavioral">Behavioral</SelectItem>
+                <SelectItem value="attendance-related">Attendance-related</SelectItem>
+                <SelectItem value="safety-concerns">Safety Concerns</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              placeholder="Enter report description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="occurredAt">Occurred At</Label>
+            <Input
+              id="occurredAt"
+              type="datetime-local"
+              value={occurredAt}
+              onChange={(e) => setOccurredAt(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="attachments">Attachments</Label>
+            <Input
+              id="attachments"
+              type="file"
+              multiple
+              onChange={(e) => setAttachments(e.target.files ? Array.from(e.target.files) : [])}
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700">

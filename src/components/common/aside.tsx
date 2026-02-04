@@ -116,6 +116,7 @@ export default function Aside() {
 				{ label: "Users", href: "/dashboard/admin/users", icon: Users },
 				{ label: "Expenses", href: "/dashboard/admin/expense", icon: BanknoteArrowDown  },
 				{ label: "Analytics", href: "/dashboard/admin/analytics", icon: LineChart },
+				{ label: "Tracking", href: "/dashboard/admin/tracking", icon: LineChart },
 			],
 		},
 		{
