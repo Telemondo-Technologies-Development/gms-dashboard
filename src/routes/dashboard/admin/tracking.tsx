@@ -1,5 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
+
+// Mock function to simulate fetching members from an API
+async function fetchMembersFromApi() {
+  return [
+    { id: '1', firstName: 'John', surname: 'Doe' },
+    { id: '2', firstName: 'Jane', surname: 'Smith' },
+  ];
+}
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,8 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import AddReportDialog from '@/components/tracking-components/AddReportDialog';
 import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal';
-import { fetchMembersFromApi } from '@/routes/dashboard/marketing/membership';
-import { fetchBranchesFromApi } from '@/routes/dashboard/marketing/branch';
+
 
 export const Route = createFileRoute('/dashboard/admin/tracking')({
   component: Tracking,
@@ -32,15 +39,6 @@ export default function Tracking() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const branchesQuery = useQuery({ queryKey: ['branches'], queryFn: fetchBranchesFromApi });
-
-  // 3. Format the branch data
-  const branchOptions = useMemo(() => {
-    return (branchesQuery.data ?? []).map((b: any) => ({
-      id: b.id,
-      name: b.name,
-    }));
-  }, [branchesQuery.data]);
 
   // Fetch members using React Query
   const membersQuery = useQuery({
@@ -53,7 +51,7 @@ export default function Tracking() {
     return apiMembers.map((m) => ({
       id: m.id,
       name: `${m.firstName} ${m.surname}`,
-      branch: 'Unknown', 
+      branch: 'Unknown', // Default value since 'branch' does not exist on the type
     }));
   }, [membersQuery.data]);
 
@@ -144,7 +142,6 @@ export default function Tracking() {
           <AddReportDialog
             onSubmit={handleAddReport}
             members={members}
-            branches={branchOptions}
           />
         </CardHeader>
         <CardContent>

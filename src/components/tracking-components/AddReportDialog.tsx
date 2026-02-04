@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -15,8 +16,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Textarea } from '@/components/ui/textarea';
 
 interface AddReportDialogProps {
-  members: { id: string; name: string }[]; 
-  branches: { id: string; name: string }[];
+  members: { id: string; name: string }[]; // Pass the list of members from the membership data
   onSubmit: (reportData: {
     name: string;
     branch: string;
@@ -28,20 +28,19 @@ interface AddReportDialogProps {
   }) => void;
 }
 
-export default function AddReportDialog({ members, branches, onSubmit }: AddReportDialogProps) {
+export default function AddReportDialog({ members, onSubmit }: AddReportDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [branch, setBranch] = useState('');
-  const [filteredBranches, setFilteredBranches] = useState(branches);
-  const [isSearchingBranch, setIsSearchingBranch] = useState(false);
   const [reportType, setReportType] = useState('');
   const [description, setDescription] = useState('');
   const [occurredAt, setOccurredAt] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
   const [filteredMembers, setFilteredMembers] = useState(members);
-  const [isSearching, setIsSearching] = useState(false); 
+  const [isSearching, setIsSearching] = useState(false); // New state
 
   useEffect(() => {
+    // Only filter if the user is actively searching/typing
     if (name.trim() === '' || !isSearching) {
       setFilteredMembers([]);
     } else {
@@ -53,27 +52,9 @@ export default function AddReportDialog({ members, branches, onSubmit }: AddRepo
     }
   }, [name, members, isSearching]);
 
-  useEffect(() => {
-    if (branch.trim() === '' || !isSearchingBranch) {
-      setFilteredBranches([]);
-    } else {
-      setFilteredBranches(
-        branches.filter((b) =>
-          b.name.toLowerCase().includes(branch.toLowerCase())
-        )
-      );
-    }
-  }, [branch, branches, isSearchingBranch]);
-
-  const handleSelectBranch = (branchName: string) => {
-    setBranch(branchName);
-    setIsSearchingBranch(false);
-    setFilteredBranches([]);
-  };
-
   const handleSelectMember = (memberName: string) => {
     setName(memberName);
-    setIsSearching(false); 
+    setIsSearching(false); // STOP searching so the effect clears the list
     setFilteredMembers([]); 
   };
 
@@ -113,7 +94,7 @@ export default function AddReportDialog({ members, branches, onSubmit }: AddRepo
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 border border-border p-4 rounded-2xl">
-        <div className="space-y-2 relative z-50">
+        <div className="space-y-2">
             <Label htmlFor="customerName">Customer Name</Label>
             <Input
                 id="customerName"
@@ -121,12 +102,13 @@ export default function AddReportDialog({ members, branches, onSubmit }: AddRepo
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
-                  setIsSearching(true); 
+                  setIsSearching(true); // START searching when user types
                 }}
                 onFocus={() => {
-                  if (name.length > 0) setIsSearching(true);
+                  if (name.length > 0) setIsSearching(true); // Re-open if there is text
                 }}
               />
+            {/* The dropdown only appears now when there is an active search */}
             {filteredMembers.length > 0 && (
               <div className="absolute z-10 w-full border bg-popover text-popover-foreground rounded-md shadow-md max-h-40 overflow-y-auto mt-1">
                 {filteredMembers.map((member) => (
@@ -141,34 +123,14 @@ export default function AddReportDialog({ members, branches, onSubmit }: AddRepo
               </div>
             )}
           </div>
-          <div className="space-y-2 relative">
+          <div className="space-y-2">
             <Label htmlFor="branchName">Branch Name</Label>
             <Input
               id="branchName"
-              placeholder="Search branch..."
+              placeholder="Enter branch name"
               value={branch}
-              autoComplete="off"
-              onChange={(e) => {
-                setBranch(e.target.value);
-                setIsSearchingBranch(true);
-              }}
-              onFocus={() => {
-                if (branch.length > 0) setIsSearchingBranch(true);
-              }}
+              onChange={(e) => setBranch(e.target.value)}
             />
-            {filteredBranches.length > 0 && (
-              <div className="absolute z-50 w-full border bg-popover text-popover-foreground rounded-md shadow-md max-h-40 overflow-y-auto mt-1">
-                {filteredBranches.map((b) => (
-                  <div
-                    key={b.id}
-                    className="p-2 hover:bg-muted cursor-pointer"
-                    onClick={() => handleSelectBranch(b.name)}
-                  >
-                    {b.name}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="reportType">Report Type</Label>
@@ -202,6 +164,15 @@ export default function AddReportDialog({ members, branches, onSubmit }: AddRepo
               type="datetime-local"
               value={occurredAt}
               onChange={(e) => setOccurredAt(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="attachments">Attachments</Label>
+            <Input
+              id="attachments"
+              type="file"
+              multiple
+              onChange={(e) => setAttachments(e.target.files ? Array.from(e.target.files) : [])}
             />
           </div>
         </div>
