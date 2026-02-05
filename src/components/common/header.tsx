@@ -1,151 +1,56 @@
-import { useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useMemo, useState } from 'react'
+import { useEmployees } from '@/hooks/users/useEmployees'
+import { useCurrentUser } from '@/hooks/users/useCurrentUser'
 import { Bell, Search, User2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
-import { useAuthSession } from '@/lib/auth-session'
-
-type JwtClaims = Record<string, unknown>
-
-function tryDecodeJwtClaims(token: string): JwtClaims | null {
-	if (!token) return null
-	const parts = token.split('.')
-	if (parts.length !== 3) return null
-
-	const payload = parts[1]
-	if (!payload) return null
-
-	try {
-		const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
-		const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
-		if (typeof atob !== 'function') return null
-		const json = atob(padded)
-		const parsed: unknown = JSON.parse(json)
-		if (parsed && typeof parsed === 'object') return parsed as JwtClaims
-		return null
-	} catch {
-		return null
-	}
-}
-
-function getStringClaim(claims: JwtClaims | null, key: string): string | undefined {
-	if (!claims) return undefined
-	const value = claims[key]
-	return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
-function looksLikeUuid(value: string): boolean {
-	return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-}
-
-async function fetchJsonOrThrow(url: string, token?: string): Promise<unknown> {
-	const response = await fetch(url, {
-		method: 'GET',
-		headers: {
-			...(token ? { Authorization: `Bearer ${token}` } : {}),
-		},
-		credentials: 'include',
-	})
-
-	const rawText = await response.text().catch(() => '')
-	if (!response.ok) {
-		throw new Error(`Request failed (${response.status}). ${rawText || 'Check server logs for details.'}`)
-	}
-
-	try {
-		return JSON.parse(rawText)
-	} catch {
-		throw new Error('Unexpected response from the server (invalid JSON).')
-	}
-}
-
-async function fetchUserById(userId: string, token?: string): Promise<UserTable> {
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-	const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-	const url = `${base}/api/user/${encodeURIComponent(userId)}`
-
-	const json = await fetchJsonOrThrow(url, token)
-	const parsed = apiResponseUserTableSchema.safeParse(json)
-	if (!parsed.success) {
-		throw new Error('Failed to validate user response.')
-	}
-	if (!parsed.data.success) {
-		throw new Error(parsed.data.message ?? 'Failed to fetch user.')
-	}
-	return parsed.data.data
-}
-
-async function fetchUserByEmail(email: string, token?: string): Promise<UserTable | null> {
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-	const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-	const url = `${base}/api/user`
-
-	const json = await fetchJsonOrThrow(url, token)
-	const parsed = apiResponseListUserTableSchema.safeParse(json)
-	if (!parsed.success) {
-		throw new Error('Failed to validate users response.')
-	}
-	if (!parsed.data.success) {
-		throw new Error(parsed.data.message ?? 'Failed to fetch users.')
-	}
-
-	const needle = email.trim().toLowerCase()
-	return parsed.data.data.find((u) => u.email.toLowerCase() === needle) ?? null
-}
+import { useAuthSession } from '@/lib/auth/auth-session'
+import { useUserStore } from '@/lib/auth/user-store'
 
 export default function Header() {
 	const [searchOpen, setSearchOpen] = useState(false)
 	const session = useAuthSession()
+	const { identity, currentUser, isLoading } = useCurrentUser()
+	const { setEmployee, setSelectedBranch, employeeFullName, selectedBranchName } = useUserStore()
 
-	const identity = useMemo(() => {
-		if (typeof window === 'undefined') return null
+	// prefer actorId from identity, then currentUser, then session
+	const resolvedActorId = identity?.actorId ?? currentUser?.actorId ?? session.actorId
 
-		const token = session.token ?? undefined
-		const storedEmail = session.email ?? undefined
-		const storedUsername = session.username ?? undefined
+	// only fetch employees when we have an actorId; use a smaller page size
+	const { data: employees } = useEmployees(0, 50, !!resolvedActorId)
 
-		const claims = token ? tryDecodeJwtClaims(token) : null
-		const claimEmail =
-			getStringClaim(claims, 'email') ??
-			getStringClaim(claims, 'preferred_username') ??
-			getStringClaim(claims, 'upn')
+	const currentEmployee = useMemo(() => {
+		if (!employees || !resolvedActorId) return null
+		return employees.find((e) => e.actorId === resolvedActorId) ?? null
+	}, [employees, resolvedActorId])
 
-		const resolvedEmail =
-			(claimEmail && claimEmail.includes('@') ? claimEmail : undefined) ??
-			(storedEmail && storedEmail.includes('@') ? storedEmail : undefined)
-
-		const sub = getStringClaim(claims, 'sub')
-		const userId = sub && looksLikeUuid(sub) ? sub : undefined
-
-		return {
-			token,
-			email: resolvedEmail,
-			username: storedUsername,
-			actorId: session.actorId ?? undefined,
-			userId,
+	// Update Zustand store whenever currentEmployee changes
+	useEffect(() => {
+		if (currentEmployee) {
+			setEmployee({
+				id: currentEmployee.id ?? null,
+				firstName: currentEmployee.firstName ?? null,
+				surname: currentEmployee.surname ?? null,
+				actorId: currentEmployee.actorId ?? null,
+			})
 		}
-	}, [session.actorId, session.email, session.token, session.username])
+	}, [currentEmployee, setEmployee])
 
-	const currentUserQuery = useQuery({
-		queryKey: ['currentUser', identity?.userId ?? null, identity?.email ?? null, identity?.token ?? null],
-		enabled: typeof window !== 'undefined' && !!identity && (!!identity.userId || !!identity.email),
-		queryFn: async () => {
-			if (!identity) return null
-			if (identity.userId) {
-				return await fetchUserById(identity.userId, identity.token ?? undefined)
-			}
-			if (identity.email) {
-				return await fetchUserByEmail(identity.email, identity.token ?? undefined)
-			}
-			return null
-		},
-		retry: false,
-	})
+	// Set selected branch from session's assigned branches (auto-select first branch)
+	useEffect(() => {
+		const firstBranch = session.assignedBranches[0]
+		if (firstBranch && !selectedBranchName) {
+			setSelectedBranch({
+				id: firstBranch.id ?? null,
+				name: firstBranch.name ?? null,
+			})
+		}
+	}, [session.assignedBranches, selectedBranchName, setSelectedBranch])
 
-	const displayEmail = currentUserQuery.data?.email ?? identity?.email ?? identity?.username ?? 'Account'
-	const displayBranchName = session.primaryBranchName ?? 'No Branch Assigned'
+	// Use Zustand store for display, with fallback to identity/currentUser
+	const displayName = employeeFullName || currentUser?.email || identity?.email || identity?.username || 'Account'
+	const displayBranchName = selectedBranchName || session.assignedBranches[0]?.name || 'No Branch Assigned'
 	const searchInput = (
 		<div className="relative">
 			<Input
@@ -189,7 +94,7 @@ export default function Header() {
 						>
 							<User2 className="h-5 w-5" />
 							<span className="text-sm font-medium">
-								{currentUserQuery.isLoading ? 'Loading…' : displayEmail}
+							{isLoading ? 'Loading…' : displayName}
 							</span>
 						</Button>
 					</div>
@@ -215,7 +120,7 @@ export default function Header() {
 						>
 							<User2 className="h-5 w-5" />
 							<span className="text-sm font-medium">
-								{currentUserQuery.isLoading ? 'Loading…' : displayEmail}
+						{isLoading ? 'Loading…' : displayName}
 							</span>
 						</Button>
 						<Button
