@@ -24,16 +24,17 @@ import type { MemberDetailsDialogProps } from '@/types/membership/memberSchemas'
 import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
-import { useAuthSession } from '@/lib/auth-session'
+import { useAuthSession } from '@/lib/auth/auth-session'
+import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
 import { AddBillingDialog } from './AddBillingForm'
 import { useMemberDetailsDialogData } from '@/hooks/membership/useMemberDetailsDialogData'
-import { isAdminToken } from '@/lib/auth-permissions'
+import { isAdminToken } from '@/lib/auth/auth-permissions'
 import { useBillingActions } from '@/hooks/billing/useBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 
 
 
-export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }: MemberDetailsDialogProps) {
+export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberDetailsDialogProps) {
   const [members, setMembers] = useState<MemberInfo[]>([])
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
@@ -49,6 +50,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
   const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
 
   const session = useAuthSession()
+  const selectedBranchId = useSelectedBranchId()
 
   const memberActorId = memberGroup?.actorId ?? memberGroup?.id ?? null
 
@@ -106,7 +108,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
       }
       
       const memberSub = memberSubscriptionQuery.data
-      const branchId = memberSub?.branchId ?? session.primaryBranchId
+      const branchId = memberSub?.branchId ?? selectedBranchId
       if (!branchId) {
         throw new Error('Branch not found. Please ensure your user is assigned to a branch.')
       }
@@ -190,7 +192,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
         } else {
           const memberSubscriptionId = subscriptionResult?.memberSubscriptionId ?? currentMemberSubscriptionId
           const createdById = subscriptionResult?.createdById ?? memberSubscriptionQuery.data?.createdById
-          const branchId = memberSubscriptionQuery.data?.branchId ?? session.primaryBranchId
+          const branchId = memberSubscriptionQuery.data?.branchId ?? selectedBranchId
           
           if (memberSubscriptionId && selectedSubscription && createdById && branchId) {
             const dueDate = startDate ?? new Date()
@@ -217,7 +219,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
         
         const memberSubscriptionId = subscriptionResult?.memberSubscriptionId ?? currentMemberSubscriptionId
         const createdById = subscriptionResult?.createdById ?? memberSubscriptionQuery.data?.createdById
-        const branchId = memberSubscriptionQuery.data?.branchId ?? session.primaryBranchId
+        const branchId = memberSubscriptionQuery.data?.branchId ?? selectedBranchId
         
         if (memberSubscriptionId && selectedSubscription && createdById && branchId) {
           await createPaymentIfNeeded({
@@ -233,26 +235,9 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup, onSave }:
           console.warn('Payment creation skipped or failed:', payError)
         }
       }
-      
-      const updated: MemberFormData = {
-        ...memberGroup,
-        members,
-        startDate,
-        endDate,
-        membershipType: selectedSubscription?.name ?? memberGroup.membershipType,
-        membershipDuration: selectedSubscription
-          ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}`
-          : memberGroup.membershipDuration,
-        billingAmount: selectedSubscription?.amount.toString() ?? memberGroup.billingAmount,
-        billingCycle: selectedSubscription
-          ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}`
-          : memberGroup.billingCycle,
-        paymentMethod: paymentMethodName,
-        membershipDetails,
-        documents,
-      }
 
-      onSave(updated)
+      // Invalidate members cache to trigger refetch
+      queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
       onOpenChange(false)
     } catch (error) {
       console.error('Failed to save member details:', error)

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
+﻿import { useMemo, useState, useCallback, memo } from 'react'
 import { format } from 'date-fns'
 import { Search, Calendar, RefreshCw, Loader2 } from 'lucide-react'
 
@@ -13,82 +13,47 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 interface Props {
-  members: MemberFormData[]
-  setMembers: Dispatch<SetStateAction<MemberFormData[]>>
   onSelectMember: (m: MemberFormData) => void
   pageSize?: number
 }
 
-export default function MembersTable({ members, setMembers, onSelectMember, pageSize = 10 }: Props) {
+function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
   const [searchQuery, setSearchQuery] = useState('')
   const [pageIndex, setPageIndex] = useState(0)
 
   const { enrichedMembers, isFetching, error, refetchAll } = useMembersData()
 
-  useEffect(() => {
+  // Reset page when search changes
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
     setPageIndex(0)
-  }, [searchQuery])
+  }, [])
 
-  useEffect(() => {
-    if (enrichedMembers.length === 0) return
+  // Memoize filtered members
+  const filteredMembers = useMemo(() => {
+    if (!searchQuery) return enrichedMembers
 
-    setMembers((prev) => {
-      if (prev.length === 0) return enrichedMembers
+    const query = searchQuery.toLowerCase()
+    return enrichedMembers.filter(
+      (memberGroup) =>
+        memberGroup.members.some(
+          (m) =>
+            m.name.toLowerCase().includes(query) ||
+            (m.email ?? '').toLowerCase().includes(query) ||
+            (m.phone ?? '').includes(query)
+        ) || memberGroup.membershipType.toLowerCase().includes(query)
+    )
+  }, [enrichedMembers, searchQuery])
 
-      const serverById = new Map(enrichedMembers.map((m) => [m.id, m]))
-      const prevById = new Map(prev.map((m) => [m.id, m]))
-
-      const merged: MemberFormData[] = []
-
-      for (const localRow of prev) {
-        if (!serverById.has(localRow.id)) merged.push(localRow)
-      }
-
-      for (const serverRow of enrichedMembers) {
-        const existing = prevById.get(serverRow.id)
-        if (!existing) {
-          merged.push(serverRow)
-          continue
-        }
-
-        const mergedMembers = serverRow.members.map((sm, idx) => {
-          const lm = existing.members[idx]
-          return {
-            ...sm,
-            email: sm.email || lm?.email || '',
-            phone: sm.phone || lm?.phone || '',
-          }
-        })
-
-        merged.push({
-          ...existing,
-          ...serverRow,
-          members: mergedMembers,
-        })
-      }
-
-      return merged
-    })
-  }, [enrichedMembers, setMembers])
-
-  const handleAddMember = (member: MemberFormData) => setMembers((prev) => [member, ...prev])
-
-  const filteredMembers = members.filter(memberGroup =>
-    memberGroup.members.some(m =>
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.email ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.phone ?? '').includes(searchQuery)
-    ) ||
-    memberGroup.membershipType.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
+  // Memoize pagination
   const pageCount = Math.max(1, Math.ceil(filteredMembers.length / pageSize))
   const pageItems = useMemo(() => {
     const start = pageIndex * pageSize
     return filteredMembers.slice(start, start + pageSize)
   }, [filteredMembers, pageIndex, pageSize])
 
-  function getMembershipStatusBadge(endDate: Date | undefined) {
+  // Memoize badge function
+  const getMembershipStatusBadge = useCallback((endDate: Date | undefined) => {
     if (!endDate) return <Badge variant="outline">No Date</Badge>
 
     const today = new Date()
@@ -103,14 +68,14 @@ export default function MembersTable({ members, setMembers, onSelectMember, page
     }
 
     return <Badge variant="default">Active</Badge>
-  }
+  }, [])
 
   return (
-    <Card className="flex flex-col max-h-screen">
+    <Card className="flex flex-col h-full">
       <CardHeader>
         <CardTitle>Members</CardTitle>
         <CardDescription>
-          {members.length} {members.length === 1 ? 'member' : 'members'} registered
+          {enrichedMembers.length} {enrichedMembers.length === 1 ? 'member' : 'members'} registered
         </CardDescription>
       </CardHeader>
 
@@ -121,7 +86,7 @@ export default function MembersTable({ members, setMembers, onSelectMember, page
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Search by name, email, phone, or membership type..."
                 className="pl-9 rounded-2xl"
               />
@@ -140,7 +105,7 @@ export default function MembersTable({ members, setMembers, onSelectMember, page
                   <RefreshCw className="h-4 w-4" />
                 )}
               </Button>
-              <AddMemberDialog onAddMember={handleAddMember} />
+              <AddMemberDialog />
             </div>
           </div>
 
@@ -155,7 +120,7 @@ export default function MembersTable({ members, setMembers, onSelectMember, page
           {filteredMembers.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">
-                {members.length === 0
+                {enrichedMembers.length === 0
                   ? 'No members registered yet. Add your first member to get started.'
                   : 'No members found matching your search.'}
               </p>
@@ -247,3 +212,5 @@ export default function MembersTable({ members, setMembers, onSelectMember, page
     </Card>
   )
 }
+
+export default memo(MembersTable)

@@ -23,14 +23,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { apiResponseMemberTableSchema, memberPostDtoSchema } from '@/types/membership/memberSchemas'
-import type { AddMemberDialogProps, MemberFormData } from '@/types/membership/memberSchemas'
+import type { MemberFormData } from '@/types/membership/memberSchemas'
 import type { MemberFormValues } from '@/types/membership/memberSchemas'
 import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionApi'
 import { SubscriptionApi } from '@/api/generated/apis/SubscriptionApi'
 import { MemberApi } from '@/api/generated/apis/MemberApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
-import { useAuthSession } from '@/lib/auth-session'
+import { useAuthSession } from '@/lib/auth/auth-session'
+import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
 import { AddBillingDialog } from '@/components/membership-components/AddBillingForm'
 import { useAddMemberDialogData } from '@/hooks/membership/useAddMemberDialogData'
 import { useBillingActions } from '@/hooks/billing/useBillingActions'
@@ -40,19 +41,19 @@ import { memberQueryKeys } from '@/lib/QueryKeys'
 const looksLikeUuid = (value: string): boolean =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
 
-export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
+export function AddMemberDialog() {
   const [open, setOpen] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
+  const queryClient = useQueryClient()
   const session = useAuthSession()
+  const selectedBranchId = useSelectedBranchId()
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState('')
   const [paymentMethodId, setPaymentMethodId] = useState('')
   const [paymentMethodName, setPaymentMethodName] = useState('')
   const [membershipDetails, setMembershipDetails] = useState('')
-
-  const queryClient = useQueryClient()
 
   const {
     token,
@@ -103,7 +104,7 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
         throw new Error('Please select a start date.')
       }
       
-      const branchId = branchPersonnelQuery.data?.branchId ?? session.primaryBranchId
+      const branchId = branchPersonnelQuery.data?.branchId ?? selectedBranchId
       if (!branchId) {
         throw new Error('User branch not found. Please ensure you are assigned to a branch.')
       }
@@ -231,35 +232,8 @@ export function AddMemberDialog({ onAddMember }: AddMemberDialogProps) {
       void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
       void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscriptions] })
 
-      const fullName = [data.firstName, data.middleName, data.surname, data.suffix].filter(Boolean).join(' ')
-      const payload: MemberFormData = {
-        id: data.id,
-        actorId: data.actorId ?? null,
-        members: [
-          {
-            id: data.id,
-            firstName: data.firstName,
-            middleName: data.middleName ?? null,
-            surname: data.surname,
-            suffix: data.suffix ?? null,
-            status: data.status ?? null,
-            name: fullName || 'Unknown',
-            email: '',
-            phone: '',
-          },
-        ],
-        startDate,
-        endDate,
-        membershipType: selectedSubscription?.name ?? '',
-        membershipDuration: selectedSubscription ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}` : '',
-        billingAmount: selectedSubscription?.amount.toString() ?? '',
-        billingCycle: selectedSubscription ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}` : '',
-        paymentMethod: paymentMethodName,
-        membershipDetails,
-        documents: [],
-      }
-
-      onAddMember(payload)
+      // Invalidate members cache to trigger refetch
+      queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
     },
   })
 

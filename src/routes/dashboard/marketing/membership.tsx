@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
 import { Search, QrCode, Fingerprint, UserCheck, Clock } from 'lucide-react'
@@ -7,6 +7,7 @@ import { Search, QrCode, Fingerprint, UserCheck, Clock } from 'lucide-react'
 import type { MemberFormData, MemberInfo, AttendanceRecord, MembershipSearchForm } from '@/types/membership/memberSchemas'
 import MembersTable from '@/components/membership-components/MembersTable'
 import { MemberDetailsDialog } from '@/components/membership-components/MemberDetailsDialog'
+import { useMembersData } from '@/hooks/membership/useMembersData'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -19,10 +20,12 @@ export const Route = createFileRoute('/dashboard/marketing/membership')({
 })
 
 function MembershipRoute() {
-  const [members, setMembers] = useState<MemberFormData[]>([])
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [selectedMemberGroupSnapshot, setSelectedMemberGroupSnapshot] = useState<MemberFormData | null>(null)
+
+  // Use the shared hook - no need for local members state
+  const { enrichedMembers, isLoading } = useMembersData()
 
   const form = useForm<MembershipSearchForm>({
     defaultValues: { searchQuery: '', attendanceSearch: '' },
@@ -30,49 +33,68 @@ function MembershipRoute() {
 
   const attendanceSearch = form.watch('attendanceSearch')
 
-  const handleMarkAttendance = (
-    memberGroup: MemberFormData,
-    memberInfo: MemberInfo,
-    method: 'qr' | 'fingerprint' | 'manual',
-  ) => {
-    const newRecord: AttendanceRecord = {
-      id: crypto.randomUUID(),
-      memberId: memberInfo.id,
-      memberName: memberInfo.name,
-      membershipType: memberGroup.membershipType,
-      checkInTime: new Date(),
-      checkInMethod: method,
-    }
-    setAttendanceRecords(prev => [newRecord, ...prev])
-    form.setValue('attendanceSearch', '')
-  }
+  // Memoize attendance marking handler
+  const handleMarkAttendance = useCallback(
+    (memberGroup: MemberFormData, memberInfo: MemberInfo, method: 'qr' | 'fingerprint' | 'manual') => {
+      const newRecord: AttendanceRecord = {
+        id: crypto.randomUUID(),
+        memberId: memberInfo.id,
+        memberName: memberInfo.name,
+        membershipType: memberGroup.membershipType,
+        checkInTime: new Date(),
+        checkInMethod: method,
+      }
+      setAttendanceRecords((prev) => [newRecord, ...prev])
+      form.setValue('attendanceSearch', '')
+    },
+    [form]
+  )
 
-  const getCheckInMethodIcon = (method: 'qr' | 'fingerprint' | 'manual') => {
+  // Memoize icon getter
+  const getCheckInMethodIcon = useCallback((method: 'qr' | 'fingerprint' | 'manual') => {
     const icons = {
       qr: <QrCode className="h-4 w-4 text-blue-500" />,
       fingerprint: <Fingerprint className="h-4 w-4 text-purple-500" />,
       manual: <UserCheck className="h-4 w-4 text-green-500" />,
     }
     return icons[method]
-  }
+  }, [])
 
-  const todayAttendance = attendanceRecords.filter((record) => {
+  // Memoize filtered search results
+  const searchResults = useMemo(() => {
+    if (!attendanceSearch) return []
+
+    const query = attendanceSearch.toLowerCase()
+    return enrichedMembers
+      .map((memberGroup) => {
+        const matches = memberGroup.members.filter(
+          (m) =>
+            m.name.toLowerCase().includes(query) ||
+            (m.email ?? '').toLowerCase().includes(query) ||
+            (m.phone ?? '').includes(query)
+        )
+        return matches.length > 0 ? { memberGroup, matches } : null
+      })
+      .filter(Boolean)
+      .slice(0, 5)
+  }, [attendanceSearch, enrichedMembers])
+
+  // Memoize today's attendance
+  const todayAttendance = useMemo(() => {
     const today = new Date().toDateString()
-    return new Date(record.checkInTime).toDateString() === today
-  })
+    return attendanceRecords.filter((record) => new Date(record.checkInTime).toDateString() === today)
+  }, [attendanceRecords])
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-primary">Membership Management</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <MembersTable
-          members={members}
-          setMembers={setMembers}
           onSelectMember={(memberGroup) => {
             setSelectedMemberGroupSnapshot(memberGroup)
             setDetailsOpen(true)
           }}
-          pageSize={10}
+          pageSize={8}
         />
 
         {/* Attendance Card */}
@@ -106,19 +128,12 @@ function MembershipRoute() {
 
                 {attendanceSearch && (
                   <div className="border rounded-lg max-h-60 overflow-y-auto divide-y">
-                    {members
-                      .slice(0, 5)
-                      .map((memberGroup) => {
-                        const query = attendanceSearch.toLowerCase()
-                        const matches = memberGroup.members.filter(
-                          (m) =>
-                            m.name.toLowerCase().includes(query) ||
-                            (m.email ?? '').toLowerCase().includes(query) ||
-                            (m.phone ?? '').includes(query)
-                        )
-
-                        if (matches.length === 0) return null
-
+                    {searchResults.length === 0 ? (
+                      <div className="p-3 text-sm text-muted-foreground">No members found.</div>
+                    ) : (
+                      searchResults.map((result) => {
+                        if (!result) return null
+                        const { memberGroup, matches } = result
                         return (
                           <div key={memberGroup.id} className="p-3">
                             <div className="text-sm font-medium text-muted-foreground mb-2">
@@ -149,8 +164,6 @@ function MembershipRoute() {
                           </div>
                         )
                       })
-                      .filter(Boolean).length === 0 && (
-                      <div className="p-3 text-sm text-muted-foreground">No members found.</div>
                     )}
                   </div>
                 )}
@@ -221,10 +234,6 @@ function MembershipRoute() {
           if (!open) setSelectedMemberGroupSnapshot(null)
         }}
         memberGroup={selectedMemberGroupSnapshot}
-        onSave={(updated) => {
-          setMembers((prev) => prev.map((m) => (m.id === updated.id ? updated : m)))
-          setSelectedMemberGroupSnapshot(updated)
-        }}
       />
     </div>
   )
