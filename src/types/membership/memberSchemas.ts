@@ -18,9 +18,8 @@ export type MembershipSearchForm = {
   attendanceSearch: string
 }
 
-export interface AddMemberDialogProps {
-  onAddMember: (member: MemberFormData) => void
-}
+// AddMemberDialog no longer needs props - uses React Query cache invalidation
+export interface AddMemberDialogProps {}
 
 export interface MemberInfo {
   id: string
@@ -53,7 +52,6 @@ export interface MemberDetailsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   memberGroup: MemberFormData | null
-  onSave: (updated: MemberFormData) => void
 }
 
 // Backend DTO schemas
