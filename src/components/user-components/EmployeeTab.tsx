@@ -41,8 +41,7 @@ export function EmployeeTab({
               <TableHead>Name</TableHead>
               <TableHead>Contact</TableHead>
               <TableHead>Role / Status</TableHead>
-              <TableHead>Salary (Est)</TableHead>
-              <TableHead>Resume</TableHead>
+              <TableHead className="w-24">Has Login</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -80,6 +79,7 @@ export function EmployeeTab({
                       </AvatarFallback>
                     </Avatar>
                   </TableCell>
+
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="font-medium">
@@ -98,12 +98,13 @@ export function EmployeeTab({
                       {employee.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>$45,000</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" className="h-8">
-                      <FileText className="h-4 w-4 mr-1" /> View
-                    </Button>
-                  </TableCell>
+                    {employee.user && employee.user.email ? (
+                      <Badge variant="secondary">Yes</Badge>
+                    ) : (
+                      <Badge variant="outline">No</Badge>
+                    )}
+                  </TableCell>                  
                 </TableRow>
               ))
             )}
