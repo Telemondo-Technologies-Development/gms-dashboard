@@ -1,6 +1,6 @@
 import { Configuration } from '@/api/generated/runtime'
 import { UserApi, EmployeeApi, PaymentApi, InvoiceApi } from '@/api/generated/apis'
-import { readPersistedAuthToken, readAuthSession } from '@/lib/auth-session'
+import { readPersistedAuthToken, readAuthSession } from '@/lib/auth/auth-session'
 
 const getConfiguration = () => {
   // Prefer Zustand-persisted session token; fallback to legacy localStorage key

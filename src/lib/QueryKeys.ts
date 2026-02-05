@@ -26,4 +26,8 @@
     currentUser: 'current-user',
   }
 
+  export const employeeQueryKeys = {
+    employee: 'employees',
+  }
+
   

@@ -1,20 +1,31 @@
+/**
+ * Authentication Session Store (Zustand + Persist)
+ * 
+ * Global authentication state management using Zustand with localStorage persistence.
+ * Stores JWT token, user identity (email, username, actorId), and branch assignments.
+
+ * - Persisted under 'auth-session' key in localStorage
+ * - Branch data is validated via normalizeBranches (Zod schemas)
+ * - Primary branch is auto-selected as first branch in list
+ * 
+ * @see user-store.ts for employee/branch UI state
+ */
+
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { BranchListDTO } from '@/api/generated/models'
-import { normalizeBranches } from '@/lib/auth-branches'
+import { normalizeBranches } from '@/lib/auth/auth-branches'
 
 export type AuthSession = {
   token: string | null
   email: string | null
   username: string | null
   actorId: string | null
-  branches: BranchListDTO[]
-  primaryBranchId: string | null
-  primaryBranchName: string | null
+  assignedBranches: BranchListDTO[] // All branches user can access
 }
 
 type AuthStore = AuthSession & {
-  setAuthSession: (data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'branches'>>) => void
+  setAuthSession: (data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'assignedBranches'>>) => void
   clearAuthSession: () => void
 }
 
@@ -23,9 +34,7 @@ const initialState: AuthSession = {
   email: null,
   username: null,
   actorId: null,
-  branches: [],
-  primaryBranchId: null,
-  primaryBranchName: null,
+  assignedBranches: [],
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -34,17 +43,16 @@ export const useAuthStore = create<AuthStore>()(
       ...initialState,
       setAuthSession: (data) =>
         set((state) => {
-          const branches = 'branches' in data && Array.isArray(data.branches) ? normalizeBranches(data.branches) : state.branches
-          const primary = branches[0] ?? null
+          const assignedBranches = 'assignedBranches' in data && Array.isArray(data.assignedBranches) 
+            ? normalizeBranches(data.assignedBranches) 
+            : state.assignedBranches
 
           return {
             token: 'token' in data ? (data.token?.trim() || null) : state.token,
             email: 'email' in data ? (data.email?.trim() || null) : state.email,
             username: 'username' in data ? (data.username?.trim() || null) : state.username,
             actorId: 'actorId' in data ? (data.actorId?.trim() || null) : state.actorId,
-            branches,
-            primaryBranchId: primary?.id ?? null,
-            primaryBranchName: primary?.name ?? null,
+            assignedBranches,
           }
         }),
       clearAuthSession: () => set(initialState),
@@ -60,22 +68,18 @@ export function useAuthSession(): AuthSession {
   const email = useAuthStore((state) => state.email)
   const username = useAuthStore((state) => state.username)
   const actorId = useAuthStore((state) => state.actorId)
-  const branches = useAuthStore((state) => state.branches)
-  const primaryBranchId = useAuthStore((state) => state.primaryBranchId)
-  const primaryBranchName = useAuthStore((state) => state.primaryBranchName)
+  const assignedBranches = useAuthStore((state) => state.assignedBranches)
 
   return {
     token,
     email,
     username,
     actorId,
-    branches,
-    primaryBranchId,
-    primaryBranchName,
+    assignedBranches,
   }
 }
 
-export function setAuthSession(data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'branches'>>): void {
+export function setAuthSession(data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'assignedBranches'>>): void {
   useAuthStore.getState().setAuthSession(data)
 }
 
@@ -90,9 +94,7 @@ export function readAuthSession(): AuthSession {
     email: state.email,
     username: state.username,
     actorId: state.actorId,
-    branches: state.branches,
-    primaryBranchId: state.primaryBranchId,
-    primaryBranchName: state.primaryBranchName,
+    assignedBranches: state.assignedBranches,
   }
 }
 
@@ -122,6 +124,4 @@ export function readPersistedAuthToken(): string | null {
   return null
 }
 
-export function useBranchId(): string | null {
-  return useAuthStore((state) => state.primaryBranchId)
-}
+

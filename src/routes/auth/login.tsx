@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiResponseEnvelopeSchema, loginSchema, type LoginPayload } from '@/types/auth/loginSchemas'
-import { normalizeBranches } from '@/lib/auth-branches'
-import { clearAuthSession, setAuthSession } from '@/lib/auth-session'
+import { normalizeBranches } from '@/lib/auth/auth-branches'
+import { clearAuthSession, setAuthSession } from '@/lib/auth/auth-session'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object'
@@ -27,7 +27,7 @@ function storeLoginIdentityFromPayload(payload: unknown, token?: string | null):
 
   const branches = normalizeBranches(payload['branches'])
 
-  setAuthSession({ token: token ?? null, actorId, username, email, branches })
+  setAuthSession({ token: token ?? null, actorId, username, email, assignedBranches: branches })
 }
 
 export const Route = createFileRoute('/auth/login')({
@@ -167,7 +167,7 @@ function RouteComponent() {
       setAuthSession({
         username: parsed.data.username,
         email: parsed.data.username.includes('@') ? parsed.data.username : null,
-        branches: [],
+        assignedBranches: [],
       })
     }
 
