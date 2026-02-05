@@ -11,12 +11,9 @@ import {
   apiResponseListInvoiceTableDTOSchema,
 } from '@/types/payment/paymentSchemas'
 
+import { paymentQueryKeys, invoiceQueryKeys } from '@/lib/QueryKeys'
 
-const PAYMENT_QUERY_KEYS = {
-  payments: 'payments',
-  paymentMethods: 'payment-methods',
-  paymentInvoices: 'invoices',
-}
+
 
 function zodIssueSummary(error: ZodError, maxIssues: number = 3): string {
   const issues = error.issues.slice(0, Math.max(1, maxIssues))
@@ -33,7 +30,7 @@ function zodIssueSummary(error: ZodError, maxIssues: number = 3): string {
  */
 export function usePayments(page: number = 0, size: number = 100) {
   return useQuery({
-    queryKey: [PAYMENT_QUERY_KEYS.payments, page, size],
+    queryKey: [paymentQueryKeys.payments, page, size],
     queryFn: async () => {
       const api = getAuthenticatedApi(PaymentApi)
       const response = await api.getAllPayments({
@@ -64,7 +61,7 @@ export function usePayments(page: number = 0, size: number = 100) {
  */
 export function usePayment(id: string | null) {
   return useQuery({
-    queryKey: [PAYMENT_QUERY_KEYS.payments, id],
+    queryKey: [paymentQueryKeys.payments, id],
     queryFn: async () => {
       if (!id) return null
       const api = getAuthenticatedApi(PaymentApi)
@@ -91,7 +88,7 @@ export function usePayment(id: string | null) {
  */
 export function usePaymentMethods(page: number = 0, size: number = 50) {
   return useQuery({
-    queryKey: [PAYMENT_QUERY_KEYS.paymentMethods, page, size],
+    queryKey: [paymentQueryKeys.paymentMethods, page, size],
     queryFn: async () => {
       const api = getAuthenticatedApi(PaymentApi)
       const response = await api.getAllPaymentMethods({
@@ -122,7 +119,7 @@ export function usePaymentMethods(page: number = 0, size: number = 50) {
  */
 export function useInvoices(page: number = 0, size: number = 200) {
   return useQuery({
-    queryKey: [PAYMENT_QUERY_KEYS.paymentInvoices, page, size],
+    queryKey: [invoiceQueryKeys.invoices, page, size],
     queryFn: async () => {
       const api = getAuthenticatedApi(InvoiceApi)
       const response = await api.getAllInvoices({

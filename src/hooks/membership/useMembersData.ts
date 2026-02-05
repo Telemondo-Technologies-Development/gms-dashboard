@@ -1,12 +1,11 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getAuthenticatedApi } from '@/lib/api-client'
-import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionApi'
-import { SubscriptionAvailedApi } from '@/api/generated/apis/SubscriptionAvailedApi'
 import { useInvoices } from '@/hooks/usePaymentHistory'
+import { useMemberSubscriptions } from './useMemberSubscriptions'
+import { useSubscriptionAvailed } from './useSubscriptionAvailed'
 import { readPersistedAuthToken } from '@/lib/auth-session'
 import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
-import { memberQueryKeys, subscriptionAvailedQueryKeys } from '@/lib/QueryKeys'
+import { memberQueryKeys } from '@/lib/QueryKeys'
 import type { MemberSubscriptionTableDTO } from '@/api/generated/models/MemberSubscriptionTableDTO'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import type { MemberFormData } from '@/types/membership/memberSchemas'
@@ -59,36 +58,8 @@ export function useMembersData() {
     queryFn: fetchMembersFromApi,
   })
 
-  const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
-  const memberSubsQuery = useQuery<MemberSubscriptionTableDTO[]>({
-    queryKey: [memberQueryKeys.memberSubscriptions],
-    queryFn: async () => {
-      try {
-        const resp = await memberSubscriptionApi.getAllMemberSubscriptions({ pageable: { page: 0, size: 500 } })
-        return resp.data ?? []
-      } catch (err) {
-        console.warn('Failed to load member subscriptions:', err)
-        return []
-      }
-    },
-    staleTime: 30000,
-  })
-
-  const subscriptionAvailedApi = getAuthenticatedApi(SubscriptionAvailedApi)
-  const subscriptionAvailedQuery = useQuery<SubscriptionAvailedTableDTO[]>({
-    queryKey: [subscriptionAvailedQueryKeys.subscriptionAvailed],
-    queryFn: async () => {
-      try {
-        const resp = await subscriptionAvailedApi.getAllSubscriptionAvailed({ pageable: { page: 0, size: 500 } })
-        return resp.data ?? []
-      } catch (err) {
-        console.warn('Failed to load subscription availed:', err)
-        return []
-      }
-    },
-    staleTime: 60000,
-  })
-
+  const memberSubsQuery = useMemberSubscriptions()
+  const subscriptionAvailedQuery = useSubscriptionAvailed()
   const invoicesQuery = useInvoices(0, 500)
   const invoices = invoicesQuery.data ?? EMPTY_INVOICES
 

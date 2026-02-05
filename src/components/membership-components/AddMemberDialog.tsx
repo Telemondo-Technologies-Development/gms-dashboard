@@ -32,7 +32,7 @@ import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/Subscri
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAuthSession } from '@/lib/auth-session'
 import { AddBillingDialog } from '@/components/membership-components/AddBillingForm'
-import { useAddMemberDialogData } from '@/hooks/useAddMemberDialogData'
+import { useAddMemberDialogData } from '@/hooks/membership/useAddMemberDialogData'
 import { useBillingActions } from '@/hooks/useBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 

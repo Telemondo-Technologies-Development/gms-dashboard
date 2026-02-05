@@ -2,7 +2,7 @@
 import { format } from 'date-fns'
 import { Search, Calendar, RefreshCw, Loader2 } from 'lucide-react'
 
-import { useMembersData } from '@/hooks/useMembersData'
+import { useMembersData } from '@/hooks/membership/useMembersData'
 import { AddMemberDialog } from '@/components/membership-components/AddMemberDialog'
 import type { MemberFormData } from '@/types/membership/memberSchemas'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -89,7 +89,7 @@ export default function MembersTable({ members, setMembers, onSelectMember, page
   }, [filteredMembers, pageIndex, pageSize])
 
   function getMembershipStatusBadge(endDate: Date | undefined) {
-    if (!endDate) return <Badge variant="secondary">No Date</Badge>
+    if (!endDate) return <Badge variant="outline">No Date</Badge>
 
     const today = new Date()
     const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))

@@ -1,15 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 
-import { SubscriptionAvailedApi } from '@/api/generated/apis/SubscriptionAvailedApi'
 import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
 import type { BranchPersonnelTableDTO } from '@/api/generated/models/BranchPersonnelTableDTO'
 import { BranchPersonnelTableDTOStatusEnum } from '@/api/generated/models/BranchPersonnelTableDTO'
-import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import type { AuthSession } from '@/lib/auth-session'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable, type JwtClaims } from '@/types/user/userSchemas'
-
-import { userQueryKeys, branchQueryKeys, subscriptionAvailedQueryKeys } from '@/lib/QueryKeys'
+import { useSubscriptionAvailed } from './useSubscriptionAvailed'
+import { userQueryKeys, branchQueryKeys } from '@/lib/QueryKeys'
 
 
 
@@ -126,7 +124,6 @@ export function useAddMemberDialogData(options: { session: AuthSession; open: bo
     session.email ?? session.username ?? currentUserQuery.data?.email ?? storedEmail ?? storedUsername
 
   const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
-  const subscriptionAvailedApi = getAuthenticatedApi(SubscriptionAvailedApi)
 
   const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
     queryKey: [branchQueryKeys.branches, resolvedActorId ?? null, token || null],
@@ -147,25 +144,7 @@ export function useAddMemberDialogData(options: { session: AuthSession; open: bo
     retry: false,
   })
 
-  const subscriptionsQuery = useQuery<SubscriptionAvailedTableDTO[]>({
-    queryKey: [subscriptionAvailedQueryKeys.subscriptionAvailed, token || null],
-    enabled: typeof window !== 'undefined' && open,
-    queryFn: async () => {
-      const response = await subscriptionAvailedApi.getAllSubscriptionAvailed({
-        pageable: {
-          page: 0,
-          size: 500,
-          sort: ['name,asc'],
-        },
-      })
-      if (!response.success) {
-        throw new Error(response.message ?? 'Failed to fetch subscription availed.')
-      }
-      return response.data ?? []
-    },
-    retry: false,
-    staleTime: 60_000,
-  })
+  const subscriptionsQuery = useSubscriptionAvailed(typeof window !== 'undefined' && open)
 
   return {
     token,

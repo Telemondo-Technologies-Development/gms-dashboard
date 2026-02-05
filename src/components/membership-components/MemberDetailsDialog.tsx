@@ -26,7 +26,7 @@ import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/Subscri
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAuthSession } from '@/lib/auth-session'
 import { AddBillingDialog } from './AddBillingForm'
-import { useMemberDetailsDialogData } from '@/hooks/useMemberDetailsDialogData'
+import { useMemberDetailsDialogData } from '@/hooks/membership/useMemberDetailsDialogData'
 import { isAdminToken } from '@/lib/auth-permissions'
 import { useBillingActions } from '@/hooks/useBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
