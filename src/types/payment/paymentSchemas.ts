@@ -1,5 +1,25 @@
 import { z } from 'zod'
 
+
+export interface EnsureInvoiceInput {
+  actorId: string
+  branchId: string
+  createdById: string
+  memberSubscriptionId: string
+  subscriptionAvailedId: string
+  dueDate: Date
+  gracePeriodDays: number
+  subtotal: number
+}
+
+export interface CreatePaymentIfNeededInput {
+  paymentMethodId: string
+  invoiceId: string | undefined
+  createdById: string
+  amount: number
+  paidAt?: Date
+}
+
 const coerceNullableDate = z.preprocess((value) => {
 	if (value == null || value === '') return null
 	if (value instanceof Date) return value

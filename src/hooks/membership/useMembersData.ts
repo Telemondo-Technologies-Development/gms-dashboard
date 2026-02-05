@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useInvoices } from '@/hooks/usePaymentHistory'
+import { useInvoices } from '@/hooks/billing/useInvoices'
 import { useMemberSubscriptions } from './useMemberSubscriptions'
 import { useSubscriptionAvailed } from './useSubscriptionAvailed'
 import { readPersistedAuthToken } from '@/lib/auth-session'

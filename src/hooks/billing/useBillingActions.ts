@@ -8,26 +8,9 @@ import { getAuthenticatedApi } from '@/lib/api-client'
 import { invoiceQueryKeys, paymentQueryKeys } from '@/lib/QueryKeys'
 import { apiResponseListInvoiceTableDTOSchema, apiResponseListPaymentMethodTableDTOSchema } from '@/types/payment/paymentSchemas'
 import type { PaymentMethodTableDTOParsed } from '@/types/payment/paymentSchemas'
+import type { EnsureInvoiceInput, CreatePaymentIfNeededInput } from '@/types/payment/paymentSchemas'
 
 
-export interface EnsureInvoiceInput {
-  actorId: string
-  branchId: string
-  createdById: string
-  memberSubscriptionId: string
-  subscriptionAvailedId: string
-  dueDate: Date
-  gracePeriodDays: number
-  subtotal: number
-}
-
-export interface CreatePaymentIfNeededInput {
-  paymentMethodId: string
-  invoiceId: string | undefined
-  createdById: string
-  amount: number
-  paidAt?: Date
-}
 
 export function useBillingActions() {
   const queryClient = useQueryClient()
