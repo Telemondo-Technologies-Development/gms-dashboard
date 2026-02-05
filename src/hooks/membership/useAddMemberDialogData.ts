@@ -4,40 +4,13 @@ import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
 import type { BranchPersonnelTableDTO } from '@/api/generated/models/BranchPersonnelTableDTO'
 import { BranchPersonnelTableDTOStatusEnum } from '@/api/generated/models/BranchPersonnelTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
-import type { AuthSession } from '@/lib/auth-session'
-import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable, type JwtClaims } from '@/types/user/userSchemas'
+import type { AuthSession } from '@/lib/auth/auth-session'
+import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
+import { tryDecodeJwtClaims, getStringClaim, looksLikeUuid, type JwtClaims } from '@/lib/auth/jwt-utils'
 import { useSubscriptionAvailed } from './useSubscriptionAvailed'
 import { userQueryKeys, branchQueryKeys } from '@/lib/QueryKeys'
 
 
-
-function tryDecodeJwtClaims(token: string): JwtClaims | null {
-  const parts = token.split('.')
-  if (parts.length !== 3) return null
-  const payload = parts[1]
-  if (!payload) return null
-
-  try {
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
-    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
-    if (typeof atob !== 'function') return null
-    const json = atob(padded)
-    const parsed: unknown = JSON.parse(json)
-    return parsed && typeof parsed === 'object' ? (parsed as JwtClaims) : null
-  } catch {
-    return null
-  }
-}
-
-function getStringClaim(claims: JwtClaims | null, key: string): string | undefined {
-  if (!claims) return undefined
-  const value = claims[key]
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
-
-function looksLikeUuid(value: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
-}
 
 async function fetchJsonOrThrow(url: string, token?: string): Promise<unknown> {
   const response = await fetch(url, {
