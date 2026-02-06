@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Payment History: Query keys and caching were refined so filters produce deterministic query keys and cache entries per-branch where applicable.
 - Login / Auth: Auth session now exposes `assignedBranches` and a light-weight helper hook (`useAuthSession`) — branch selection flows were reworked to store the user's selected branch in a separate `user-store` (Zustand) so pages and queries can depend on the selected branch.
 - User Management: Employee editing and creation moved into `EmployeeDialog`; Employee list rows indicate whether a system user exists for that employee; removed the legacy User tab and related UI duplication.
+- Polished expense page design to match system design
+- Removed Key insights component in analytics page and polished page design to match system design
 
 
 
