@@ -5,7 +5,7 @@ import { AlertCircle, Plus, RefreshCw, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Card } from "@/components/ui/card";
 
 import { EmployeeDialog } from "@/components/user-components/EmployeeDialog";

@@ -10,6 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- Membership: Refactored member + subscription flows to align with backend DTOs (MemberPostDTO/MemberPutDTO, MemberSubscriptionPostDTO/MemberSubscriptionPutDTO). Improved Members page performance by removing duplicated local state, adding memoization and React.memo where appropriate, and centralizing mutations to use React Query cache invalidation.
+- Payment History: Added enhanced filtering and CSV export support for payment history, and improved query efficiency and UI responsiveness for large result sets.
+- Login / Auth: Centralized authentication state with a persisted Zustand store (`auth-session.ts`) that stores token and `assignedBranches`; added shared JWT utilities for robust claim parsing; login flow updated to return token + identity payload consistently.
+- User Management: Split system users and employees in the UI, integrated employee-first workflow (create employee before creating user login), added a "Has Login" column to the employees table, and removed the previous combined System Users tab for clarity.
+
+### Changed
+
+- API Generation: Client regeneration included updated models and API method signatures; downstream hooks and utilities were adjusted to the regenerated shapes.
+- Membership: Member creation and details dialogs now use React Query as the single source of truth; dialogs invalidate member queries after mutations instead of using callback prop-drilling.
+- Payment History: Query keys and caching were refined so filters produce deterministic query keys and cache entries per-branch where applicable.
+- Login / Auth: Auth session now exposes `assignedBranches` and a light-weight helper hook (`useAuthSession`) — branch selection flows were reworked to store the user's selected branch in a separate `user-store` (Zustand) so pages and queries can depend on the selected branch.
+- User Management: Employee editing and creation moved into `EmployeeDialog`; Employee list rows indicate whether a system user exists for that employee; removed the legacy User tab and related UI duplication.
+
+
+
+## [0.4.0] - 2026-2-3
+
+### Added
 - Tracking Page : addedd a page for managing incident reports with customer specific details.
 - AddReportDialog : Dialog for adding new reports with customer.
 - IncidentReportsModal : A modal for viewing detailed report for a customer.
