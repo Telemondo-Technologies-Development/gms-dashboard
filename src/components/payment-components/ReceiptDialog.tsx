@@ -18,7 +18,7 @@ import type { PaymentTableDTOParsed, PaymentMethodTableDTOParsed } from '@/types
 interface ReceiptProps {
   payment: PaymentTableDTOParsed
   paymentMethod?: PaymentMethodTableDTOParsed
-}
+} 
 
 export function Receipt({ payment, paymentMethod }: ReceiptProps) {
   return (
@@ -40,10 +40,6 @@ export function Receipt({ payment, paymentMethod }: ReceiptProps) {
       </div>
 
       <div className="mb-8 space-y-2">
-         <div className="flex justify-between">
-          <span>Invoice ID</span>
-          <span className="font-mono">{payment.invoiceId}</span>
-        </div>
         <div className="flex justify-between">
           <span>Payment Method</span>
           <span>{paymentMethod?.name ?? payment.paymentMethodId}</span>

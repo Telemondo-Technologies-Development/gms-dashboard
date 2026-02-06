@@ -225,12 +225,14 @@ function PaymentHistoryRoute() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <h1 className="text-2xl font-bold text-primary">Payment and Billing History Management</h1>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader>
             <form.Subscribe selector={(state) => state.values}>
               {(filters) => (
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    
                   <div>
                     <CardTitle>Transactions</CardTitle>
                     <CardDescription>
