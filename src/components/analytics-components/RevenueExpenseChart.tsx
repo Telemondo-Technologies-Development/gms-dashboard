@@ -19,11 +19,11 @@ type Props = {
 const chartConfig = {
   revenue: {
     label: 'Revenue',
-    color: '#4a5c92', 
+    color: '#7c93d4', // Blue matching expense charts
   },
   expense: {
     label: 'Expenses',
-    color: '#ea580c',
+    color: '#ef4444', // Red for expenses
   },
 }
 
@@ -73,7 +73,7 @@ export function RevenueExpenseChart({ data, timeRange }: Props) {
       {/* Chart Container */}
       <ChartContainer config={chartConfig} className="h-[300px] w-full">
         <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
           <XAxis 
             dataKey="month" 
             tickLine={false}
@@ -93,17 +93,17 @@ export function RevenueExpenseChart({ data, timeRange }: Props) {
           <Line
             type="monotone"
             dataKey="revenue"
-            stroke="#4a5c92"
+            stroke="#7c93d4"
             strokeWidth={2.5}
-            dot={{ fill: '#4a5c92', r: 4 }}
+            dot={{ fill: '#7c93d4', r: 4 }}
             activeDot={{ r: 6 }}
           />
           <Line
             type="monotone"
             dataKey="expense"
-            stroke="hsl(var(--destructive))"
+            stroke="#ef4444"
             strokeWidth={2.5}
-            dot={{ fill: 'hsl(var(--destructive))', r: 4 }}
+            dot={{ fill: '#ef4444', r: 4 }}
             activeDot={{ r: 6 }}
           />
         </LineChart>

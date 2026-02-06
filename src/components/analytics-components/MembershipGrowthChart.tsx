@@ -19,15 +19,15 @@ type Props = {
 const chartConfig = {
   total: {
     label: 'Total Members',
-    color: '#4a5c92',
+    color: '#7c93d4', // Blue matching other charts
   },
   new: {
     label: 'New Members',
-    color: '#10b981',
+    color: '#10b981', // Green for new/positive
   },
   cancelled: {
     label: 'Cancelled',
-    color: '#ea580c',
+    color: '#ef4444', // Red for cancelled
   },
 }
 
@@ -119,19 +119,19 @@ export function MembershipGrowthChart({ data, timeRange }: Props) {
         <AreaChart data={chartData}>
           <defs>
             <linearGradient id="gradientTotal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#4a5c92" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#4a5c92" stopOpacity={0.05}/>
+              <stop offset="5%" stopColor="#7c93d4" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#7c93d4" stopOpacity={0.05}/>
             </linearGradient>
             <linearGradient id="gradientNew" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
               <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
             </linearGradient>
             <linearGradient id="gradientCancelled" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0.05}/>
+              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
           <XAxis 
             dataKey="month" 
             tickLine={false}
@@ -150,7 +150,7 @@ export function MembershipGrowthChart({ data, timeRange }: Props) {
           <Area
             type="monotone"
             dataKey="total"
-            stroke="#4a5c92"
+            stroke="#7c93d4"
             fill="url(#gradientTotal)"
             strokeWidth={2.5}
           />
@@ -164,7 +164,7 @@ export function MembershipGrowthChart({ data, timeRange }: Props) {
           <Area
             type="monotone"
             dataKey="cancelled"
-            stroke="hsl(var(--destructive))"
+            stroke="#ef4444"
             fill="url(#gradientCancelled)"
             strokeWidth={2.5}
           />
