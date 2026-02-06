@@ -1,37 +1,37 @@
 
-# BranchPersonnelTableDTO
+# SuppliesLogTableDTO
 
-Format for Branch Personnel read
+Format for Supplies Log read
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`actorId` | string
-`branchId` | string
-`createdAt` | Date
 `createdById` | string
 `id` | string
-`status` | string
-`updatedAt` | Date
+`name` | string
+`objectIds` | Array&lt;string&gt;
+`quantity` | number
+`remarks` | string
+`suppliesId` | string
 `updatedById` | string
 
 ## Example
 
 ```typescript
-import type { BranchPersonnelTableDTO } from ''
+import type { SuppliesLogTableDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "actorId": null,
-  "branchId": null,
-  "createdAt": null,
   "createdById": null,
   "id": null,
-  "status": null,
-  "updatedAt": null,
+  "name": null,
+  "objectIds": null,
+  "quantity": null,
+  "remarks": null,
+  "suppliesId": null,
   "updatedById": null,
-} satisfies BranchPersonnelTableDTO
+} satisfies SuppliesLogTableDTO
 
 console.log(example)
 
@@ -40,7 +40,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as BranchPersonnelTableDTO
+const exampleParsed = JSON.parse(exampleJSON) as SuppliesLogTableDTO
 console.log(exampleParsed)
 ```
 

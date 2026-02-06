@@ -15,6 +15,8 @@ apis/ObjectStorageApi.ts
 apis/PaymentApi.ts
 apis/SubscriptionApi.ts
 apis/SubscriptionAvailedApi.ts
+apis/SuppliesApi.ts
+apis/SuppliesLogsApi.ts
 apis/UserApi.ts
 apis/index.ts
 docs/AccessControlApi.md
@@ -45,6 +47,8 @@ docs/ApiResponseListRoleTableDTO.md
 docs/ApiResponseListScheduleTableDTO.md
 docs/ApiResponseListSubscriptionAvailedTableDTO.md
 docs/ApiResponseListSubscriptionTableDTO.md
+docs/ApiResponseListSuppliesLogTableDTO.md
+docs/ApiResponseListSupplyTableDTO.md
 docs/ApiResponseListUserTableDTO.md
 docs/ApiResponseMemberSubscriptionTableDTO.md
 docs/ApiResponseMemberTableDTO.md
@@ -58,6 +62,9 @@ docs/ApiResponseScheduleTableDTO.md
 docs/ApiResponseString.md
 docs/ApiResponseSubscriptionAvailedTableDTO.md
 docs/ApiResponseSubscriptionTableDTO.md
+docs/ApiResponseSuppliesLogTableDTO.md
+docs/ApiResponseSupplyTableDTO.md
+docs/ApiResponseSupplyWithLogsDTO.md
 docs/ApiResponseUnit.md
 docs/ApiResponseUserTableDTO.md
 docs/AssetApi.md
@@ -135,6 +142,15 @@ docs/SubscriptionAvailedTableDTO.md
 docs/SubscriptionPostDTO.md
 docs/SubscriptionPutDTO.md
 docs/SubscriptionTableDTO.md
+docs/SuppliesApi.md
+docs/SuppliesLogPostDTO.md
+docs/SuppliesLogPutDTO.md
+docs/SuppliesLogTableDTO.md
+docs/SuppliesLogsApi.md
+docs/SupplyPostDTO.md
+docs/SupplyPutDTO.md
+docs/SupplyTableDTO.md
+docs/SupplyWithLogsDTO.md
 docs/UploadBranchLogoRequest.md
 docs/UserApi.md
 docs/UserPostDTO.md
@@ -168,6 +184,8 @@ models/ApiResponseListRoleTableDTO.ts
 models/ApiResponseListScheduleTableDTO.ts
 models/ApiResponseListSubscriptionAvailedTableDTO.ts
 models/ApiResponseListSubscriptionTableDTO.ts
+models/ApiResponseListSuppliesLogTableDTO.ts
+models/ApiResponseListSupplyTableDTO.ts
 models/ApiResponseListUserTableDTO.ts
 models/ApiResponseMemberSubscriptionTableDTO.ts
 models/ApiResponseMemberTableDTO.ts
@@ -181,6 +199,9 @@ models/ApiResponseScheduleTableDTO.ts
 models/ApiResponseString.ts
 models/ApiResponseSubscriptionAvailedTableDTO.ts
 models/ApiResponseSubscriptionTableDTO.ts
+models/ApiResponseSuppliesLogTableDTO.ts
+models/ApiResponseSupplyTableDTO.ts
+models/ApiResponseSupplyWithLogsDTO.ts
 models/ApiResponseUnit.ts
 models/ApiResponseUserTableDTO.ts
 models/AssetCategoryPostDTO.ts
@@ -242,6 +263,13 @@ models/SubscriptionAvailedTableDTO.ts
 models/SubscriptionPostDTO.ts
 models/SubscriptionPutDTO.ts
 models/SubscriptionTableDTO.ts
+models/SuppliesLogPostDTO.ts
+models/SuppliesLogPutDTO.ts
+models/SuppliesLogTableDTO.ts
+models/SupplyPostDTO.ts
+models/SupplyPutDTO.ts
+models/SupplyTableDTO.ts
+models/SupplyWithLogsDTO.ts
 models/UploadBranchLogoRequest.ts
 models/UserPostDTO.ts
 models/UserPutDTO.ts

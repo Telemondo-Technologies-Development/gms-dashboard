@@ -68,7 +68,7 @@ export function LogInResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
     return {
         
         'actorId': json['actorId'],
-        'branches': json['branches'] == null ? [] : ((json['branches'] as Array<any>).map(BranchListDTOFromJSON)),
+        'branches': ((json['branches'] as Array<any>).map(BranchListDTOFromJSON)),
         'email': json['email'],
     };
 }
@@ -85,7 +85,7 @@ export function LogInResponseToJSONTyped(value?: LogInResponse | null, ignoreDis
     return {
         
         'actorId': value['actorId'],
-        'branches': (value['branches'] ?? []).map(BranchListDTOToJSON),
+        'branches': ((value['branches'] as Array<any>).map(BranchListDTOToJSON)),
         'email': value['email'],
     };
 }

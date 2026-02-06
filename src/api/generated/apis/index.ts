@@ -17,4 +17,6 @@ export * from './ObjectStorageApi';
 export * from './PaymentApi';
 export * from './SubscriptionApi';
 export * from './SubscriptionAvailedApi';
+export * from './SuppliesApi';
+export * from './SuppliesLogsApi';
 export * from './UserApi';

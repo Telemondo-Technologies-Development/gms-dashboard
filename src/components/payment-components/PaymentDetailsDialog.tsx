@@ -150,16 +150,13 @@ export function PaymentDetailsDialog({
           <div className="text-sm text-muted-foreground">Select a row to view details.</div>
         )}
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-4 sm:gap-4">
            {payment && onPrintReceipt && (
-            <Button variant="secondary" onClick={() => onPrintReceipt(payment)}>
+            <Button variant="default" onClick={() => onPrintReceipt(payment)}>
               <Printer className="mr-2 h-4 w-4" />
               Receipt
             </Button>
           )}
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
