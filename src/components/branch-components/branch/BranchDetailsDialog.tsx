@@ -15,9 +15,9 @@ import {
 export interface StaffMember {
   id: string;
   name: string;
+  phone: string;
   role: 'Manager' | 'Staff';
   email: string;
-  phone: string;
   address: string;
   birthday: string;
 }
@@ -26,8 +26,7 @@ export interface BranchFormData {
   id: string;
   name: string;
   address: string;
-  phone: string;
-  status: 'Active' | 'Maintenance';
+  status: 'Active' | 'Closed';
   assignedStaff: StaffMember[];
   latitude: number; 
   longitude: number;
@@ -51,15 +50,13 @@ export function BranchDetailsDialog({
 }: BranchDetailsDialogProps) {
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('');
-  const [status, setStatus] = useState<'Active' | 'Maintenance'>('Active');
+  const [status, setStatus] = useState<'Active' | 'Closed'>('Active');
 
   useEffect(() => {
     if (!branch) return;
 
     setName(branch.name);
     setAddress(branch.address);
-    setPhone(branch.phone || ''); 
     setStatus(branch.status);
   }, [branch]);
 
@@ -71,7 +68,6 @@ export function BranchDetailsDialog({
       ...branch,
       name,
       address,
-      phone, 
       status,
     };
 
@@ -112,29 +108,16 @@ export function BranchDetailsDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      className="pl-10"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
                   <select
                     id="status"
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-background"
                     value={status}
-                    onChange={(e) => setStatus(e.target.value as 'Active' | 'Maintenance')}
+                    onChange={(e) => setStatus(e.target.value as 'Active' | 'Closed')}
                     required
                   >
                     <option value="Active">Active</option>
-                    <option value="Maintenance">Maintenance</option>
+                    <option value="Closed">Close</option>
                   </select>
                 </div>
               </div>

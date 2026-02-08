@@ -13,9 +13,9 @@ interface AddBranchDialogProps {
 export interface StaffMember {
   id: string;
   name: string;
+  phone: string;
   role: "Manager" | "Staff";
   email: string;
-  phone: string;
   address: string;
   birthday: string;
 }
@@ -24,8 +24,7 @@ export interface BranchFormData {
   id: string;
   name: string;
   address: string;
-  phone: string;
-  status: "Active" | "Maintenance";
+  status: "Active" | "Closed";
   assignedStaff: StaffMember[];
   latitude: number;
   longitude: number;
@@ -38,12 +37,11 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
   const [formData, setFormData] = useState({
     name: "",
     address: "",
-    phone: "",
     status: "Active",
   });
 
   const resetForm = () => {
-    setFormData({ name: "", address: "", phone: "", status: "Active" });
+    setFormData({ name: "", address: "", status: "Active" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,8 +74,7 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
       id: crypto.randomUUID(),
       name: formData.name,
       address: formData.address,
-      phone: formData.phone,
-      status: formData.status as "Active" | "Maintenance",
+      status: formData.status as "Active" | "Closed",
       assignedStaff: [],
       latitude,
       longitude,
@@ -148,21 +145,6 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    placeholder="Enter phone number"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        phone: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="status">Status *</Label>
                   <select
                     id="status"
@@ -177,7 +159,7 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
                     required
                   >
                     <option value="Active">Active</option>
-                    <option value="Maintenance">Maintenance</option>
+                    <option value="Close">Close</option>
                   </select>
                 </div>
               </CardContent>

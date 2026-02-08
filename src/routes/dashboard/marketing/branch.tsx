@@ -189,7 +189,6 @@ function RouteComponent() {
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}
         branch={selectedBranch ? { 
           ...selectedBranch, 
-          phone: '', 
           status: 'Active', 
           revenue: 0, 
           expenses: 0, 
