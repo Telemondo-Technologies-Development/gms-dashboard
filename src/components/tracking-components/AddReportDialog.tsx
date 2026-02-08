@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react'; 
 import { useMembersData } from '@/hooks/membership/useMembersData';
+import { useBranches } from '@/hooks/branch/useBranches';
+
 import {
   Dialog,
   DialogContent,
@@ -33,6 +35,7 @@ interface AddReportDialogProps {
 
 export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
   const { enrichedMembers } = useMembersData();
+  const { branches } = useBranches(); 
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -49,6 +52,13 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
     }));
   }, [enrichedMembers]);
 
+  const branchList = useMemo(() => {
+    return branches.map((b: { id: string; name: string }) => ({
+      id: b.id,
+      name: b.name,
+    }));
+  }, [branches]);
+
   const filteredMembers = useMemo(() => {
     if (!name.trim() || !isSearching) return [];
     return memberList.filter((member) =>
@@ -56,9 +66,23 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
     ).slice(0, 5); 
   }, [name, memberList, isSearching]);
 
+  const [isBranchSearching, setIsBranchSearching] = useState(false);
+
+  const filteredBranches = useMemo(() => {
+    if (!branch.trim() || !isBranchSearching) return [];
+    return branchList.filter((b: { id: string; name: string }) =>
+      b.name.toLowerCase().includes(branch.toLowerCase())
+    ).slice(0, 5);
+  }, [branch, branchList, isBranchSearching]);
+
   const handleSelectMember = (memberName: string) => {
     setName(memberName);
     setIsSearching(false);
+  };
+
+  const handleSelectBranch = (branchName: string) => {
+    setBranch(branchName);
+    setIsBranchSearching(false);
   };
 
   const handleSubmit = () => {
@@ -73,7 +97,7 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
         attachments,
       });
       
-      // Reset form
+
       setName('');
       setBranch('');
       setReportType('');
@@ -97,7 +121,6 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
         </DialogHeader>
         <div className="space-y-4 border p-4 rounded-2xl">
           
-          {/* CUSTOMER NAME FIELD WITH AUTO-SUGGEST */}
           <div className="space-y-2 relative">
             <Label htmlFor="customerName">Customer Name</Label>
             <Input
@@ -130,6 +153,41 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+
+          <div className="space-y-2 relative">
+            <Label htmlFor="branchName">Branch Name</Label>
+            <Input
+              id="branchName"
+              placeholder="Search branch name..."
+              value={branch}
+              onChange={(e) => {
+                setBranch(e.target.value);
+                setIsBranchSearching(true);
+              }}
+              onFocus={() => {
+                if (branch.length > 0) setIsBranchSearching(true);
+              }}
+              onBlur={() => {
+                setTimeout(() => setIsBranchSearching(false), 200);
+              }}
+            />
+            {isBranchSearching && filteredBranches.length > 0 && (
+                <div className="absolute z-50 w-full top-[70px] bg-popover border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                {filteredBranches.map((b: { id: string; name: string }) => (
+                  <div
+                  key={b.id}
+                  className="px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
+                  onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
+                    e.preventDefault(); 
+                    handleSelectBranch(b.name);
+                  }}
+                  >
+                  {b.name}
+                  </div>
+                ))}
+                </div>
             )}
           </div>
 
