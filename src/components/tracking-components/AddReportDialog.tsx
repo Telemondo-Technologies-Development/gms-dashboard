@@ -24,6 +24,11 @@ interface AddReportDialogProps {
     createdBy: string;
     attachments: File[];
   }) => void;
+  members: {
+    id: string;
+    name: string;
+    branch: string;
+  }[];
 }
 
 export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
