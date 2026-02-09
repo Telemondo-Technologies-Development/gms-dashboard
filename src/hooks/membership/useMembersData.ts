@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useInvoices } from '@/hooks/billing/useInvoices'
 import { useMemberSubscriptions } from './useMemberSubscriptions'
@@ -44,15 +44,17 @@ async function fetchMembersFromApi() {
   return envelope.data ?? []
 }
 
-function formatCurrency(amount: number, currency: string = 'PHP') {
-  return new Intl.NumberFormat('en-PH', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 2,
-  }).format(amount)
-}
 
 export function useMembersData() {
+  /**
+   * React hooks + TanStack Query notes:
+   * - TanStack Query is the source of truth for fetching/caching server data.
+   * - `useMemo` is used for derived data (enrichedMembers) and expensive helpers
+   *   (like Intl.NumberFormat) to avoid re-creating them on every render.
+   * - `useCallback` stabilizes functions we return (`refetchAll`) to reduce
+   *   re-renders in consuming components.
+   */
+
   const membersQuery = useQuery({
     queryKey: [memberQueryKeys.members],
     queryFn: fetchMembersFromApi,
@@ -62,6 +64,23 @@ export function useMembersData() {
   const subscriptionAvailedQuery = useSubscriptionAvailed()
   const invoicesQuery = useInvoices(0, 500)
   const invoices = invoicesQuery.data ?? EMPTY_INVOICES
+
+  const currencyFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+        maximumFractionDigits: 2,
+      }),
+    [],
+  )
+
+  const formatCurrencyMemo = useCallback(
+    (amount: number) => {
+      return currencyFormatter.format(amount)
+    },
+    [currencyFormatter],
+  )
 
   const enrichedMembers = useMemo<MemberFormData[]>(() => {
     const apiMembers = membersQuery.data ?? []
@@ -121,20 +140,20 @@ export function useMembersData() {
         paymentMethod: '',
         membershipDetails: `Status: ${m.status}${availed ? ` • Plan: ${availed.name}` : ''}${
           relatedInvoices.length
-            ? ` • Invoiced: ${formatCurrency(totalInvoiced)} • Paid: ${formatCurrency(totalPaid)} • Unpaid: ${formatCurrency(totalUnpaid)}`
+            ? ` • Invoiced: ${formatCurrencyMemo(totalInvoiced)} • Paid: ${formatCurrencyMemo(totalPaid)} • Unpaid: ${formatCurrencyMemo(totalUnpaid)}`
             : ''
         }`,
         documents: [],
       }
     })
-  }, [membersQuery.data, memberSubsQuery.data, subscriptionAvailedQuery.data, invoices])
+  }, [membersQuery.data, memberSubsQuery.data, subscriptionAvailedQuery.data, invoices, formatCurrencyMemo])
 
-  const refetchAll = () => {
+  const refetchAll = useCallback(() => {
     void membersQuery.refetch()
     void memberSubsQuery.refetch()
     void subscriptionAvailedQuery.refetch()
     void invoicesQuery.refetch()
-  }
+  }, [invoicesQuery, memberSubsQuery, membersQuery, subscriptionAvailedQuery])
 
   const isLoading = membersQuery.isLoading || memberSubsQuery.isLoading || subscriptionAvailedQuery.isLoading || invoicesQuery.isLoading
   const isFetching = membersQuery.isFetching || memberSubsQuery.isFetching || subscriptionAvailedQuery.isFetching || invoicesQuery.isFetching

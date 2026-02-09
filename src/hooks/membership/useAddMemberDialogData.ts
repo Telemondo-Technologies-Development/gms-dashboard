@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
@@ -6,7 +7,7 @@ import { BranchPersonnelTableDTOStatusEnum } from '@/api/generated/models/Branch
 import { getAuthenticatedApi } from '@/lib/api-client'
 import type { AuthSession } from '@/lib/auth/auth-session'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
-import { tryDecodeJwtClaims, getStringClaim, looksLikeUuid, type JwtClaims } from '@/lib/auth/jwt-utils'
+import { tryDecodeJwtClaims, getStringClaim, looksLikeUuid } from '@/lib/auth/jwt-utils'
 import { useSubscriptionAvailed } from './useSubscriptionAvailed'
 import { userQueryKeys, branchQueryKeys } from '@/lib/QueryKeys'
 
@@ -74,46 +75,70 @@ export function useAddMemberDialogData(options: { session: AuthSession; open: bo
   const storedUsername = session.username ?? ''
   const storedActorId = session.actorId ?? ''
 
-  const claims = token ? tryDecodeJwtClaims(token) : null
-  const authUserId = (() => {
+  /**
+   * React hooks + TanStack Query notes:
+   * - TanStack Query handles remote fetching/caching.
+   * - `useMemo` caches derived values (claims/userId/email) so we don't re-derive
+   *   them on unrelated re-renders.
+   * - `useCallback` stabilizes `queryFn` identities, which helps keep hook outputs
+   *   referentially stable for consumers that memoize.
+   */
+
+  const claims = useMemo(() => (token ? tryDecodeJwtClaims(token) : null), [token])
+
+  const authUserId = useMemo(() => {
     const sub = getStringClaim(claims, 'sub')
     return sub && looksLikeUuid(sub) ? sub : undefined
-  })()
+  }, [claims])
+
+  const currentUserQueryEnabled =
+    typeof window !== 'undefined' && open && (!!authUserId || !!storedEmail)
+
+  const currentUserQueryFn = useCallback(async () => {
+    if (authUserId) return await fetchUserById(authUserId, token)
+    if (storedEmail) return await fetchUserByEmail(storedEmail, token)
+    return null
+  }, [authUserId, storedEmail, token])
 
   const currentUserQuery = useQuery({
     queryKey: [userQueryKeys.currentUser, authUserId ?? null, storedEmail || null],
-    enabled: typeof window !== 'undefined' && open && (!!authUserId || !!storedEmail),
-    queryFn: async () => {
-      if (authUserId) return await fetchUserById(authUserId, token)
-      if (storedEmail) return await fetchUserByEmail(storedEmail, token)
-      return null
-    },
+    enabled: currentUserQueryEnabled,
+    queryFn: currentUserQueryFn,
     retry: false,
   })
 
   const createdByActorId = currentUserQuery.data?.actorId
-  const resolvedActorId = session.actorId ?? createdByActorId ?? (storedActorId || undefined)
-  const currentUserEmail =
-    session.email ?? session.username ?? currentUserQuery.data?.email ?? storedEmail ?? storedUsername
+
+  const resolvedActorId = useMemo(
+    () => session.actorId ?? createdByActorId ?? (storedActorId || undefined),
+    [session.actorId, createdByActorId, storedActorId],
+  )
+
+  const currentUserEmail = useMemo(
+    () => session.email ?? session.username ?? currentUserQuery.data?.email ?? storedEmail ?? storedUsername,
+    [session.email, session.username, currentUserQuery.data?.email, storedEmail, storedUsername],
+  )
 
   const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
+
+  const branchPersonnelQueryFn = useCallback(async () => {
+    if (!resolvedActorId) return null
+    const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } })
+    if (!response.success) {
+      throw new Error(response.message ?? 'Failed to fetch branch personnel.')
+    }
+
+    const record =
+      response.data?.find(
+        (r) => r.actorId === resolvedActorId && r.status === BranchPersonnelTableDTOStatusEnum.Active,
+      ) ?? null
+    return record
+  }, [branchPersonnelApi, resolvedActorId])
 
   const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
     queryKey: [branchQueryKeys.branches, resolvedActorId ?? null, token || null],
     enabled: open && !!resolvedActorId,
-    queryFn: async () => {
-      if (!resolvedActorId) return null
-      const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } })
-      if (!response.success) {
-        throw new Error(response.message ?? 'Failed to fetch branch personnel.')
-      }
-
-      const record =
-        response.data?.find(
-          (r) => r.actorId === resolvedActorId && r.status === BranchPersonnelTableDTOStatusEnum.Active,
-        ) ?? null
-      return record
-    },
+    queryFn: branchPersonnelQueryFn,
     retry: false,
   })
 
