@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
+import { Search } from 'lucide-react';
 
 // Mock function to simulate fetching members from an API
 async function fetchMembersFromApi() {
@@ -145,13 +146,16 @@ export default function Tracking() {
           />
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 mb-6">
-            <Input
-              placeholder="Search by name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
+        <div className="flex items-center gap-2 mb-6">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 max-w-sm" // Added padding to accommodate the Search icon
+              />
+            </div>
           </div>
 
           {filteredCustomers.length === 0 ? (
