@@ -6,7 +6,9 @@
     "dev": "vite --port 3000",
     "build": "vite build && tsc -p tsconfig.build.json",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "openapi-generator-cli generate -i openapi.json -g typescript-fetch -o src/api/generated --additional-properties=supportsES6=true,useSingleRequestParameter=true"
+    
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
