@@ -37,7 +37,9 @@
           }
         },
         "summary": "Get all assets",
-        "tags": ["Asset"]
+        "tags": [
+          "Asset"
+        ]
       },
       "post": {
         "operationId": "createAsset",
@@ -64,7 +66,9 @@
           }
         },
         "summary": "Create an asset",
-        "tags": ["Asset"]
+        "tags": [
+          "Asset"
+        ]
       }
     },
     "/api/asset/category": {
@@ -83,7 +87,9 @@
           }
         },
         "summary": "Get all Asset Categories",
-        "tags": ["Asset Category"]
+        "tags": [
+          "Asset Category"
+        ]
       },
       "post": {
         "operationId": "createAssetCategory",
@@ -110,7 +116,9 @@
           }
         },
         "summary": "Create a new Asset Category",
-        "tags": ["Asset Category"]
+        "tags": [
+          "Asset Category"
+        ]
       }
     },
     "/api/asset/category/{id}": {
@@ -140,7 +148,9 @@
           }
         },
         "summary": "Delete a Asset Category by id",
-        "tags": ["Asset Category"]
+        "tags": [
+          "Asset Category"
+        ]
       },
       "get": {
         "operationId": "getAssetCategory",
@@ -168,7 +178,9 @@
           }
         },
         "summary": "Get a Asset Category by id",
-        "tags": ["Asset Category"]
+        "tags": [
+          "Asset Category"
+        ]
       },
       "put": {
         "operationId": "updateAssetCategory",
@@ -206,7 +218,9 @@
           }
         },
         "summary": "Update a Asset Category by id",
-        "tags": ["Asset Category"]
+        "tags": [
+          "Asset Category"
+        ]
       }
     },
     "/api/asset/maintenance": {
@@ -235,7 +249,9 @@
           }
         },
         "summary": "Get all maintenance logs (paginated)",
-        "tags": ["Asset Maintenance"]
+        "tags": [
+          "Asset Maintenance"
+        ]
       }
     },
     "/api/asset/maintenance/schedule": {
@@ -263,7 +279,9 @@
             "description": "OK"
           }
         },
-        "tags": ["Maintenance Schedule"]
+        "tags": [
+          "Maintenance Schedule"
+        ]
       },
       "post": {
         "operationId": "createSchedule",
@@ -289,7 +307,9 @@
             "description": "OK"
           }
         },
-        "tags": ["Maintenance Schedule"]
+        "tags": [
+          "Maintenance Schedule"
+        ]
       }
     },
     "/api/asset/maintenance/schedule/{id}": {
@@ -318,7 +338,9 @@
             "description": "OK"
           }
         },
-        "tags": ["Maintenance Schedule"]
+        "tags": [
+          "Maintenance Schedule"
+        ]
       },
       "get": {
         "operationId": "getAsset_1",
@@ -346,7 +368,9 @@
           }
         },
         "summary": "Get an asset by ID",
-        "tags": ["Maintenance Schedule"]
+        "tags": [
+          "Maintenance Schedule"
+        ]
       },
       "put": {
         "operationId": "updateSchedule",
@@ -383,7 +407,9 @@
             "description": "OK"
           }
         },
-        "tags": ["Maintenance Schedule"]
+        "tags": [
+          "Maintenance Schedule"
+        ]
       }
     },
     "/api/asset/maintenance/{id}": {
@@ -413,7 +439,9 @@
           }
         },
         "summary": "Get a maintenance log by id",
-        "tags": ["Asset Maintenance"]
+        "tags": [
+          "Asset Maintenance"
+        ]
       },
       "patch": {
         "operationId": "updateMaintenanceStatus",
@@ -451,7 +479,9 @@
           }
         },
         "summary": "Update maintenance status, description, files, and completion date",
-        "tags": ["Asset Maintenance"]
+        "tags": [
+          "Asset Maintenance"
+        ]
       }
     },
     "/api/asset/{id}": {
@@ -481,7 +511,9 @@
           }
         },
         "summary": "Delete an asset by ID",
-        "tags": ["Asset"]
+        "tags": [
+          "Asset"
+        ]
       },
       "get": {
         "operationId": "getAsset",
@@ -509,7 +541,9 @@
           }
         },
         "summary": "Get an asset by ID",
-        "tags": ["Asset"]
+        "tags": [
+          "Asset"
+        ]
       },
       "put": {
         "operationId": "updateAsset",
@@ -547,7 +581,9 @@
           }
         },
         "summary": "Update an asset by ID",
-        "tags": ["Asset"]
+        "tags": [
+          "Asset"
+        ]
       }
     },
     "/api/billingCycle": {
@@ -576,7 +612,9 @@
           }
         },
         "summary": "Get all Billing Cycles",
-        "tags": ["Billing Cycle"]
+        "tags": [
+          "Billing Cycle"
+        ]
       },
       "post": {
         "operationId": "createBillingCycle",
@@ -603,7 +641,9 @@
           }
         },
         "summary": "Create a new Billing Cycle",
-        "tags": ["Billing Cycle"]
+        "tags": [
+          "Billing Cycle"
+        ]
       }
     },
     "/api/billingCycle/{id}": {
@@ -633,7 +673,9 @@
           }
         },
         "summary": "Delete a Billing Cycle by id",
-        "tags": ["Billing Cycle"]
+        "tags": [
+          "Billing Cycle"
+        ]
       },
       "get": {
         "operationId": "getBillingCycle",
@@ -661,7 +703,9 @@
           }
         },
         "summary": "Get a Billing Cycle by id",
-        "tags": ["Billing Cycle"]
+        "tags": [
+          "Billing Cycle"
+        ]
       },
       "put": {
         "operationId": "updateBillingCycle",
@@ -699,7 +743,9 @@
           }
         },
         "summary": "Update a Billing Cycle by id",
-        "tags": ["Billing Cycle"]
+        "tags": [
+          "Billing Cycle"
+        ]
       }
     },
     "/api/branch": {
@@ -728,7 +774,9 @@
           }
         },
         "summary": "Get all Branches",
-        "tags": ["Branch"]
+        "tags": [
+          "Branch"
+        ]
       },
       "post": {
         "operationId": "createBranch",
@@ -755,7 +803,9 @@
           }
         },
         "summary": "Create a new Branch",
-        "tags": ["Branch"]
+        "tags": [
+          "Branch"
+        ]
       }
     },
     "/api/branch/personnel": {
@@ -784,7 +834,9 @@
           }
         },
         "summary": "Get all Branch Personnel",
-        "tags": ["Branch Personnel"]
+        "tags": [
+          "Branch Personnel"
+        ]
       },
       "post": {
         "operationId": "createBranchPersonnel",
@@ -811,7 +863,9 @@
           }
         },
         "summary": "Create a new Branch Personnel",
-        "tags": ["Branch Personnel"]
+        "tags": [
+          "Branch Personnel"
+        ]
       }
     },
     "/api/branch/personnel/picture": {
@@ -828,7 +882,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -846,7 +902,9 @@
           }
         },
         "summary": "Upload a branch logo into the object storage (public)",
-        "tags": ["Branch Personnel"]
+        "tags": [
+          "Branch Personnel"
+        ]
       }
     },
     "/api/branch/personnel/{id}": {
@@ -876,7 +934,9 @@
           }
         },
         "summary": "Delete a Branch Personnel by id",
-        "tags": ["Branch Personnel"]
+        "tags": [
+          "Branch Personnel"
+        ]
       },
       "get": {
         "operationId": "getBranchPersonnel",
@@ -904,7 +964,9 @@
           }
         },
         "summary": "Get a Branch Personnel by id",
-        "tags": ["Branch Personnel"]
+        "tags": [
+          "Branch Personnel"
+        ]
       },
       "put": {
         "operationId": "updateBranchPersonnel",
@@ -942,7 +1004,9 @@
           }
         },
         "summary": "Update a Branch Personnel by id",
-        "tags": ["Branch Personnel"]
+        "tags": [
+          "Branch Personnel"
+        ]
       }
     },
     "/api/branch/{id}": {
@@ -972,7 +1036,9 @@
           }
         },
         "summary": "Delete a Branch by id",
-        "tags": ["Branch"]
+        "tags": [
+          "Branch"
+        ]
       },
       "get": {
         "operationId": "getBranch",
@@ -1000,7 +1066,9 @@
           }
         },
         "summary": "Get a Branch by id",
-        "tags": ["Branch"]
+        "tags": [
+          "Branch"
+        ]
       },
       "put": {
         "operationId": "updateBranch",
@@ -1038,7 +1106,9 @@
           }
         },
         "summary": "Update a Branch by id",
-        "tags": ["Branch"]
+        "tags": [
+          "Branch"
+        ]
       }
     },
     "/api/branch/{id}/employees": {
@@ -1060,7 +1130,13 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["ACTIVE", "MOVED", "TERMINATED", "RESIGNED", "UNDECIDED"]
+              "enum": [
+                "ACTIVE",
+                "MOVED",
+                "TERMINATED",
+                "RESIGNED",
+                "UNDECIDED"
+              ]
             }
           }
         ],
@@ -1077,7 +1153,9 @@
           }
         },
         "summary": "Get all Personnel per Branch by id",
-        "tags": ["Branch"]
+        "tags": [
+          "Branch"
+        ]
       }
     },
     "/api/employee": {
@@ -1106,7 +1184,9 @@
           }
         },
         "summary": "Get all Employees",
-        "tags": ["Employee"]
+        "tags": [
+          "Employee"
+        ]
       },
       "post": {
         "operationId": "createEmployee",
@@ -1133,7 +1213,9 @@
           }
         },
         "summary": "Create a new Employee",
-        "tags": ["Employee"]
+        "tags": [
+          "Employee"
+        ]
       }
     },
     "/api/employee/picture": {
@@ -1150,7 +1232,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -1168,7 +1252,9 @@
           }
         },
         "summary": "Upload an employee profile picture into the object storage (public)",
-        "tags": ["Employee"]
+        "tags": [
+          "Employee"
+        ]
       }
     },
     "/api/employee/{id}": {
@@ -1198,7 +1284,9 @@
           }
         },
         "summary": "Delete an Employee by id",
-        "tags": ["Employee"]
+        "tags": [
+          "Employee"
+        ]
       },
       "get": {
         "operationId": "getEmployee",
@@ -1226,7 +1314,9 @@
           }
         },
         "summary": "Get an Employee by id",
-        "tags": ["Employee"]
+        "tags": [
+          "Employee"
+        ]
       },
       "put": {
         "operationId": "updateEmployee",
@@ -1264,7 +1354,9 @@
           }
         },
         "summary": "Update an Employee by id",
-        "tags": ["Employee"]
+        "tags": [
+          "Employee"
+        ]
       }
     },
     "/api/invoice": {
@@ -1293,7 +1385,9 @@
           }
         },
         "summary": "Get all Invoices",
-        "tags": ["Invoice"]
+        "tags": [
+          "Invoice"
+        ]
       },
       "post": {
         "operationId": "createInvoice",
@@ -1320,7 +1414,9 @@
           }
         },
         "summary": "Create a new Invoice",
-        "tags": ["Invoice"]
+        "tags": [
+          "Invoice"
+        ]
       }
     },
     "/api/invoice/{id}": {
@@ -1350,7 +1446,9 @@
           }
         },
         "summary": "Delete an Invoice by id",
-        "tags": ["Invoice"]
+        "tags": [
+          "Invoice"
+        ]
       },
       "get": {
         "operationId": "getInvoice",
@@ -1378,7 +1476,9 @@
           }
         },
         "summary": "Get an Invoice by id",
-        "tags": ["Invoice"]
+        "tags": [
+          "Invoice"
+        ]
       },
       "put": {
         "operationId": "updateInvoice",
@@ -1416,7 +1516,9 @@
           }
         },
         "summary": "Update an Invoice by id",
-        "tags": ["Invoice"]
+        "tags": [
+          "Invoice"
+        ]
       }
     },
     "/api/member": {
@@ -1445,7 +1547,9 @@
           }
         },
         "summary": "Get all Members",
-        "tags": ["Member"]
+        "tags": [
+          "Member"
+        ]
       },
       "post": {
         "operationId": "createMember",
@@ -1472,7 +1576,9 @@
           }
         },
         "summary": "Create a new Member",
-        "tags": ["Member"]
+        "tags": [
+          "Member"
+        ]
       }
     },
     "/api/member/picture": {
@@ -1489,7 +1595,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -1507,7 +1615,9 @@
           }
         },
         "summary": "Upload a member profile picture into the object storage (public)",
-        "tags": ["Member"]
+        "tags": [
+          "Member"
+        ]
       }
     },
     "/api/member/subscription": {
@@ -1536,7 +1646,9 @@
           }
         },
         "summary": "Get all MemberSubscriptions",
-        "tags": ["Member Subscription"]
+        "tags": [
+          "Member Subscription"
+        ]
       },
       "post": {
         "operationId": "createMemberSubscription",
@@ -1563,7 +1675,9 @@
           }
         },
         "summary": "Create a new MemberSubscription",
-        "tags": ["Member Subscription"]
+        "tags": [
+          "Member Subscription"
+        ]
       }
     },
     "/api/member/subscription/{id}": {
@@ -1593,7 +1707,9 @@
           }
         },
         "summary": "Delete a MemberSubscription by id",
-        "tags": ["Member Subscription"]
+        "tags": [
+          "Member Subscription"
+        ]
       },
       "get": {
         "operationId": "getMemberSubscription",
@@ -1621,7 +1737,9 @@
           }
         },
         "summary": "Get a MemberSubscription by id",
-        "tags": ["Member Subscription"]
+        "tags": [
+          "Member Subscription"
+        ]
       },
       "put": {
         "operationId": "updateMemberSubscription",
@@ -1659,7 +1777,9 @@
           }
         },
         "summary": "Update a MemberSubscription by id",
-        "tags": ["Member Subscription"]
+        "tags": [
+          "Member Subscription"
+        ]
       }
     },
     "/api/member/{id}": {
@@ -1689,7 +1809,9 @@
           }
         },
         "summary": "Delete a Member by id",
-        "tags": ["Member"]
+        "tags": [
+          "Member"
+        ]
       },
       "get": {
         "operationId": "getMember",
@@ -1717,7 +1839,9 @@
           }
         },
         "summary": "Get a Member by id",
-        "tags": ["Member"]
+        "tags": [
+          "Member"
+        ]
       },
       "put": {
         "operationId": "updateMember",
@@ -1755,7 +1879,9 @@
           }
         },
         "summary": "Update a Member by id",
-        "tags": ["Member"]
+        "tags": [
+          "Member"
+        ]
       }
     },
     "/api/payment": {
@@ -1784,7 +1910,9 @@
           }
         },
         "summary": "Get all Payments",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       },
       "post": {
         "operationId": "createPayment",
@@ -1811,7 +1939,9 @@
           }
         },
         "summary": "Create a new Payment",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       }
     },
     "/api/payment/method": {
@@ -1840,7 +1970,9 @@
           }
         },
         "summary": "Get all Payment Methods",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       },
       "post": {
         "operationId": "createPaymentMethod",
@@ -1867,7 +1999,9 @@
           }
         },
         "summary": "Create a new Payment Method",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       }
     },
     "/api/payment/method/{id}": {
@@ -1897,7 +2031,9 @@
           }
         },
         "summary": "Delete a Payment Method by id",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       },
       "get": {
         "operationId": "getPaymentMethod",
@@ -1925,7 +2061,9 @@
           }
         },
         "summary": "Get a Payment Method with its Permissions by id",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       },
       "put": {
         "operationId": "updatePaymentMethod",
@@ -1963,7 +2101,9 @@
           }
         },
         "summary": "Update a Payment Method by id",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       }
     },
     "/api/payment/{id}": {
@@ -1993,7 +2133,9 @@
           }
         },
         "summary": "Delete a Payment by id",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       },
       "get": {
         "operationId": "getPayment",
@@ -2021,7 +2163,9 @@
           }
         },
         "summary": "Get a Payment by id",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       },
       "put": {
         "operationId": "updatePayment",
@@ -2059,7 +2203,9 @@
           }
         },
         "summary": "Update a Payment by id",
-        "tags": ["Payment"]
+        "tags": [
+          "Payment"
+        ]
       }
     },
     "/api/permission": {
@@ -2078,7 +2224,9 @@
           }
         },
         "summary": "Get all Permissions",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       },
       "post": {
         "operationId": "createPermission",
@@ -2109,7 +2257,9 @@
           }
         },
         "summary": "[DEV] Create a new Permission",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       }
     },
     "/api/permission/{id}": {
@@ -2139,7 +2289,9 @@
           }
         },
         "summary": "Get a Permission by id",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       }
     },
     "/api/role": {
@@ -2168,7 +2320,9 @@
           }
         },
         "summary": "Get all Roles",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       },
       "post": {
         "operationId": "createRole",
@@ -2195,7 +2349,9 @@
           }
         },
         "summary": "Create a new Role",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       }
     },
     "/api/role/{id}": {
@@ -2225,7 +2381,9 @@
           }
         },
         "summary": "Delete a Role by id",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       },
       "get": {
         "operationId": "getRole",
@@ -2253,7 +2411,9 @@
           }
         },
         "summary": "Get a Role with its Permissions by id",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       },
       "put": {
         "operationId": "updateRole",
@@ -2291,7 +2451,9 @@
           }
         },
         "summary": "Update a Role by id",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       }
     },
     "/api/role/{id}/permission": {
@@ -2331,7 +2493,9 @@
           }
         },
         "summary": "Delete a Role's Permission by id",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       },
       "put": {
         "operationId": "updateRolePermissions",
@@ -2369,7 +2533,9 @@
           }
         },
         "summary": "Update a Role's Permission by id",
-        "tags": ["Access Control"]
+        "tags": [
+          "Access Control"
+        ]
       }
     },
     "/api/storage/upload": {
@@ -2404,7 +2570,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -2422,7 +2590,9 @@
           }
         },
         "summary": "Upload a file into the object storage",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/upload/asset/document": {
@@ -2439,7 +2609,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -2457,7 +2629,9 @@
           }
         },
         "summary": "(private)",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/upload/asset/maintenance": {
@@ -2474,7 +2648,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -2492,7 +2668,9 @@
           }
         },
         "summary": "(private)",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/upload/expense/receipt": {
@@ -2519,7 +2697,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -2537,7 +2717,9 @@
           }
         },
         "summary": "(private)",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/upload/payment-method/doc": {
@@ -2554,7 +2736,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -2572,7 +2756,9 @@
           }
         },
         "summary": "(private)",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/upload/report/attachment": {
@@ -2589,7 +2775,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -2607,7 +2795,9 @@
           }
         },
         "summary": "(private)",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/upload/supply/document": {
@@ -2624,7 +2814,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -2642,7 +2834,9 @@
           }
         },
         "summary": "(private)",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/upload/supply/log": {
@@ -2659,7 +2853,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -2677,7 +2873,9 @@
           }
         },
         "summary": "(private)",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/{id}": {
@@ -2707,7 +2905,9 @@
           }
         },
         "summary": "delete a file from object storage and database",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/storage/{id}/url": {
@@ -2737,7 +2937,9 @@
           }
         },
         "summary": "Get a file from the object storage by ID",
-        "tags": ["Object Storage"]
+        "tags": [
+          "Object Storage"
+        ]
       }
     },
     "/api/subscription": {
@@ -2766,7 +2968,9 @@
           }
         },
         "summary": "Get all Subscriptions",
-        "tags": ["Subscription"]
+        "tags": [
+          "Subscription"
+        ]
       },
       "post": {
         "operationId": "createSubscription",
@@ -2793,7 +2997,9 @@
           }
         },
         "summary": "Create a new Subscription",
-        "tags": ["Subscription"]
+        "tags": [
+          "Subscription"
+        ]
       }
     },
     "/api/subscription/{id}": {
@@ -2823,7 +3029,9 @@
           }
         },
         "summary": "Delete a Subscription by id",
-        "tags": ["Subscription"]
+        "tags": [
+          "Subscription"
+        ]
       },
       "get": {
         "operationId": "getSubscription",
@@ -2851,7 +3059,9 @@
           }
         },
         "summary": "Get a Subscription by id",
-        "tags": ["Subscription"]
+        "tags": [
+          "Subscription"
+        ]
       },
       "put": {
         "operationId": "updateSubscription",
@@ -2889,7 +3099,9 @@
           }
         },
         "summary": "Update a Subscription by id",
-        "tags": ["Subscription"]
+        "tags": [
+          "Subscription"
+        ]
       }
     },
     "/api/subscriptionAvailed": {
@@ -2918,7 +3130,9 @@
           }
         },
         "summary": "Get all Subscription Availed",
-        "tags": ["Subscription Availed"]
+        "tags": [
+          "Subscription Availed"
+        ]
       },
       "post": {
         "operationId": "createSubscriptionAvailed",
@@ -2945,7 +3159,9 @@
           }
         },
         "summary": "Create a new Subscription Availed",
-        "tags": ["Subscription Availed"]
+        "tags": [
+          "Subscription Availed"
+        ]
       }
     },
     "/api/subscriptionAvailed/{id}": {
@@ -2975,7 +3191,9 @@
           }
         },
         "summary": "Delete a Subscription Availed by id",
-        "tags": ["Subscription Availed"]
+        "tags": [
+          "Subscription Availed"
+        ]
       },
       "get": {
         "operationId": "getSubscriptionAvailed",
@@ -3003,7 +3221,9 @@
           }
         },
         "summary": "Get a Subscription Availed by id",
-        "tags": ["Subscription Availed"]
+        "tags": [
+          "Subscription Availed"
+        ]
       }
     },
     "/api/supply": {
@@ -3032,7 +3252,9 @@
           }
         },
         "summary": "Get all Supplies",
-        "tags": ["Supplies"]
+        "tags": [
+          "Supplies"
+        ]
       },
       "post": {
         "operationId": "createSupply",
@@ -3059,7 +3281,9 @@
           }
         },
         "summary": "Create a new Supply",
-        "tags": ["Supplies"]
+        "tags": [
+          "Supplies"
+        ]
       }
     },
     "/api/supply/log": {
@@ -3088,7 +3312,9 @@
           }
         },
         "summary": "Get all Supplies Logs",
-        "tags": ["Supplies Logs"]
+        "tags": [
+          "Supplies Logs"
+        ]
       },
       "post": {
         "operationId": "createSuppliesLog",
@@ -3115,7 +3341,9 @@
           }
         },
         "summary": "Create a new Supplies Log",
-        "tags": ["Supplies Logs"]
+        "tags": [
+          "Supplies Logs"
+        ]
       }
     },
     "/api/supply/log/{id}": {
@@ -3145,7 +3373,9 @@
           }
         },
         "summary": "Delete a Supplies Log by id",
-        "tags": ["Supplies Logs"]
+        "tags": [
+          "Supplies Logs"
+        ]
       },
       "get": {
         "operationId": "getSuppliesLog",
@@ -3173,7 +3403,9 @@
           }
         },
         "summary": "Get a Supplies Log by id",
-        "tags": ["Supplies Logs"]
+        "tags": [
+          "Supplies Logs"
+        ]
       },
       "put": {
         "operationId": "updateSupply_1",
@@ -3211,7 +3443,9 @@
           }
         },
         "summary": "Update a Supplies Log by id",
-        "tags": ["Supplies Logs"]
+        "tags": [
+          "Supplies Logs"
+        ]
       }
     },
     "/api/supply/{id}": {
@@ -3241,7 +3475,9 @@
           }
         },
         "summary": "Delete a Supply by id",
-        "tags": ["Supplies"]
+        "tags": [
+          "Supplies"
+        ]
       },
       "get": {
         "operationId": "getSupply",
@@ -3269,7 +3505,9 @@
           }
         },
         "summary": "Get a Supply by id",
-        "tags": ["Supplies"]
+        "tags": [
+          "Supplies"
+        ]
       },
       "put": {
         "operationId": "updateSupply",
@@ -3307,7 +3545,9 @@
           }
         },
         "summary": "Update a Supply by id",
-        "tags": ["Supplies"]
+        "tags": [
+          "Supplies"
+        ]
       }
     },
     "/api/supply/{id}/log": {
@@ -3345,7 +3585,9 @@
           }
         },
         "summary": "Get supply info and its logs",
-        "tags": ["Supplies"]
+        "tags": [
+          "Supplies"
+        ]
       }
     },
     "/api/user": {
@@ -3374,7 +3616,9 @@
           }
         },
         "summary": "Get all Users",
-        "tags": ["User"]
+        "tags": [
+          "User"
+        ]
       },
       "post": {
         "description": "Creates a new user record in the database",
@@ -3402,7 +3646,9 @@
           }
         },
         "summary": "Create a new User",
-        "tags": ["User"]
+        "tags": [
+          "User"
+        ]
       }
     },
     "/api/user/{id}": {
@@ -3432,7 +3678,9 @@
           }
         },
         "summary": "Delete a User by id",
-        "tags": ["User"]
+        "tags": [
+          "User"
+        ]
       },
       "get": {
         "operationId": "getUser",
@@ -3460,7 +3708,9 @@
           }
         },
         "summary": "Get a User by id",
-        "tags": ["User"]
+        "tags": [
+          "User"
+        ]
       },
       "put": {
         "operationId": "updateUser",
@@ -3498,7 +3748,9 @@
           }
         },
         "summary": "Update a User by id",
-        "tags": ["User"]
+        "tags": [
+          "User"
+        ]
       }
     },
     "/auth/login": {
@@ -3526,7 +3778,9 @@
             "description": "OK"
           }
         },
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     }
   },
@@ -3545,7 +3799,10 @@
             "type": "string"
           }
         },
-        "required": ["code", "description"]
+        "required": [
+          "code",
+          "description"
+        ]
       },
       "ApiResponseAssetCategoryTableDTO": {
         "type": "object",
@@ -3573,7 +3830,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseAssetMaintenanceTableDTO": {
         "type": "object",
@@ -3601,7 +3861,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseAssetTableDTO": {
         "type": "object",
@@ -3629,7 +3892,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseBillingCycleTableDTO": {
         "type": "object",
@@ -3657,7 +3923,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseBranchEmployeesDTO": {
         "type": "object",
@@ -3685,7 +3954,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseBranchPersonnelTableDTO": {
         "type": "object",
@@ -3713,7 +3985,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseBranchTableDTO": {
         "type": "object",
@@ -3741,7 +4016,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseEmployeeTableDTO": {
         "type": "object",
@@ -3769,7 +4047,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseInvoiceTableDTO": {
         "type": "object",
@@ -3797,7 +4078,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListAssetCategoryTableDTO": {
         "type": "object",
@@ -3828,7 +4112,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListAssetMaintenanceTableDTO": {
         "type": "object",
@@ -3859,7 +4146,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListAssetTableDTO": {
         "type": "object",
@@ -3890,7 +4180,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListBillingCycleTableDTO": {
         "type": "object",
@@ -3921,7 +4214,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListBranchPersonnelTableDTO": {
         "type": "object",
@@ -3952,7 +4248,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListBranchTableDTO": {
         "type": "object",
@@ -3983,7 +4282,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListEmployeeTableDTO": {
         "type": "object",
@@ -4014,7 +4316,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListInvoiceTableDTO": {
         "type": "object",
@@ -4045,7 +4350,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListMemberSubscriptionTableDTO": {
         "type": "object",
@@ -4076,7 +4384,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListMemberTableDTO": {
         "type": "object",
@@ -4107,7 +4418,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListPaymentMethodTableDTO": {
         "type": "object",
@@ -4138,7 +4452,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListPaymentTableDTO": {
         "type": "object",
@@ -4169,7 +4486,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListPermission": {
         "type": "object",
@@ -4200,7 +4520,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListRoleTableDTO": {
         "type": "object",
@@ -4231,7 +4554,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListScheduleTableDTO": {
         "type": "object",
@@ -4262,7 +4588,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListSubscriptionAvailedTableDTO": {
         "type": "object",
@@ -4293,7 +4622,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListSubscriptionTableDTO": {
         "type": "object",
@@ -4324,7 +4656,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListSuppliesLogTableDTO": {
         "type": "object",
@@ -4355,7 +4690,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListSupplyTableDTO": {
         "type": "object",
@@ -4386,7 +4724,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseListUserTableDTO": {
         "type": "object",
@@ -4417,7 +4758,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseMemberSubscriptionTableDTO": {
         "type": "object",
@@ -4445,7 +4789,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseMemberTableDTO": {
         "type": "object",
@@ -4473,7 +4820,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseObjectStorage": {
         "type": "object",
@@ -4501,7 +4851,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseOptionalPermission": {
         "type": "object",
@@ -4529,7 +4882,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponsePaymentMethodTableDTO": {
         "type": "object",
@@ -4557,7 +4913,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponsePaymentTableDTO": {
         "type": "object",
@@ -4585,7 +4944,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseRolePermissionTableDTO": {
         "type": "object",
@@ -4613,7 +4975,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseRoleTableDTO": {
         "type": "object",
@@ -4641,7 +5006,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseScheduleTableDTO": {
         "type": "object",
@@ -4669,7 +5037,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseString": {
         "type": "object",
@@ -4697,7 +5068,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseSubscriptionAvailedTableDTO": {
         "type": "object",
@@ -4725,7 +5099,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseSubscriptionTableDTO": {
         "type": "object",
@@ -4753,7 +5130,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseSuppliesLogTableDTO": {
         "type": "object",
@@ -4781,7 +5161,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseSupplyTableDTO": {
         "type": "object",
@@ -4809,7 +5192,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseSupplyWithLogsDTO": {
         "type": "object",
@@ -4837,7 +5223,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseUnit": {
         "type": "object",
@@ -4862,7 +5251,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "ApiResponseUserTableDTO": {
         "type": "object",
@@ -4890,7 +5282,10 @@
             "format": "int64"
           }
         },
-        "required": ["success", "timestamp"]
+        "required": [
+          "success",
+          "timestamp"
+        ]
       },
       "AssetCategoryPostDTO": {
         "type": "object",
@@ -4904,7 +5299,10 @@
             "type": "string"
           }
         },
-        "required": ["createdById", "name"]
+        "required": [
+          "createdById",
+          "name"
+        ]
       },
       "AssetCategoryPutDTO": {
         "type": "object",
@@ -4918,7 +5316,10 @@
             "format": "uuid"
           }
         },
-        "required": ["name", "updatedById"]
+        "required": [
+          "name",
+          "updatedById"
+        ]
       },
       "AssetCategoryTableDTO": {
         "type": "object",
@@ -4940,7 +5341,10 @@
             "format": "uuid"
           }
         },
-        "required": ["id", "name"]
+        "required": [
+          "id",
+          "name"
+        ]
       },
       "AssetMaintenancePatchDTO": {
         "type": "object",
@@ -4961,14 +5365,23 @@
           },
           "status": {
             "type": "string",
-            "enum": ["PENDING", "OVERDUE", "COMPLETED", "SKIPPED"]
+            "enum": [
+              "PENDING",
+              "OVERDUE",
+              "COMPLETED",
+              "SKIPPED"
+            ]
           },
           "updatedById": {
             "type": "string",
             "format": "uuid"
           }
         },
-        "required": ["objectIds", "status", "updatedById"]
+        "required": [
+          "objectIds",
+          "status",
+          "updatedById"
+        ]
       },
       "AssetMaintenanceTableDTO": {
         "type": "object",
@@ -5020,7 +5433,13 @@
             "format": "uuid"
           }
         },
-        "required": ["dueDate", "id", "maintenanceDate", "objectIds", "status"]
+        "required": [
+          "dueDate",
+          "id",
+          "maintenanceDate",
+          "objectIds",
+          "status"
+        ]
       },
       "AssetPostDTO": {
         "type": "object",
@@ -5165,7 +5584,13 @@
             "format": "uuid"
           }
         },
-        "required": ["assetCategoryId", "branchId", "id", "name", "objectIds"]
+        "required": [
+          "assetCategoryId",
+          "branchId",
+          "id",
+          "name",
+          "objectIds"
+        ]
       },
       "BillingCyclePostDTO": {
         "type": "object",
@@ -5185,7 +5610,12 @@
           },
           "intervals": {
             "type": "string",
-            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ]
           },
           "name": {
             "type": "string"
@@ -5213,7 +5643,12 @@
           },
           "intervals": {
             "type": "string",
-            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ]
           },
           "name": {
             "type": "string"
@@ -5249,7 +5684,12 @@
           },
           "intervals": {
             "type": "string",
-            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ]
           },
           "name": {
             "type": "string"
@@ -5277,7 +5717,9 @@
             }
           }
         },
-        "required": ["branch"]
+        "required": [
+          "branch"
+        ]
       },
       "BranchListDTO": {
         "type": "object",
@@ -5290,7 +5732,10 @@
             "type": "string"
           }
         },
-        "required": ["id", "name"]
+        "required": [
+          "id",
+          "name"
+        ]
       },
       "BranchPersonnelPostDTO": {
         "type": "object",
@@ -5310,10 +5755,21 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "MOVED", "TERMINATED", "RESIGNED", "UNDECIDED"]
+            "enum": [
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
+              "UNDECIDED"
+            ]
           }
         },
-        "required": ["actorId", "branchId", "createdById", "status"]
+        "required": [
+          "actorId",
+          "branchId",
+          "createdById",
+          "status"
+        ]
       },
       "BranchPersonnelPutDTO": {
         "type": "object",
@@ -5329,14 +5785,25 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "MOVED", "TERMINATED", "RESIGNED", "UNDECIDED"]
+            "enum": [
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
+              "UNDECIDED"
+            ]
           },
           "updatedById": {
             "type": "string",
             "format": "uuid"
           }
         },
-        "required": ["actorId", "branchId", "status", "updatedById"]
+        "required": [
+          "actorId",
+          "branchId",
+          "status",
+          "updatedById"
+        ]
       },
       "BranchPersonnelTableDTO": {
         "type": "object",
@@ -5364,7 +5831,13 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "MOVED", "TERMINATED", "RESIGNED", "UNDECIDED"]
+            "enum": [
+              "ACTIVE",
+              "MOVED",
+              "TERMINATED",
+              "RESIGNED",
+              "UNDECIDED"
+            ]
           },
           "updatedAt": {
             "type": "string",
@@ -5412,7 +5885,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "CLOSED", "UNDECIDED"]
+            "enum": [
+              "ACTIVE",
+              "CLOSED",
+              "UNDECIDED"
+            ]
           }
         },
         "required": [
@@ -5448,7 +5925,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "CLOSED", "UNDECIDED"]
+            "enum": [
+              "ACTIVE",
+              "CLOSED",
+              "UNDECIDED"
+            ]
           },
           "updatedById": {
             "type": "string",
@@ -5486,10 +5967,21 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "CLOSED", "UNDECIDED"]
+            "enum": [
+              "ACTIVE",
+              "CLOSED",
+              "UNDECIDED"
+            ]
           }
         },
-        "required": ["address", "id", "latitude", "longitude", "name", "status"]
+        "required": [
+          "address",
+          "id",
+          "latitude",
+          "longitude",
+          "name",
+          "status"
+        ]
       },
       "BranchTableDTO": {
         "type": "object",
@@ -5521,7 +6013,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "CLOSED", "UNDECIDED"]
+            "enum": [
+              "ACTIVE",
+              "CLOSED",
+              "UNDECIDED"
+            ]
           },
           "updatedAt": {
             "type": "string",
@@ -5554,7 +6050,9 @@
             "$ref": "#/components/schemas/EmployeeSummaryDTO"
           }
         },
-        "required": ["actorId"]
+        "required": [
+          "actorId"
+        ]
       },
       "EmployeePostDTO": {
         "type": "object",
@@ -5579,7 +6077,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           },
           "suffix": {
             "type": "string",
@@ -5594,7 +6096,12 @@
             "format": "uuid"
           }
         },
-        "required": ["contactNo", "firstName", "status", "surname"]
+        "required": [
+          "contactNo",
+          "firstName",
+          "status",
+          "surname"
+        ]
       },
       "EmployeePutDTO": {
         "type": "object",
@@ -5619,7 +6126,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           },
           "suffix": {
             "type": "string",
@@ -5634,7 +6145,12 @@
             "format": "uuid"
           }
         },
-        "required": ["contactNo", "firstName", "status", "surname"]
+        "required": [
+          "contactNo",
+          "firstName",
+          "status",
+          "surname"
+        ]
       },
       "EmployeeSummaryDTO": {
         "type": "object",
@@ -5656,7 +6172,9 @@
             "type": "string"
           }
         },
-        "required": ["id"]
+        "required": [
+          "id"
+        ]
       },
       "EmployeeTableDTO": {
         "type": "object",
@@ -5681,7 +6199,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           },
           "suffix": {
             "type": "string"
@@ -5693,7 +6215,13 @@
             "$ref": "#/components/schemas/UserTableDTO"
           }
         },
-        "required": ["contactNo", "firstName", "id", "status", "surname"]
+        "required": [
+          "contactNo",
+          "firstName",
+          "id",
+          "status",
+          "surname"
+        ]
       },
       "InvoicePostDTO": {
         "type": "object",
@@ -5725,7 +6253,12 @@
           },
           "status": {
             "type": "string",
-            "enum": ["DRAFT", "ISSUED", "PAID", "OVERDUE"]
+            "enum": [
+              "DRAFT",
+              "ISSUED",
+              "PAID",
+              "OVERDUE"
+            ]
           },
           "subscriptionAvailedId": {
             "type": "string",
@@ -5764,7 +6297,12 @@
           },
           "status": {
             "type": "string",
-            "enum": ["DRAFT", "ISSUED", "PAID", "OVERDUE"]
+            "enum": [
+              "DRAFT",
+              "ISSUED",
+              "PAID",
+              "OVERDUE"
+            ]
           },
           "subtotal": {
             "type": "number"
@@ -5820,7 +6358,12 @@
           },
           "status": {
             "type": "string",
-            "enum": ["DRAFT", "ISSUED", "PAID", "OVERDUE"]
+            "enum": [
+              "DRAFT",
+              "ISSUED",
+              "PAID",
+              "OVERDUE"
+            ]
           },
           "subscriptionAvailedId": {
             "type": "string",
@@ -5862,7 +6405,10 @@
             "type": "string"
           }
         },
-        "required": ["password", "username"]
+        "required": [
+          "password",
+          "username"
+        ]
       },
       "LogInResponse": {
         "type": "object",
@@ -5881,7 +6427,11 @@
             "type": "string"
           }
         },
-        "required": ["actorId", "branches", "email"]
+        "required": [
+          "actorId",
+          "branches",
+          "email"
+        ]
       },
       "MemberPostDTO": {
         "type": "object",
@@ -5905,7 +6455,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           },
           "suffix": {
             "type": "string",
@@ -5916,7 +6470,12 @@
             "type": "string"
           }
         },
-        "required": ["createdById", "firstName", "status", "surname"]
+        "required": [
+          "createdById",
+          "firstName",
+          "status",
+          "surname"
+        ]
       },
       "MemberPutDTO": {
         "type": "object",
@@ -5936,7 +6495,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           },
           "suffix": {
             "type": "string",
@@ -5951,7 +6514,12 @@
             "format": "uuid"
           }
         },
-        "required": ["firstName", "status", "surname", "updatedById"]
+        "required": [
+          "firstName",
+          "status",
+          "surname",
+          "updatedById"
+        ]
       },
       "MemberSubscriptionPostDTO": {
         "type": "object",
@@ -5979,7 +6547,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "CANCELED", "DONE"]
+            "enum": [
+              "ACTIVE",
+              "CANCELED",
+              "DONE"
+            ]
           },
           "subscriptionId": {
             "type": "string",
@@ -6017,7 +6589,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "CANCELED", "DONE"]
+            "enum": [
+              "ACTIVE",
+              "CANCELED",
+              "DONE"
+            ]
           },
           "subscriptionId": {
             "type": "string",
@@ -6070,7 +6646,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["ACTIVE", "CANCELED", "DONE"]
+            "enum": [
+              "ACTIVE",
+              "CANCELED",
+              "DONE"
+            ]
           },
           "subscriptionAvailedId": {
             "type": "string",
@@ -6081,7 +6661,13 @@
             "format": "uuid"
           }
         },
-        "required": ["actorId", "branchId", "id", "startDate", "status"]
+        "required": [
+          "actorId",
+          "branchId",
+          "id",
+          "startDate",
+          "status"
+        ]
       },
       "MemberTableDTO": {
         "type": "object",
@@ -6107,7 +6693,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           },
           "suffix": {
             "type": "string"
@@ -6120,7 +6710,12 @@
             "format": "uuid"
           }
         },
-        "required": ["firstName", "id", "status", "surname"]
+        "required": [
+          "firstName",
+          "id",
+          "status",
+          "surname"
+        ]
       },
       "ObjectStorage": {
         "type": "object",
@@ -6201,7 +6796,12 @@
             "format": "int64"
           }
         },
-        "required": ["pageCount", "pageIndex", "pageSize", "totalCount"]
+        "required": [
+          "pageCount",
+          "pageIndex",
+          "pageSize",
+          "totalCount"
+        ]
       },
       "Pageable": {
         "type": "object",
@@ -6236,7 +6836,10 @@
             "type": "string"
           }
         },
-        "required": ["createdById", "name"]
+        "required": [
+          "createdById",
+          "name"
+        ]
       },
       "PaymentMethodPutDTO": {
         "type": "object",
@@ -6250,7 +6853,10 @@
             "format": "uuid"
           }
         },
-        "required": ["name", "updatedById"]
+        "required": [
+          "name",
+          "updatedById"
+        ]
       },
       "PaymentMethodTableDTO": {
         "type": "object",
@@ -6272,7 +6878,10 @@
             "format": "uuid"
           }
         },
-        "required": ["id", "name"]
+        "required": [
+          "id",
+          "name"
+        ]
       },
       "PaymentPostDTO": {
         "type": "object",
@@ -6309,7 +6918,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           }
         },
         "required": [
@@ -6342,14 +6955,23 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           },
           "updatedById": {
             "type": "string",
             "format": "uuid"
           }
         },
-        "required": ["amount", "paymentMethodId", "status", "updatedById"]
+        "required": [
+          "amount",
+          "paymentMethodId",
+          "status",
+          "updatedById"
+        ]
       },
       "PaymentTableDTO": {
         "type": "object",
@@ -6386,7 +7008,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["IN", "OUT", "UNDECIDED"]
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
           },
           "updatedById": {
             "type": "string",
@@ -6413,7 +7039,10 @@
             "type": "string"
           }
         },
-        "required": ["id", "name"]
+        "required": [
+          "id",
+          "name"
+        ]
       },
       "RolePermissionDTO": {
         "type": "object",
@@ -6428,7 +7057,9 @@
             "uniqueItems": true
           }
         },
-        "required": ["permissionIds"]
+        "required": [
+          "permissionIds"
+        ]
       },
       "RolePermissionTableDTO": {
         "type": "object",
@@ -6459,7 +7090,12 @@
             "format": "uuid"
           }
         },
-        "required": ["description", "id", "name", "permissions"]
+        "required": [
+          "description",
+          "id",
+          "name",
+          "permissions"
+        ]
       },
       "RolePostDTO": {
         "type": "object",
@@ -6476,7 +7112,11 @@
             "type": "string"
           }
         },
-        "required": ["createdById", "description", "name"]
+        "required": [
+          "createdById",
+          "description",
+          "name"
+        ]
       },
       "RolePutDTO": {
         "type": "object",
@@ -6493,7 +7133,11 @@
             "format": "uuid"
           }
         },
-        "required": ["description", "name", "updatedById"]
+        "required": [
+          "description",
+          "name",
+          "updatedById"
+        ]
       },
       "RoleTableDTO": {
         "type": "object",
@@ -6518,7 +7162,11 @@
             "format": "uuid"
           }
         },
-        "required": ["description", "id", "name"]
+        "required": [
+          "description",
+          "id",
+          "name"
+        ]
       },
       "SchedulePostDTO": {
         "type": "object",
@@ -6781,7 +7429,9 @@
             "format": "uuid"
           }
         },
-        "required": ["subscriptionId"]
+        "required": [
+          "subscriptionId"
+        ]
       },
       "SubscriptionAvailedTableDTO": {
         "type": "object",
@@ -6804,7 +7454,12 @@
           },
           "intervals": {
             "type": "string",
-            "enum": ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]
+            "enum": [
+              "DAILY",
+              "WEEKLY",
+              "MONTHLY",
+              "YEARLY"
+            ]
           },
           "name": {
             "type": "string"
@@ -7043,7 +7698,13 @@
             "format": "uuid"
           }
         },
-        "required": ["id", "name", "objectIds", "quantity", "suppliesId"]
+        "required": [
+          "id",
+          "name",
+          "objectIds",
+          "quantity",
+          "suppliesId"
+        ]
       },
       "SupplyPostDTO": {
         "type": "object",
@@ -7071,7 +7732,12 @@
             }
           }
         },
-        "required": ["branchId", "createdById", "name", "objectIds"]
+        "required": [
+          "branchId",
+          "createdById",
+          "name",
+          "objectIds"
+        ]
       },
       "SupplyPutDTO": {
         "type": "object",
@@ -7099,7 +7765,12 @@
             "format": "uuid"
           }
         },
-        "required": ["branchId", "name", "objectIds", "updatedById"]
+        "required": [
+          "branchId",
+          "name",
+          "objectIds",
+          "updatedById"
+        ]
       },
       "SupplyTableDTO": {
         "type": "object",
@@ -7139,7 +7810,13 @@
             "format": "uuid"
           }
         },
-        "required": ["branchId", "id", "name", "objectIds", "quantity"]
+        "required": [
+          "branchId",
+          "id",
+          "name",
+          "objectIds",
+          "quantity"
+        ]
       },
       "SupplyWithLogsDTO": {
         "type": "object",
@@ -7155,7 +7832,9 @@
             "$ref": "#/components/schemas/SupplyTableDTO"
           }
         },
-        "required": ["supply"]
+        "required": [
+          "supply"
+        ]
       },
       "UserPostDTO": {
         "type": "object",
@@ -7169,7 +7848,10 @@
             "minLength": 8
           }
         },
-        "required": ["email", "password"]
+        "required": [
+          "email",
+          "password"
+        ]
       },
       "UserPutDTO": {
         "type": "object",
@@ -7178,7 +7860,9 @@
             "type": "string"
           }
         },
-        "required": ["email"]
+        "required": [
+          "email"
+        ]
       },
       "UserTableDTO": {
         "type": "object",
@@ -7203,7 +7887,12 @@
             "format": "date-time"
           }
         },
-        "required": ["createdAt", "email", "id", "updatedAt"]
+        "required": [
+          "createdAt",
+          "email",
+          "id",
+          "updatedAt"
+        ]
       }
     }
   }
