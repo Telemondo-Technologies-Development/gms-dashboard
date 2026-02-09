@@ -33,7 +33,10 @@ export const Route = createFileRoute('/dashboard/admin/analytics')({
 
 type TimeRange = 'monthly' | 'quarterly' | 'yearly'
 
-// Helper function to filter mock data by branch
+/**
+ * Filters analytics data by selected branch
+ * Returns proportionally scaled data for individual branches or full dataset for 'all'
+ */
 function getFilteredData(branch: string): AnalyticsData {
   if (branch === 'all') {
     return MOCK_ANALYTICS_DATA
@@ -45,8 +48,9 @@ function getFilteredData(branch: string): AnalyticsData {
     return MOCK_ANALYTICS_DATA
   }
 
-  // Calculate branch ratio for proportional data distribution
-  const branchRatio = branchData.revenue / MOCK_ANALYTICS_DATA.branches.reduce((sum, b) => sum + b.revenue, 0)
+  // Calculate branch's proportion of total revenue for scaling
+  const totalRevenue = MOCK_ANALYTICS_DATA.branches.reduce((sum, b) => sum + b.revenue, 0)
+  const branchRatio = totalRevenue > 0 ? branchData.revenue / totalRevenue : 0
 
   return {
     monthlyIncome: {
@@ -79,13 +83,15 @@ function getFilteredData(branch: string): AnalyticsData {
   }
 }
 
-// Empty State Component
+/**
+ * Empty state component for when no data is available
+ */
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
       <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
       <h3 className="text-lg font-semibold mb-2">No Data Available</h3>
-      <p className="text-sm text-muted-foreground">{message}</p>
+      <p className="text-sm text-muted-foreground max-w-md text-center">{message}</p>
     </div>
   )
 }
@@ -95,7 +101,11 @@ function AnalyticsRoute() {
   const [timeRange, setTimeRange] = useState<TimeRange>('monthly')
   const [isExporting, setIsExporting] = useState(false)
 
-  const branches = ['all', ...MOCK_ANALYTICS_DATA.branches.map(b => b.name)]
+  // Memoize branch list to prevent unnecessary recalculations
+  const branches = useMemo(
+    () => ['all', ...MOCK_ANALYTICS_DATA.branches.map(b => b.name)],
+    []
+  )
   
   // Get filtered data based on selected branch
   const analyticsData = useMemo(
@@ -113,17 +123,18 @@ function AnalyticsRoute() {
       }
 
       if (format === 'pdf') {
-        exportToPDF(data)
+        await exportToPDF(data)
         toast.success('Export Successful', {
-          description: 'PDF report has been generated.',
+          description: 'PDF report has been generated and downloaded.',
         })
       } else {
-        exportToExcel(data)
+        await exportToExcel(data)
         toast.success('Export Successful', {
           description: 'Excel report has been downloaded.',
         })
       }
     } catch (error) {
+      console.error('Export failed:', error)
       toast.error('Export Failed', {
         description: 'Unable to generate report. Please try again.',
       })
@@ -136,7 +147,7 @@ function AnalyticsRoute() {
   if (!analyticsData.branches?.length) {
     return (
       <div className="flex flex-1 flex-col p-6 min-h-0">
-        <EmptyState message="No data available for the selected branch" />
+        <EmptyState message="No data available for the selected branch. Please select a different branch or contact support." />
       </div>
     )
   }
@@ -144,70 +155,67 @@ function AnalyticsRoute() {
   const displayBranchName = selectedBranch === 'all' ? 'All Branches' : selectedBranch
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden min-h-0">
+    <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex-shrink-0 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Financial Analytics</h1>
-            <p className="text-muted-foreground mt-1">
-              Viewing analytics for {displayBranchName}
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Financial Analytics</h1>
+          <p className="text-muted-foreground mt-1">
+            Viewing analytics for {displayBranchName}
+          </p>
+        </div>
 
-          <div className="flex items-center gap-2">
-            {/* Branch Selector */}
-            <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Select branch" />
-              </SelectTrigger>
-              <SelectContent>
-                {branches.map((branch) => (
-                  <SelectItem key={branch} value={branch}>
-                    {branch === 'all' ? 'All Branches' : branch}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Branch Selector */}
+          <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Select branch" />
+            </SelectTrigger>
+            <SelectContent>
+              {branches.map((branch) => (
+                <SelectItem key={branch} value={branch}>
+                  {branch === 'all' ? 'All Branches' : branch}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-            {/* Time Range Selector */}
-            <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Time range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="quarterly">Quarterly</SelectItem>
-                <SelectItem value="yearly">Yearly</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Time Range Selector */}
+          <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Time range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="monthly">Monthly</SelectItem>
+              <SelectItem value="quarterly">Quarterly</SelectItem>
+              <SelectItem value="yearly">Yearly</SelectItem>
+            </SelectContent>
+          </Select>
 
-            {/* Export Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={isExporting}>
-                  <Download className="mr-2 h-4 w-4" />
-                  {isExporting ? 'Exporting...' : 'Export'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleExport('pdf')} disabled={isExporting}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Export as PDF
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('excel')} disabled={isExporting}>
-                  <FileSpreadsheet className="mr-2 h-4 w-4" />
-                  Export as Excel
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {/* Export Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" disabled={isExporting}>
+                <Download className="mr-2 h-4 w-4" />
+                {isExporting ? 'Exporting...' : 'Export'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport('pdf')} disabled={isExporting}>
+                <FileText className="mr-2 h-4 w-4" />
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('excel')} disabled={isExporting}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Export as Excel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
-        <div className="space-y-6">
+      <div className="space-y-6">
           {/* Income Report Cards */}
           <IncomeReportCards data={analyticsData} branch={selectedBranch} />
 
@@ -278,7 +286,6 @@ function AnalyticsRoute() {
               </CardContent>
             </Card>
           )}
-        </div>
       </div>
     </div>
   )
