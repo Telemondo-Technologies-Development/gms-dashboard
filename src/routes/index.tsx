@@ -7,8 +7,8 @@ export const Route = createFileRoute('/')({
 
 function IndexRedirect() {
   useEffect(() => {
-    // Redirect to /dashboard as the default route for testing
-    window.location.replace('/dashboard')
+    // Redirect to /auth/login as the default route for testing
+    window.location.replace('/auth/login')
   }, [])
 
   return null
