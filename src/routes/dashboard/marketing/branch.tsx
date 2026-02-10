@@ -10,6 +10,7 @@ import { MultiBranchOverview } from '@/components/branch-components/branch/Multi
 import { BranchList } from '@/components/branch-components/branch/BranchList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useBranches } from '@/hooks/branch/useBranches';
+import { useAuthSession } from '@/lib/auth/auth-session';
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
@@ -19,21 +20,22 @@ export const Route = createFileRoute('/dashboard/marketing/branch')({
 interface Branch {
   id: string;
   name: string;
-  latitude: string; 
-  longitude: string; 
   address: string;
-  created_by: string;
-  updated_by: string;
-  created_at: string;
-  updated_at: string;
-  assignedStaff?: StaffMember[];
+  latitude: string;
+  longitude: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
+  updatedById: string;
+  assignedStaff?: any[]; 
 }
 
 function RouteComponent() {
-  // 1. Hook Integration
+  const { actorId } = useAuthSession(); 
+
   const { branches, refetch, isLoading } = useBranches();
 
-  // 2. State Management
   const [dialogState, setDialogState] = useState({
     detailsOpen: false,
     staffDialogOpen: false,
@@ -46,8 +48,6 @@ function RouteComponent() {
   const [mapBranch, setMapBranch] = useState<BranchFormData | null>(null);
   const [branchToRemove, setBranchToRemove] = useState<BranchFormData | null>(null);
 
-  const currentUserId = 'exampleUserId'; 
-
   const toggleDialog = (dialog: keyof typeof dialogState, value: boolean) => {
     setDialogState((prev) => ({ ...prev, [dialog]: value }));
   };
@@ -57,10 +57,10 @@ function RouteComponent() {
     const currentTimestamp = new Date().toISOString();
     const newBranch = {
       ...branch,
-      created_by: currentUserId,
-      updated_by: currentUserId,
-      created_at: currentTimestamp,
-      updated_at: currentTimestamp,
+      createdById: actorId, 
+      updatedById: actorId, 
+      createdAt: currentTimestamp,
+      updatedAt: currentTimestamp,
     };
   
     try {
@@ -101,8 +101,8 @@ function RouteComponent() {
         },
         body: JSON.stringify({
           ...updatedBranch,
-          updated_by: currentUserId,
-          updated_at: new Date().toISOString(),
+          updatedById: actorId, 
+          updatedAt: new Date().toISOString(),
         }),
       });
   
@@ -140,6 +140,12 @@ function RouteComponent() {
   const selectedBranch: Branch | null = selectedBranchId
     ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
     : null;
+
+  if (selectedBranch && selectedBranch.status === 'INACTIVE') {
+    selectedBranch.status = 'ACTIVE'; 
+  } else if (selectedBranch && selectedBranch.status === 'INACTIVE') {
+    selectedBranch.status = 'INACTIVE'; 
+  }
 
   function handleUpdateStaff(newStaff: StaffMember[]): void {
     console.log("Updating staff for branch:", activeBranchForStaff?.name, newStaff);
@@ -188,7 +194,7 @@ function RouteComponent() {
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}
         branch={selectedBranch ? { 
           ...selectedBranch, 
-          status: 'Active', 
+          status: selectedBranch.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE', 
           revenue: 0, 
           expenses: 0, 
           memberships: 0, 
@@ -208,8 +214,8 @@ function RouteComponent() {
       <MapDialog
         open={dialogState.mapDialogOpen}
         onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
-        latitude={mapBranch?.latitude || '0'} // Changed default to string
-        longitude={mapBranch?.longitude || '0'} // Changed default to string
+        latitude={mapBranch?.latitude || '0'} 
+        longitude={mapBranch?.longitude || '0'} 
         address={mapBranch?.address || ''}
       />
   

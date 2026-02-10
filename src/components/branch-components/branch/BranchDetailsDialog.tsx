@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useAuthSession } from '@/lib/auth/auth-session';
 
 export interface StaffMember {
   id: string;
@@ -25,13 +26,34 @@ export interface BranchFormData {
   id: string;
   name: string;
   address: string;
-  status: 'Active' | 'Closed';
-  assignedStaff: StaffMember[];
-  latitude: string; 
-  longitude: string; 
-  revenue: number; 
-  expenses: number; 
-  memberships: number;
+  latitude: string;
+  longitude: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdById: string; 
+  updatedById: string; 
+  createdAt: string; 
+  updatedAt: string; 
+  assignedStaff?: StaffMember[];
+  revenue?: number; 
+  expenses?: number; 
+  memberships?: number; 
+}
+
+interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
+  updatedById: string;
+  assignedStaff?: any[]; 
+  revenue?: number; 
+  expenses?: number; 
+  memberships?: number; 
 }
 
 interface BranchDetailsDialogProps {
@@ -47,16 +69,18 @@ export function BranchDetailsDialog({
   branch,
   onSave,
 }: BranchDetailsDialogProps) {
+  const { actorId } = useAuthSession(); 
+
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [status, setStatus] = useState<'Active' | 'Closed'>('Active');
+  const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE'); 
 
   useEffect(() => {
     if (!branch) return;
 
     setName(branch.name);
     setAddress(branch.address);
-    setStatus(branch.status);
+    setStatus(branch.status); 
   }, [branch]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -68,6 +92,10 @@ export function BranchDetailsDialog({
       name,
       address,
       status,
+      createdById: branch.createdById || actorId || '', 
+      updatedById: actorId || '', 
+      createdAt: branch.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     onSave(updatedBranch);
@@ -112,11 +140,11 @@ export function BranchDetailsDialog({
                     id="status"
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-background"
                     value={status}
-                    onChange={(e) => setStatus(e.target.value as 'Active' | 'Closed')}
+                    onChange={(e) => setStatus(e.target.value as 'ACTIVE' | 'INACTIVE')}
                     required
                   >
-                    <option value="Active">Active</option>
-                    <option value="Closed">Close</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
                   </select>
                 </div>
               </div>

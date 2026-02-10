@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import { useAuthSession } from '@/lib/auth/auth-session';
 
 interface AddBranchDialogProps {
   onAddBranch: (branch: BranchFormData) => void;
@@ -24,16 +25,19 @@ export interface BranchFormData {
   id: string;
   name: string;
   address: string;
-  status: "Active" | "Closed";
-  assignedStaff: StaffMember[];
-  latitude: string; // Changed from number to string
-  longitude: string; // Changed from number to string
-  revenue: number; // Added revenue property
-  expenses: number; // Added expenses property
-  memberships: number; // Added memberships property
+  latitude: string;
+  longitude: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdById: string;
+  updatedById: string;
+  createdAt: string;
+  updatedAt: string;
+  assignedStaff?: StaffMember[];
 }
 
 export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
+  const { actorId } = useAuthSession();
+  const resolvedActorId = actorId || ''; 
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -74,13 +78,13 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
       id: crypto.randomUUID(),
       name: formData.name,
       address: formData.address,
-      status: formData.status as "Active" | "Closed",
-      assignedStaff: [],
+      status: formData.status as 'ACTIVE' | 'INACTIVE',
       latitude,
       longitude,
-      revenue: 0, // Initialize revenue
-      expenses: 0, // Initialize expenses
-      memberships: 0, // Initialize memberships
+      createdById: resolvedActorId, 
+      updatedById: resolvedActorId, 
+      createdAt: new Date().toISOString(), 
+      updatedAt: new Date().toISOString(),
     };
 
     onAddBranch(newBranch);
@@ -153,13 +157,13 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        status: e.target.value as "Active" | "Maintenance",
+                        status: e.target.value as 'ACTIVE' | 'INACTIVE',
                       }))
                     }
                     required
                   >
-                    <option value="Active">Active</option>
-                    <option value="Close">Close</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
                   </select>
                 </div>
               </CardContent>
