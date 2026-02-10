@@ -39,22 +39,6 @@ export interface BranchFormData {
   memberships?: number; 
 }
 
-interface Branch {
-  id: string;
-  name: string;
-  address: string;
-  latitude: string;
-  longitude: string;
-  status: 'ACTIVE' | 'INACTIVE';
-  createdAt: string;
-  updatedAt: string;
-  createdById: string;
-  updatedById: string;
-  assignedStaff?: any[]; 
-  revenue?: number; 
-  expenses?: number; 
-  memberships?: number; 
-}
 
 interface BranchDetailsDialogProps {
   open: boolean;

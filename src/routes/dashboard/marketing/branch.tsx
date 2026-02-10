@@ -128,17 +128,16 @@ function RouteComponent() {
           ...updatedBranch,
           latitude,
           longitude,
-          status: updatedBranch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE', // Map status for backend
+          status: updatedBranch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE', 
           updatedById: actorId,
           updatedAt: new Date().toISOString(),
         }),
       });
 
       if (!response.ok) throw new Error('Failed to update branch.');
-      refetch(); // Refresh branch data
-      toggleDialog('detailsOpen', false); // Close the dialog
+      refetch();
+      toggleDialog('detailsOpen', false); 
 
-      // Update the map dialog with new coordinates
       if (mapBranch && mapBranch.id === updatedBranch.id) {
         setMapBranch({ ...updatedBranch, latitude, longitude });
       }
