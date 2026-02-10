@@ -57,8 +57,9 @@ function RouteComponent() {
     const currentTimestamp = new Date().toISOString();
     const newBranch = {
       ...branch,
-      createdById: actorId, 
-      updatedById: actorId, 
+      status: branch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE', // Map 'INACTIVE' to 'CLOSED' for backend
+      createdById: actorId,
+      updatedById: actorId,
       createdAt: currentTimestamp,
       updatedAt: currentTimestamp,
     };
