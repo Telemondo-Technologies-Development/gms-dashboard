@@ -93,7 +93,31 @@ function RouteComponent() {
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
       const url = `${base}/api/branch/${updatedBranch.id}`;
       const token = localStorage.getItem('auth_token');
-      
+
+      // Fetch new coordinates based on the updated address
+      const fetchCoordinates = async (address: string) => {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+              address
+            )}&format=json`
+          );
+          const data = await response.json();
+          if (data.length > 0) {
+            return {
+              latitude: data[0].lat,
+              longitude: data[0].lon,
+            };
+          }
+          return { latitude: '0', longitude: '0' };
+        } catch (error) {
+          console.error('Error fetching coordinates:', error);
+          return { latitude: '0', longitude: '0' };
+        }
+      };
+
+      const { latitude, longitude } = await fetchCoordinates(updatedBranch.address);
+
       const response = await fetch(url, {
         method: 'PUT',
         headers: {
@@ -102,13 +126,22 @@ function RouteComponent() {
         },
         body: JSON.stringify({
           ...updatedBranch,
-          updatedById: actorId, 
+          latitude,
+          longitude,
+          status: updatedBranch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE', // Map status for backend
+          updatedById: actorId,
           updatedAt: new Date().toISOString(),
         }),
       });
-  
+
       if (!response.ok) throw new Error('Failed to update branch.');
-      refetch(); 
+      refetch(); // Refresh branch data
+      toggleDialog('detailsOpen', false); // Close the dialog
+
+      // Update the map dialog with new coordinates
+      if (mapBranch && mapBranch.id === updatedBranch.id) {
+        setMapBranch({ ...updatedBranch, latitude, longitude });
+      }
     } catch (error) {
       console.error(error);
       alert('Failed to update branch.');
