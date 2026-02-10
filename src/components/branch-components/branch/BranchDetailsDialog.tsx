@@ -27,8 +27,8 @@ export interface BranchFormData {
   address: string;
   status: 'Active' | 'Closed';
   assignedStaff: StaffMember[];
-  latitude: number; 
-  longitude: number;
+  latitude: string; 
+  longitude: string; 
   revenue: number; 
   expenses: number; 
   memberships: number;

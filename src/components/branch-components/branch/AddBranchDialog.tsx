@@ -26,8 +26,8 @@ export interface BranchFormData {
   address: string;
   status: "Active" | "Closed";
   assignedStaff: StaffMember[];
-  latitude: number;
-  longitude: number;
+  latitude: string; // Changed from number to string
+  longitude: string; // Changed from number to string
   revenue: number; // Added revenue property
   expenses: number; // Added expenses property
   memberships: number; // Added memberships property
@@ -57,14 +57,14 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
         const data = await response.json();
         if (data.length > 0) {
           return {
-            latitude: parseFloat(data[0].lat),
-            longitude: parseFloat(data[0].lon),
+            latitude: data[0].lat,
+            longitude: data[0].lon,
           };
         }
-        return { latitude: 0, longitude: 0 };
+        return { latitude: "0", longitude: "0" };
       } catch (error) {
         console.error("Error fetching coordinates:", error);
-        return { latitude: 0, longitude: 0 };
+        return { latitude: "0", longitude: "0" };
       }
     };
 

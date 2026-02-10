@@ -15,12 +15,12 @@ export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
 });
 
-// TYPES
+
 interface Branch {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  latitude: string; 
+  longitude: string; 
   address: string;
   created_by: string;
   updated_by: string;
@@ -142,7 +142,6 @@ function RouteComponent() {
     : null;
 
   function handleUpdateStaff(newStaff: StaffMember[]): void {
-    // This should ideally be an API call, then refetch()
     console.log("Updating staff for branch:", activeBranchForStaff?.name, newStaff);
     refetch();
   }
@@ -209,8 +208,8 @@ function RouteComponent() {
       <MapDialog
         open={dialogState.mapDialogOpen}
         onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
-        latitude={mapBranch?.latitude || 0}
-        longitude={mapBranch?.longitude || 0}
+        latitude={mapBranch?.latitude || '0'} // Changed default to string
+        longitude={mapBranch?.longitude || '0'} // Changed default to string
         address={mapBranch?.address || ''}
       />
   

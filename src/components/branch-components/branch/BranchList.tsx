@@ -9,6 +9,8 @@ interface BranchListProps {
     name: string;
     address: string;
     status: string;
+    latitude: string; 
+    longitude: string; 
   }[];
   onSelectBranch: (id: string) => void;
   onToggleDialog: (dialog: 'detailsOpen' | 'staffDialogOpen' | 'mapDialogOpen' | 'confirmDialogOpen', value: boolean) => void;

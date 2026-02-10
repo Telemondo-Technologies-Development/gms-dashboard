@@ -6,8 +6,8 @@ import 'leaflet-defaulticon-compatibility';
 interface MapDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  latitude: number;
-  longitude: number;
+  latitude: string; // Changed from number to string
+  longitude: string; // Changed from number to string
   address: string;
 }
 
@@ -20,7 +20,7 @@ export function MapDialog({ open, onOpenChange, latitude, longitude, address }: 
         </DialogHeader>
         <div className="h-[300px] w-full">
           <MapContainer
-            center={[latitude, longitude]}
+            center={[parseFloat(latitude), parseFloat(longitude)]} // Parsing string to number
             zoom={15}
             style={{ height: '100%', width: '100%' }}
           >
@@ -28,7 +28,7 @@ export function MapDialog({ open, onOpenChange, latitude, longitude, address }: 
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors'
             />
-            <Marker position={[latitude, longitude]} />
+            <Marker position={[parseFloat(latitude), parseFloat(longitude)]} /> // Parsing string to number
           </MapContainer>
         </div>
         <p className="text-center mt-4 text-sm text-muted-foreground">{address}</p>
