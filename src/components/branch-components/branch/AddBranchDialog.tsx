@@ -7,10 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogD
 import { Plus } from "lucide-react";
 import { useAuthSession } from '@/lib/auth/auth-session';
 
-interface AddBranchDialogProps {
-  onAddBranch: (branch: BranchFormData) => void;
-}
-
 export interface StaffMember {
   id: string;
   name: string;
@@ -35,18 +31,29 @@ export interface BranchFormData {
   assignedStaff?: StaffMember[];
 }
 
+
+interface AddBranchDialogProps {
+  onAddBranch: (branch: BranchFormData) => Promise<void>;
+}
+
 export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
   const { actorId } = useAuthSession();
   const resolvedActorId = actorId || ''; 
-  const [formData, setFormData] = useState({
+  // Removed unused addBranch declaration
+  const [formData, setFormData] = useState<{
+    name: string;
+    address: string;
+    status: 'ACTIVE' | 'INACTIVE';
+  }>({
     name: "",
     address: "",
-    status: "Active",
+    status: "ACTIVE",
   });
 
   const resetForm = () => {
-    setFormData({ name: "", address: "", status: "Active" });
+    setFormData({ name: "", address: "", status: "ACTIVE" });
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,15 +88,20 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
       status: formData.status as 'ACTIVE' | 'INACTIVE',
       latitude,
       longitude,
-      createdById: resolvedActorId, 
-      updatedById: resolvedActorId, 
-      createdAt: new Date().toISOString(), 
+      createdById: resolvedActorId,
+      updatedById: resolvedActorId,
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    onAddBranch(newBranch);
-    resetForm();
-    setOpen(false);
+    try {
+      await onAddBranch(newBranch);
+      resetForm();
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add branch:", error);
+      alert("Failed to add branch. Please try again.");
+    }
   };
   const [open, setOpen] = useState(false);
   return (
