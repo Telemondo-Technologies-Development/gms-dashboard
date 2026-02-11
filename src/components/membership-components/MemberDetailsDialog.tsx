@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cn } from '@/lib/utils'
-import type { MemberFormData, MemberInfo } from '@/types/membership/memberSchemas'
+import type { MemberInfo } from '@/types/membership/memberSchemas'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar } from '@/components/ui/calendar'
@@ -27,7 +27,7 @@ import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAuthSession } from '@/lib/auth/auth-session'
 import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
 import { AddBillingDialog } from './AddBillingForm'
-import { useMemberDetailsDialogData } from '@/hooks/membership/useMemberDetailsDialogData'
+import { useMemberDetailsDialogData } from '@/hooks/membership/useMemberDetailsData'
 import { isAdminToken } from '@/lib/auth/auth-permissions'
 import { useBillingActions } from '@/hooks/billing/useBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
@@ -38,11 +38,8 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
   const [members, setMembers] = useState<MemberInfo[]>([])
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [documents, setDocuments] = useState<File[]>([])
-
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState('')
   const [paymentMethodId, setPaymentMethodId] = useState('')
-  const [paymentMethodName, setPaymentMethodName] = useState('')
   const [membershipDetails, setMembershipDetails] = useState('')
   const [currentMemberSubscriptionId, setCurrentMemberSubscriptionId] = useState<string | undefined>(undefined)
   
@@ -76,8 +73,6 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
     setMembers(memberGroup.members)
     setStartDate(memberGroup.startDate)
     setEndDate(memberGroup.endDate)
-    setDocuments(memberGroup.documents)
-    setPaymentMethodName(memberGroup.paymentMethod)
     setPaymentMethodId('')
     setMembershipDetails(memberGroup.membershipDetails)
     
@@ -452,12 +447,12 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                 <AddBillingDialog
                   selectedSubscription={selectedSubscription}
                   paymentMethodId={paymentMethodId}
-                  onPaymentMethodChange={(id, name) => {
+                  onPaymentMethodChange={(id) => {
                     setPaymentMethodId(id)
-                    setPaymentMethodName(name)
                   }}
                   totalCost={totalCost}
                   disabled={!canEditBilling}
+                  createdById={session.actorId ?? null}
                 />
               </div>
             </div>

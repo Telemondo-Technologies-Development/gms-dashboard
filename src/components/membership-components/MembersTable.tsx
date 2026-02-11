@@ -2,7 +2,7 @@
 import { format } from 'date-fns'
 import { Search, Calendar, RefreshCw, Loader2 } from 'lucide-react'
 
-import { useMembersData } from '@/hooks/membership/useMembersData'
+import { useMembersData } from '@/hooks/membership/useMembers'
 import { AddMemberDialog } from '@/components/membership-components/AddMemberDialog'
 import type { MemberFormData } from '@/types/membership/memberSchemas'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'

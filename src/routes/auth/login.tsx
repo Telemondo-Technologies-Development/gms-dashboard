@@ -47,7 +47,7 @@ function RouteComponent() {
   return (
     <div className="flex h-screen w-full">
       {/* Left Container - Branding/Hero */}
-      <div className="hidden lg:flex flex-1 items-center justify-center bg-linear-to-r from-primary to-secondary border-r">
+      <div className="hidden lg:flex flex-1 items-center justify-center bg-gradient-to-r from-[#000080] to-[#00bfff] border-r">
         <div className="flex flex-col items-center space-y-6 text-center p-10 ">
           <div className=" ">
             <Dumbbell className="h-20 w-20 text-background" />
