@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'; 
-import { useMembersData } from '@/hooks/membership/useMembersData';
+import { useMembersData } from '@/hooks/membership/useMembers';
 import { useBranches } from '@/hooks/branch/useBranches';
 
 
