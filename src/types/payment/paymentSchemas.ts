@@ -62,6 +62,13 @@ export const paymentMethodTableDTOSchema = z.object({
 
 export type PaymentMethodTableDTOParsed = z.infer<typeof paymentMethodTableDTOSchema>
 
+export const paymentMethodPostSchema = z.object({
+	createdById: z.string().min(1),
+	name: z.string().min(1),
+})
+
+export type PaymentMethodPostInput = z.infer<typeof paymentMethodPostSchema>
+
 const apiErrorSchema = z
 	.object({
 		message: z.string().optional(),
@@ -92,6 +99,15 @@ export type ApiResponsePaymentTableDTOParsed = z.infer<typeof apiResponsePayment
 
 export const apiResponseListPaymentMethodTableDTOSchema = z.object({
 	data: z.array(paymentMethodTableDTOSchema).optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export const apiResponsePaymentMethodTableDTOSchema = z.object({
+	data: paymentMethodTableDTOSchema.optional(),
 	errors: z.array(apiErrorSchema).optional(),
 	message: z.string().optional(),
 	meta: pageMetadataSchema.optional(),
