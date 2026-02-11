@@ -12,6 +12,8 @@ All URIs are relative to *http://localhost:8080*
 | [**uploadMaintenanceRecord**](ObjectStorageApi.md#uploadmaintenancerecord) | **POST** /api/storage/upload/asset/maintenance | (private) |
 | [**uploadPaymentMethodDoc**](ObjectStorageApi.md#uploadpaymentmethoddoc) | **POST** /api/storage/upload/payment-method/doc | (private) |
 | [**uploadReportAttachment**](ObjectStorageApi.md#uploadreportattachment) | **POST** /api/storage/upload/report/attachment | (private) |
+| [**uploadSupplyLogAttachment**](ObjectStorageApi.md#uploadsupplylogattachment) | **POST** /api/storage/upload/supply/log | (private) |
+| [**uploadSupplyPhoto**](ObjectStorageApi.md#uploadsupplyphoto) | **POST** /api/storage/upload/supply/document | (private) |
 
 
 
@@ -505,6 +507,136 @@ async function example() {
 
   try {
     const data = await api.uploadReportAttachment(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **uploadBranchLogoRequest** | [UploadBranchLogoRequest](UploadBranchLogoRequest.md) |  | [Optional] |
+
+### Return type
+
+[**ApiResponseObjectStorage**](ApiResponseObjectStorage.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## uploadSupplyLogAttachment
+
+> ApiResponseObjectStorage uploadSupplyLogAttachment(uploadBranchLogoRequest)
+
+(private)
+
+### Example
+
+```ts
+import {
+  Configuration,
+  ObjectStorageApi,
+} from '';
+import type { UploadSupplyLogAttachmentRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new ObjectStorageApi();
+
+  const body = {
+    // UploadBranchLogoRequest (optional)
+    uploadBranchLogoRequest: ...,
+  } satisfies UploadSupplyLogAttachmentRequest;
+
+  try {
+    const data = await api.uploadSupplyLogAttachment(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **uploadBranchLogoRequest** | [UploadBranchLogoRequest](UploadBranchLogoRequest.md) |  | [Optional] |
+
+### Return type
+
+[**ApiResponseObjectStorage**](ApiResponseObjectStorage.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## uploadSupplyPhoto
+
+> ApiResponseObjectStorage uploadSupplyPhoto(uploadBranchLogoRequest)
+
+(private)
+
+### Example
+
+```ts
+import {
+  Configuration,
+  ObjectStorageApi,
+} from '';
+import type { UploadSupplyPhotoRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new ObjectStorageApi();
+
+  const body = {
+    // UploadBranchLogoRequest (optional)
+    uploadBranchLogoRequest: ...,
+  } satisfies UploadSupplyPhotoRequest;
+
+  try {
+    const data = await api.uploadSupplyPhoto(body);
     console.log(data);
   } catch (error) {
     console.error(error);

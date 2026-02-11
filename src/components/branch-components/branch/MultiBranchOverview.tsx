@@ -8,6 +8,8 @@ interface MultiBranchOverviewProps {
     revenue: number;
     expenses: number;
     memberships: number;
+    latitude: string; 
+    longitude: string; 
   }[];
 }
 

@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { TabsContent } from '@/components/ui/tabs'
+// TabsContent removed — this component no longer relies on tabs
 import type { EmployeeTableDTO } from '@/api/generated/models'
 
 export interface EmployeeTabProps {
@@ -32,8 +32,7 @@ export function EmployeeTab({
   onEdit,
 }: EmployeeTabProps) {
   return (
-    <TabsContent value="employees">
-      <div className="rounded-md border bg-card">
+    <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -41,14 +40,13 @@ export function EmployeeTab({
               <TableHead>Name</TableHead>
               <TableHead>Contact</TableHead>
               <TableHead>Role / Status</TableHead>
-              <TableHead>Salary (Est)</TableHead>
-              <TableHead>Resume</TableHead>
+              <TableHead className="w-24">Has Login</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loadingEmployees ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   <div className="flex justify-center items-center gap-2">
                     <Loader2 className="h-6 w-6 animate-spin" /> Loading...
                   </div>
@@ -56,7 +54,7 @@ export function EmployeeTab({
               </TableRow>
             ) : filteredEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   {normalizedSearch
                     ? 'No matching employees found.'
                     : 'No employees found.'}
@@ -80,6 +78,7 @@ export function EmployeeTab({
                       </AvatarFallback>
                     </Avatar>
                   </TableCell>
+
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="font-medium">
@@ -98,18 +97,18 @@ export function EmployeeTab({
                       {employee.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>$45,000</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" className="h-8">
-                      <FileText className="h-4 w-4 mr-1" /> View
-                    </Button>
-                  </TableCell>
+                    {employee.user && employee.user.email ? (
+                      <Badge variant="secondary">Yes</Badge>
+                    ) : (
+                      <Badge variant="outline">No</Badge>
+                    )}
+                  </TableCell>                  
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
-    </TabsContent>
   )
 }

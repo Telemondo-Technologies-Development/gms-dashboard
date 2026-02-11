@@ -1,351 +1,100 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useMemo, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
-import { AddMemberDialog } from '@/components/membership-components/AddMemberDialog'
-import type {  MemberFormData, MemberInfo } from '@/types/membership/memberSchemas'
+import { format } from 'date-fns'
+import { Search, QrCode, Fingerprint, UserCheck, Clock } from 'lucide-react'
+
+import type { MemberFormData, MemberInfo, AttendanceRecord, MembershipSearchForm } from '@/types/membership/memberSchemas'
+import MembersTable from '@/components/membership-components/MembersTable'
 import { MemberDetailsDialog } from '@/components/membership-components/MemberDetailsDialog'
+import { useMembersData } from '@/hooks/membership/useMembersData'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Search, Mail, Phone, Calendar, QrCode, Fingerprint, UserCheck, Clock, RefreshCw, Loader2 } from 'lucide-react'
-import { format } from 'date-fns'
-import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
-import type { AttendanceRecord } from '@/types/membership/memberSchemas'
-import type { MembershipSearchForm } from '@/types/membership/memberSchemas'
 import { Label } from '@/components/ui/label'
-
 
 export const Route = createFileRoute('/dashboard/marketing/membership')({
   component: MembershipRoute,
 })
 
-const MEMBER_QUERY_KEYS = {
-  members: 'members',
-}
-
-
-async function fetchMembersFromApi() {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-  const url = `${base}/api/member`
-
-  const token = localStorage.getItem('auth_token')
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    credentials: 'include',
-  })
-
-  const rawText = await response.text().catch(() => '')
-  if (!response.ok) {
-    throw new Error(`Failed to load members (${response.status}). ${rawText || 'Check server logs for details.'}`)
-  }
-
-  const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
-  const envelope = apiResponseListMemberTableSchema.parse(parsedJson)
-  if (!envelope.success) {
-    throw new Error(envelope.message ?? 'Failed to load members.')
-  }
-  return envelope.data
-}
-
 function MembershipRoute() {
-  const [members, setMembers] = useState<MemberFormData[]>([])
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
   const [detailsOpen, setDetailsOpen] = useState(false)
-  const [selectedMemberGroupId, setSelectedMemberGroupId] = useState<string | null>(null)
+  const [selectedMemberGroupSnapshot, setSelectedMemberGroupSnapshot] = useState<MemberFormData | null>(null)
+
+  // Use the shared hook - no need for local members state
+  const { enrichedMembers, isLoading } = useMembersData()
 
   const form = useForm<MembershipSearchForm>({
     defaultValues: { searchQuery: '', attendanceSearch: '' },
   })
 
-  const searchQuery = form.watch('searchQuery')
   const attendanceSearch = form.watch('attendanceSearch')
 
-  const membersQuery = useQuery({
-    queryKey: [MEMBER_QUERY_KEYS.members],
-    queryFn: fetchMembersFromApi,
-  })
-
-  const mappedApiMembers = useMemo<MemberFormData[]>(() => {
-    const apiMembers = membersQuery.data ?? []
-    return apiMembers.map((m) => {
-      const fullName = [m.firstName, m.middleName, m.surname, m.suffix].filter(Boolean).join(' ')
-      return {
-        id: m.id,
-        actorId: m.actorId ?? null,
-        members: [
-          {
-            id: m.id,
-            firstName: m.firstName,
-            middleName: m.middleName ?? null,
-            surname: m.surname,
-            suffix: m.suffix ?? null,
-            status: m.status ?? null,
-            name: fullName || 'Unknown',
-            email: '',
-            phone: '',
-          },
-        ],
-        startDate: undefined,
-        endDate: undefined,
-        membershipType: 'Member',
-        membershipDuration: '',
-        billingAmount: '',
-        billingCycle: '',
-        paymentMethod: '',
-        membershipDetails: `Status: ${m.status}`,
-        documents: [],
+  // Memoize attendance marking handler
+  const handleMarkAttendance = useCallback(
+    (memberGroup: MemberFormData, memberInfo: MemberInfo, method: 'qr' | 'fingerprint' | 'manual') => {
+      const newRecord: AttendanceRecord = {
+        id: crypto.randomUUID(),
+        memberId: memberInfo.id,
+        memberName: memberInfo.name,
+        membershipType: memberGroup.membershipType,
+        checkInTime: new Date(),
+        checkInMethod: method,
       }
-    })
-  }, [membersQuery.data])
-
-  useEffect(() => {
-    // If this page is still empty, hydrate from API.
-    if (members.length === 0 && mappedApiMembers.length > 0) {
-      setMembers(mappedApiMembers)
-    }
-  }, [mappedApiMembers, members.length])
-
-  const handleAddMember = (member: MemberFormData) => {
-    setMembers(prev => [member, ...prev])
-  }
-
-  const handleMarkAttendance = (
-    memberGroup: MemberFormData,
-    memberInfo: MemberInfo,
-    method: 'qr' | 'fingerprint' | 'manual',
-  ) => {
-    const newRecord: AttendanceRecord = {
-      id: crypto.randomUUID(),
-      memberId: memberInfo.id,
-      memberName: memberInfo.name,
-      membershipType: memberGroup.membershipType,
-      checkInTime: new Date(),
-      checkInMethod: method,
-    }
-    setAttendanceRecords(prev => [newRecord, ...prev])
-    form.setValue('attendanceSearch', '')
-  }
-
-  const filteredMembers = members.filter(memberGroup =>
-    memberGroup.members.some(m =>
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.email ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.phone ?? '').includes(searchQuery)
-    ) ||
-    memberGroup.membershipType.toLowerCase().includes(searchQuery.toLowerCase())
+      setAttendanceRecords((prev) => [newRecord, ...prev])
+      form.setValue('attendanceSearch', '')
+    },
+    [form]
   )
 
-  const selectedMemberGroup = selectedMemberGroupId
-    ? members.find((m) => m.id === selectedMemberGroupId) ?? null
-    : null
-
-  const filteredAttendanceMembers = members.filter(memberGroup =>
-    memberGroup.members.some(m =>
-      m.name.toLowerCase().includes(attendanceSearch.toLowerCase()) ||
-      (m.email ?? '').toLowerCase().includes(attendanceSearch.toLowerCase()) ||
-      (m.phone ?? '').includes(attendanceSearch)
-    )
-  )
-
-  const todayAttendance = attendanceRecords.filter(record => {
-    const today = new Date()
-    const recordDate = new Date(record.checkInTime)
-    return recordDate.toDateString() === today.toDateString()
-  })
-
-  const getMembershipStatusBadge = (endDate: Date | undefined) => {
-    if (!endDate) return <Badge variant="secondary">No Date</Badge>
-    
-    const today = new Date()
-    const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-    
-    if (daysUntilExpiry < 0) {
-      return <Badge variant="destructive">Expired</Badge>
-    } else if (daysUntilExpiry <= 7) {
-      return <Badge variant="destructive">Expiring Soon</Badge>
-    } else if (daysUntilExpiry <= 30) {
-      return <Badge variant="outline">Ending Soon</Badge>
-    } else {
-      return <Badge variant="default">Active</Badge>
+  // Memoize icon getter
+  const getCheckInMethodIcon = useCallback((method: 'qr' | 'fingerprint' | 'manual') => {
+    const icons = {
+      qr: <QrCode className="h-4 w-4 text-blue-500" />,
+      fingerprint: <Fingerprint className="h-4 w-4 text-purple-500" />,
+      manual: <UserCheck className="h-4 w-4 text-green-500" />,
     }
-  }
+    return icons[method]
+  }, [])
 
-  const getCheckInMethodIcon = (method: 'qr' | 'fingerprint' | 'manual') => {
-    switch (method) {
-      case 'qr':
-        return <QrCode className="h-4 w-4 text-blue-500" />
-      case 'fingerprint':
-        return <Fingerprint className="h-4 w-4 text-purple-500" />
-      case 'manual':
-        return <UserCheck className="h-4 w-4 text-green-500" />
-    }
-  }
+  // Memoize filtered search results
+  const searchResults = useMemo(() => {
+    if (!attendanceSearch) return []
+
+    const query = attendanceSearch.toLowerCase()
+    return enrichedMembers
+      .map((memberGroup) => {
+        const matches = memberGroup.members.filter(
+          (m) =>
+            m.name.toLowerCase().includes(query) ||
+            (m.email ?? '').toLowerCase().includes(query) ||
+            (m.phone ?? '').includes(query)
+        )
+        return matches.length > 0 ? { memberGroup, matches } : null
+      })
+      .filter(Boolean)
+      .slice(0, 5)
+  }, [attendanceSearch, enrichedMembers])
+
+  // Memoize today's attendance
+  const todayAttendance = useMemo(() => {
+    const today = new Date().toDateString()
+    return attendanceRecords.filter((record) => new Date(record.checkInTime).toDateString() === today)
+  }, [attendanceRecords])
 
   return (
-    <div className="space-y-6"> 
-      <div className="flex items-center justify-between">
-        <div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => membersQuery.refetch()}
-            disabled={membersQuery.isFetching}
-          >
-            {membersQuery.isFetching ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-          </Button>
-          <AddMemberDialog onAddMember={handleAddMember} />
-        </div>
-      </div>
-
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-primary">Membership Management</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Members Card */}
-        <Card className="flex flex-col">
-            <CardHeader>
-              <CardTitle>Members</CardTitle>
-              <CardDescription>
-                {members.length} {members.length === 1 ? 'member' : 'members'} registered
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name, email, phone, or membership type..."
-                    {...form.register('searchQuery')}
-                    className="pl-9 rounded-2xl"
-                  />
-                </div>
-              </div>
-
-              {membersQuery.error && (
-                <div className="mb-4 text-sm text-destructive" role="alert">
-                  {membersQuery.error instanceof Error ? membersQuery.error.message : 'Failed to load members.'}
-                </div>
-              )}
-
-              <Label className="text-xs text-muted-foreground mb-3">Tip: Click a row to view/edit full details and billing.</Label>
-
-              {filteredMembers.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    {members.length === 0 
-                      ? 'No members registered yet. Add your first member to get started.' 
-                      : 'No members found matching your search.'}
-                  </p>
-                </div>
-              ) : (
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[30%]">Name</TableHead>
-                        <TableHead className="w-[30%]">Contact</TableHead>
-                        <TableHead className="w-[25%]">Duration</TableHead>
-                        <TableHead className="w-[15%]">Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredMembers.map((memberGroup) => (
-                        <TableRow
-                          key={memberGroup.id}
-                          role="button"
-                          tabIndex={0}
-                          className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => {
-                            setSelectedMemberGroupId(memberGroup.id)
-                            setDetailsOpen(true)
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault()
-                              setSelectedMemberGroupId(memberGroup.id)
-                              setDetailsOpen(true)
-                            }
-                          }}
-                        >
-                          <TableCell>
-                            <div className="space-y-1">
-                              {memberGroup.members.map((member, idx) => (
-                                <div key={idx} className="font-medium">
-                                  {member.name}
-                                  {memberGroup.members.length > 1 && (
-                                    <Badge variant="outline" className="ml-2 text-xs">
-                                      {idx + 1}/{memberGroup.members.length}
-                                    </Badge>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-2 min-w-0">
-                              {memberGroup.members.map((member, idx) => (
-                                <div key={idx} className="flex flex-col gap-1 text-sm min-w-0">
-                                  <div className="flex items-center gap-2 text-muted-foreground">
-                                    <Mail className="h-3 w-3" />
-                                    <span className="truncate">{member.email}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-muted-foreground">
-                                    <Phone className="h-3 w-3" />
-                                    <span className="truncate">{member.phone}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1 text-sm">
-                              {memberGroup.startDate && (
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                  <Calendar className="h-3 w-3" />
-                                  {format(memberGroup.startDate, 'MMM dd, yyyy')}
-                                </div>
-                              )}
-                              {memberGroup.endDate && (
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                  <Calendar className="h-3 w-3" />
-                                  {format(memberGroup.endDate, 'MMM dd, yyyy')}
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {getMembershipStatusBadge(memberGroup.endDate)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-        <MemberDetailsDialog
-          open={detailsOpen}
-          onOpenChange={(open) => {
-            setDetailsOpen(open)
-            if (!open) setSelectedMemberGroupId(null)
+        <MembersTable
+          onSelectMember={(memberGroup) => {
+            setSelectedMemberGroupSnapshot(memberGroup)
+            setDetailsOpen(true)
           }}
-          memberGroup={selectedMemberGroup}
-          onSave={(updated) => {
-            setMembers((prev) => prev.map((m) => (m.id === updated.id ? updated : m)))
-          }}
+          pageSize={8}
         />
 
         {/* Attendance Card */}
@@ -377,55 +126,46 @@ function MembershipRoute() {
                   />
                 </div>
 
-                {attendanceSearch && filteredAttendanceMembers.length > 0 && (
+                {attendanceSearch && (
                   <div className="border rounded-lg max-h-60 overflow-y-auto divide-y">
-                    {filteredAttendanceMembers.slice(0, 5).map((memberGroup) => {
-                      const query = attendanceSearch.toLowerCase()
-                      const matches = memberGroup.members.filter((m) => {
+                    {searchResults.length === 0 ? (
+                      <div className="p-3 text-sm text-muted-foreground">No members found.</div>
+                    ) : (
+                      searchResults.map((result) => {
+                        if (!result) return null
+                        const { memberGroup, matches } = result
                         return (
-                          m.name.toLowerCase().includes(query) ||
-                          (m.email ?? '').toLowerCase().includes(query) ||
-                          (m.phone ?? '').includes(attendanceSearch)
+                          <div key={memberGroup.id} className="p-3">
+                            <div className="text-sm font-medium text-muted-foreground mb-2">
+                              {memberGroup.membershipType}
+                            </div>
+                            <div className="space-y-2">
+                              {matches.map((member) => (
+                                <div
+                                  key={member.id}
+                                  className="p-2 rounded-md flex hover:bg-muted/50 items-center justify-between"
+                                >
+                                  <div>
+                                    <div className="font-medium">{member.name}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {member.email} • {member.phone}
+                                    </div>
+                                  </div>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => handleMarkAttendance(memberGroup, member, 'manual')}
+                                  >
+                                    Check In
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         )
                       })
-
-                      if (matches.length === 0) return null
-
-                      return (
-                        <div key={memberGroup.id} className="p-3">
-                          <div className="text-sm font-medium text-muted-foreground mb-2">
-                            Group: {memberGroup.membershipType}
-                          </div>
-                          <div className="space-y-2">
-                            {matches.map((member) => (
-                              <div
-                                key={member.id}
-                                className="p-2 rounded-md flex hover:bg-surface-container-low items-center justify-between"
-                              >
-                                <div>
-                                  <div className="font-medium">{member.name}</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {member.email} • {member.phone}
-                                  </div>
-                                </div>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  onClick={() => handleMarkAttendance(memberGroup, member, 'manual')}
-                                >
-                                  Check In
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )
-                    })}
+                    )}
                   </div>
-                )}
-
-                {attendanceSearch && filteredAttendanceMembers.length === 0 && (
-                  <div className="text-sm text-muted-foreground">No members found.</div>
                 )}
               </div>
             </CardContent>
@@ -487,6 +227,14 @@ function MembershipRoute() {
           </Card>
         </div>
       </div>
+      <MemberDetailsDialog
+        open={detailsOpen}
+        onOpenChange={(open) => {
+          setDetailsOpen(open)
+          if (!open) setSelectedMemberGroupSnapshot(null)
+        }}
+        memberGroup={selectedMemberGroupSnapshot}
+      />
     </div>
   )
 }

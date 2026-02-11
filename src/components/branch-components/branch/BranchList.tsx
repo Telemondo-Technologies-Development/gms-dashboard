@@ -3,18 +3,27 @@ import { Card } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { MapPin, MoreVertical } from 'lucide-react';
 
+interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
+  updatedById: string;
+  assignedStaff?: any[]; 
+}
+
 interface BranchListProps {
-  branches: {
-    id: string;
-    name: string;
-    address: string;
-    status: string;
-  }[];
+  branches: Branch[];
   onSelectBranch: (id: string) => void;
   onToggleDialog: (dialog: 'detailsOpen' | 'staffDialogOpen' | 'mapDialogOpen' | 'confirmDialogOpen', value: boolean) => void;
-  onSetMapBranch: (branch: any) => void;
-  onSetBranchToRemove: (branch: any) => void;
-  onSetActiveBranchForStaff: (branch: any) => void;
+  onSetMapBranch: (branch: Branch) => void;
+  onSetBranchToRemove: (branch: Branch) => void;
+  onSetActiveBranchForStaff: (branch: Branch) => void;
 }
 
 export const BranchList: React.FC<BranchListProps> = ({
@@ -40,7 +49,7 @@ export const BranchList: React.FC<BranchListProps> = ({
               <div>
                 <span
                   className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded ${
-                    branch.status === 'Active'
+                    branch.status === 'ACTIVE'
                       ? 'text-emerald-600 bg-emerald-50'
                       : 'text-yellow-600 bg-yellow-50'
                   }`}

@@ -2,15 +2,23 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { useMemo, useState } from 'react'
 import { useForm } from '@tanstack/react-form'
+import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { AlertTriangle, CalendarIcon, CheckCircle2, Clock, Receipt, Search, XCircle } from 'lucide-react'
 
-import { usePayment, usePaymentMethods, usePayments } from '@/hooks/usePaymentHistory'
+import { usePayments, usePayment } from '@/hooks/billing/usePayments'
+import { usePaymentMethods } from '@/hooks/billing/usePaymentMethods'
+import { useInvoices } from '@/hooks/billing/useInvoices'
+import { getAuthenticatedApi } from '@/lib/api-client'
+import { MemberApi } from '@/api/generated/apis/MemberApi'
+import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
+import type { MemberTableData } from '@/types/membership/memberSchemas'
 import {
   paymentHistoryFiltersSchema,
   type PaymentHistoryFilters,
   type PaymentMethodTableDTOParsed,
   type PaymentTableDTOParsed,
+  type InvoiceTableDTOParsed,
 } from '@/types/payment/paymentSchemas'
 
 import { PaymentDetailsDialog } from '@/components/payment-components/PaymentDetailsDialog'
@@ -32,6 +40,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+
+
 
 export const Route = createFileRoute('/dashboard/billing/payment-history')({
   component: PaymentHistoryRoute,
@@ -111,16 +122,49 @@ function PaymentHistoryRoute() {
     },
   })
 
-  const {
-    data: payments = [],
-    isLoading: paymentsLoading,
-    error: paymentsError,
-  } = usePayments(0, 200)
+  const paymentsQuery = usePayments(0, 200)
+  const payments = paymentsQuery.data ?? []
+  const paymentsLoading = paymentsQuery.isLoading
+  const paymentsError = paymentsQuery.error
 
-  const {
-    data: paymentMethods = [],
-    isLoading: methodsLoading,
-  } = usePaymentMethods(0, 200)
+  const membersQuery = useQuery<MemberTableData[]>({
+    queryKey: ['payment-history-members'],
+    queryFn: async () => {
+      const api = getAuthenticatedApi(MemberApi)
+      const resp = await api.getAllMembers({ pageable: { page: 0, size: 1000 } })
+      const parsed = apiResponseListMemberTableSchema.parse(resp)
+      return parsed.data ?? []
+    },
+    staleTime: 60000,
+  })
+
+  const members = membersQuery.data ?? []
+  const membersLoading = membersQuery.isLoading
+
+  const methodsQuery = usePaymentMethods(0, 200)
+  const paymentMethods = methodsQuery.data ?? []
+  const methodsLoading = methodsQuery.isLoading
+
+  const invoicesQuery = useInvoices(0, 500)
+  const invoices = invoicesQuery.data ?? []
+  const invoicesLoading = invoicesQuery.isLoading
+  const invoicesError = invoicesQuery.error
+
+  const invoiceById = useMemo(() => {
+    const map = new Map<string, InvoiceTableDTOParsed>()
+    for (const inv of invoices) map.set(inv.id, inv)
+    return map
+  }, [invoices])
+
+  const memberNameByActorId = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const m of members) {
+      if (!m.actorId) continue
+      const fullName = [m.firstName, m.middleName, m.surname, m.suffix].filter(Boolean).join(' ')
+      map.set(m.actorId, fullName || 'Unknown')
+    }
+    return map
+  }, [members])
 
   const paymentMethodById = useMemo(() => {
     const map = new Map<string, PaymentMethodTableDTOParsed>()
@@ -137,71 +181,64 @@ function PaymentHistoryRoute() {
   }, [paymentQuery.data, payments, selectedPaymentId])
 
   const selectedPaymentLoading = !!selectedPaymentId && paymentQuery.isLoading && !selectedPayment
-  const selectedPaymentError =
-    paymentQuery.error instanceof Error ? paymentQuery.error.message : paymentQuery.error ? 'Failed to load payment.' : undefined
+  const selectedPaymentError = paymentQuery.error instanceof Error ? paymentQuery.error.message : undefined
+
+  const filterPayments = (filters: PaymentHistoryFilters) => {
+    const q = filters.query.trim().toLowerCase()
+    const from = filters.fromDate ? new Date(filters.fromDate) : null
+    const to = filters.toDate ? new Date(filters.toDate) : null
+
+    return payments.filter((p) => {
+      const st = mapDisplayStatus(p)
+      if (filters.status !== 'all' && st !== filters.status) return false
+
+      if (q) {
+        const methodName = paymentMethodById.get(p.paymentMethodId)?.name ?? ''
+        const invoice = invoiceById.get(p.invoiceId)
+        const memberName = invoice?.actorId ? memberNameByActorId.get(invoice.actorId) ?? '' : ''
+        const haystack = `${p.id} ${p.invoiceId} ${methodName} ${p.status} ${p.failureReason ?? ''} ${memberName}`.toLowerCase()
+        if (!haystack.includes(q)) return false
+      }
+
+      const date = p.paidAt ? new Date(p.paidAt) : null
+      if (from && date && date < from) return false
+      if (to && date && date > to) return false
+      return true
+    })
+  }
 
   const totals = useMemo(() => {
-    const totalsByStatus: Record<DisplayStatus, number> = {
-      paid: 0,
-      failed: 0,
-      pending: 0,
-    }
-
+    const totalsByStatus: Record<DisplayStatus, number> = { paid: 0, failed: 0, pending: 0 }
     for (const p of payments) {
-      const st = mapDisplayStatus(p)
-      totalsByStatus[st] += p.amount
+      totalsByStatus[mapDisplayStatus(p)] += p.amount
     }
-
     return totalsByStatus
   }, [payments])
 
   if (paymentsError) {
     return (
       <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-        {paymentsError instanceof Error
-          ? paymentsError.message
-          : 'Failed to load payment history'}
+        {paymentsError instanceof Error ? paymentsError.message : 'Failed to load payments'}
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <h1 className="text-2xl font-bold text-primary">Payment and Billing History Management</h1>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader>
             <form.Subscribe selector={(state) => state.values}>
-              {(filters) => {
-                const q = filters.query.trim().toLowerCase()
-                const from = filters.fromDate ? new Date(filters.fromDate) : null
-                const to = filters.toDate ? new Date(filters.toDate) : null
-
-                const filteredCount = payments.filter((p) => {
-                  const st = mapDisplayStatus(p)
-                  if (filters.status !== 'all' && st !== filters.status) return false
-
-                  if (q) {
-                    const methodName = paymentMethodById.get(p.paymentMethodId)?.name ?? ''
-                    const haystack = `${p.id} ${p.invoiceId} ${methodName} ${p.status} ${p.failureReason ?? ''}`
-                      .toLowerCase()
-                    if (!haystack.includes(q)) return false
-                  }
-
-                  const date = p.paidAt ? new Date(p.paidAt) : null
-                  if (from && date && date < from) return false
-                  if (to && date && date > to) return false
-                  return true
-                }).length
-
-                return (
+              {(filters) => (
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <CardTitle>Transactions</CardTitle>
-                      <CardDescription>
-                        {paymentsLoading ? 'Loading…' : `${filteredCount} payments`}
-                      </CardDescription>
-                    </div>
+                    
+                  <div>
+                    <CardTitle>Transactions</CardTitle>
+                    <CardDescription>
+                      {paymentsLoading ? 'Loading…' : `${filterPayments(filters).length} payments`}
+                    </CardDescription>
+                  </div>
                     <div className="w-full sm:w-55">
                       <form.Field name="status">
                         {(field) => (
@@ -224,11 +261,11 @@ function PaymentHistoryRoute() {
                         )}
                       </form.Field>
                     </div>
-                  </div>
-                )
-              }}
+                </div>
+              )}
             </form.Subscribe>
           </CardHeader>
+
           <CardContent>
             <form
               onSubmit={(e) => {
@@ -245,7 +282,7 @@ function PaymentHistoryRoute() {
                     <Input
                       value={field.state.value}
                       onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="Search id, invoice, method, status…"
+                      placeholder="Search id, invoice, member, method, status…"
                       className="pl-9 rounded-2xl"
                     />
                   )}
@@ -337,37 +374,24 @@ function PaymentHistoryRoute() {
             <div className="mt-4">
               <form.Subscribe selector={(state) => state.values}>
                 {(filters) => {
-                  const q = filters.query.trim().toLowerCase()
-                  const from = filters.fromDate ? new Date(filters.fromDate) : null
-                  const to = filters.toDate ? new Date(filters.toDate) : null
+                  const filteredPayments = filterPayments(filters).sort((a, b) => {
+                    const dateA = a.paidAt ? new Date(a.paidAt).getTime() : 0
+                    const dateB = b.paidAt ? new Date(b.paidAt).getTime() : 0
+                    return dateB - dateA
+                  })
 
-                  const filteredPayments = payments
-                    .filter((p) => {
-                      const st = mapDisplayStatus(p)
-                      if (filters.status !== 'all' && st !== filters.status) return false
-
-                      if (q) {
-                        const methodName = paymentMethodById.get(p.paymentMethodId)?.name ?? ''
-                        const haystack = `${p.id} ${p.invoiceId} ${methodName} ${p.status} ${p.failureReason ?? ''}`
-                          .toLowerCase()
-                        if (!haystack.includes(q)) return false
-                      }
-
-                      const date = p.paidAt ? new Date(p.paidAt) : null
-                      if (from && date && date < from) return false
-                      if (to && date && date > to) return false
-                      return true
-                    })
-                    .sort((a, b) => {
-                      const dateA = a.paidAt ? new Date(a.paidAt).getTime() : 0
-                      const dateB = b.paidAt ? new Date(b.paidAt).getTime() : 0
-                      return dateB - dateA
-                    })
-
-                  if (paymentsLoading) {
+                  if (paymentsLoading || invoicesLoading) {
                     return (
                       <div className="rounded-md border p-6 text-sm text-muted-foreground">
                         Loading payment history…
+                      </div>
+                    )
+                  }
+
+                  if (invoicesError) {
+                    return (
+                      <div className="rounded-md border p-6 text-sm text-destructive">
+                        {invoicesError instanceof Error ? invoicesError.message : 'Failed to load invoices'}
                       </div>
                     )
                   }
@@ -401,18 +425,19 @@ function PaymentHistoryRoute() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-[22%]">Payment</TableHead>
-                            <TableHead className="w-[22%]">Invoice</TableHead>
-                            <TableHead className="w-[18%]">Method</TableHead>
-                            <TableHead className="w-[16%]">Paid At</TableHead>
-                            <TableHead className="w-[14%]">Amount</TableHead>
-                            <TableHead className="w-[8%]">Status</TableHead>
+                            <TableHead className="w-[18%]">Member</TableHead>
+                            <TableHead className="w-[16%]">Method</TableHead>
+                            <TableHead className="w-[14%]">Paid At</TableHead>
+                            <TableHead className="w-[10%]">Amount</TableHead>
+                            <TableHead className="w-[6%]">Status</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {filteredPayments.map((p) => {
                             const methodName = paymentMethodById.get(p.paymentMethodId)?.name
                             const st = mapDisplayStatus(p)
+                            const invoice = invoiceById.get(p.invoiceId)
+                            const memberName = invoice?.actorId ? memberNameByActorId.get(invoice.actorId) : undefined
 
                             return (
                               <TableRow
@@ -432,8 +457,13 @@ function PaymentHistoryRoute() {
                                   }
                                 }}
                               >
-                                <TableCell className="font-mono text-xs">{p.id}</TableCell>
-                                <TableCell className="font-mono text-xs">{p.invoiceId}</TableCell>
+                                <TableCell className="text-sm">
+                                  {membersLoading ? (
+                                    <span className="text-muted-foreground">Loading…</span>
+                                  ) : (
+                                    <span className="font-medium">{memberName || '—'}</span>
+                                  )}
+                                </TableCell>
                                 <TableCell className="text-sm">
                                   {methodsLoading ? 'Loading…' : (methodName ?? '—')}
                                 </TableCell>

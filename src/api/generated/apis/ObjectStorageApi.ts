@@ -66,6 +66,14 @@ export interface UploadReportAttachmentRequest {
     uploadBranchLogoRequest?: UploadBranchLogoRequest;
 }
 
+export interface UploadSupplyLogAttachmentRequest {
+    uploadBranchLogoRequest?: UploadBranchLogoRequest;
+}
+
+export interface UploadSupplyPhotoRequest {
+    uploadBranchLogoRequest?: UploadBranchLogoRequest;
+}
+
 /**
  * 
  */
@@ -367,6 +375,70 @@ export class ObjectStorageApi extends runtime.BaseAPI {
      */
     async uploadReportAttachment(requestParameters: UploadReportAttachmentRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseObjectStorage> {
         const response = await this.uploadReportAttachmentRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * (private)
+     */
+    async uploadSupplyLogAttachmentRaw(requestParameters: UploadSupplyLogAttachmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseObjectStorage>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/storage/upload/supply/log`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UploadBranchLogoRequestToJSON(requestParameters['uploadBranchLogoRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseObjectStorageFromJSON(jsonValue));
+    }
+
+    /**
+     * (private)
+     */
+    async uploadSupplyLogAttachment(requestParameters: UploadSupplyLogAttachmentRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseObjectStorage> {
+        const response = await this.uploadSupplyLogAttachmentRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * (private)
+     */
+    async uploadSupplyPhotoRaw(requestParameters: UploadSupplyPhotoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseObjectStorage>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/storage/upload/supply/document`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UploadBranchLogoRequestToJSON(requestParameters['uploadBranchLogoRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseObjectStorageFromJSON(jsonValue));
+    }
+
+    /**
+     * (private)
+     */
+    async uploadSupplyPhoto(requestParameters: UploadSupplyPhotoRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseObjectStorage> {
+        const response = await this.uploadSupplyPhotoRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

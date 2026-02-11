@@ -1,6 +1,5 @@
-import { ArrowDown, ArrowUp, TrendingUp } from 'lucide-react'
+import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import type { AnalyticsData } from '@/lib/analytics-data'
 
 type Props = {
@@ -41,45 +40,18 @@ export function BranchPerformanceTable({ data }: Props) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedBranches.map((branch, index) => {
-            const isTopPerformer = index === 0
-            const isHighGrowth = branch.growth >= 10
-            const isDeclining = branch.growth < 0
+          {sortedBranches.map((branch) => {
             const profitMargin = ((branch.profit / branch.revenue) * 100).toFixed(1)
             
             return (
-              <TableRow key={branch.name} className="hover:bg-muted/50">
+              <TableRow key={branch.name}>
                 <TableCell className="font-medium">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      {isTopPerformer && (
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                      )}
-                      <span>{branch.name}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {isTopPerformer && (
-                        <Badge variant="default" className="text-xs bg-green-600">
-                          Top Performer
-                        </Badge>
-                      )}
-                      {isDeclining && (
-                        <Badge variant="destructive" className="text-xs">
-                          Declining
-                        </Badge>
-                      )}
-                      {isHighGrowth && (
-                        <Badge variant="default" className="text-xs bg-blue-600">
-                          High Growth
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
+                  {branch.name}
                 </TableCell>
-                <TableCell className="font-semibold text-green-700">
+                <TableCell className="font-semibold text-green-600">
                   {formatCurrency(branch.revenue)}
                 </TableCell>
-                <TableCell className="font-semibold text-red-700">
+                <TableCell className="font-semibold text-red-600">
                   {formatCurrency(branch.expenses)}
                 </TableCell>
                 <TableCell>

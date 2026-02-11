@@ -15,9 +15,9 @@ type Props = {
 type PaymentMethod = 'Cash' | 'Card' | 'Online'
 
 const chartConfig = {
-  Cash: { label: 'Cash', color: '#4a5c92' },
-  Card: { label: 'Card', color: '#324478' },
-  Online: { label: 'Online', color: '#8b5cf6' },
+  Cash: { label: 'Cash', color: '#7c93d4' }, // Blue
+  Card: { label: 'Card', color: '#435F8C' }, // Darker blue
+  Online: { label: 'Online', color: '#8b5cf6' }, // Purple
 } as const
 
 const ICONS: Record<PaymentMethod, LucideIcon> = {

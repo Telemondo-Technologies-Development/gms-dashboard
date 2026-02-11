@@ -6,52 +6,36 @@ import { BranchDetailsDialog } from '@/components/branch-components/branch/Branc
 import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
 import { MapDialog } from '@/components/branch-components/branch/MapDialog';
 import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
-
 import { MultiBranchOverview } from '@/components/branch-components/branch/MultiBranchOverview';
 import { BranchList } from '@/components/branch-components/branch/BranchList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { useQuery } from '@tanstack/react-query';
-
+import { useBranches } from '@/hooks/branch/useBranches';
+import { useAuthSession } from '@/lib/auth/auth-session';
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
 });
 
-const fetchBranchesFromApi = async () => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
-  const url = `${base}/api/branch`;
 
-  const token = localStorage.getItem('auth_token');
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    credentials: 'include',
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch branches.');
-  }
-
-  const result = await response.json();
-
- 
-  if (!Array.isArray(result.data)) {
-    throw new Error('Invalid response format: Expected an array of branches.');
-  }
-
-  return result.data; 
-};
+interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
+  updatedById: string;
+  assignedStaff?: any[]; 
+}
 
 function RouteComponent() {
-  const { data: branches = [], isFetching, refetch } = useQuery({
-    queryKey: ['branches'],
-    queryFn: fetchBranchesFromApi,
-  });
+  const { actorId } = useAuthSession(); 
 
- 
+  const { branches, refetch, isLoading } = useBranches();
+
   const [dialogState, setDialogState] = useState({
     detailsOpen: false,
     staffDialogOpen: false,
@@ -64,29 +48,28 @@ function RouteComponent() {
   const [mapBranch, setMapBranch] = useState<BranchFormData | null>(null);
   const [branchToRemove, setBranchToRemove] = useState<BranchFormData | null>(null);
 
-  const currentUserId = 'exampleUserId'; 
-
-  
   const toggleDialog = (dialog: keyof typeof dialogState, value: boolean) => {
     setDialogState((prev) => ({ ...prev, [dialog]: value }));
   };
 
+  // 3. API Handlers
   const handleAddBranch = async (branch: BranchFormData) => {
     const currentTimestamp = new Date().toISOString();
     const newBranch = {
       ...branch,
-      created_by: currentUserId,
-      updated_by: currentUserId,
-      created_at: currentTimestamp,
-      updated_at: currentTimestamp,
+      status: branch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE', 
+      createdById: actorId,
+      updatedById: actorId,
+      createdAt: currentTimestamp,
+      updatedAt: currentTimestamp,
     };
   
     try {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
       const url = `${base}/api/branch`;
-  
       const token = localStorage.getItem('auth_token');
+      
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -96,114 +79,110 @@ function RouteComponent() {
         body: JSON.stringify(newBranch),
       });
   
-      if (!response.ok) {
-        throw new Error('Failed to add branch.');
-      }
-  
-      const savedBranch = await response.json();
+      if (!response.ok) throw new Error('Failed to add branch.');
       refetch(); 
     } catch (error) {
       console.error(error);
-      alert('Failed to add branch. Please try again.');
+      alert('Failed to add branch.');
     }
   };
 
   const handleSaveBranch = async (updatedBranch: BranchFormData) => {
-    const currentTimestamp = new Date().toISOString();
-    const branchWithUpdatedBy = {
-      ...updatedBranch,
-      updated_by: currentUserId,
-      updated_at: currentTimestamp,
-    };
-  
     try {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
       const url = `${base}/api/branch/${updatedBranch.id}`;
-  
       const token = localStorage.getItem('auth_token');
+
+      // Fetch new coordinates based on the updated address
+      const fetchCoordinates = async (address: string) => {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+              address
+            )}&format=json`
+          );
+          const data = await response.json();
+          if (data.length > 0) {
+            return {
+              latitude: data[0].lat,
+              longitude: data[0].lon,
+            };
+          }
+          return { latitude: '0', longitude: '0' };
+        } catch (error) {
+          console.error('Error fetching coordinates:', error);
+          return { latitude: '0', longitude: '0' };
+        }
+      };
+
+      const { latitude, longitude } = await fetchCoordinates(updatedBranch.address);
+
       const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(branchWithUpdatedBy),
+        body: JSON.stringify({
+          ...updatedBranch,
+          latitude,
+          longitude,
+          status: updatedBranch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE', 
+          updatedById: actorId,
+          updatedAt: new Date().toISOString(),
+        }),
       });
-  
-      if (!response.ok) {
-        throw new Error('Failed to update branch.');
+
+      if (!response.ok) throw new Error('Failed to update branch.');
+      refetch();
+      toggleDialog('detailsOpen', false); 
+
+      if (mapBranch && mapBranch.id === updatedBranch.id) {
+        setMapBranch({ ...updatedBranch, latitude, longitude });
       }
-  
-      refetch(); 
     } catch (error) {
       console.error(error);
-      alert('Failed to update branch. Please try again.');
+      alert('Failed to update branch.');
     }
   };
 
-const handleRemoveBranch = async () => {
-  if (branchToRemove) {
+  const handleRemoveBranch = async () => {
+    if (!branchToRemove) return;
     try {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
       const url = `${base}/api/branch/${branchToRemove.id}`;
-
       const token = localStorage.getItem('auth_token');
+
       const response = await fetch(url, {
         method: 'DELETE',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete branch.');
-      }
-
+      if (!response.ok) throw new Error('Failed to delete branch.');
       refetch(); 
       toggleDialog('confirmDialogOpen', false);
       setBranchToRemove(null);
     } catch (error) {
       console.error(error);
-      alert('Failed to delete branch. Please try again.');
+      alert('Failed to delete branch.');
     }
-  }
-};
-
-  interface Branch {
-    id: string;
-    name: string;
-    latitude: number;
-    longitude: number;
-    address: string;
-    created_by: string;
-    updated_by: string;
-    created_at: string;
-    updated_at: string;
-    assignedStaff?: StaffMember[];
-  }
+  };
 
   const selectedBranch: Branch | null = selectedBranchId
-    ? branches.find((branch: Branch) => branch.id === selectedBranchId) ?? null
+    ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
     : null;
 
+  if (selectedBranch && selectedBranch.status === 'INACTIVE') {
+    selectedBranch.status = 'ACTIVE'; 
+  } else if (selectedBranch && selectedBranch.status === 'INACTIVE') {
+    selectedBranch.status = 'INACTIVE'; 
+  }
+
   function handleUpdateStaff(newStaff: StaffMember[]): void {
-    if (activeBranchForStaff) {
-      const updatedBranch = {
-        ...activeBranchForStaff,
-        assignedStaff: newStaff,
-        updated_by: currentUserId,
-        updated_at: new Date().toISOString(),
-      };
-
-      refetch(); 
-
-      setActiveBranchForStaff(updatedBranch);
-
-      // Send updatedBranch to the backend
-      // Example: await api.updateBranch(updatedBranch);
-    }
+    console.log("Updating staff for branch:", activeBranchForStaff?.name, newStaff);
+    refetch();
   }
 
   return (
@@ -212,41 +191,48 @@ const handleRemoveBranch = async () => {
         <div />
         <AddBranchDialog onAddBranch={handleAddBranch} />
       </div> 
-        <Tabs defaultValue='branches' >
-          <TabsList className="mb-10 flex space-x-6">
-            <TabsTrigger value="branches">Branches</TabsTrigger>
-            <TabsTrigger value="multiBranchDashboard">MultiBranchDashboard</TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="branches">
-              <div>
-                {isFetching ? (
-                  <p>Loading branches...</p> 
-                ) : branches.length > 0 ? (
-                  <BranchList
-                    branches={branches}
-                    onSelectBranch={setSelectedBranchId}
-                    onToggleDialog={toggleDialog}
-                    onSetMapBranch={setMapBranch}
-                    onSetBranchToRemove={setBranchToRemove}
-                    onSetActiveBranchForStaff={setActiveBranchForStaff}
-                  />
-                ) : (
-                  <div className="p-4 border rounded-md">
-                    <p>No branches available. Please check your backend or add a new branch.</p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          <TabsContent value="multiBranchDashboard">
-            <MultiBranchOverview branches={branches} />
-          </TabsContent>
-        </Tabs>
+      <Tabs defaultValue='branches'>
+        <TabsList className="mb-10 flex space-x-6">
+          <TabsTrigger value="branches">Branches</TabsTrigger>
+          <TabsTrigger value="multiBranchDashboard">Multi-Branch Overview</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="branches">
+          {isLoading ? (
+            <div className="flex justify-center p-10"><p>Loading branches...</p></div>
+          ) : branches.length > 0 ? (
+            <BranchList 
+              branches={branches} 
+              onSelectBranch={setSelectedBranchId}
+              onToggleDialog={toggleDialog}
+              onSetMapBranch={setMapBranch}
+              onSetBranchToRemove={setBranchToRemove}
+              onSetActiveBranchForStaff={setActiveBranchForStaff}
+            />
+          ) : (
+            <div className="p-8 border rounded-md text-center text-muted-foreground">
+              No branches found. Click "Add Branch" to get started.
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="multiBranchDashboard">
+          <MultiBranchOverview branches={branches} />
+        </TabsContent>
+      </Tabs>
   
       <BranchDetailsDialog
         open={dialogState.detailsOpen}
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}
-        branch={selectedBranch ? { ...selectedBranch, phone: '', status: 'Active', revenue: 0, expenses: 0, memberships: 0, assignedStaff: selectedBranch.assignedStaff || [] } : null}
+        branch={selectedBranch ? { 
+          ...selectedBranch, 
+          status: selectedBranch.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE', 
+          revenue: 0, 
+          expenses: 0, 
+          memberships: 0, 
+          assignedStaff: selectedBranch.assignedStaff || [] 
+        } : null}
         onSave={handleSaveBranch}
       />
   
@@ -261,8 +247,8 @@ const handleRemoveBranch = async () => {
       <MapDialog
         open={dialogState.mapDialogOpen}
         onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
-        latitude={mapBranch?.latitude || 0}
-        longitude={mapBranch?.longitude || 0}
+        latitude={mapBranch?.latitude || '0'} 
+        longitude={mapBranch?.longitude || '0'} 
         address={mapBranch?.address || ''}
       />
   

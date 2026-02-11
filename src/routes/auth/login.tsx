@@ -1,72 +1,72 @@
-import { useState, type FormEvent } from 'react'
-import { createFileRoute, type ErrorComponentProps } from '@tanstack/react-router'
-import { useMutation } from '@tanstack/react-query'
-import { Dumbbell } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { apiResponseEnvelopeSchema, loginResponseSchema, loginSchema, type LoginPayload } from '@/types/auth/loginSchemas'
-import { normalizeBranches } from '@/lib/auth-branches'
-import { clearAuthSession, setAuthSession } from '@/lib/auth-session'
-
-type JwtClaims = Record<string, unknown>
-
-function tryDecodeJwtClaims(token: string): JwtClaims | null {
-  if (!token) return null
-  const parts = token.split('.')
-  if (parts.length !== 3) return null
-
-  const payload = parts[1]
-  if (!payload) return null
-
-  try {
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
-    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=')
-    if (typeof atob !== 'function') return null
-    const json = atob(padded)
-    const parsed: unknown = JSON.parse(json)
-    if (parsed && typeof parsed === 'object') return parsed as JwtClaims
-    return null
-  } catch {
-    return null
-  }
-}
-
-function getStringClaim(claims: JwtClaims | null, key: string): string | undefined {
-  if (!claims) return undefined
-  const value = claims[key]
-  return typeof value === 'string' && value.trim() ? value.trim() : undefined
-}
+import { useState, type FormEvent } from "react";
+import {
+  createFileRoute,
+  type ErrorComponentProps,
+} from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { Dumbbell } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  apiResponseEnvelopeSchema,
+  loginSchema,
+  type LoginPayload,
+} from "@/types/auth/loginSchemas";
+import { normalizeBranches } from "@/lib/auth/auth-branches";
+import { clearAuthSession, setAuthSession } from "@/lib/auth/auth-session";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === 'object'
+  return !!value && typeof value === "object";
 }
 
-function storeLoginIdentityFromPayload(payload: unknown): void {
-  if (typeof window === 'undefined') return
-  if (!isRecord(payload)) return
+function storeLoginIdentityFromPayload(
+  payload: unknown,
+  token?: string | null,
+): void {
+  if (typeof window === "undefined") return;
+  if (!isRecord(payload)) return;
 
-  const actorIdRaw = payload['actorId']
-  const actorId = typeof actorIdRaw === 'string' && actorIdRaw.trim() ? actorIdRaw.trim() : null
+  const actorIdRaw = payload["actorId"];
+  const actorId =
+    typeof actorIdRaw === "string" && actorIdRaw.trim()
+      ? actorIdRaw.trim()
+      : null;
 
-  const emailOrUsernameRaw = payload['email']
-  const username = typeof emailOrUsernameRaw === 'string' && emailOrUsernameRaw.trim() ? emailOrUsernameRaw.trim() : null
-  const email = username && username.includes('@') ? username : null
+  const emailOrUsernameRaw = payload["email"] ?? payload["username"];
+  const username =
+    typeof emailOrUsernameRaw === "string" && emailOrUsernameRaw.trim()
+      ? emailOrUsernameRaw.trim()
+      : null;
+  const email = username && username.includes("@") ? username : null;
 
-  const branches = normalizeBranches(payload['branches'])
+  const branches = normalizeBranches(payload["branches"]);
 
-  // Payload-login mode: cookie-based auth, so clear any stale token.
-  setAuthSession({ token: null, actorId, username, email, branches })
+  setAuthSession({
+    token: token ?? null,
+    actorId,
+    username,
+    email,
+    assignedBranches: branches,
+  });
 }
 
-export const Route = createFileRoute('/auth/login')({
+export const Route = createFileRoute("/auth/login")({
   component: RouteComponent,
   errorComponent: ({ error }: ErrorComponentProps) => (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-lg text-destructive">Login error</CardTitle>
+          <CardTitle className="text-lg text-destructive">
+            Login error
+          </CardTitle>
           <CardDescription>{error.message}</CardDescription>
         </CardHeader>
       </Card>
@@ -77,153 +77,150 @@ export const Route = createFileRoute('/auth/login')({
       <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary" />
     </div>
   ),
-
-})
+});
 
 function RouteComponent() {
   const [formState, setFormState] = useState<LoginPayload>({
-    username: '',
-    password: '',
-  })
-  const [formError, setFormError] = useState<string | null>(null)
-  const [loginResponse, setLoginResponse] = useState<string | null>(null)
+    username: "",
+    password: "",
+  });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [loginResponse, setLoginResponse] = useState<string | null>(null);
 
   const loginMutation = useMutation({
     mutationFn: async (payload: LoginPayload) => {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-      const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-      const url = `${base}/auth/login`
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+      const base = import.meta.env.DEV ? "" : apiBaseUrl || "";
+      const url = `${base}/auth/login`;
 
-      // Backend expects { username, password } (username can be an email or username string).
-      const requestBody = { username: payload.username, password: payload.password }
+      const requestBody = {
+        username: payload.username,
+        password: payload.password,
+      };
 
       try {
         const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          // Include credentials so HttpOnly session cookies are set by the browser.
-          credentials: 'include',
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify(requestBody),
-        })
+        });
 
-        const rawText = await response.text().catch(() => '')
+        const rawText = await response.text().catch(() => "");
 
         if (!response.ok) {
-          throw new Error(`Login failed (${response.status}). ${rawText || 'Check server logs for details.'}`)
+          throw new Error(
+            `Login failed (${response.status}). ${rawText || "Check server logs for details."}`,
+          );
         }
 
-        const trimmed = rawText.trim()
-        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-          const maybeJson: unknown = JSON.parse(trimmed)
-          const envelope = apiResponseEnvelopeSchema.safeParse(maybeJson)
-          if (envelope.success) {
-            if (envelope.data.success === false) {
-              throw new Error(envelope.data.message ?? 'Login failed.')
-            }
-            if (envelope.data.success === true) {
-              const data = envelope.data.data
-              if (typeof data === 'string' && data.trim()) {
-                const maybeJsonString = data.trim()
-                if (maybeJsonString.startsWith('{') || maybeJsonString.startsWith('[')) {
-                  try {
-                    const parsedJson: unknown = JSON.parse(maybeJsonString)
-                    if (parsedJson && typeof parsedJson === 'object' && !Array.isArray(parsedJson)) {
-                      storeLoginIdentityFromPayload(parsedJson)
-                      // No real token in this mode (cookie-based auth)
-                      return ''
-                    }
-                  } catch {
-                    // fall through
-                  }
-                }
+        const trimmed = rawText.trim();
+        if (!trimmed || !(trimmed.startsWith("{") || trimmed.startsWith("["))) {
+          throw new Error("Unexpected response format from login service.");
+        }
 
-                setAuthSession({ branches: [] })
-                return maybeJsonString
-              }
-              if (
-                typeof data === 'object' &&
-                data !== null &&
-                !Array.isArray(data)
-              ) {
-                const branches = normalizeBranches((data as { branches?: unknown }).branches)
-                storeLoginIdentityFromPayload({ ...(data as Record<string, unknown>), branches })
+        const jsonData: unknown = JSON.parse(trimmed);
+        const envelope = apiResponseEnvelopeSchema.safeParse(jsonData);
 
-                const maybeToken = (data as { token?: unknown }).token
-                if (typeof maybeToken === 'string' && maybeToken.trim()) {
-                  return maybeToken.trim()
-                }
-
-                // Cookie-based login success; no token returned.
-                return ''
-              }
-              throw new Error(envelope.data.message ?? 'Login succeeded, but no token was returned.')
-            }
+        if (envelope.success) {
+          if (envelope.data.success === false) {
+            throw new Error(envelope.data.message ?? "Login failed.");
           }
+
+          const data = envelope.data.data;
+
+          // Token returned as string in envelope
+          if (typeof data === "string" && data.trim()) {
+            const token = data.trim();
+            // Try parsing if it's nested JSON (some backends do this)
+            if (token.startsWith("{")) {
+              try {
+                const parsed: unknown = JSON.parse(token);
+                if (isRecord(parsed)) {
+                  const extractedToken =
+                    typeof parsed["token"] === "string"
+                      ? parsed["token"].trim()
+                      : null;
+                  storeLoginIdentityFromPayload(parsed, extractedToken);
+                  return extractedToken ?? "";
+                }
+              } catch {
+                // Not nested JSON, treat as raw token
+              }
+            }
+            return token;
+          }
+
+          // Token + identity payload in envelope.data
+          if (isRecord(data)) {
+            const token =
+              typeof data["token"] === "string" ? data["token"].trim() : null;
+            storeLoginIdentityFromPayload(data, token);
+            return token ?? "";
+          }
+
+          throw new Error(
+            "Login succeeded but returned unexpected data format.",
+          );
         }
-        const parsed = loginResponseSchema.safeParse(rawText)
-        if (parsed.success && parsed.data.trim()) {
-          return parsed.data.trim()
+
+        // Direct payload (not wrapped in envelope) - cookie-based auth
+        if (isRecord(jsonData)) {
+          const token =
+            typeof jsonData["token"] === "string"
+              ? jsonData["token"].trim()
+              : null;
+          storeLoginIdentityFromPayload(jsonData, token);
+          return token ?? "";
         }
-        throw new Error('Unexpected response from the login service.')
+
+        throw new Error("Unexpected response from the login service.");
       } catch (error) {
         if (error instanceof Error) {
-          throw new Error(error.message || 'Unable to reach the server.')
+          throw new Error(error.message || "Unable to reach the server.");
         }
-        throw new Error('Unable to reach the server. Check the API URL and that the backend is running.')
+        throw new Error(
+          "Unable to reach the server. Check the API URL and that the backend is running.",
+        );
       }
     },
     onSuccess: async (token) => {
-      if (typeof token === 'string' && token.trim()) {
-        setAuthSession({ token: token.trim() })
-
-        const claims = tryDecodeJwtClaims(token)
-        const claimEmail =
-          getStringClaim(claims, 'email') ??
-          getStringClaim(claims, 'preferred_username') ??
-          getStringClaim(claims, 'upn')
-
-        if (claimEmail && claimEmail.includes('@')) {
-          setAuthSession({ email: claimEmail })
-        }
-
-        setLoginResponse(`Login success. Token: ${token}`)
+      if (typeof token === "string" && token.trim()) {
+        setLoginResponse(`Login success. Token received.`);
       } else {
-        // Important: don't keep stale tokens around (it makes the UI appear stuck on the previous user).
-        setAuthSession({ token: null })
-
-        setLoginResponse('Login success. (No token returned; session cookie set)')
+        setLoginResponse("Login success. (Session cookie set)");
       }
 
       window.setTimeout(() => {
-        window.location.href = 'http://localhost:3000/dashboard'
-      }, 800)
+        window.location.href = "http://localhost:3000/dashboard";
+      }, 800);
     },
-  })
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setLoginResponse(null)
-    const parsed = loginSchema.safeParse(formState)
+    event.preventDefault();
+    setLoginResponse(null);
+    const parsed = loginSchema.safeParse(formState);
     if (!parsed.success) {
-      setFormError(parsed.error.issues[0]?.message ?? 'Please check your login details.')
-      return
+      setFormError(
+        parsed.error.issues[0]?.message ?? "Please check your login details.",
+      );
+      return;
     }
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Clear any previous user identity so the header can't get stuck.
-      clearAuthSession()
+      clearAuthSession();
       setAuthSession({
         username: parsed.data.username,
-        email: parsed.data.username.includes('@') ? parsed.data.username : null,
-        branches: [],
-      })
+        email: parsed.data.username.includes("@") ? parsed.data.username : null,
+        assignedBranches: [],
+      });
     }
 
-    setFormError(null)
-    loginMutation.mutate(parsed.data)
-  }
+    setFormError(null);
+    loginMutation.mutate(parsed.data);
+  };
 
   return (
     <div className="flex h-screen w-full">
@@ -234,27 +231,34 @@ function RouteComponent() {
             <Dumbbell className="h-20 w-20 text-background" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-4xl font-bold italic tracking-tight text-background">Gym Management System</h1>
+            <h1 className="text-4xl font-bold italic tracking-tight text-background">
+              Gym Management System
+            </h1>
             <p className="text-muted text-xl">Staff & Admin Login Portal</p>
           </div>
           <div>
             <p className="text-sm text-background/80 max-w-lg">
-              Manage your gym efficiently with our comprehensive system. Track members, schedule classes, and oversee staff all in one place.
+              Manage your gym efficiently with our comprehensive system. Track
+              members, schedule classes, and oversee staff all in one place.
             </p>
           </div>
         </div>
       </div>
 
       {/* Right Container - Login Form */}
-      <div className="flex flex-1 items-center justify-center bg-background px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-1 items-center justify-center bg-surface px-4 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md border-0 shadow-none sm:border sm:shadow-lg sm:shadow-primary/20">
           <CardHeader className="space-y-2 text-center">
             {/* Show Icon on specific mobile view only where left panel is hidden */}
             <div className="lg:hidden mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Dumbbell className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl font-bold italic text-primary">Welcome Back</CardTitle>
-            <CardDescription className="text-base">Enter your credentials to access your account</CardDescription>
+            <CardTitle className="text-2xl font-bold italic text-primary">
+              Welcome Back
+            </CardTitle>
+            <CardDescription className="text-base">
+              Enter your credentials to access your account
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -270,7 +274,12 @@ function RouteComponent() {
                   className=" border-input py-5"
                   autoComplete="username"
                   value={formState.username}
-                  onChange={(event) => setFormState((prev) => ({ ...prev, username: event.target.value }))}
+                  onChange={(event) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      username: event.target.value,
+                    }))
+                  }
                 />
               </div>
 
@@ -285,21 +294,32 @@ function RouteComponent() {
                   className="border-input py-5"
                   autoComplete="current-password"
                   value={formState.password}
-                  onChange={(event) => setFormState((prev) => ({ ...prev, password: event.target.value }))}
+                  onChange={(event) =>
+                    setFormState((prev) => ({
+                      ...prev,
+                      password: event.target.value,
+                    }))
+                  }
                 />
                 <div className="flex justify-end">
-                  <a 
-                    href="#" 
+                  <a
+                    href="#"
                     className="text-xs text-muted-foreground hover:text-primary hover:underline"
                   >
                     Forgot password?
                   </a>
                 </div>
-              </div>  
-        
+              </div>
+
               {(formError || loginMutation.error) && (
-                <p className="text-sm text-destructive font-medium text-center" role="alert">
-                  {formError ?? (loginMutation.error instanceof Error ? loginMutation.error.message : 'Login failed.')}
+                <p
+                  className="text-sm text-destructive font-medium text-center"
+                  role="alert"
+                >
+                  {formError ??
+                    (loginMutation.error instanceof Error
+                      ? loginMutation.error.message
+                      : "Login failed.")}
                 </p>
               )}
 
@@ -314,23 +334,28 @@ function RouteComponent() {
                     <span>Signing In...</span>
                   </div>
                 ) : (
-                  'Sign In'
+                  "Sign In"
                 )}
               </Button>
 
               {loginResponse && (
-                <p className="text-sm text-muted-foreground wrap-break-word text-center bg-muted/50 p-2 rounded-md" role="status">
+                <p
+                  className="text-sm text-muted-foreground wrap-break-word text-center bg-muted/50 p-2 rounded-md"
+                  role="status"
+                >
                   {loginResponse}
                 </p>
               )}
 
               <div className="pt-4 text-center border-t mt-6">
-                <p className="text-xs text-muted-foreground">Do not share your credentials with anyone.</p>
+                <p className="text-xs text-muted-foreground">
+                  Do not share your credentials with anyone.
+                </p>
               </div>
             </form>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

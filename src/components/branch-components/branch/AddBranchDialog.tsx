@@ -5,17 +5,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-
-interface AddBranchDialogProps {
-  onAddBranch: (branch: BranchFormData) => void;
-}
+import { useAuthSession } from '@/lib/auth/auth-session';
 
 export interface StaffMember {
   id: string;
   name: string;
+  phone: string;
   role: "Manager" | "Staff";
   email: string;
-  phone: string;
   address: string;
   birthday: string;
 }
@@ -24,27 +21,39 @@ export interface BranchFormData {
   id: string;
   name: string;
   address: string;
-  phone: string;
-  status: "Active" | "Maintenance";
-  assignedStaff: StaffMember[];
-  latitude: number;
-  longitude: number;
-  revenue: number; // Added revenue property
-  expenses: number; // Added expenses property
-  memberships: number; // Added memberships property
+  latitude: string;
+  longitude: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdById: string;
+  updatedById: string;
+  createdAt: string;
+  updatedAt: string;
+  assignedStaff?: StaffMember[];
+}
+
+
+interface AddBranchDialogProps {
+  onAddBranch: (branch: BranchFormData) => Promise<void>;
 }
 
 export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
-  const [formData, setFormData] = useState({
+  const { actorId } = useAuthSession();
+  const resolvedActorId = actorId || ''; 
+  // Removed unused addBranch declaration
+  const [formData, setFormData] = useState<{
+    name: string;
+    address: string;
+    status: 'ACTIVE' | 'INACTIVE';
+  }>({
     name: "",
     address: "",
-    phone: "",
-    status: "Active",
+    status: "ACTIVE",
   });
 
   const resetForm = () => {
-    setFormData({ name: "", address: "", phone: "", status: "Active" });
+    setFormData({ name: "", address: "", status: "ACTIVE" });
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,14 +68,14 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
         const data = await response.json();
         if (data.length > 0) {
           return {
-            latitude: parseFloat(data[0].lat),
-            longitude: parseFloat(data[0].lon),
+            latitude: data[0].lat,
+            longitude: data[0].lon,
           };
         }
-        return { latitude: 0, longitude: 0 };
+        return { latitude: "0", longitude: "0" };
       } catch (error) {
         console.error("Error fetching coordinates:", error);
-        return { latitude: 0, longitude: 0 };
+        return { latitude: "0", longitude: "0" };
       }
     };
 
@@ -76,19 +85,23 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
       id: crypto.randomUUID(),
       name: formData.name,
       address: formData.address,
-      phone: formData.phone,
-      status: formData.status as "Active" | "Maintenance",
-      assignedStaff: [],
+      status: formData.status as 'ACTIVE' | 'INACTIVE',
       latitude,
       longitude,
-      revenue: 0, // Initialize revenue
-      expenses: 0, // Initialize expenses
-      memberships: 0, // Initialize memberships
+      createdById: resolvedActorId,
+      updatedById: resolvedActorId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    onAddBranch(newBranch);
-    resetForm();
-    setOpen(false);
+    try {
+      await onAddBranch(newBranch);
+      resetForm();
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add branch:", error);
+      alert("Failed to add branch. Please try again.");
+    }
   };
   const [open, setOpen] = useState(false);
   return (
@@ -148,21 +161,6 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    placeholder="Enter phone number"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        phone: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="status">Status *</Label>
                   <select
                     id="status"
@@ -171,13 +169,13 @@ export function AddBranchDialog({ onAddBranch }: AddBranchDialogProps) {
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        status: e.target.value as "Active" | "Maintenance",
+                        status: e.target.value as 'ACTIVE' | 'INACTIVE',
                       }))
                     }
                     required
                   >
-                    <option value="Active">Active</option>
-                    <option value="Maintenance">Maintenance</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
                   </select>
                 </div>
               </CardContent>

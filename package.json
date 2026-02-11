@@ -6,7 +6,9 @@
     "dev": "vite --port 3000",
     "build": "vite build && tsc -p tsconfig.build.json",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "openapi-generator-cli generate -i openapi.json -g typescript-fetch -o src/api/generated --additional-properties=supportsES6=true,useSingleRequestParameter=true"
+    
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -43,6 +45,7 @@
     "@tanstack/react-query": "^5.90.17",
     "@tanstack/react-router": "^1.132.0",
     "@tanstack/react-router-devtools": "^1.132.0",
+    "@tanstack/react-table": "^8.21.3",
     "@tanstack/router-plugin": "^1.132.0",
     "@types/leaflet": "^1.9.21",
     "class-variance-authority": "^0.7.1",
@@ -68,7 +71,8 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.0.6",
     "vaul": "^1.1.2",
-    "zod": "^4.3.5"
+    "zod": "^4.3.5",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@tanstack/devtools-vite": "^0.3.11",

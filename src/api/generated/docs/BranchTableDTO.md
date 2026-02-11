@@ -8,12 +8,14 @@ Format for Branch read
 Name | Type
 ------------ | -------------
 `address` | string
+`createdAt` | Date
 `createdById` | string
 `id` | string
 `latitude` | string
 `longitude` | string
 `name` | string
 `status` | string
+`updatedAt` | Date
 `updatedById` | string
 
 ## Example
@@ -24,12 +26,14 @@ import type { BranchTableDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "address": null,
+  "createdAt": null,
   "createdById": null,
   "id": null,
   "latitude": null,
   "longitude": null,
   "name": null,
   "status": null,
+  "updatedAt": null,
   "updatedById": null,
 } satisfies BranchTableDTO
 

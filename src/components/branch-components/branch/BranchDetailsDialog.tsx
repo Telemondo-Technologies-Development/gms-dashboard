@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Phone } from 'lucide-react'; 
 import {
   Dialog,
   DialogContent,
@@ -11,13 +10,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useAuthSession } from '@/lib/auth/auth-session';
 
 export interface StaffMember {
   id: string;
   name: string;
+  phone: string;
   role: 'Manager' | 'Staff';
   email: string;
-  phone: string;
   address: string;
   birthday: string;
 }
@@ -26,15 +26,19 @@ export interface BranchFormData {
   id: string;
   name: string;
   address: string;
-  phone: string;
-  status: 'Active' | 'Maintenance';
-  assignedStaff: StaffMember[];
-  latitude: number; 
-  longitude: number;
-  revenue: number; 
-  expenses: number; 
-  memberships: number;
+  latitude: string;
+  longitude: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  createdById: string; 
+  updatedById: string; 
+  createdAt: string; 
+  updatedAt: string; 
+  assignedStaff?: StaffMember[];
+  revenue?: number; 
+  expenses?: number; 
+  memberships?: number; 
 }
+
 
 interface BranchDetailsDialogProps {
   open: boolean;
@@ -49,18 +53,18 @@ export function BranchDetailsDialog({
   branch,
   onSave,
 }: BranchDetailsDialogProps) {
+  const { actorId } = useAuthSession(); 
+
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('');
-  const [status, setStatus] = useState<'Active' | 'Maintenance'>('Active');
+  const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE'); 
 
   useEffect(() => {
     if (!branch) return;
 
     setName(branch.name);
     setAddress(branch.address);
-    setPhone(branch.phone || ''); 
-    setStatus(branch.status);
+    setStatus(branch.status); 
   }, [branch]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -71,8 +75,11 @@ export function BranchDetailsDialog({
       ...branch,
       name,
       address,
-      phone, 
       status,
+      createdById: branch.createdById || actorId || '', 
+      updatedById: actorId || '', 
+      createdAt: branch.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     onSave(updatedBranch);
@@ -112,29 +119,16 @@ export function BranchDetailsDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      className="pl-10"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
                   <select
                     id="status"
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-background"
                     value={status}
-                    onChange={(e) => setStatus(e.target.value as 'Active' | 'Maintenance')}
+                    onChange={(e) => setStatus(e.target.value as 'ACTIVE' | 'INACTIVE')}
                     required
                   >
-                    <option value="Active">Active</option>
-                    <option value="Maintenance">Maintenance</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
                   </select>
                 </div>
               </div>

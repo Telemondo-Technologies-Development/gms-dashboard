@@ -2800,6 +2800,84 @@
         ]
       }
     },
+    "/api/storage/upload/supply/document": {
+      "post": {
+        "operationId": "uploadSupplyPhoto",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "(private)",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
+    "/api/storage/upload/supply/log": {
+      "post": {
+        "operationId": "uploadSupplyLogAttachment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "(private)",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
     "/api/storage/{id}": {
       "delete": {
         "operationId": "deleteFile",
@@ -3145,6 +3223,370 @@
         "summary": "Get a Subscription Availed by id",
         "tags": [
           "Subscription Availed"
+        ]
+      }
+    },
+    "/api/supply": {
+      "get": {
+        "operationId": "getAllSupplies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListSupplyTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Supplies",
+        "tags": [
+          "Supplies"
+        ]
+      },
+      "post": {
+        "operationId": "createSupply",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSupplyTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Supply",
+        "tags": [
+          "Supplies"
+        ]
+      }
+    },
+    "/api/supply/log": {
+      "get": {
+        "operationId": "getAllSuppliesLogs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListSuppliesLogTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Supplies Logs",
+        "tags": [
+          "Supplies Logs"
+        ]
+      },
+      "post": {
+        "operationId": "createSuppliesLog",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuppliesLogPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSuppliesLogTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Supplies Log",
+        "tags": [
+          "Supplies Logs"
+        ]
+      }
+    },
+    "/api/supply/log/{id}": {
+      "delete": {
+        "operationId": "deleteSuppliesLog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Supplies Log by id",
+        "tags": [
+          "Supplies Logs"
+        ]
+      },
+      "get": {
+        "operationId": "getSuppliesLog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSuppliesLogTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Supplies Log by id",
+        "tags": [
+          "Supplies Logs"
+        ]
+      },
+      "put": {
+        "operationId": "updateSupply_1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuppliesLogPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSuppliesLogTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Supplies Log by id",
+        "tags": [
+          "Supplies Logs"
+        ]
+      }
+    },
+    "/api/supply/{id}": {
+      "delete": {
+        "operationId": "deleteSupply",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Supply by id",
+        "tags": [
+          "Supplies"
+        ]
+      },
+      "get": {
+        "operationId": "getSupply",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSupplyTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Supply by id",
+        "tags": [
+          "Supplies"
+        ]
+      },
+      "put": {
+        "operationId": "updateSupply",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplyPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSupplyTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Supply by id",
+        "tags": [
+          "Supplies"
+        ]
+      }
+    },
+    "/api/supply/{id}/log": {
+      "get": {
+        "operationId": "getSupplyLogs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSupplyWithLogsDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get supply info and its logs",
+        "tags": [
+          "Supplies"
         ]
       }
     },
@@ -4219,6 +4661,74 @@
           "timestamp"
         ]
       },
+      "ApiResponseListSuppliesLogTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuppliesLogTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListSupplyTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplyTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListUserTableDTO": {
         "type": "object",
         "properties": {
@@ -4599,6 +5109,99 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/SubscriptionTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseSuppliesLogTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SuppliesLogTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseSupplyTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SupplyTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseSupplyWithLogsDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SupplyWithLogsDTO"
           },
           "errors": {
             "type": "array",
@@ -5214,6 +5817,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -5232,6 +5839,10 @@
               "UNDECIDED"
             ]
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
@@ -5240,8 +5851,10 @@
         "required": [
           "actorId",
           "branchId",
+          "createdAt",
           "id",
-          "status"
+          "status",
+          "updatedAt"
         ]
       },
       "BranchPostDTO": {
@@ -5377,6 +5990,10 @@
           "address": {
             "type": "string"
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -5402,6 +6019,10 @@
               "UNDECIDED"
             ]
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
@@ -5409,11 +6030,13 @@
         },
         "required": [
           "address",
+          "createdAt",
           "id",
           "latitude",
           "longitude",
           "name",
-          "status"
+          "status",
+          "updatedAt"
         ]
       },
       "EmployeeInBranchDTO": {
@@ -5796,8 +6419,6 @@
           },
           "branches": {
             "type": "array",
-            "nullable": true,
-            "default": [],
             "items": {
               "$ref": "#/components/schemas/BranchListDTO"
             }
@@ -6961,6 +7582,258 @@
           "id",
           "name",
           "updatedAt"
+        ]
+      },
+      "SuppliesLogPostDTO": {
+        "type": "object",
+        "description": "Format for Supplies Log create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "suppliesId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "createdById",
+          "name",
+          "objectIds",
+          "quantity",
+          "suppliesId"
+        ]
+      },
+      "SuppliesLogPutDTO": {
+        "type": "object",
+        "description": "Format for Supplies Log update",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "suppliesId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "objectIds",
+          "quantity",
+          "suppliesId",
+          "updatedById"
+        ]
+      },
+      "SuppliesLogTableDTO": {
+        "type": "object",
+        "description": "Format for Supplies Log read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "suppliesId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "objectIds",
+          "quantity",
+          "suppliesId"
+        ]
+      },
+      "SupplyPostDTO": {
+        "type": "object",
+        "description": "Format for Supply create",
+        "properties": {
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "branchId",
+          "createdById",
+          "name",
+          "objectIds"
+        ]
+      },
+      "SupplyPutDTO": {
+        "type": "object",
+        "description": "Format for Supply update",
+        "properties": {
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "branchId",
+          "name",
+          "objectIds",
+          "updatedById"
+        ]
+      },
+      "SupplyTableDTO": {
+        "type": "object",
+        "description": "Format for Supply read",
+        "properties": {
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "branchId",
+          "id",
+          "name",
+          "objectIds",
+          "quantity"
+        ]
+      },
+      "SupplyWithLogsDTO": {
+        "type": "object",
+        "description": "Wrapper for Supply and its Logs",
+        "properties": {
+          "logs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuppliesLogTableDTO"
+            }
+          },
+          "supply": {
+            "$ref": "#/components/schemas/SupplyTableDTO"
+          }
+        },
+        "required": [
+          "supply"
         ]
       },
       "UserPostDTO": {
