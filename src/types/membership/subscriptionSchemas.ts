@@ -86,3 +86,24 @@ export const apiResponseSubscriptionAvailedTableDTOSchema = z.object({
   success: z.boolean(),
   timestamp: z.coerce.number(),
 })
+
+export interface UseCreateSubscriptionPlanOptions {
+  createdById: string | null
+  onCreated?: (plan: SubscriptionAvailedTableDTOParsed) => void
+}
+
+export interface UseCreateSubscriptionPlanResult {
+  formState: SubscriptionPlanFormState
+  setFormState: React.Dispatch<React.SetStateAction<SubscriptionPlanFormState>>
+  submitError: string | null
+  isSubmitting: boolean
+  handleSubmit: () => Promise<void>
+  reset: () => void
+}
+
+export interface SubscriptionPlanFormState {
+  name: string
+  description: string
+  amount: string
+  billingCycleId: string
+}

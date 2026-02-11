@@ -11,28 +11,14 @@ import {
   subscriptionAvailedPostSchema,
   subscriptionPostSchema,
   type SubscriptionAvailedTableDTOParsed,
+  type SubscriptionPlanFormState,
+  type UseCreateSubscriptionPlanOptions,
+  type UseCreateSubscriptionPlanResult,
 } from '@/types/membership/subscriptionSchemas'
 
-interface UseCreateSubscriptionPlanOptions {
-  createdById: string | null
-  onCreated?: (plan: SubscriptionAvailedTableDTOParsed) => void
-}
 
-interface UseCreateSubscriptionPlanResult {
-  formState: SubscriptionPlanFormState
-  setFormState: React.Dispatch<React.SetStateAction<SubscriptionPlanFormState>>
-  submitError: string | null
-  isSubmitting: boolean
-  handleSubmit: () => Promise<void>
-  reset: () => void
-}
 
-interface SubscriptionPlanFormState {
-  name: string
-  description: string
-  amount: string
-  billingCycleId: string
-}
+
 
 const defaultFormState: SubscriptionPlanFormState = {
   name: '',
