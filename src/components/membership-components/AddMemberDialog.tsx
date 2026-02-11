@@ -301,7 +301,7 @@ export function AddMemberDialog() {
               >
                 {(field) => (
                   <div className="space-y-2">
-                    <Label htmlFor={field.name}>First name</Label>
+                    <Label htmlFor={field.name}>First name *</Label>
                     <Input
                       id={field.name}
                       value={field.state.value}
@@ -321,7 +321,7 @@ export function AddMemberDialog() {
               <form.Field name="middleName">
                 {(field) => (
                   <div className="space-y-2">
-                    <Label htmlFor={field.name}>Middle name (optional)</Label>
+                    <Label htmlFor={field.name}>Middle name</Label>
                     <Input
                       id={field.name}
                       value={field.state.value}
@@ -341,7 +341,7 @@ export function AddMemberDialog() {
               >
                 {(field) => (
                   <div className="space-y-2">
-                    <Label htmlFor={field.name}>Surname</Label>
+                    <Label htmlFor={field.name}>Surname *</Label>
                     <Input
                       id={field.name}
                       value={field.state.value}
@@ -361,7 +361,7 @@ export function AddMemberDialog() {
               <form.Field name="suffix">
                 {(field) => (
                   <div className="space-y-2">
-                    <Label htmlFor={field.name}>Suffix (optional)</Label>
+                    <Label htmlFor={field.name}>Suffix</Label>
                     <Input
                       id={field.name}
                       value={field.state.value}
@@ -386,7 +386,7 @@ export function AddMemberDialog() {
             >
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name}>Profile picture id (optional)</Label>
+                  <Label htmlFor={field.name}>Upload Picture </Label>
                   <Input
                     id={field.name}
                     value={field.state.value}
@@ -398,9 +398,7 @@ export function AddMemberDialog() {
                     <p className="text-sm text-destructive" role="alert">
                       {field.state.meta.errors[0]}
                     </p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">Backend expects an existing uploaded image id.</p>
-                  )}
+                  ) : null}
                 </div>
               )}
             </form.Field>

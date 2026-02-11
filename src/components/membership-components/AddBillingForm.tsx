@@ -95,7 +95,7 @@ export function AddBillingDialog({
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="paymentMethod">Mode of Payment</Label>
+          <Label htmlFor="paymentMethod">Mode of Payment * </Label>
           <Select
             value={paymentMethodId}
             disabled={disabled}
@@ -129,7 +129,7 @@ export function AddBillingDialog({
           </Select>
         </div>
 
-        <div className="rounded-xl bg-muted/50 p-4 space-y-3">
+        <Card className="rounded-xl bg-muted/50 p-4 space-y-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Subscription</span>
             <span className="font-medium">{selectedSubscription?.name || '—'}</span>
@@ -156,7 +156,7 @@ export function AddBillingDialog({
             <span className="font-semibold">Total</span>
             <span className="text-2xl font-bold text-primary">PHP {totalCost}</span>
           </div>
-        </div>
+        </Card>
       </CardContent>
     </Card>
   )
