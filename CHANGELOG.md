@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Branch: added backend integration for (add,delete,edit) branchpage
+- Tracking: adjusted the logic of getting data from backend for auto suggest (name and branch) when filing report.
 - Membership: Added dialogs and hooks to create subscription plans (with billing cycle selection) and payment methods directly from membership flows.
 - Membership: Added billing cycle query support and subscription/payment schemas for validating create flows.
 
@@ -22,7 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.0]
 
 ### Added
-
+-Branch Page : connected the backend through docker for adding branch.
+-Tracking Page : Connected to backend for data fetching 
 - Membership: Refactored member + subscription flows to align with backend DTOs (MemberPostDTO/MemberPutDTO, MemberSubscriptionPostDTO/MemberSubscriptionPutDTO). Improved Members page performance by removing duplicated local state, adding memoization and React.memo where appropriate, and centralizing mutations to use React Query cache invalidation.
 - Payment History: Added enhanced filtering and CSV export support for payment history, and improved query efficiency and UI responsiveness for large result sets.
 - Login / Auth: Centralized authentication state with a persisted Zustand store (`auth-session.ts`) that stores token and `assignedBranches`; added shared JWT utilities for robust claim parsing; login flow updated to return token + identity payload consistently.
