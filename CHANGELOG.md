@@ -10,6 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Membership: Added dialogs and hooks to create subscription plans (with billing cycle selection) and payment methods directly from membership flows.
+- Membership: Added billing cycle query support and subscription/payment schemas for validating create flows.
+
+### Changed
+- Membership: Refactored Add Member and Member Details dialogs to surface in-context "Add subscription" and "Add payment method" actions and refresh lists after creation.
+- Build: Split Vite output into vendor chunks (React, TanStack, Radix UI, charts, Leaflet) to reduce large bundle warnings.
+
+
+
+## [0.5.0]
+
+### Added
 
 - Membership: Refactored member + subscription flows to align with backend DTOs (MemberPostDTO/MemberPutDTO, MemberSubscriptionPostDTO/MemberSubscriptionPutDTO). Improved Members page performance by removing duplicated local state, adding memoization and React.memo where appropriate, and centralizing mutations to use React Query cache invalidation.
 - Payment History: Added enhanced filtering and CSV export support for payment history, and improved query efficiency and UI responsiveness for large result sets.
