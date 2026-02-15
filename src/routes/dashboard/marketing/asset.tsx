@@ -20,7 +20,7 @@ import { AddAssetDialog } from '@/components/asset-components/AddAssetDialog'
 import { AssetDetailsDialog } from '@/components/asset-components/AssetDetailsDialog'
 import { DeleteAssetDialog } from '@/components/asset-components/DeleteAssetDialog'
 
-export const Route = createFileRoute('/dashboard/marketing/assets')({
+export const Route = createFileRoute('/dashboard/marketing/asset')({
   component: RouteComponent,
 })
 
