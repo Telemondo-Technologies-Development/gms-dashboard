@@ -6,7 +6,9 @@ import {
   type LoginPayload,
 } from "@/types/auth/loginSchemas";
 import { normalizeBranches } from "@/lib/auth/auth-branches";
-import { clearAuthSession, setAuthSession } from "@/lib/auth/auth-session";
+import { clearAuthSession, readAuthSession, setAuthSession } from "@/lib/auth/auth-session";
+import { extractRoleCandidates, getRoleBasedDashboardPath } from "@/lib/auth/auth-permissions";
+import { tryDecodeJwtClaims } from "@/lib/auth/jwt-utils";
 
 interface UseLoginOptions {
   redirectUrl?: string;
@@ -47,18 +49,22 @@ function storeLoginIdentityFromPayload(
   const email = username && username.includes("@") ? username : null;
 
   const branches = normalizeBranches(payload["branches"]);
+  const payloadRoles = extractRoleCandidates(payload);
+  const tokenRoles = extractRoleCandidates(token ? tryDecodeJwtClaims(token) : null);
+  const roles = Array.from(new Set([...payloadRoles, ...tokenRoles]));
 
   setAuthSession({
     token: token ?? null,
     actorId,
     username,
     email,
+    roles,
     assignedBranches: branches,
   });
 }
 
 export function useLogin(options: UseLoginOptions = {}): UseLoginResult {
-  const { redirectUrl = "http://localhost:3000/dashboard" } = options;
+  const { redirectUrl } = options;
   const [formState, setFormState] = useState<LoginPayload>({
     username: "",
     password: "",
@@ -172,8 +178,9 @@ export function useLogin(options: UseLoginOptions = {}): UseLoginResult {
       }
 
       if (typeof window !== "undefined") {
+        const route = redirectUrl || getRoleBasedDashboardPath(token, readAuthSession().roles);
         window.setTimeout(() => {
-          window.location.href = redirectUrl;
+          window.location.href = route;
         }, 800);
       }
     },
@@ -198,6 +205,7 @@ export function useLogin(options: UseLoginOptions = {}): UseLoginResult {
         email: parsed.data.username.includes("@")
           ? parsed.data.username
           : null,
+        roles: [],
         assignedBranches: [],
       });
     }

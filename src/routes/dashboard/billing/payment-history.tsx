@@ -509,24 +509,6 @@ function PaymentHistoryRoute() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Notes</CardTitle>
-              <CardDescription>Based on PaymentTableDTO fields.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 h-4 w-4" />
-                <span>
-                  Display status is derived from <span className="font-mono text-xs">paidAt</span> and
-                  <span className="font-mono text-xs"> failureReason</span>.
-                </span>
-              </div>
-              <div>
-                API status: <span className="font-mono text-xs">IN | OUT | UNDECIDED</span>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 

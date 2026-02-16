@@ -19,11 +19,11 @@ import {
 } from '@/components/ui/select'
 import { toast } from 'sonner'
 
-import { RevenueExpenseChart } from '@/components/analytics-components/RevenueExpenseChart'
-import { MembershipGrowthChart } from '@/components/analytics-components/MembershipGrowthChart'
-import { PaymentMethodChart } from '@/components/analytics-components/PaymentMethodChart'
-import { BranchPerformanceTable } from '@/components/analytics-components/BranchPerformanceTable'
-import { IncomeReportCards } from '@/components/analytics-components/IncomeReportCards'
+import { RevenueExpenseChart } from '@/components/analytics-components/AnalyticsRevenue'
+import { MembershipGrowthChart } from '@/components/analytics-components/AnalyticsGrowth'
+import { PaymentMethodChart } from '@/components/analytics-components/AnalyticsPayments'
+import { BranchPerformanceTable } from '@/components/analytics-components/AnalyticsBranches'
+import { IncomeReportCards } from '@/components/analytics-components/AnalyticsIncome'
 import { MOCK_ANALYTICS_DATA, type AnalyticsData } from '@/lib/analytics-data'
 import { exportToPDF, exportToExcel } from '@/lib/analytics-export'
 

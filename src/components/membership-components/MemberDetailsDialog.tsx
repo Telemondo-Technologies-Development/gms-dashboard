@@ -22,13 +22,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import type { MemberDetailsDialogProps } from '@/types/membership/memberSchemas'
 import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionApi'
+import { SubscriptionApi } from '@/api/generated/apis/SubscriptionApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAuthSession } from '@/lib/auth/auth-session'
-import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
+import { useAddMemberDialogData } from '@/hooks/membership/useAddMemberData'
 import { AddBillingDialog } from './AddBillingForm'
+import { AddSubscriptionDialog } from './AddSubscriptionDialog'
 import { useMemberDetailsDialogData } from '@/hooks/membership/useMemberDetailsData'
-import { isAdminToken } from '@/lib/auth/auth-permissions'
+import { isAdminSession } from '@/lib/auth/auth-permissions'
 import { useBillingActions } from '@/hooks/billing/useBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 
@@ -45,13 +47,17 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
   
   const queryClient = useQueryClient()
   const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
+  const subscriptionApi = getAuthenticatedApi(SubscriptionApi)
 
   const session = useAuthSession()
-  const selectedBranchId = useSelectedBranchId()
+  const { resolvedActorId, selectedBranchId } = useAddMemberDialogData({ open })
 
   const memberActorId = memberGroup?.actorId ?? memberGroup?.id ?? null
 
-  const isAdmin = useMemo(() => isAdminToken(session.token), [session.token])
+  const isAdmin = useMemo(
+    () => isAdminSession({ token: session.token, roles: session.roles }),
+    [session.token, session.roles],
+  )
 
   const { ensureInvoiceForSubscription, createPaymentIfNeeded } = useBillingActions()
 
@@ -96,6 +102,25 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
     return (amount * Math.max(1, members.length)).toFixed(2)
   }, [selectedSubscription, members.length])
 
+  const resolveSubscriptionId = async (): Promise<string> => {
+    if (!selectedSubscriptionId) return ''
+    if (!selectedSubscription) return selectedSubscriptionId
+
+    try {
+      const subsResp = await subscriptionApi.getAllSubscriptions({
+        pageable: { page: 0, size: 500 },
+      })
+      const match = (subsResp.data ?? []).find(
+        (s) =>
+          s.name.trim().toLowerCase() === selectedSubscription.name.trim().toLowerCase() &&
+          s.amount === selectedSubscription.amount,
+      )
+      return match?.id ?? selectedSubscriptionId
+    } catch {
+      return selectedSubscriptionId
+    }
+  }
+
   const updateSubscriptionMutation = useMutation({
     mutationFn: async () => {
       if (!memberGroup?.id || !selectedSubscriptionId || !startDate) {
@@ -108,11 +133,16 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
         throw new Error('Branch not found. Please ensure your user is assigned to a branch.')
       }
       
-      const updatedById = memberSub?.updatedById || memberSub?.createdById
+      const updatedById = memberSub?.updatedById || memberSub?.createdById || resolvedActorId || null
       if (!updatedById) {
         throw new Error(`Cannot determine user ID for session: ${session.username ?? session.email ?? 'unknown'}`)
       }
       
+      const subscriptionIdToUse = await resolveSubscriptionId()
+      if (!subscriptionIdToUse) {
+        throw new Error('Please select a subscription plan.')
+      }
+
       let resultingMemberSubscriptionId: string | undefined = currentMemberSubscriptionId
       let creatorIdForPayment = updatedById
       
@@ -125,7 +155,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
             startDate,
             endDate,
             status: 'ACTIVE',
-            subscriptionId: selectedSubscriptionId,
+            subscriptionId: subscriptionIdToUse,
             updateCurrentSubscription: true,
             updatedById,
           },
@@ -142,7 +172,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
             startDate,
             endDate,
             status: 'ACTIVE',
-            subscriptionId: selectedSubscriptionId,
+            subscriptionId: subscriptionIdToUse,
           },
         })
         if (!createResp.success || !createResp.data) {
@@ -159,16 +189,6 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
     },
   })
   
-  const handleMemberFieldChange = (index: number, field: keyof MemberInfo, value: unknown) => {
-    setMembers((prev) => {
-      const next = [...prev]
-      const member = next[index]
-      if (!member) return prev
-      next[index] = { ...member, [field]: value }
-      return next
-    })
-  }
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!memberGroup) return
@@ -247,7 +267,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
           <DialogHeader>
             <DialogTitle>Member Details</DialogTitle>
             <DialogDescription>
-              View and update member information, subscription dates, and billing.
+              Review member info and update billing to renew memberships when they expire.
             </DialogDescription>
           </DialogHeader>
 
@@ -263,48 +283,46 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                   <CardContent className="space-y-8">
                     <div className="space-y-6">
                       <h3 className="font-semibold leading-none tracking-tight">Member Information</h3>
-                      {members.map((m, index) => (
+                      {members.map((m) => (
                         <div key={m.id} className="rounded-lg space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor={`firstName-${m.id}`}>First Name</Label>
+                              <Label htmlFor={`firstName-${m.id}`}>First Name *</Label>
                               <Input
                                 id={`firstName-${m.id}`}
                                 value={m.firstName || ''}
-                                onChange={(e) => handleMemberFieldChange(index, 'firstName', e.target.value)}
-                                placeholder="Juan"
-                                required
+                                placeholder="Enter first name"
+                                disabled
                               />
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`middleName-${m.id}`}>Middle Name</Label>
+                              <Label htmlFor={`middleName-${m.id}`}>Middle Name </Label>
                               <Input
                                 id={`middleName-${m.id}`}
                                 value={m.middleName || ''}
-                                onChange={(e) => handleMemberFieldChange(index, 'middleName', e.target.value)}
-                                placeholder="D."
+                                placeholder="Enter middle name"
+                                disabled
                               />
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`surname-${m.id}`}>Surname</Label>
+                              <Label htmlFor={`surname-${m.id}`}>Surname *</Label>
                               <Input
                                 id={`surname-${m.id}`}
                                 value={m.surname || ''}
-                                onChange={(e) => handleMemberFieldChange(index, 'surname', e.target.value)}
-                                placeholder="Dela Cruz"
-                                required
+                                placeholder="Enter surname"
+                                disabled
                               />
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`suffix-${m.id}`}>Suffix</Label>
+                              <Label htmlFor={`suffix-${m.id}`}>Suffix </Label>
                               <Input
                                 id={`suffix-${m.id}`}
                                 value={m.suffix || ''}
-                                onChange={(e) => handleMemberFieldChange(index, 'suffix', e.target.value)}
-                                placeholder="Jr."
+                                placeholder="Enter suffix"
+                                disabled
                               />
                             </div>
 
@@ -312,7 +330,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                               <Label>Status</Label>
                               <Select
                                 value={m.status || 'UNDECIDED'}
-                                onValueChange={(v) => handleMemberFieldChange(index, 'status', v)}
+                                disabled
                               >
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select status" />
@@ -370,6 +388,14 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                                 ))}
                               </SelectContent>
                             </Select>
+                            {canEditBilling ? (
+                              <div className="flex items-center">
+                                <AddSubscriptionDialog
+                                  createdById={session.actorId ?? null}
+                                  onCreated={(id) => setSelectedSubscriptionId(id)}
+                                />
+                              </div>
+                            ) : null}
                             {selectedSubscription ? (
                               <p className="text-xs text-muted-foreground">
                                 Interval: {selectedSubscription.intervalCount} {selectedSubscription.intervals} · Grace:{' '}
@@ -452,7 +478,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                   }}
                   totalCost={totalCost}
                   disabled={!canEditBilling}
-                  createdById={session.actorId ?? null}
+                  createdById={resolvedActorId ?? null}
                 />
               </div>
             </div>

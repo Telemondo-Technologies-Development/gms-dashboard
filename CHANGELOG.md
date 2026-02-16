@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Membership: Refactored Add Member and Member Details dialogs to surface in-context "Add subscription" and "Add payment method" actions and refresh lists after creation.
 - Build: Split Vite output into vendor chunks (React, TanStack, Radix UI, charts, Leaflet) to reduce large bundle warnings.
+- Analytics: refactored analytics-component file names 
+- Expense: refactored expense-component file names
 
 
 
