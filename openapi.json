@@ -1359,6 +1359,978 @@
         ]
       }
     },
+    "/api/expense/asset": {
+      "get": {
+        "operationId": "getAllAssetExpense",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListAssetExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all asset expenses",
+        "tags": [
+          "Asset Expense"
+        ]
+      },
+      "post": {
+        "operationId": "createAssetExpense",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetExpenseCreateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create an asset expense",
+        "tags": [
+          "Asset Expense"
+        ]
+      }
+    },
+    "/api/expense/asset/{id}": {
+      "delete": {
+        "operationId": "deleteAssetExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delet an asset expense by ID",
+        "tags": [
+          "Asset Expense"
+        ]
+      },
+      "get": {
+        "operationId": "getAssetExpenseById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get an asset expense by ID",
+        "tags": [
+          "Asset Expense"
+        ]
+      },
+      "put": {
+        "operationId": "updateAssetExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetExpenseUpdateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update an asset expense by ID",
+        "tags": [
+          "Asset Expense"
+        ]
+      }
+    },
+    "/api/expense/assetMaintenance": {
+      "get": {
+        "operationId": "getAllAssetMaintenanceExpense",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListAssetMaintenanceExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all asset maintenance expenses",
+        "tags": [
+          "Asset Maintenance Expense"
+        ]
+      },
+      "post": {
+        "operationId": "createAssetMaintenanceExpense",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetMaintenanceExpenseCreateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetMaintenanceExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create an asset maintenance expense",
+        "tags": [
+          "Asset Maintenance Expense"
+        ]
+      }
+    },
+    "/api/expense/assetMaintenance/{id}": {
+      "delete": {
+        "operationId": "deleteAssetMaintenanceExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete an asset maintenance expense by ID",
+        "tags": [
+          "Asset Maintenance Expense"
+        ]
+      },
+      "get": {
+        "operationId": "getAssetMaintenanceExpenseById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetMaintenanceExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get an asset maintenance expense by ID",
+        "tags": [
+          "Asset Maintenance Expense"
+        ]
+      },
+      "put": {
+        "operationId": "updateAssetMaintenanceExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetMaintenanceExpenseUpdateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAssetMaintenanceExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update an asset maintenance expense by ID",
+        "tags": [
+          "Asset Maintenance Expense"
+        ]
+      }
+    },
+    "/api/expense/other": {
+      "get": {
+        "operationId": "getAllOtherExpense",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListOtherExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all other expenses",
+        "tags": [
+          "Other Expense"
+        ]
+      },
+      "post": {
+        "operationId": "createOtherExpense",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtherExpenseCreateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOtherExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create an other expense",
+        "tags": [
+          "Other Expense"
+        ]
+      }
+    },
+    "/api/expense/other/{id}": {
+      "delete": {
+        "operationId": "deleteOtherExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete an other expense by ID",
+        "tags": [
+          "Other Expense"
+        ]
+      },
+      "get": {
+        "operationId": "getOtherExpenseById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OtherExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get an other expense by ID",
+        "tags": [
+          "Other Expense"
+        ]
+      },
+      "put": {
+        "operationId": "updateOtherExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtherExpenseUpdateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOtherExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update an other expense by ID",
+        "tags": [
+          "Other Expense"
+        ]
+      }
+    },
+    "/api/expense/salary": {
+      "get": {
+        "operationId": "getAllSalaryExpense",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListSalaryExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all salary expenses",
+        "tags": [
+          "Salary Expense"
+        ]
+      },
+      "post": {
+        "operationId": "createSalaryExpense",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalaryExpenseCreateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSalaryExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Salary Expense",
+        "tags": [
+          "Salary Expense"
+        ]
+      }
+    },
+    "/api/expense/salary/{id}": {
+      "delete": {
+        "operationId": "deleteSalaryExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a salary Expense by id",
+        "tags": [
+          "Salary Expense"
+        ]
+      },
+      "get": {
+        "operationId": "getSalaryExpenseById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalaryExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get salary expense by id",
+        "tags": [
+          "Salary Expense"
+        ]
+      },
+      "put": {
+        "operationId": "updateSalaryExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SalaryExpenseUpdateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSalaryExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update an existing Salary Expense by id",
+        "tags": [
+          "Salary Expense"
+        ]
+      }
+    },
+    "/api/expense/supply": {
+      "get": {
+        "operationId": "getAllSuppliesExpense",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListSuppliesExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all supplies expenses",
+        "tags": [
+          "Supplies Expense"
+        ]
+      },
+      "post": {
+        "operationId": "createSuppliesExpense",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuppliesExpenseCreateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSuppliesExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a supplies expense",
+        "tags": [
+          "Supplies Expense"
+        ]
+      }
+    },
+    "/api/expense/supply/{id}": {
+      "delete": {
+        "operationId": "deleteSuppliesExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a supplies expense by ID",
+        "tags": [
+          "Supplies Expense"
+        ]
+      },
+      "get": {
+        "operationId": "getSuppliesExpenseById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuppliesExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a supplies expense by ID",
+        "tags": [
+          "Supplies Expense"
+        ]
+      },
+      "put": {
+        "operationId": "updateSuppliesExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuppliesExpenseUpdateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSuppliesExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a supplies expense by ID",
+        "tags": [
+          "Supplies Expense"
+        ]
+      }
+    },
+    "/api/expense/utility": {
+      "get": {
+        "operationId": "getAllUtilityExpense",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListUtilityExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all utility expenses",
+        "tags": [
+          "Utility Expense"
+        ]
+      },
+      "post": {
+        "operationId": "createUtilityExpense",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UtilityExpenseCreateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUtilityExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a utility expense",
+        "tags": [
+          "Utility Expense"
+        ]
+      }
+    },
+    "/api/expense/utility/{id}": {
+      "delete": {
+        "operationId": "deleteUtilityExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a utility expense by ID",
+        "tags": [
+          "Utility Expense"
+        ]
+      },
+      "get": {
+        "operationId": "getUtilityExpenseById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UtilityExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a utility expense by ID",
+        "tags": [
+          "Utility Expense"
+        ]
+      },
+      "put": {
+        "operationId": "updateUtilityExpense",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UtilityExpenseUpdateDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUtilityExpenseReadDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a utility expense by ID",
+        "tags": [
+          "Utility Expense"
+        ]
+      }
+    },
     "/api/invoice": {
       "get": {
         "operationId": "getAllInvoices",
@@ -2291,6 +3263,320 @@
         "summary": "Get a Permission by id",
         "tags": [
           "Access Control"
+        ]
+      }
+    },
+    "/api/report": {
+      "get": {
+        "operationId": "getAllReports",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListReportTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report"
+        ]
+      },
+      "post": {
+        "operationId": "createReport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report"
+        ]
+      }
+    },
+    "/api/report/type": {
+      "get": {
+        "operationId": "getAll",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListReportTypeTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report Type"
+        ]
+      },
+      "post": {
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportTypePostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportTypeTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report Type"
+        ]
+      }
+    },
+    "/api/report/type/{id}": {
+      "delete": {
+        "operationId": "delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report Type"
+        ]
+      },
+      "get": {
+        "operationId": "getById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportTypeTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report Type"
+        ]
+      },
+      "put": {
+        "operationId": "update",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportTypePutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportTypeTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report Type"
+        ]
+      }
+    },
+    "/api/report/{id}": {
+      "delete": {
+        "operationId": "deleteReport",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report"
+        ]
+      },
+      "get": {
+        "operationId": "getReport",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report"
+        ]
+      },
+      "put": {
+        "operationId": "updateReport",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Report"
         ]
       }
     },
@@ -3835,6 +5121,68 @@
           "timestamp"
         ]
       },
+      "ApiResponseAssetExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AssetExpenseReadDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseAssetMaintenanceExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AssetMaintenanceExpenseReadDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseAssetMaintenanceTableDTO": {
         "type": "object",
         "properties": {
@@ -4090,6 +5438,74 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AssetCategoryTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListAssetExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetExpenseReadDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListAssetMaintenanceExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetMaintenanceExpenseReadDTO"
             }
           },
           "errors": {
@@ -4423,6 +5839,40 @@
           "timestamp"
         ]
       },
+      "ApiResponseListOtherExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OtherExpenseReadDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListPaymentMethodTableDTO": {
         "type": "object",
         "properties": {
@@ -4525,6 +5975,74 @@
           "timestamp"
         ]
       },
+      "ApiResponseListReportTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListReportTypeTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportTypeTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListRoleTableDTO": {
         "type": "object",
         "properties": {
@@ -4532,6 +6050,40 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RoleTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListSalaryExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalaryExpenseReadDTO"
             }
           },
           "errors": {
@@ -4661,6 +6213,40 @@
           "timestamp"
         ]
       },
+      "ApiResponseListSuppliesExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SuppliesExpenseReadDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListSuppliesLogTableDTO": {
         "type": "object",
         "properties": {
@@ -4736,6 +6322,40 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListUtilityExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UtilityExpenseReadDTO"
             }
           },
           "errors": {
@@ -4887,6 +6507,37 @@
           "timestamp"
         ]
       },
+      "ApiResponseOtherExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/OtherExpenseReadDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponsePaymentMethodTableDTO": {
         "type": "object",
         "properties": {
@@ -4949,6 +6600,68 @@
           "timestamp"
         ]
       },
+      "ApiResponseReportTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ReportTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseReportTypeTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ReportTypeTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseRolePermissionTableDTO": {
         "type": "object",
         "properties": {
@@ -4985,6 +6698,37 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/RoleTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseSalaryExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SalaryExpenseReadDTO"
           },
           "errors": {
             "type": "array",
@@ -5109,6 +6853,37 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/SubscriptionTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseSuppliesExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SuppliesExpenseReadDTO"
           },
           "errors": {
             "type": "array",
@@ -5287,6 +7062,37 @@
           "timestamp"
         ]
       },
+      "ApiResponseUtilityExpenseReadDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/UtilityExpenseReadDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "AssetCategoryPostDTO": {
         "type": "object",
         "description": "Format for Asset Category create",
@@ -5344,6 +7150,262 @@
         "required": [
           "id",
           "name"
+        ]
+      },
+      "AssetExpenseCreateDTO": {
+        "type": "object",
+        "description": "Request body for creating a new asset expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "assetId",
+          "branchId",
+          "paidAt"
+        ]
+      },
+      "AssetExpenseReadDTO": {
+        "type": "object",
+        "description": "Response data representing an asset expense details",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "amount",
+          "createdAt",
+          "id",
+          "objectIds",
+          "paidAt",
+          "updatedAt"
+        ]
+      },
+      "AssetExpenseUpdateDTO": {
+        "type": "object",
+        "description": "Request body for updating an existing asset expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "assetId",
+          "branchId",
+          "paidAt"
+        ]
+      },
+      "AssetMaintenanceExpenseCreateDTO": {
+        "type": "object",
+        "description": "Request body for creating a new asset maintenance expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "assetMaintenanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "assetMaintenanceId",
+          "branchId",
+          "paidAt"
+        ]
+      },
+      "AssetMaintenanceExpenseReadDTO": {
+        "type": "object",
+        "description": "Response data representing asset maintenance expense details",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "assetMaintenanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "amount",
+          "createdAt",
+          "id",
+          "objectIds",
+          "paidAt",
+          "updatedAt"
+        ]
+      },
+      "AssetMaintenanceExpenseUpdateDTO": {
+        "type": "object",
+        "description": "Request body for updating an existing asset maintenance expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "assetMaintenanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "assetMaintenanceId",
+          "branchId",
+          "paidAt"
         ]
       },
       "AssetMaintenancePatchDTO": {
@@ -6776,6 +8838,134 @@
           "updatedAt"
         ]
       },
+      "OtherExpenseCreateDTO": {
+        "type": "object",
+        "description": "Request body for creating a new miscellaneous (other) expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "otherExpenseTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "branchId",
+          "otherExpenseTypeId",
+          "paidAt"
+        ]
+      },
+      "OtherExpenseReadDTO": {
+        "type": "object",
+        "description": "Response data representing miscellaneous (other) expense details",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "otherExpenseTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "amount",
+          "createdAt",
+          "id",
+          "objectIds",
+          "paidAt",
+          "updatedAt"
+        ]
+      },
+      "OtherExpenseUpdateDTO": {
+        "type": "object",
+        "description": "Request body for updating an existing miscellaneous (other) expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "otherExpenseTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "branchId",
+          "otherExpenseTypeId",
+          "paidAt"
+        ]
+      },
       "PageMetadata": {
         "type": "object",
         "properties": {
@@ -7044,6 +9234,202 @@
           "name"
         ]
       },
+      "ReportPostDTO": {
+        "type": "object",
+        "description": "Format for Report create",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reportTypeId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "createdById",
+          "objectIds",
+          "reportTypeId"
+        ]
+      },
+      "ReportPutDTO": {
+        "type": "object",
+        "description": "Format for Report update",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reportTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "objectIds",
+          "reportTypeId",
+          "updatedById"
+        ]
+      },
+      "ReportTableDTO": {
+        "type": "object",
+        "description": "Format for Report read",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reportTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "id",
+          "objectIds",
+          "reportTypeId"
+        ]
+      },
+      "ReportTypePostDTO": {
+        "type": "object",
+        "description": "Format for ReportType create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdById",
+          "name"
+        ]
+      },
+      "ReportTypePutDTO": {
+        "type": "object",
+        "description": "Format for ReportType update",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "updatedById"
+        ]
+      },
+      "ReportTypeTableDTO": {
+        "type": "object",
+        "description": "Format for Report Type read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
       "RolePermissionDTO": {
         "type": "object",
         "description": "Format for Role Permission's update & delete",
@@ -7166,6 +9552,161 @@
           "description",
           "id",
           "name"
+        ]
+      },
+      "SalaryExpenseCreateDTO": {
+        "type": "object",
+        "description": "Request body for creating a new salary expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "salaryType": {
+            "type": "string",
+            "enum": [
+              "FULL",
+              "PARTIAL",
+              "ADVANCED"
+            ]
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "branchId",
+          "paidAt",
+          "period",
+          "salaryType"
+        ]
+      },
+      "SalaryExpenseReadDTO": {
+        "type": "object",
+        "description": "Response data representing salary expense details",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "salaryType": {
+            "type": "string",
+            "enum": [
+              "FULL",
+              "PARTIAL",
+              "ADVANCED"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "amount",
+          "createdAt",
+          "objectIds",
+          "paidAt",
+          "period",
+          "salaryType",
+          "updatedAt"
+        ]
+      },
+      "SalaryExpenseUpdateDTO": {
+        "type": "object",
+        "description": "Request body for updating an existing salary expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "salaryType": {
+            "type": "string",
+            "enum": [
+              "FULL",
+              "PARTIAL",
+              "ADVANCED"
+            ]
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "branchId",
+          "paidAt",
+          "period",
+          "salaryType"
         ]
       },
       "SchedulePostDTO": {
@@ -7584,6 +10125,134 @@
           "updatedAt"
         ]
       },
+      "SuppliesExpenseCreateDTO": {
+        "type": "object",
+        "description": "Request body for creating a new supplies expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "suppliesLogId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "branchId",
+          "paidAt",
+          "suppliesLogId"
+        ]
+      },
+      "SuppliesExpenseReadDTO": {
+        "type": "object",
+        "description": "Response data representing supplies expense details",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "suppliesLogId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "amount",
+          "createdAt",
+          "id",
+          "objectIds",
+          "paidAt",
+          "updatedAt"
+        ]
+      },
+      "SuppliesExpenseUpdateDTO": {
+        "type": "object",
+        "description": "Request body for updating an existing supplies expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "suppliesLogId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "branchId",
+          "paidAt",
+          "suppliesLogId"
+        ]
+      },
       "SuppliesLogPostDTO": {
         "type": "object",
         "description": "Format for Supplies Log create",
@@ -7892,6 +10561,161 @@
           "email",
           "id",
           "updatedAt"
+        ]
+      },
+      "UtilityExpenseCreateDTO": {
+        "type": "object",
+        "description": "Request body for creating a new utility expense record (e.g., water, electricity)",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "meter": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "utilityTypeId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "branchId",
+          "meter",
+          "paidAt",
+          "period",
+          "utilityTypeId"
+        ]
+      },
+      "UtilityExpenseReadDTO": {
+        "type": "object",
+        "description": "Response data representing utility expense details",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "meter": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "utilityTypeId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "amount",
+          "createdAt",
+          "id",
+          "meter",
+          "objectIds",
+          "paidAt",
+          "period",
+          "updatedAt"
+        ]
+      },
+      "UtilityExpenseUpdateDTO": {
+        "type": "object",
+        "description": "Request body for updating an existing utility expense record",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "meter": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "uniqueItems": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "period": {
+            "type": "string",
+            "format": "date"
+          },
+          "utilityTypeId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "actorId",
+          "amount",
+          "branchId",
+          "meter",
+          "paidAt",
+          "period",
+          "utilityTypeId"
         ]
       }
     }

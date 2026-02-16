@@ -13,8 +13,11 @@ import { EmployeeTab } from "@/components/user-components/EmployeeTab";
 
 import { useEmployees } from "@/hooks/users/useEmployees";
 import { useEmployeeActions } from "@/hooks/users/useEmployeeActions";
+import { useAuthSession } from "@/lib/auth/auth-session";
+import { isAdminSession } from "@/lib/auth/auth-permissions";
 
 import type { EmployeeTableDTO } from "@/api/generated/models";
+import type { EmployeeFormValues } from "@/types/user/userSchemas";
 
 export const Route = createFileRoute("/dashboard/admin/users")({
   component: UsersPage,
@@ -25,6 +28,9 @@ function UsersPage() {
   const [selectedEmployee, setSelectedEmployee] =
     useState<EmployeeTableDTO | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const session = useAuthSession();
+  const isAdmin = isAdminSession({ token: session.token, roles: session.roles });
+  const hasResolvedRoles = session.roles.length > 0;
 
   const {
     data: employees,
@@ -46,11 +52,23 @@ function UsersPage() {
     setIsEmployeeDialogOpen(true);
   };
 
-  const handleEmployeeSubmit = async (values: any) => {
+  const handleEmployeeSubmit = async (values: EmployeeFormValues) => {
     await saveEmployee.mutateAsync({ employee: selectedEmployee, values });
     setIsEmployeeDialogOpen(false);
     setSelectedEmployee(null);
   };
+
+  if (hasResolvedRoles && !isAdmin) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Access denied</AlertTitle>
+        <AlertDescription>
+          Only admin accounts can access employee admin management.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   const handleDelete = async (id: string) => {
     await deleteEmployee.mutateAsync(id);

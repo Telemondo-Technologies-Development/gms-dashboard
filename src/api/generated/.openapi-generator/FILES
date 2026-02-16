@@ -13,6 +13,8 @@ apis/MemberApi.ts
 apis/MemberSubscriptionApi.ts
 apis/ObjectStorageApi.ts
 apis/PaymentApi.ts
+apis/ReportApi.ts
+apis/ReportTypeApi.ts
 apis/SubscriptionApi.ts
 apis/SubscriptionAvailedApi.ts
 apis/SuppliesApi.ts
@@ -43,6 +45,8 @@ docs/ApiResponseListMemberTableDTO.md
 docs/ApiResponseListPaymentMethodTableDTO.md
 docs/ApiResponseListPaymentTableDTO.md
 docs/ApiResponseListPermission.md
+docs/ApiResponseListReportTableDTO.md
+docs/ApiResponseListReportTypeTableDTO.md
 docs/ApiResponseListRoleTableDTO.md
 docs/ApiResponseListScheduleTableDTO.md
 docs/ApiResponseListSubscriptionAvailedTableDTO.md
@@ -56,6 +60,8 @@ docs/ApiResponseObjectStorage.md
 docs/ApiResponseOptionalPermission.md
 docs/ApiResponsePaymentMethodTableDTO.md
 docs/ApiResponsePaymentTableDTO.md
+docs/ApiResponseReportTableDTO.md
+docs/ApiResponseReportTypeTableDTO.md
 docs/ApiResponseRolePermissionTableDTO.md
 docs/ApiResponseRoleTableDTO.md
 docs/ApiResponseScheduleTableDTO.md
@@ -127,6 +133,14 @@ docs/PaymentPostDTO.md
 docs/PaymentPutDTO.md
 docs/PaymentTableDTO.md
 docs/Permission.md
+docs/ReportApi.md
+docs/ReportPostDTO.md
+docs/ReportPutDTO.md
+docs/ReportTableDTO.md
+docs/ReportTypeApi.md
+docs/ReportTypePostDTO.md
+docs/ReportTypePutDTO.md
+docs/ReportTypeTableDTO.md
 docs/RolePermissionDTO.md
 docs/RolePermissionTableDTO.md
 docs/RolePostDTO.md
@@ -180,6 +194,8 @@ models/ApiResponseListMemberTableDTO.ts
 models/ApiResponseListPaymentMethodTableDTO.ts
 models/ApiResponseListPaymentTableDTO.ts
 models/ApiResponseListPermission.ts
+models/ApiResponseListReportTableDTO.ts
+models/ApiResponseListReportTypeTableDTO.ts
 models/ApiResponseListRoleTableDTO.ts
 models/ApiResponseListScheduleTableDTO.ts
 models/ApiResponseListSubscriptionAvailedTableDTO.ts
@@ -193,6 +209,8 @@ models/ApiResponseObjectStorage.ts
 models/ApiResponseOptionalPermission.ts
 models/ApiResponsePaymentMethodTableDTO.ts
 models/ApiResponsePaymentTableDTO.ts
+models/ApiResponseReportTableDTO.ts
+models/ApiResponseReportTypeTableDTO.ts
 models/ApiResponseRolePermissionTableDTO.ts
 models/ApiResponseRoleTableDTO.ts
 models/ApiResponseScheduleTableDTO.ts
@@ -250,6 +268,12 @@ models/PaymentPostDTO.ts
 models/PaymentPutDTO.ts
 models/PaymentTableDTO.ts
 models/Permission.ts
+models/ReportPostDTO.ts
+models/ReportPutDTO.ts
+models/ReportTableDTO.ts
+models/ReportTypePostDTO.ts
+models/ReportTypePutDTO.ts
+models/ReportTypeTableDTO.ts
 models/RolePermissionDTO.ts
 models/RolePermissionTableDTO.ts
 models/RolePostDTO.ts

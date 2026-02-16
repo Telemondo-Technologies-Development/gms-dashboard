@@ -15,6 +15,8 @@ export * from './MemberApi';
 export * from './MemberSubscriptionApi';
 export * from './ObjectStorageApi';
 export * from './PaymentApi';
+export * from './ReportApi';
+export * from './ReportTypeApi';
 export * from './SubscriptionApi';
 export * from './SubscriptionAvailedApi';
 export * from './SuppliesApi';

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'; 
-import { useMembersData } from '@/hooks/membership/useMembersData';
+import { useMembersData } from '@/hooks/membership/useMembers';
 import { useBranches } from '@/hooks/branch/useBranches';
 
 
@@ -190,16 +190,6 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
                 ))}
                 </div>
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="branchName">Branch Name</Label>
-            <Input
-              id="branchName"
-              placeholder="Enter branch name"
-              value={branch}
-              onChange={(e) => setBranch(e.target.value)}
-            />
           </div>
 
           <div className="space-y-2">

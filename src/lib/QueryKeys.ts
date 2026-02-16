@@ -18,6 +18,10 @@
     subscriptionAvailed: 'subscription-availed',
   }
 
+  export const billingCycleQueryKeys = {
+    billingCycles: 'billing-cycles',
+  }
+
   export const branchQueryKeys = {
     branches: 'branches',
   }

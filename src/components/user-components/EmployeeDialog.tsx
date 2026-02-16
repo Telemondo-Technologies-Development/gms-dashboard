@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CheckCircle2, Loader2, UserPlus, XCircle } from 'lucide-react'
@@ -31,9 +31,12 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { EmployeeTableDTO } from '@/api/generated/models'
-import { employeeFormSchema, createUserFormSchema } from '@/types/user/userSchemas'
+import { employeeFormSchema } from '@/types/user/userSchemas'
 import type { EmployeeFormInput, EmployeeFormValues, CreateUserFormInput } from '@/types/user/userSchemas'
 import { useUserActions } from '@/hooks/users/useUserActions'
+import { useAuthSession } from '@/lib/auth/auth-session'
+import { isAdminSession } from '@/lib/auth/auth-permissions'
+import { CreateEmployeeLoginDialog } from './CreateEmployeeLoginDialog'
 
 export interface EmployeeDialogProps {
 	open: boolean
@@ -48,9 +51,14 @@ export function EmployeeDialog({
 	employee,
 	onSubmit,
 }: EmployeeDialogProps) {
-	const [showUserForm, setShowUserForm] = useState(false)
+	const [showCreateLoginModal, setShowCreateLoginModal] = useState(false)
 	const [userCreated, setUserCreated] = useState(false)
 	const { createUser } = useUserActions()
+	const session = useAuthSession()
+	const canCreateEmployeeLogin = useMemo(
+		() => isAdminSession({ token: session.token, roles: session.roles }),
+		[session.token, session.roles],
+	)
 
 	const form = useForm<EmployeeFormInput>({
 		resolver: zodResolver(employeeFormSchema),
@@ -74,22 +82,13 @@ export function EmployeeDialog({
 			: undefined,
 	})
 
-	const userForm = useForm<CreateUserFormInput>({
-		resolver: zodResolver(createUserFormSchema),
-		defaultValues: {
-			email: '',
-			password: '',
-		},
-	})
-
 	// Reset forms and state when dialog closes
 	useEffect(() => {
 		if (!open) {
-			setShowUserForm(false)
+			setShowCreateLoginModal(false)
 			setUserCreated(false)
-			userForm.reset()
 		}
-	}, [open, userForm])
+	}, [open])
 
 	const hasUser = employee?.user
 
@@ -104,13 +103,27 @@ export function EmployeeDialog({
 	}
 
 	const handleCreateUser = async (values: CreateUserFormInput) => {
+		if (!employee) throw new Error('Employee is required to create login access.')
 		try {
 			const result = await createUser.mutateAsync(values)
+			const createdUserId = result.data?.id
+			if (!createdUserId) {
+				throw new Error(result.message ?? 'User created but no user ID returned.')
+			}
+
+			await onSubmit({
+				firstName: employee.firstName,
+				surname: employee.surname,
+				middleName: employee.middleName ?? '',
+				contactNo: employee.contactNo,
+				status: employee.status,
+				suffix: employee.suffix ?? '',
+				userId: createdUserId,
+			})
+
 			setUserCreated(true)
-			setShowUserForm(false)
+			setShowCreateLoginModal(false)
 			
-			// If we got a user ID back, we could update the employee here
-			// You might need to add logic to link the user to the employee
 			console.log('User created:', result)
 		} catch (error) {
 			console.error('Error creating user', error)
@@ -264,109 +277,33 @@ export function EmployeeDialog({
 											</>
 										)}
 									</CardTitle>
-									<CardDescription>
+										<CardDescription>
 										{hasUser
 											? 'This employee has system login access.'
 											: 'Create login credentials for roles that need system access (Admin, Manager, Cashier).'}
 									</CardDescription>
 								</CardHeader>
-								<CardContent>
-									{hasUser ? (
-										<div className="space-y-2">
-											<div className="text-sm">
-												<span className="font-medium">Email:</span> {employee.user?.email || 'N/A'}
-											</div>
-										{employee.user?.id && (
-											<div className="text-sm">
-												<span className="font-medium">User ID:</span> {employee.user.id}
-											</div>
+									<CardContent className="space-y-2">
+										{hasUser || userCreated ? (
+											<p className="text-sm text-muted-foreground">Login account is already linked to this employee.</p>
+										) : canCreateEmployeeLogin ? (
+											<Button type="button" variant="outline" onClick={() => setShowCreateLoginModal(true)}>
+												<UserPlus className="mr-2 h-4 w-4" />
+												Create Login Access
+											</Button>
+										) : (
+											<p className="text-sm text-muted-foreground">Only admins can create employee login access.</p>
 										)}
-										</div>
-									) : (
-										<div className="space-y-4">
-											{!showUserForm && !userCreated && (
-												<Button
-													type="button"
-													variant="outline"
-													onClick={() => setShowUserForm(true)}
-													className="w-full"
-												>
-													<UserPlus className="h-4 w-4 mr-2" />
-													Create Login Credentials
-												</Button>
-											)}
-
-											{userCreated && (
-												<div className="flex items-center gap-2 text-sm text-green-600">
-													<CheckCircle2 className="h-4 w-4" />
-													Login credentials created successfully. Refresh the page to see updated employee data.
-												</div>
-											)}
-
-											{showUserForm && !userCreated && (
-												<Form {...userForm}>
-													<form onSubmit={userForm.handleSubmit(handleCreateUser)} className="space-y-4">
-														<FormField
-															control={userForm.control}
-															name="email"
-															render={({ field }) => (
-																<FormItem>
-																	<FormLabel>Email Address</FormLabel>
-																	<FormControl>
-																		<Input 
-																			type="email" 
-																			placeholder="employee@example.com" 
-																			{...field} 
-																		/>
-																	</FormControl>
-																	<FormMessage />
-																</FormItem>
-															)}
-														/>
-														<FormField
-															control={userForm.control}
-															name="password"
-															render={({ field }) => (
-																<FormItem>
-																	<FormLabel>Password</FormLabel>
-																	<FormControl>
-																		<Input 
-																			type="password" 
-																			placeholder="••••••••" 
-																			{...field} 
-																		/>
-																	</FormControl>
-																	<FormMessage />
-																</FormItem>
-															)}
-														/>
-														<div className="flex gap-2">
-															<Button
-																type="button"
-																variant="outline"
-																onClick={() => setShowUserForm(false)}
-																className="flex-1"
-															>
-																Cancel
-															</Button>
-															<Button
-																type="submit"
-																disabled={userForm.formState.isSubmitting}
-																className="flex-1"
-															>
-																{userForm.formState.isSubmitting ? (
-																	<Loader2 className="h-4 w-4 animate-spin mr-2" />
-																) : null}
-																Create User
-															</Button>
-														</div>
-													</form>
-												</Form>
-											)}
-										</div>
-									)}
-								</CardContent>
+									</CardContent>
 							</Card>
+
+								<CreateEmployeeLoginDialog
+									open={showCreateLoginModal}
+									onOpenChange={setShowCreateLoginModal}
+									employeeName={`${employee.firstName} ${employee.surname}`}
+									onSubmit={handleCreateUser}
+									isSubmitting={createUser.isPending}
+								/>
 						</>
 					)}
 				</div>

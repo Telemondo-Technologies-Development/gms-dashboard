@@ -21,11 +21,12 @@ export type AuthSession = {
   email: string | null
   username: string | null
   actorId: string | null
+  roles: string[]
   assignedBranches: BranchListDTO[] // All branches user can access
 }
 
 type AuthStore = AuthSession & {
-  setAuthSession: (data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'assignedBranches'>>) => void
+  setAuthSession: (data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'roles' | 'assignedBranches'>>) => void
   clearAuthSession: () => void
 }
 
@@ -34,6 +35,7 @@ const initialState: AuthSession = {
   email: null,
   username: null,
   actorId: null,
+  roles: [],
   assignedBranches: [],
 }
 
@@ -52,6 +54,9 @@ export const useAuthStore = create<AuthStore>()(
             email: 'email' in data ? (data.email?.trim() || null) : state.email,
             username: 'username' in data ? (data.username?.trim() || null) : state.username,
             actorId: 'actorId' in data ? (data.actorId?.trim() || null) : state.actorId,
+            roles: 'roles' in data && Array.isArray(data.roles)
+              ? data.roles.filter((role): role is string => typeof role === 'string' && role.trim().length > 0)
+              : state.roles,
             assignedBranches,
           }
         }),
@@ -68,6 +73,7 @@ export function useAuthSession(): AuthSession {
   const email = useAuthStore((state) => state.email)
   const username = useAuthStore((state) => state.username)
   const actorId = useAuthStore((state) => state.actorId)
+  const roles = useAuthStore((state) => state.roles)
   const assignedBranches = useAuthStore((state) => state.assignedBranches)
 
   return {
@@ -75,11 +81,12 @@ export function useAuthSession(): AuthSession {
     email,
     username,
     actorId,
+    roles,
     assignedBranches,
   }
 }
 
-export function setAuthSession(data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'assignedBranches'>>): void {
+export function setAuthSession(data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'roles' | 'assignedBranches'>>): void {
   useAuthStore.getState().setAuthSession(data)
 }
 
@@ -94,6 +101,7 @@ export function readAuthSession(): AuthSession {
     email: state.email,
     username: state.username,
     actorId: state.actorId,
+    roles: state.roles,
     assignedBranches: state.assignedBranches,
   }
 }

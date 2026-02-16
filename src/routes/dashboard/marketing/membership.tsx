@@ -7,7 +7,7 @@ import { Search, QrCode, Fingerprint, UserCheck, Clock } from 'lucide-react'
 import type { MemberFormData, MemberInfo, AttendanceRecord, MembershipSearchForm } from '@/types/membership/memberSchemas'
 import MembersTable from '@/components/membership-components/MembersTable'
 import { MemberDetailsDialog } from '@/components/membership-components/MemberDetailsDialog'
-import { useMembersData } from '@/hooks/membership/useMembersData'
+import { useMembersData } from '@/hooks/membership/useMembers'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -24,7 +24,6 @@ function MembershipRoute() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [selectedMemberGroupSnapshot, setSelectedMemberGroupSnapshot] = useState<MemberFormData | null>(null)
 
-  // Use the shared hook - no need for local members state
   const { enrichedMembers, isLoading } = useMembersData()
 
   const form = useForm<MembershipSearchForm>({

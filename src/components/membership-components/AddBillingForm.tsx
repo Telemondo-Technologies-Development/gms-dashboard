@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AddPaymentMethodDialog } from '@/components/membership-components/AddPaymentMethodDialog'
 import { useQuery } from '@tanstack/react-query'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { paymentQueryKeys } from '@/lib/QueryKeys'
@@ -16,6 +17,7 @@ export interface AddBillingDialogProps {
   totalCost: string
   disabled?: boolean
   loadPaymentMethods?: boolean
+  createdById?: string | null
 }
 
 export function AddBillingDialog({
@@ -25,6 +27,7 @@ export function AddBillingDialog({
   totalCost,
   disabled = false,
   loadPaymentMethods = true,
+  createdById = null,
 }: AddBillingDialogProps) {
   const NONE_PAYMENT_METHOD_VALUE = '__none__'
   const EMPTY_PAYMENT_METHODS_VALUE = '__empty_payment_methods__'
@@ -95,7 +98,7 @@ export function AddBillingDialog({
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="paymentMethod">Mode of Payment</Label>
+          <Label htmlFor="paymentMethod">Mode of Payment * </Label>
           <Select
             value={paymentMethodId}
             disabled={disabled}
@@ -127,9 +130,17 @@ export function AddBillingDialog({
               )}
             </SelectContent>
           </Select>
+          {!disabled ? (
+            <div className="pt-2">
+              <AddPaymentMethodDialog
+                createdById={createdById}
+                onCreated={(id, name) => onPaymentMethodChange(id, name)}
+              />
+            </div>
+          ) : null}
         </div>
 
-        <div className="rounded-xl bg-muted/50 p-4 space-y-3">
+        <Card className="rounded-xl bg-muted/50 p-4 space-y-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Subscription</span>
             <span className="font-medium">{selectedSubscription?.name || '—'}</span>
@@ -156,7 +167,7 @@ export function AddBillingDialog({
             <span className="font-semibold">Total</span>
             <span className="text-2xl font-bold text-primary">PHP {totalCost}</span>
           </div>
-        </div>
+        </Card>
       </CardContent>
     </Card>
   )

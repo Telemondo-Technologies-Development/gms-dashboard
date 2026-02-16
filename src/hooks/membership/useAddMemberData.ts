@@ -5,11 +5,12 @@ import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
 import type { BranchPersonnelTableDTO } from '@/api/generated/models/BranchPersonnelTableDTO'
 import { BranchPersonnelTableDTOStatusEnum } from '@/api/generated/models/BranchPersonnelTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
-import type { AuthSession } from '@/lib/auth/auth-session'
+import { useAuthSession } from '@/lib/auth/auth-session'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
 import { tryDecodeJwtClaims, getStringClaim, looksLikeUuid } from '@/lib/auth/jwt-utils'
 import { useSubscriptionAvailed } from './useSubscriptionAvailed'
 import { userQueryKeys, branchQueryKeys } from '@/lib/QueryKeys'
+import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
 
 
 
@@ -68,8 +69,10 @@ async function fetchUserByEmail(email: string, token?: string): Promise<UserTabl
   return parsed.data.data.find((u) => u.email.toLowerCase() === needle) ?? null
 }
 
-export function useAddMemberDialogData(options: { session: AuthSession; open: boolean }) {
-  const { session, open } = options
+export function useAddMemberDialogData(options: { open: boolean }) {
+  const { open } = options
+  const session = useAuthSession()
+  const selectedBranchId = useSelectedBranchId()
   const token = session.token ?? ''
   const storedEmail = session.email ?? ''
   const storedUsername = session.username ?? ''
@@ -145,6 +148,7 @@ export function useAddMemberDialogData(options: { session: AuthSession; open: bo
   const subscriptionsQuery = useSubscriptionAvailed(typeof window !== 'undefined' && open)
 
   return {
+    selectedBranchId,
     token,
     authUserId,
     currentUserQuery,

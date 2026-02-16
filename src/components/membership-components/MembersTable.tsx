@@ -2,7 +2,7 @@
 import { format } from 'date-fns'
 import { Search, Calendar, RefreshCw, Loader2 } from 'lucide-react'
 
-import { useMembersData } from '@/hooks/membership/useMembersData'
+import { useMembersData } from '@/hooks/membership/useMembers'
 import { AddMemberDialog } from '@/components/membership-components/AddMemberDialog'
 import type { MemberFormData } from '@/types/membership/memberSchemas'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -54,20 +54,19 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
 
   // Memoize badge function
   const getMembershipStatusBadge = useCallback((endDate: Date | undefined) => {
-    if (!endDate) return <Badge variant="outline">No Date</Badge>
+    if (!endDate) return <span className="text-destructive font-semibold">Expired</span>
 
     const today = new Date()
     const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
     if (daysUntilExpiry < 0) {
-      return <Badge variant="destructive">Expired</Badge>
+      return <span className="text-destructive font-semibold">Expired</span>
+    } else if (daysUntilExpiry <= 3) {
+      return <span className="text-red-500 font-semibold">Expiring Soon</span>
     } else if (daysUntilExpiry <= 7) {
-      return <Badge variant="destructive">Expiring Soon</Badge>
-    } else if (daysUntilExpiry <= 30) {
-      return <Badge variant="outline">Ending Soon</Badge>
+      return <span className="text-orange-500 font-semibold">Ending Soon</span>
     }
-
-    return <Badge variant="default">Active</Badge>
+    return <span className="text-green-500 font-semibold">Active</span>
   }, [])
 
   return (
@@ -130,9 +129,9 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[40%]">Name</TableHead>
-                    <TableHead className="w-[30%]">Duration</TableHead>
-                    <TableHead className="w-[15%]">Status</TableHead>
+                    <TableHead className="w-[30%]">Name</TableHead>
+                    <TableHead className="w-[40%]">Duration</TableHead>
+                    <TableHead className="w-[20%]">Status</TableHead>
                     <TableHead className="w-[15%]">Plan</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -167,16 +166,15 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
                       </TableCell>
 
                       <TableCell>
-                        <div className="flex flex-col gap-1 text-sm">
+                        <div className="flex flex-row gap-1 text-sm">
                           {memberGroup.startDate ? (
                             <div className="flex items-center gap-2 text-muted-foreground">
-                              <Calendar className="h-3 w-3" />
                               {format(memberGroup.startDate, 'MMM dd, yyyy')}
                             </div>
                           ) : null}
                           {memberGroup.endDate ? (
                             <div className="flex items-center gap-2 text-muted-foreground">
-                              <Calendar className="h-3 w-3" />
+                              <span>–</span>
                               {format(memberGroup.endDate, 'MMM dd, yyyy')}
                             </div>
                           ) : null}
@@ -185,7 +183,7 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
 
                       <TableCell>{getMembershipStatusBadge(memberGroup.endDate)}</TableCell>
                       <TableCell>
-                        <Badge>{memberGroup.membershipType || '—'}</Badge>
+                        <span>{memberGroup.membershipType || '—'}</span>
                       </TableCell>
                     </TableRow>
                   ))}
