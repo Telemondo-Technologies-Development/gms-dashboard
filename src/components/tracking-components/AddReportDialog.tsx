@@ -193,16 +193,6 @@ export default function AddReportDialog({ onSubmit }: AddReportDialogProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="branchName">Branch Name</Label>
-            <Input
-              id="branchName"
-              placeholder="Enter branch name"
-              value={branch}
-              onChange={(e) => setBranch(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="reportType">Report Type</Label>
             <Select value={reportType} onValueChange={setReportType}>
               <SelectTrigger id="reportType">
