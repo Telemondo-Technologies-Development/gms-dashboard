@@ -1,6 +1,7 @@
 import { Shield, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 interface ListViewProps {
   branchName: string;
@@ -17,17 +18,17 @@ export function StaffListView({ branchName, staff, onSelect }: ListViewProps) {
       </div>
 
       <div className="p-6 space-y-6">
-        <div className="space-y-2 relative">
+        <div className="space-y-4 relative">
           <Label htmlFor="searchEmployee">Search Employee</Label>
           <Input
             id="searchEmployee"
             placeholder="Search Employee..."
-            className="w-full bg-transparent outline-none text-zinc-900 placeholder-zinc-400 border border-zinc-200 rounded-lg px-4"
+            className="w-full bg-transparent outline-none text-zinc-900 placeholder-zinc-400 border border-zinc-200 rounded-lg px-4 py-2"
           />
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-4 border border-zinc-200">
-          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+        <div className="bg-white rounded-lg shadow-md p-6 border border-zinc-200 mt-6">
+          <div className="space-y-4 max-h-[300px] overflow-y-auto">
             {staff.length === 0 ? (
               <div className="py-12 text-center border-2 border-dashed border-zinc-50 rounded-xl">
                 <p className="text-sm text-zinc-400 italic">No staff assigned yet.</p>
@@ -67,6 +68,12 @@ export function StaffListView({ branchName, staff, onSelect }: ListViewProps) {
               ))
             )}
           </div>
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <Button variant="default" className="bg-blue-600 hover:bg-blue-700 px-6 py-2">
+            Assign
+          </Button>
         </div>
       </div>
     </div>
