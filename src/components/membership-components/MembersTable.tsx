@@ -1,6 +1,6 @@
 ﻿import { useMemo, useState, useCallback, memo } from 'react'
 import { format } from 'date-fns'
-import { Search, Calendar, RefreshCw, Loader2 } from 'lucide-react'
+import { Search, Calendar, RefreshCw, Loader2, User, Mail, Phone, CreditCard } from 'lucide-react'
 
 import { useMembersData } from '@/hooks/membership/useMembers'
 import { AddMemberDialog } from '@/components/membership-components/AddMemberDialog'
@@ -8,13 +8,22 @@ import type { MemberFormData } from '@/types/membership/memberSchemas'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface Props {
   onSelectMember: (m: MemberFormData) => void
   pageSize?: number
+}
+
+function getInitials(name: string) {
+  const parts = name.trim().split(' ')
+  if (parts.length > 1) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
+  return name.slice(0, 2).toUpperCase()
 }
 
 function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
@@ -54,54 +63,63 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
 
   // Memoize badge function
   const getMembershipStatusBadge = useCallback((endDate: Date | undefined) => {
-    if (!endDate) return <span className="text-destructive font-semibold">Expired</span>
+    if (!endDate) return <Badge variant="destructive">Expired</Badge>
 
     const today = new Date()
     const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
 
     if (daysUntilExpiry < 0) {
-      return <span className="text-destructive font-semibold">Expired</span>
+      return <Badge variant="destructive">Expired</Badge>
     } else if (daysUntilExpiry <= 3) {
-      return <span className="text-red-500 font-semibold">Expiring Soon</span>
+      return <Badge className="bg-red-500 hover:bg-red-600">Expiring Soon</Badge>
     } else if (daysUntilExpiry <= 7) {
-      return <span className="text-orange-500 font-semibold">Ending Soon</span>
+      return <Badge className="bg-orange-500 hover:bg-orange-600">Ending Soon</Badge>
     }
-    return <span className="text-green-500 font-semibold">Active</span>
+    return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>
   }, [])
 
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader>
-        <CardTitle>Members</CardTitle>
-        <CardDescription>
-          {enrichedMembers.length} {enrichedMembers.length === 1 ? 'member' : 'members'} registered
-        </CardDescription>
+    <Card className="flex flex-col h-full shadow-md border-muted/40">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-xl font-bold tracking-tight">Members Record</CardTitle>
+            <CardDescription className="mt-1">
+              Manage your {enrichedMembers.length} {enrichedMembers.length === 1 ? 'member' : 'members'} and their subscription details.
+            </CardDescription>
+          </div>
+          <Badge variant="secondary" className="px-3 py-1 text-sm">
+            Total: {enrichedMembers.length}
+          </Badge>
+        </div>
       </CardHeader>
 
-      <div className="flex-1 min-h-0 overflow-auto">
-        <CardContent>
-          <div className="flex items-center gap-2 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="flex-1 min-h-0 overflow-auto ">
+        <CardContent className="p-0">
+          <div className="px-6 py-4 border-b bg-muted/5 flex items-center gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
               <Input
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Search by name, email, phone, or membership type..."
-                className="pl-9 rounded-2xl"
+                placeholder="Search members..."
+                className="pl-9 h-10 bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
               />
             </div>
-            <div className="flex items-center gap-2">
+            
+            <div className="flex items-center gap-2 ml-auto">
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
                 onClick={refetchAll}
                 disabled={isFetching}
+                className="h-10 w-10 shrink-0"
               >
                 {isFetching ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 ) : (
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="h-4 w-4 text-muted-foreground" />
                 )}
               </Button>
               <AddMemberDialog />
@@ -109,84 +127,144 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
           </div>
 
           {error && (
-            <div className="mb-4 text-sm text-destructive" role="alert">
+            <div className="m-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-2" role="alert">
+              <span className="font-semibold">Error:</span>
               {error instanceof Error ? error.message : 'Failed to load members.'}
             </div>
           )}
 
-          <Label className="text-xs text-muted-foreground mb-3">Tip: Click a row to view/edit full details and billing.</Label>
-
           {filteredMembers.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
+            <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                <User className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium text-foreground">No members found</h3>
+              <p className="text-sm text-muted-foreground max-w-sm mt-1">
                 {enrichedMembers.length === 0
-                  ? 'No members registered yet. Add your first member to get started.'
-                  : 'No members found matching your search.'}
+                  ? 'Get started by adding your first member to the system.'
+                  : `No results matching "${searchQuery}". Try a different search term.`}
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="relative">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[30%]">Name</TableHead>
-                    <TableHead className="w-[40%]">Duration</TableHead>
-                    <TableHead className="w-[20%]">Status</TableHead>
-                    <TableHead className="w-[15%]">Plan</TableHead>
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-transparent border-b border-muted/60">
+                    <TableHead className="w-[35%] pl-6 py-4 font-semibold text-foreground/70">Member Details</TableHead>
+                    <TableHead className="w-[25%] py-4 font-semibold text-foreground/70">Plan & Billing</TableHead>
+                    <TableHead className="w-[25%] py-4 font-semibold text-foreground/70">Subscription Period</TableHead>
+                    <TableHead className="w-[15%] py-4 font-semibold text-foreground/70 text-right pr-6">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pageItems.map((memberGroup) => (
-                    <TableRow
-                      key={memberGroup.id}
-                      role="button"
-                      tabIndex={0}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => onSelectMember(memberGroup)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          onSelectMember(memberGroup)
-                        }
-                      }}
-                    >
-                      <TableCell>
-                        <div className="space-y-1">
-                          {memberGroup.members.map((member, idx) => (
-                            <div key={`${member.id}-${idx}`} className="font-medium">
-                              {member.name}
-                              {memberGroup.members.length > 1 ? (
-                                <Badge variant="outline" className="ml-2 text-xs">
-                                  {idx + 1}/{memberGroup.members.length}
-                                </Badge>
-                              ) : null}
+                  {pageItems.map((memberGroup) => {
+                    const mainMember = memberGroup.members[0]
+                    const otherMembersCount = Math.max(0, memberGroup.members.length - 1)
+                    
+                    return (
+                      <TableRow
+                        key={memberGroup.id}
+                        role="button"
+                        tabIndex={0}
+                        className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
+                        onClick={() => onSelectMember(memberGroup)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            onSelectMember(memberGroup)
+                          }
+                        }}
+                      >
+                        <TableCell className="pl-6 py-4 align-top">
+                          <div className="flex items-start gap-3">
+                            <div className="flex flex-col gap-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-foreground">{mainMember.name}</span>
+                                {otherMembersCount > 0 && (
+                                  <Badge variant="default" className="h-5 px-1.5 text-[10px] bg-muted-foreground/15 text-muted-foreground hover:bg-muted-foreground/25">
+                                    +{otherMembersCount} others
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                                {mainMember.email && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="flex items-center gap-1.5 max-w-48">
+                                          <Mail className="h-3 w-3 shrink-0 opacity-70" />
+                                          <span className="truncate">{mainMember.email}</span>
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{mainMember.email}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
+                                {mainMember.phone && (
+                                  <div className="flex items-center gap-1.5">
+                                    <Phone className="h-3 w-3 shrink-0 opacity-70" />
+                                    <span>{mainMember.phone}</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          ))}
-                        </div>
-                      </TableCell>
+                          </div>
+                        </TableCell>
 
-                      <TableCell>
-                        <div className="flex flex-row gap-1 text-sm">
-                          {memberGroup.startDate ? (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              {format(memberGroup.startDate, 'MMM dd, yyyy')}
+                        <TableCell className="py-4 align-top">
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary">
+                                {memberGroup.membershipType || "Standard"} 
+                              </Badge>
+                              {memberGroup.membershipDuration && (
+                                <span className="text-xs text-muted-foreground font-medium px-1.5 py-0.5 rounded-sm bg-muted">
+                                  {memberGroup.membershipDuration}
+                                </span>
+                              )}
                             </div>
-                          ) : null}
-                          {memberGroup.endDate ? (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <span>–</span>
-                              {format(memberGroup.endDate, 'MMM dd, yyyy')}
-                            </div>
-                          ) : null}
-                        </div>
-                      </TableCell>
+                            
+                            {(memberGroup.billingAmount || memberGroup.billingCycle) && (
+                              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                <CreditCard className="h-3.5 w-3.5 opacity-70" />
+                                <span>
+                                  {memberGroup.billingAmount ? `₱${memberGroup.billingAmount}` : '—'}
+                                  {memberGroup.billingCycle ? ` / ${memberGroup.billingCycle}` : ''}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
 
-                      <TableCell>{getMembershipStatusBadge(memberGroup.endDate)}</TableCell>
-                      <TableCell>
-                        <span>{memberGroup.membershipType || '—'}</span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        <TableCell className="py-4 align-top">
+                          <div className="flex flex-col gap-1.5">
+                            {memberGroup.startDate && memberGroup.endDate ? (
+                              <>
+                                <div className="flex items-center gap-2 text-sm text-foreground/80">
+                                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span className="font-medium">
+                                    {format(memberGroup.startDate, 'MMM d, yyyy')}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground pl-[0.35rem] border-l-2 border-muted ml-1.5 py-0.5">
+                                  <span className="ml-2">Ends {format(memberGroup.endDate, 'MMM d, yyyy')}</span>
+                                </div>
+                              </>
+                            ) : (
+                              <span className="text-sm text-muted-foreground italic">No active subscription</span>
+                            )}
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="py-4 align-top text-right pr-6">
+                          {getMembershipStatusBadge(memberGroup.endDate)}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -194,14 +272,30 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
         </CardContent>
       </div>
 
-      <div className="border-t px-3 py-2 bg-background">
-        <div className="flex items-center justify-between gap-2">
-          <div className="text-xs text-muted-foreground">Page {Math.min(pageIndex + 1, pageCount)} of {pageCount}</div>
+      <div className="border-t bg-muted/5 p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-xs text-muted-foreground font-medium">
+            Showing {Math.min(pageIndex * pageSize + 1, filteredMembers.length)} to {Math.min((pageIndex + 1) * pageSize, filteredMembers.length)} of {filteredMembers.length} entries
+          </div>
           <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => setPageIndex((p) => Math.max(0, p - 1))} disabled={pageIndex <= 0}>
-              Prev
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+              disabled={pageIndex <= 0}
+              className="h-8 px-3 text-xs"
+            >
+              Previous
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))} disabled={pageIndex >= pageCount - 1}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+              disabled={pageIndex >= pageCount - 1}
+              className="h-8 px-3 text-xs"
+            >
               Next
             </Button>
           </div>

@@ -111,8 +111,8 @@ function UsersPage() {
       )}
       <h1 className="text-2xl font-bold text-primary">Employee Management</h1>
 
-      <Card className="space-y-4 p-4">
-        <div className="grid grid-cols-1 items-center gap-3 md:grid-cols-2 ">
+      <Card className="space-y-4">
+        <div className="grid grid-cols-1 items-center gap-2 md:grid-cols-2 p-2">
         <div className="relative w-full md:justify-self-start">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
