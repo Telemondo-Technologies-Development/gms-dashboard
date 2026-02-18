@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAuthSession } from '@/lib/auth/auth-session';
+import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 
 export interface StaffMember {
   id: string;
@@ -58,6 +59,8 @@ export function BranchDetailsDialog({
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE'); 
+
+  const { data: branchPersonnel, isLoading: loadingBranchPersonnel } = useBranchPersonnel(branch?.id || '');
 
   useEffect(() => {
     if (!branch) return;
@@ -130,6 +133,28 @@ export function BranchDetailsDialog({
                     <option value="ACTIVE">Active</option>
                     <option value="INACTIVE">Inactive</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="space-y-4 bg-white rounded-lg shadow-md p-4 border border-zinc-200">
+                <h3 className="text-lg font-semibold">Assigned Personnel</h3>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {loadingBranchPersonnel ? (
+                    <p className="text-sm text-zinc-400 italic">Loading personnel...</p>
+                  ) : branchPersonnel?.length === 0 ? (
+                    <p className="text-sm text-zinc-400 italic">No personnel assigned to this branch.</p>
+                  ) : (
+                    (branchPersonnel ?? []).map((personnel) => (
+                      <div
+                        key={personnel.id}
+                        className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200"
+                      >
+                        <p className="text-sm font-medium text-zinc-900">
+                          {personnel.actorId} - {personnel.status}
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

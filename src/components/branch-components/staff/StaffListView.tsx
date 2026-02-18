@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useEmployees } from '@/hooks/users/useEmployees';
 import { useMemo, useState } from 'react';
 
+
 interface ListViewProps {
   branchName: string;
   staff: any[];
@@ -14,7 +15,7 @@ interface ListViewProps {
 export function StaffListView({ branchName}: ListViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const { data: employees, isLoading: loadingEmployees } = useEmployees();
+  const { data: employees } = useEmployees();
 
   const filteredEmployees = useMemo(() => {
     if (!searchTerm.trim() || !isSearching) return [];
@@ -68,29 +69,10 @@ export function StaffListView({ branchName}: ListViewProps) {
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 border border-zinc-200 mt-6">
-          <div className="space-y-4 max-h-[300px] overflow-y-auto">
-            {loadingEmployees ? (
-              <div className="py-12 text-center">
-                <p className="text-sm text-zinc-400 italic">Loading employees...</p>
-              </div>
-            ) : filteredEmployees.length === 0 ? (
-              <div className="py-12 text-center border-2 border-dashed border-zinc-50 rounded-xl">
-                <p className="text-sm text-zinc-400 italic">No employees found.</p>
-              </div>
-            ) : (
-              filteredEmployees.map((employee) => (
-                <div
-                  key={employee.id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 hover:bg-zinc-100 cursor-pointer transition-all group border border-transparent hover:border-zinc-200"
-                  onMouseDown={() => setSearchTerm(`${employee.firstName} ${employee.surname}`)}
-                >
-                  <p className="text-sm font-semibold text-zinc-900 leading-none">
-                    {employee.firstName} {employee.surname}
-                  </p>
-                </div>
-              ))
-            )}
+        <div className="mt-4">
+          {/* Placeholder for the list */}
+          <div className="border border-zinc-200 rounded-lg p-4 text-center text-zinc-500">
+            No items to display.
           </div>
         </div>
 
