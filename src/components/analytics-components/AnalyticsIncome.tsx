@@ -21,31 +21,21 @@ function IncomeCard({ title, current, previous, percentChange, formatCurrency }:
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          <div className="text-3xl font-bold">
-            {formatCurrency(current)}
-          </div>
-          <div className="flex items-center justify-between">
-            <div className={`flex items-center gap-1 text-sm font-semibold ${
+          <div className="text-3xl font-bold">{formatCurrency(current)}</div>
+          <div
+            className={`flex items-center gap-1 text-sm font-semibold ${
               isPositive ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {isPositive ? (
-                <ArrowUp className="h-4 w-4" />
-              ) : (
-                <ArrowDown className="h-4 w-4" />
-              )}
-              <span className="sr-only">
-                {isPositive ? 'Increased' : 'Decreased'} by
-              </span>
-              {Math.abs(percentChange)}% from last period
-            </div>
+            }`}
+          >
+            {isPositive ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+            <span className="sr-only">{isPositive ? 'Increased' : 'Decreased'} by</span>
+            {Math.abs(percentChange)}% from last period
           </div>
-          <div className="text-xs text-muted-foreground pt-1">
+          <div className="pt-1 text-xs text-muted-foreground">
             Previous: {formatCurrency(previous)}
           </div>
         </div>
@@ -54,31 +44,36 @@ function IncomeCard({ title, current, previous, percentChange, formatCurrency }:
   )
 }
 
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+
 export function IncomeReportCards({ data }: Props) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-PH', {
+  if (!data.monthlyIncome || !data.annualIncome) return null
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-PH', {
       style: 'currency',
       currency: 'PHP',
       maximumFractionDigits: 0,
     }).format(value / 100)
-  }
 
-  // Validate data
-  if (!data.monthlyIncome || !data.annualIncome) {
-    return null
-  }
+  const now = new Date()
+  const monthLabel = `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`
+  const prevYear = now.getFullYear() - 1
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <IncomeCard
-        title="Monthly Income Report - January 2026"
+        title={`Monthly Income Report — ${monthLabel}`}
         current={data.monthlyIncome.current}
         previous={data.monthlyIncome.previous}
         percentChange={data.monthlyIncome.percentChange}
         formatCurrency={formatCurrency}
       />
       <IncomeCard
-        title="Annual Income Report - 2025"
+        title={`Annual Income Report — ${prevYear}`}
         current={data.annualIncome.current}
         previous={data.annualIncome.previous}
         percentChange={data.annualIncome.percentChange}
