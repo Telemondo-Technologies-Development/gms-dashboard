@@ -8,7 +8,6 @@
     "preview": "vite preview",
     "test": "vitest run",
     "generate": "openapi-generator-cli generate -i openapi.json -g typescript-fetch -o src/api/generated --additional-properties=supportsES6=true,useSingleRequestParameter=true"
-    
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -42,7 +41,7 @@
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",
     "@tanstack/react-form": "^1.28.0",
-    "@tanstack/react-query": "^5.90.17",
+    "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-router": "^1.132.0",
     "@tanstack/react-router-devtools": "^1.132.0",
     "@tanstack/react-table": "^8.21.3",
