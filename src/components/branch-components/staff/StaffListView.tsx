@@ -1,5 +1,6 @@
-import { Plus, Shield, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Shield, User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface ListViewProps {
   branchName: string;
@@ -8,7 +9,7 @@ interface ListViewProps {
   onSelect: (member: any) => void;
 }
 
-export function StaffListView({ branchName, staff, onAddClick, onSelect }: ListViewProps) {
+export function StaffListView({ branchName, staff, onSelect }: ListViewProps) {
   return (
     <div className="flex flex-col h-full max-h-[70vh]">
       <div className="p-6 border-b shrink-0">
@@ -16,14 +17,14 @@ export function StaffListView({ branchName, staff, onAddClick, onSelect }: ListV
       </div>
 
       <div className="p-6 space-y-6">
-        <Button
-          onClick={onAddClick}
-          variant="outline"
-          className="w-full h-16 border-dashed border-2 text-zinc-500 hover:text-black hover:border-zinc-900 gap-2 transition-all bg-zinc-50/50 shrink-0"
-        >
-          <Plus size={18} />
-          <span className="font-bold uppercase text-[10px] tracking-widest">Add New Staff Member</span>
-        </Button>
+        <div className="space-y-2 relative">
+          <Label htmlFor="searchEmployee">Search Employee</Label>
+          <Input
+            id="searchEmployee"
+            placeholder="Search Employee..."
+            className="w-full bg-transparent outline-none text-zinc-900 placeholder-zinc-400 border border-zinc-200 rounded-lg px-4"
+          />
+        </div>
 
         <div className="bg-white rounded-lg shadow-md p-4 border border-zinc-200">
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
