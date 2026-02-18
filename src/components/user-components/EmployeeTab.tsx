@@ -92,7 +92,7 @@ export function EmployeeTab({
                   <TableCell className="pl-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col">
-                        <span className="font-semibold text-foreground">
+                        <span className="font-medium text-foreground">
                           {employee.firstName} {employee.surname}
                         </span>
                         {/* Position field not in DTO yet, temporarily removed */}
