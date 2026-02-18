@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useCreatePaymentMethod } from '@/hooks/billing/useCreatePaymentMethod'
+import { useCreatePaymentMethod } from '@/hooks/billing/useAddPaymentMethod'
 
 interface AddPaymentMethodDialogProps {
   createdById: string | null
