@@ -9,8 +9,8 @@ import { useAuthSession } from '@/lib/auth/auth-session';
 import { useAssignBranchPersonnel } from '@/hooks/Staff/useAssignBranchPersonnel';
 import { useUpdateBranchPersonnel } from '@/hooks/Staff/useUpdateBranchPersonnel';
 import { useDeleteBranchPersonnel } from '@/hooks/Staff/useDeleteBranchPersonnel';
+import { useAllBranchPersonnel } from '@/hooks/Staff/useAllBranchPersonnel';
 import type { BranchPersonnelPutDTOStatusEnum } from '@/api/generated/models/BranchPersonnelPutDTO';
-import type { BranchPersonnelPostDTOStatusEnum } from '@/api/generated/models/BranchPersonnelPostDTO';
 
 interface ListViewProps {
   branchId: string;
@@ -28,6 +28,7 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
   const { data: employees } = useEmployees();
   const { data: branchPersonnel, isLoading: loadingBranchPersonnel } = useBranchPersonnel(branchId);
   const { data: branchEmployees, isLoading: loadingEmployees } = useBranchEmployees(branchId);
+  const { data: allPersonnel } = useAllBranchPersonnel();
 
   const { actorId: currentActorId } = useAuthSession();
 
@@ -66,10 +67,46 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
       .slice(0, 5);
   }, [searchTerm, employees, isSearching]);
 
+  const actorIdToAssign = selectedEmployee?.actorId ?? selectedEmployee?.id ?? '';
+
   const alreadyAssigned = useMemo(() => {
-    if (!selectedEmployee) return false;
-    return (branchPersonnel ?? []).some((p) => p.actorId === selectedEmployee.id);
-  }, [branchPersonnel, selectedEmployee]);
+    if (!actorIdToAssign) return false;
+    return (branchPersonnel ?? []).some((p) => p.actorId === actorIdToAssign);
+  }, [branchPersonnel, actorIdToAssign]);
+
+  const handleAssign = async () => {
+    if (!actorIdToAssign || !currentActorId || !branchId) return;
+
+    // Find existing ACTIVE assignment anywhere
+    const existingActive = (allPersonnel ?? []).find(
+      (p) => p.actorId === actorIdToAssign && p.status === 'ACTIVE'
+    );
+
+    // Already ACTIVE in THIS branch → do nothing
+    if (existingActive && existingActive.branchId === branchId) return;
+
+    // ACTIVE in ANOTHER branch → mark old as MOVED first
+    if (existingActive && existingActive.branchId !== branchId) {
+      await update.mutateAsync({
+        id: existingActive.id,
+        actorId: existingActive.actorId,
+        branchId: existingActive.branchId,
+        updatedById: currentActorId,
+        status: 'MOVED',
+      });
+    }
+
+    // Create new ACTIVE assignment in this branch
+    await assign.mutateAsync({
+      actorId: actorIdToAssign,
+      branchId,
+      createdById: currentActorId,
+      status: 'ACTIVE',
+    });
+
+    setSearchTerm('');
+    setSelectedEmployee(null);
+  };
 
   return (
     <div className="flex flex-col h-full max-h-[70vh]">
@@ -82,7 +119,7 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
           <Label htmlFor="searchEmployee">Search Employee</Label>
           <Input
             id="searchEmployee"
-            placeholder="Search Employee..."
+            placeholder="Search Employee to Assign..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -126,11 +163,9 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
             </div>
 
             {loadingAssigned ? (
-              <div className="text-center text-sm text-zinc-400 italic py-4">
-                Loading personnel...
-              </div>
+              <div className="text-center text-sm text-zinc-400 italic py-4">Loading personnel...</div>
             ) : (branchPersonnel ?? []).length === 0 ? (
-              <div className="text-center text-sm text-zinc-500 py-4">No items to display.</div>
+              <div className="text-center text-sm text-zinc-500 py-4">No Personnel Available.</div>
             ) : (
               <div className="space-y-2 max-h-[260px] overflow-y-auto">
                 {(branchPersonnel ?? []).map((personnel) => {
@@ -197,29 +232,15 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
               !selectedEmployee ||
               alreadyAssigned ||
               assign.isPending ||
+              update.isPending ||
               !currentActorId ||
               !branchId
             }
             onClick={() => {
-              if (!selectedEmployee || !currentActorId || !branchId) return;
-
-              assign.mutate(
-                {
-                  actorId: selectedEmployee.id,
-                  branchId,
-                  createdById: currentActorId,
-                  status: 'ACTIVE' as BranchPersonnelPostDTOStatusEnum,
-                },
-                {
-                  onSuccess: () => {
-                    setSearchTerm('');
-                    setSelectedEmployee(null);
-                  },
-                }
-              );
+              void handleAssign();
             }}
           >
-            {alreadyAssigned ? 'Already Assigned' : assign.isPending ? 'Assigning...' : 'Assign'}
+            {alreadyAssigned ? 'Already Assigned' : assign.isPending || update.isPending ? 'Assigning...' : 'Assign'}
           </Button>
         </div>
       </div>

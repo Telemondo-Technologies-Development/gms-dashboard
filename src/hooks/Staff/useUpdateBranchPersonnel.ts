@@ -6,7 +6,7 @@ import type { BranchPersonnelPutDTOStatusEnum } from '@/api/generated/models/Bra
 const api = getAuthenticatedApi(BranchPersonnelApi);
 
 type Input = {
-  id: string; // branchPersonnel record id
+  id: string; 
   actorId: string;
   branchId: string;
   updatedById: string;
