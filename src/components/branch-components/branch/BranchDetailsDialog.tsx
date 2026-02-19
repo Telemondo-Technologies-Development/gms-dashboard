@@ -29,22 +29,21 @@ export interface BranchFormData {
   latitude: string;
   longitude: string;
   status: 'ACTIVE' | 'INACTIVE';
-  createdById: string; 
-  updatedById: string; 
-  createdAt: string; 
-  updatedAt: string; 
+  createdById: string;
+  updatedById: string;
+  createdAt: string;
+  updatedAt: string;
   assignedStaff?: StaffMember[];
-  revenue?: number; 
-  expenses?: number; 
-  memberships?: number; 
+  revenue?: number;
+  expenses?: number;
+  memberships?: number;
 }
-
 
 interface BranchDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   branch: BranchFormData | null;
-  onSave: (updatedBranch: BranchFormData) => void; 
+  onSave: (updatedBranch: BranchFormData) => void;
 }
 
 export function BranchDetailsDialog({
@@ -53,18 +52,18 @@ export function BranchDetailsDialog({
   branch,
   onSave,
 }: BranchDetailsDialogProps) {
-  const { actorId } = useAuthSession(); 
+  const { actorId } = useAuthSession();
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE'); 
+  const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
 
   useEffect(() => {
     if (!branch) return;
 
     setName(branch.name);
     setAddress(branch.address);
-    setStatus(branch.status); 
+    setStatus(branch.status);
   }, [branch]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,8 +75,8 @@ export function BranchDetailsDialog({
       name,
       address,
       status,
-      createdById: branch.createdById || actorId || '', 
-      updatedById: actorId || '', 
+      createdById: branch.createdById || actorId || '',
+      updatedById: actorId || '',
       createdAt: branch.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -96,7 +95,9 @@ export function BranchDetailsDialog({
           </DialogHeader>
 
           {!branch ? (
-            <div className="text-sm text-muted-foreground text-center py-4">No branch selected.</div>
+            <div className="text-sm text-muted-foreground text-center py-4">
+              No branch selected.
+            </div>
           ) : (
             <div className="space-y-4">
               <div className="space-y-4 border border-border p-4 rounded-2xl">
@@ -109,6 +110,7 @@ export function BranchDetailsDialog({
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="address">Address</Label>
                   <Input
@@ -118,6 +120,7 @@ export function BranchDetailsDialog({
                     required
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
                   <select
