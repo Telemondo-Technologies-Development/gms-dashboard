@@ -1,43 +1,43 @@
-# BillingCycleApi
+# BranchPersonnelRolesApi
 
 All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createBillingCycle**](BillingCycleApi.md#createbillingcycle) | **POST** /api/billing-cycle | Create a new Billing Cycle |
-| [**deleteBillingCycle**](BillingCycleApi.md#deletebillingcycle) | **DELETE** /api/billing-cycle/{id} | Delete a Billing Cycle by id |
-| [**getAllBillingCycles**](BillingCycleApi.md#getallbillingcycles) | **GET** /api/billing-cycle | Get all Billing Cycles |
-| [**getBillingCycle**](BillingCycleApi.md#getbillingcycle) | **GET** /api/billing-cycle/{id} | Get a Billing Cycle by id |
-| [**updateBillingCycle**](BillingCycleApi.md#updatebillingcycle) | **PUT** /api/billing-cycle/{id} | Update a Billing Cycle by id |
+| [**createPersonnelRole**](BranchPersonnelRolesApi.md#createpersonnelrole) | **POST** /api/branch/personnel/role | Create a new Personnel Role |
+| [**deletePersonnelRole**](BranchPersonnelRolesApi.md#deletepersonnelrole) | **DELETE** /api/branch/personnel/role/{id} | Delete a Personnel Role by id |
+| [**getAllPersonnelRoles**](BranchPersonnelRolesApi.md#getallpersonnelroles) | **GET** /api/branch/personnel/role | Get all Personnel Roles |
+| [**getPersonnelRole**](BranchPersonnelRolesApi.md#getpersonnelrole) | **GET** /api/branch/personnel/role/{id} | Get a Personnel Role by id |
+| [**updatePersonnelRole**](BranchPersonnelRolesApi.md#updatepersonnelrole) | **PUT** /api/branch/personnel/role/{id} | Update a Personnel Role by id |
 
 
 
-## createBillingCycle
+## createPersonnelRole
 
-> ApiResponseBillingCycleTableDTO createBillingCycle(billingCyclePostDTO)
+> ApiResponsePersonnelRoleTableDTO createPersonnelRole(personnelRolePostDTO)
 
-Create a new Billing Cycle
+Create a new Personnel Role
 
 ### Example
 
 ```ts
 import {
   Configuration,
-  BillingCycleApi,
+  BranchPersonnelRolesApi,
 } from '';
-import type { CreateBillingCycleRequest } from '';
+import type { CreatePersonnelRoleRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
-  const api = new BillingCycleApi();
+  const api = new BranchPersonnelRolesApi();
 
   const body = {
-    // BillingCyclePostDTO
-    billingCyclePostDTO: ...,
-  } satisfies CreateBillingCycleRequest;
+    // PersonnelRolePostDTO
+    personnelRolePostDTO: ...,
+  } satisfies CreatePersonnelRoleRequest;
 
   try {
-    const data = await api.createBillingCycle(body);
+    const data = await api.createPersonnelRole(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -53,11 +53,11 @@ example().catch(console.error);
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **billingCyclePostDTO** | [BillingCyclePostDTO](BillingCyclePostDTO.md) |  | |
+| **personnelRolePostDTO** | [PersonnelRolePostDTO](PersonnelRolePostDTO.md) |  | |
 
 ### Return type
 
-[**ApiResponseBillingCycleTableDTO**](ApiResponseBillingCycleTableDTO.md)
+[**ApiResponsePersonnelRoleTableDTO**](ApiResponsePersonnelRoleTableDTO.md)
 
 ### Authorization
 
@@ -77,32 +77,32 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
-## deleteBillingCycle
+## deletePersonnelRole
 
-> ApiResponseUnit deleteBillingCycle(id)
+> ApiResponseUnit deletePersonnelRole(id)
 
-Delete a Billing Cycle by id
+Delete a Personnel Role by id
 
 ### Example
 
 ```ts
 import {
   Configuration,
-  BillingCycleApi,
+  BranchPersonnelRolesApi,
 } from '';
-import type { DeleteBillingCycleRequest } from '';
+import type { DeletePersonnelRoleRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
-  const api = new BillingCycleApi();
+  const api = new BranchPersonnelRolesApi();
 
   const body = {
     // string
     id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
-  } satisfies DeleteBillingCycleRequest;
+  } satisfies DeletePersonnelRoleRequest;
 
   try {
-    const data = await api.deleteBillingCycle(body);
+    const data = await api.deletePersonnelRole(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -142,32 +142,32 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
-## getAllBillingCycles
+## getAllPersonnelRoles
 
-> ApiResponseListBillingCycleTableDTO getAllBillingCycles(pageable)
+> ApiResponseListPersonnelRoleTableDTO getAllPersonnelRoles(pageable)
 
-Get all Billing Cycles
+Get all Personnel Roles
 
 ### Example
 
 ```ts
 import {
   Configuration,
-  BillingCycleApi,
+  BranchPersonnelRolesApi,
 } from '';
-import type { GetAllBillingCyclesRequest } from '';
+import type { GetAllPersonnelRolesRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
-  const api = new BillingCycleApi();
+  const api = new BranchPersonnelRolesApi();
 
   const body = {
     // Pageable
     pageable: ...,
-  } satisfies GetAllBillingCyclesRequest;
+  } satisfies GetAllPersonnelRolesRequest;
 
   try {
-    const data = await api.getAllBillingCycles(body);
+    const data = await api.getAllPersonnelRoles(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -187,7 +187,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**ApiResponseListBillingCycleTableDTO**](ApiResponseListBillingCycleTableDTO.md)
+[**ApiResponseListPersonnelRoleTableDTO**](ApiResponseListPersonnelRoleTableDTO.md)
 
 ### Authorization
 
@@ -207,32 +207,32 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
-## getBillingCycle
+## getPersonnelRole
 
-> ApiResponseBillingCycleTableDTO getBillingCycle(id)
+> ApiResponsePersonnelRoleTableDTO getPersonnelRole(id)
 
-Get a Billing Cycle by id
+Get a Personnel Role by id
 
 ### Example
 
 ```ts
 import {
   Configuration,
-  BillingCycleApi,
+  BranchPersonnelRolesApi,
 } from '';
-import type { GetBillingCycleRequest } from '';
+import type { GetPersonnelRoleRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
-  const api = new BillingCycleApi();
+  const api = new BranchPersonnelRolesApi();
 
   const body = {
     // string
     id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
-  } satisfies GetBillingCycleRequest;
+  } satisfies GetPersonnelRoleRequest;
 
   try {
-    const data = await api.getBillingCycle(body);
+    const data = await api.getPersonnelRole(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -252,7 +252,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**ApiResponseBillingCycleTableDTO**](ApiResponseBillingCycleTableDTO.md)
+[**ApiResponsePersonnelRoleTableDTO**](ApiResponsePersonnelRoleTableDTO.md)
 
 ### Authorization
 
@@ -272,34 +272,34 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
-## updateBillingCycle
+## updatePersonnelRole
 
-> ApiResponseBillingCycleTableDTO updateBillingCycle(id, billingCyclePutDTO)
+> ApiResponsePersonnelRoleTableDTO updatePersonnelRole(id, personnelRolePutDTO)
 
-Update a Billing Cycle by id
+Update a Personnel Role by id
 
 ### Example
 
 ```ts
 import {
   Configuration,
-  BillingCycleApi,
+  BranchPersonnelRolesApi,
 } from '';
-import type { UpdateBillingCycleRequest } from '';
+import type { UpdatePersonnelRoleRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
-  const api = new BillingCycleApi();
+  const api = new BranchPersonnelRolesApi();
 
   const body = {
     // string
     id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
-    // BillingCyclePutDTO
-    billingCyclePutDTO: ...,
-  } satisfies UpdateBillingCycleRequest;
+    // PersonnelRolePutDTO
+    personnelRolePutDTO: ...,
+  } satisfies UpdatePersonnelRoleRequest;
 
   try {
-    const data = await api.updateBillingCycle(body);
+    const data = await api.updatePersonnelRole(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -316,11 +316,11 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **id** | `string` |  | [Defaults to `undefined`] |
-| **billingCyclePutDTO** | [BillingCyclePutDTO](BillingCyclePutDTO.md) |  | |
+| **personnelRolePutDTO** | [PersonnelRolePutDTO](PersonnelRolePutDTO.md) |  | |
 
 ### Return type
 
-[**ApiResponseBillingCycleTableDTO**](ApiResponseBillingCycleTableDTO.md)
+[**ApiResponsePersonnelRoleTableDTO**](ApiResponsePersonnelRoleTableDTO.md)
 
 ### Authorization
 

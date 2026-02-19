@@ -45,6 +45,18 @@ export interface LogInResponse {
      * @memberof LogInResponse
      */
     email: string;
+    /**
+     * 
+     * @type {{ [key: string]: Array<string>; }}
+     * @memberof LogInResponse
+     */
+    permissions: { [key: string]: Array<string>; };
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof LogInResponse
+     */
+    roles: Array<string>;
 }
 
 /**
@@ -54,6 +66,8 @@ export function instanceOfLogInResponse(value: object): value is LogInResponse {
     if (!('actorId' in value) || value['actorId'] === undefined) return false;
     if (!('branches' in value) || value['branches'] === undefined) return false;
     if (!('email' in value) || value['email'] === undefined) return false;
+    if (!('permissions' in value) || value['permissions'] === undefined) return false;
+    if (!('roles' in value) || value['roles'] === undefined) return false;
     return true;
 }
 
@@ -70,6 +84,8 @@ export function LogInResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
         'actorId': json['actorId'],
         'branches': ((json['branches'] as Array<any>).map(BranchListDTOFromJSON)),
         'email': json['email'],
+        'permissions': json['permissions'],
+        'roles': json['roles'],
     };
 }
 
@@ -87,6 +103,8 @@ export function LogInResponseToJSONTyped(value?: LogInResponse | null, ignoreDis
         'actorId': value['actorId'],
         'branches': ((value['branches'] as Array<any>).map(BranchListDTOToJSON)),
         'email': value['email'],
+        'permissions': value['permissions'],
+        'roles': value['roles'],
     };
 }
 

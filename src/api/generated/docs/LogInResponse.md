@@ -9,6 +9,8 @@ Name | Type
 `actorId` | string
 `branches` | [Array&lt;BranchListDTO&gt;](BranchListDTO.md)
 `email` | string
+`permissions` | { [key: string]: Array&lt;string&gt;; }
+`roles` | Array&lt;string&gt;
 
 ## Example
 
@@ -20,6 +22,8 @@ const example = {
   "actorId": null,
   "branches": null,
   "email": null,
+  "permissions": null,
+  "roles": null,
 } satisfies LogInResponse
 
 console.log(example)

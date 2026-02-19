@@ -282,7 +282,7 @@ No authorization required
 
 ## getAllPermissions
 
-> ApiResponseListPermission getAllPermissions()
+> ApiResponsePagePermission getAllPermissions(pageable)
 
 Get all Permissions
 
@@ -299,8 +299,13 @@ async function example() {
   console.log("🚀 Testing  SDK...");
   const api = new AccessControlApi();
 
+  const body = {
+    // Pageable
+    pageable: ...,
+  } satisfies GetAllPermissionsRequest;
+
   try {
-    const data = await api.getAllPermissions();
+    const data = await api.getAllPermissions(body);
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -313,11 +318,14 @@ example().catch(console.error);
 
 ### Parameters
 
-This endpoint does not need any parameter.
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
 
 ### Return type
 
-[**ApiResponseListPermission**](ApiResponseListPermission.md)
+[**ApiResponsePagePermission**](ApiResponsePagePermission.md)
 
 ### Authorization
 
@@ -404,7 +412,7 @@ No authorization required
 
 ## getPermission
 
-> ApiResponseOptionalPermission getPermission(id)
+> ApiResponsePermission getPermission(id)
 
 Get a Permission by id
 
@@ -447,7 +455,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**ApiResponseOptionalPermission**](ApiResponseOptionalPermission.md)
+[**ApiResponsePermission**](ApiResponsePermission.md)
 
 ### Authorization
 

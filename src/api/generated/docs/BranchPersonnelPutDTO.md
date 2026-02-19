@@ -9,6 +9,7 @@ Name | Type
 ------------ | -------------
 `actorId` | string
 `branchId` | string
+`personnelRoleId` | string
 `status` | string
 `updatedById` | string
 
@@ -21,6 +22,7 @@ import type { BranchPersonnelPutDTO } from ''
 const example = {
   "actorId": null,
   "branchId": null,
+  "personnelRoleId": null,
   "status": null,
   "updatedById": null,
 } satisfies BranchPersonnelPutDTO

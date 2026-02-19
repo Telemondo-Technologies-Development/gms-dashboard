@@ -8,13 +8,11 @@ Format for Invoice create
 Name | Type
 ------------ | -------------
 `actorId` | string
-`branchId` | string
 `createdById` | string
 `dueDate` | Date
 `gracePeriodDate` | Date
 `memberSubscriptionId` | string
 `status` | string
-`subscriptionAvailedId` | string
 `subtotal` | number
 `systemGenerated` | boolean
 
@@ -26,13 +24,11 @@ import type { InvoicePostDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "actorId": null,
-  "branchId": null,
   "createdById": null,
   "dueDate": null,
   "gracePeriodDate": null,
   "memberSubscriptionId": null,
   "status": null,
-  "subscriptionAvailedId": null,
   "subtotal": null,
   "systemGenerated": null,
 } satisfies InvoicePostDTO

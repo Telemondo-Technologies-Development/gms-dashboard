@@ -8,6 +8,7 @@ apis/AuthApi.ts
 apis/BillingCycleApi.ts
 apis/BranchApi.ts
 apis/BranchPersonnelApi.ts
+apis/BranchPersonnelRolesApi.ts
 apis/EmployeeApi.ts
 apis/InvoiceApi.ts
 apis/MaintenanceScheduleApi.ts
@@ -55,7 +56,7 @@ docs/ApiResponseListMemberTableDTO.md
 docs/ApiResponseListOtherExpenseReadDTO.md
 docs/ApiResponseListPaymentMethodTableDTO.md
 docs/ApiResponseListPaymentTableDTO.md
-docs/ApiResponseListPermission.md
+docs/ApiResponseListPersonnelRoleTableDTO.md
 docs/ApiResponseListReportTableDTO.md
 docs/ApiResponseListReportTypeTableDTO.md
 docs/ApiResponseListRoleTableDTO.md
@@ -71,10 +72,12 @@ docs/ApiResponseListUtilityExpenseReadDTO.md
 docs/ApiResponseMemberSubscriptionTableDTO.md
 docs/ApiResponseMemberTableDTO.md
 docs/ApiResponseObjectStorage.md
-docs/ApiResponseOptionalPermission.md
 docs/ApiResponseOtherExpenseReadDTO.md
+docs/ApiResponsePagePermission.md
 docs/ApiResponsePaymentMethodTableDTO.md
 docs/ApiResponsePaymentTableDTO.md
+docs/ApiResponsePermission.md
+docs/ApiResponsePersonnelRoleTableDTO.md
 docs/ApiResponseReportTableDTO.md
 docs/ApiResponseReportTypeTableDTO.md
 docs/ApiResponseRolePermissionTableDTO.md
@@ -121,6 +124,7 @@ docs/BranchListDTO.md
 docs/BranchPersonnelApi.md
 docs/BranchPersonnelPostDTO.md
 docs/BranchPersonnelPutDTO.md
+docs/BranchPersonnelRolesApi.md
 docs/BranchPersonnelTableDTO.md
 docs/BranchPostDTO.md
 docs/BranchPutDTO.md
@@ -154,7 +158,9 @@ docs/OtherExpenseCreateDTO.md
 docs/OtherExpenseReadDTO.md
 docs/OtherExpenseUpdateDTO.md
 docs/PageMetadata.md
+docs/PagePermission.md
 docs/Pageable.md
+docs/PageableObject.md
 docs/PaymentApi.md
 docs/PaymentMethodPostDTO.md
 docs/PaymentMethodPutDTO.md
@@ -163,6 +169,9 @@ docs/PaymentPostDTO.md
 docs/PaymentPutDTO.md
 docs/PaymentTableDTO.md
 docs/Permission.md
+docs/PersonnelRolePostDTO.md
+docs/PersonnelRolePutDTO.md
+docs/PersonnelRoleTableDTO.md
 docs/ReportApi.md
 docs/ReportPostDTO.md
 docs/ReportPutDTO.md
@@ -183,6 +192,7 @@ docs/SalaryExpenseUpdateDTO.md
 docs/SchedulePostDTO.md
 docs/SchedulePutDTO.md
 docs/ScheduleTableDTO.md
+docs/SortObject.md
 docs/SubscriptionApi.md
 docs/SubscriptionAvailedApi.md
 docs/SubscriptionAvailedPostDTO.md
@@ -240,7 +250,7 @@ models/ApiResponseListMemberTableDTO.ts
 models/ApiResponseListOtherExpenseReadDTO.ts
 models/ApiResponseListPaymentMethodTableDTO.ts
 models/ApiResponseListPaymentTableDTO.ts
-models/ApiResponseListPermission.ts
+models/ApiResponseListPersonnelRoleTableDTO.ts
 models/ApiResponseListReportTableDTO.ts
 models/ApiResponseListReportTypeTableDTO.ts
 models/ApiResponseListRoleTableDTO.ts
@@ -256,10 +266,12 @@ models/ApiResponseListUtilityExpenseReadDTO.ts
 models/ApiResponseMemberSubscriptionTableDTO.ts
 models/ApiResponseMemberTableDTO.ts
 models/ApiResponseObjectStorage.ts
-models/ApiResponseOptionalPermission.ts
 models/ApiResponseOtherExpenseReadDTO.ts
+models/ApiResponsePagePermission.ts
 models/ApiResponsePaymentMethodTableDTO.ts
 models/ApiResponsePaymentTableDTO.ts
+models/ApiResponsePermission.ts
+models/ApiResponsePersonnelRoleTableDTO.ts
 models/ApiResponseReportTableDTO.ts
 models/ApiResponseReportTypeTableDTO.ts
 models/ApiResponseRolePermissionTableDTO.ts
@@ -323,7 +335,9 @@ models/OtherExpenseCreateDTO.ts
 models/OtherExpenseReadDTO.ts
 models/OtherExpenseUpdateDTO.ts
 models/PageMetadata.ts
+models/PagePermission.ts
 models/Pageable.ts
+models/PageableObject.ts
 models/PaymentMethodPostDTO.ts
 models/PaymentMethodPutDTO.ts
 models/PaymentMethodTableDTO.ts
@@ -331,6 +345,9 @@ models/PaymentPostDTO.ts
 models/PaymentPutDTO.ts
 models/PaymentTableDTO.ts
 models/Permission.ts
+models/PersonnelRolePostDTO.ts
+models/PersonnelRolePutDTO.ts
+models/PersonnelRoleTableDTO.ts
 models/ReportPostDTO.ts
 models/ReportPutDTO.ts
 models/ReportTableDTO.ts
@@ -348,6 +365,7 @@ models/SalaryExpenseUpdateDTO.ts
 models/SchedulePostDTO.ts
 models/SchedulePutDTO.ts
 models/ScheduleTableDTO.ts
+models/SortObject.ts
 models/SubscriptionAvailedPostDTO.ts
 models/SubscriptionAvailedTableDTO.ts
 models/SubscriptionPostDTO.ts

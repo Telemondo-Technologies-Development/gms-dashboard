@@ -30,12 +30,6 @@ export interface InvoicePostDTO {
      * @type {string}
      * @memberof InvoicePostDTO
      */
-    branchId: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvoicePostDTO
-     */
     createdById: string;
     /**
      * 
@@ -61,12 +55,6 @@ export interface InvoicePostDTO {
      * @memberof InvoicePostDTO
      */
     status: InvoicePostDTOStatusEnum;
-    /**
-     * 
-     * @type {string}
-     * @memberof InvoicePostDTO
-     */
-    subscriptionAvailedId: string;
     /**
      * 
      * @type {number}
@@ -99,13 +87,11 @@ export type InvoicePostDTOStatusEnum = typeof InvoicePostDTOStatusEnum[keyof typ
  */
 export function instanceOfInvoicePostDTO(value: object): value is InvoicePostDTO {
     if (!('actorId' in value) || value['actorId'] === undefined) return false;
-    if (!('branchId' in value) || value['branchId'] === undefined) return false;
     if (!('createdById' in value) || value['createdById'] === undefined) return false;
     if (!('dueDate' in value) || value['dueDate'] === undefined) return false;
     if (!('gracePeriodDate' in value) || value['gracePeriodDate'] === undefined) return false;
     if (!('memberSubscriptionId' in value) || value['memberSubscriptionId'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
-    if (!('subscriptionAvailedId' in value) || value['subscriptionAvailedId'] === undefined) return false;
     if (!('subtotal' in value) || value['subtotal'] === undefined) return false;
     return true;
 }
@@ -121,13 +107,11 @@ export function InvoicePostDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     return {
         
         'actorId': json['actorId'],
-        'branchId': json['branchId'],
         'createdById': json['createdById'],
         'dueDate': (new Date(json['dueDate'])),
         'gracePeriodDate': (new Date(json['gracePeriodDate'])),
         'memberSubscriptionId': json['memberSubscriptionId'],
         'status': json['status'],
-        'subscriptionAvailedId': json['subscriptionAvailedId'],
         'subtotal': json['subtotal'],
         'systemGenerated': json['systemGenerated'] == null ? undefined : json['systemGenerated'],
     };
@@ -145,13 +129,11 @@ export function InvoicePostDTOToJSONTyped(value?: InvoicePostDTO | null, ignoreD
     return {
         
         'actorId': value['actorId'],
-        'branchId': value['branchId'],
         'createdById': value['createdById'],
         'dueDate': value['dueDate'].toISOString(),
         'gracePeriodDate': value['gracePeriodDate'].toISOString(),
         'memberSubscriptionId': value['memberSubscriptionId'],
         'status': value['status'],
-        'subscriptionAvailedId': value['subscriptionAvailedId'],
         'subtotal': value['subtotal'],
         'systemGenerated': value['systemGenerated'],
     };

@@ -42,6 +42,12 @@ export interface BranchPersonnelPostDTO {
      * @type {string}
      * @memberof BranchPersonnelPostDTO
      */
+    personnelRoleId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BranchPersonnelPostDTO
+     */
     status: BranchPersonnelPostDTOStatusEnum;
 }
 
@@ -66,6 +72,7 @@ export function instanceOfBranchPersonnelPostDTO(value: object): value is Branch
     if (!('actorId' in value) || value['actorId'] === undefined) return false;
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
     if (!('createdById' in value) || value['createdById'] === undefined) return false;
+    if (!('personnelRoleId' in value) || value['personnelRoleId'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
     return true;
 }
@@ -83,6 +90,7 @@ export function BranchPersonnelPostDTOFromJSONTyped(json: any, ignoreDiscriminat
         'actorId': json['actorId'],
         'branchId': json['branchId'],
         'createdById': json['createdById'],
+        'personnelRoleId': json['personnelRoleId'],
         'status': json['status'],
     };
 }
@@ -101,6 +109,7 @@ export function BranchPersonnelPostDTOToJSONTyped(value?: BranchPersonnelPostDTO
         'actorId': value['actorId'],
         'branchId': value['branchId'],
         'createdById': value['createdById'],
+        'personnelRoleId': value['personnelRoleId'],
         'status': value['status'],
     };
 }

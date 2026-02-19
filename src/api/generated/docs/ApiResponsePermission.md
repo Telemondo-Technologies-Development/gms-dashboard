@@ -1,31 +1,32 @@
 
-# BranchPersonnelPostDTO
+# ApiResponsePermission
 
-Format for Branch Personnel create
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`actorId` | string
-`branchId` | string
-`createdById` | string
-`personnelRoleId` | string
-`status` | string
+`data` | [Permission](Permission.md)
+`errors` | [Array&lt;ApiError&gt;](ApiError.md)
+`message` | string
+`meta` | [PageMetadata](PageMetadata.md)
+`success` | boolean
+`timestamp` | number
 
 ## Example
 
 ```typescript
-import type { BranchPersonnelPostDTO } from ''
+import type { ApiResponsePermission } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "actorId": null,
-  "branchId": null,
-  "createdById": null,
-  "personnelRoleId": null,
-  "status": null,
-} satisfies BranchPersonnelPostDTO
+  "data": null,
+  "errors": null,
+  "message": null,
+  "meta": null,
+  "success": null,
+  "timestamp": null,
+} satisfies ApiResponsePermission
 
 console.log(example)
 
@@ -34,7 +35,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as BranchPersonnelPostDTO
+const exampleParsed = JSON.parse(exampleJSON) as ApiResponsePermission
 console.log(exampleParsed)
 ```
 

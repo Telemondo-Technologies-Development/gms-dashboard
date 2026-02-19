@@ -4,10 +4,10 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createSubscriptionAvailed**](SubscriptionAvailedApi.md#createsubscriptionavailed) | **POST** /api/subscriptionAvailed | Create a new Subscription Availed |
-| [**deleteSubscriptionAvailed**](SubscriptionAvailedApi.md#deletesubscriptionavailed) | **DELETE** /api/subscriptionAvailed/{id} | Delete a Subscription Availed by id |
-| [**getAllSubscriptionAvailed**](SubscriptionAvailedApi.md#getallsubscriptionavailed) | **GET** /api/subscriptionAvailed | Get all Subscription Availed |
-| [**getSubscriptionAvailed**](SubscriptionAvailedApi.md#getsubscriptionavailed) | **GET** /api/subscriptionAvailed/{id} | Get a Subscription Availed by id |
+| [**createSubscriptionAvailed**](SubscriptionAvailedApi.md#createsubscriptionavailed) | **POST** /api/subscription-availed | Create a new Subscription Availed |
+| [**deleteSubscriptionAvailed**](SubscriptionAvailedApi.md#deletesubscriptionavailed) | **DELETE** /api/subscription-availed/{id} | Delete a Subscription Availed by id |
+| [**getAllSubscriptionAvailed**](SubscriptionAvailedApi.md#getallsubscriptionavailed) | **GET** /api/subscription-availed | Get all Subscription Availed |
+| [**getSubscriptionAvailed**](SubscriptionAvailedApi.md#getsubscriptionavailed) | **GET** /api/subscription-availed/{id} | Get a Subscription Availed by id |
 
 
 

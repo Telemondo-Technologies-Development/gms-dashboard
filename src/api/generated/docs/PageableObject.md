@@ -1,31 +1,32 @@
 
-# BranchPersonnelPostDTO
+# PageableObject
 
-Format for Branch Personnel create
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`actorId` | string
-`branchId` | string
-`createdById` | string
-`personnelRoleId` | string
-`status` | string
+`offset` | number
+`pageNumber` | number
+`pageSize` | number
+`paged` | boolean
+`sort` | [SortObject](SortObject.md)
+`unpaged` | boolean
 
 ## Example
 
 ```typescript
-import type { BranchPersonnelPostDTO } from ''
+import type { PageableObject } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "actorId": null,
-  "branchId": null,
-  "createdById": null,
-  "personnelRoleId": null,
-  "status": null,
-} satisfies BranchPersonnelPostDTO
+  "offset": null,
+  "pageNumber": null,
+  "pageSize": null,
+  "paged": null,
+  "sort": null,
+  "unpaged": null,
+} satisfies PageableObject
 
 console.log(example)
 
@@ -34,7 +35,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as BranchPersonnelPostDTO
+const exampleParsed = JSON.parse(exampleJSON) as PageableObject
 console.log(exampleParsed)
 ```
 

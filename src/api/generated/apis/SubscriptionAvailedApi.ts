@@ -73,7 +73,7 @@ export class SubscriptionAvailedApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
 
-        let urlPath = `/api/subscriptionAvailed`;
+        let urlPath = `/api/subscription-availed`;
 
         const response = await this.request({
             path: urlPath,
@@ -110,7 +110,7 @@ export class SubscriptionAvailedApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/subscriptionAvailed/{id}`;
+        let urlPath = `/api/subscription-availed/{id}`;
         urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
 
         const response = await this.request({
@@ -151,7 +151,7 @@ export class SubscriptionAvailedApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/subscriptionAvailed`;
+        let urlPath = `/api/subscription-availed`;
 
         const response = await this.request({
             path: urlPath,
@@ -187,7 +187,7 @@ export class SubscriptionAvailedApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/subscriptionAvailed/{id}`;
+        let urlPath = `/api/subscription-availed/{id}`;
         urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
 
         const response = await this.request({

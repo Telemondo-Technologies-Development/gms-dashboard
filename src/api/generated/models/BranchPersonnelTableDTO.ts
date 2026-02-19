@@ -54,6 +54,12 @@ export interface BranchPersonnelTableDTO {
      * @type {string}
      * @memberof BranchPersonnelTableDTO
      */
+    personnelRoleId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BranchPersonnelTableDTO
+     */
     status: BranchPersonnelTableDTOStatusEnum;
     /**
      * 
@@ -91,6 +97,7 @@ export function instanceOfBranchPersonnelTableDTO(value: object): value is Branc
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
+    if (!('personnelRoleId' in value) || value['personnelRoleId'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
     if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
@@ -111,6 +118,7 @@ export function BranchPersonnelTableDTOFromJSONTyped(json: any, ignoreDiscrimina
         'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'id': json['id'],
+        'personnelRoleId': json['personnelRoleId'],
         'status': json['status'],
         'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
@@ -133,6 +141,7 @@ export function BranchPersonnelTableDTOToJSONTyped(value?: BranchPersonnelTableD
         'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'id': value['id'],
+        'personnelRoleId': value['personnelRoleId'],
         'status': value['status'],
         'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],

@@ -1,31 +1,26 @@
 
-# BranchPersonnelPostDTO
+# SortObject
 
-Format for Branch Personnel create
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`actorId` | string
-`branchId` | string
-`createdById` | string
-`personnelRoleId` | string
-`status` | string
+`empty` | boolean
+`sorted` | boolean
+`unsorted` | boolean
 
 ## Example
 
 ```typescript
-import type { BranchPersonnelPostDTO } from ''
+import type { SortObject } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "actorId": null,
-  "branchId": null,
-  "createdById": null,
-  "personnelRoleId": null,
-  "status": null,
-} satisfies BranchPersonnelPostDTO
+  "empty": null,
+  "sorted": null,
+  "unsorted": null,
+} satisfies SortObject
 
 console.log(example)
 
@@ -34,7 +29,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as BranchPersonnelPostDTO
+const exampleParsed = JSON.parse(exampleJSON) as SortObject
 console.log(exampleParsed)
 ```
 
