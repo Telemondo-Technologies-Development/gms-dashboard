@@ -5,6 +5,12 @@ import { useEmployees } from '@/hooks/users/useEmployees';
 import { useMemo, useState } from 'react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 import { useBranchEmployees } from '@/hooks/Staff/useBranchEmployees';
+import { useAuthSession } from '@/lib/auth/auth-session';
+import { useAssignBranchPersonnel } from '@/hooks/Staff/useAssignBranchPersonnel';
+import { useUpdateBranchPersonnel } from '@/hooks/Staff/useUpdateBranchPersonnel';
+import { useDeleteBranchPersonnel } from '@/hooks/Staff/useDeleteBranchPersonnel';
+import type { BranchPersonnelPutDTOStatusEnum } from '@/api/generated/models/BranchPersonnelPutDTO';
+import type { BranchPersonnelPostDTOStatusEnum } from '@/api/generated/models/BranchPersonnelPostDTO';
 
 interface ListViewProps {
   branchId: string;
@@ -17,10 +23,28 @@ interface ListViewProps {
 export function StaffListView({ branchId, branchName }: ListViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<any | null>(null);
 
   const { data: employees } = useEmployees();
   const { data: branchPersonnel, isLoading: loadingBranchPersonnel } = useBranchPersonnel(branchId);
   const { data: branchEmployees, isLoading: loadingEmployees } = useBranchEmployees(branchId);
+
+  const { actorId: currentActorId } = useAuthSession();
+
+  const assign = useAssignBranchPersonnel();
+  const update = useUpdateBranchPersonnel();
+  const remove = useDeleteBranchPersonnel();
+
+  const STATUS_OPTIONS: BranchPersonnelPutDTOStatusEnum[] = [
+    'ACTIVE',
+    'MOVED',
+    'TERMINATED',
+    'RESIGNED',
+    'UNDECIDED',
+  ];
+
+  const loadingAssigned = loadingBranchPersonnel || loadingEmployees;
+
   const actorNameById = useMemo(() => {
     return new Map(
       (branchEmployees ?? []).map((e) => {
@@ -32,8 +56,6 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
     );
   }, [branchEmployees]);
 
-  const loadingAssigned = loadingBranchPersonnel || loadingEmployees;
-
   const filteredEmployees = useMemo(() => {
     if (!searchTerm.trim() || !isSearching) return [];
     return (employees ?? [])
@@ -43,6 +65,11 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
       })
       .slice(0, 5);
   }, [searchTerm, employees, isSearching]);
+
+  const alreadyAssigned = useMemo(() => {
+    if (!selectedEmployee) return false;
+    return (branchPersonnel ?? []).some((p) => p.actorId === selectedEmployee.id);
+  }, [branchPersonnel, selectedEmployee]);
 
   return (
     <div className="flex flex-col h-full max-h-[70vh]">
@@ -60,6 +87,7 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setIsSearching(true);
+              setSelectedEmployee(null);
             }}
             onFocus={() => {
               if (searchTerm.length > 0) setIsSearching(true);
@@ -78,6 +106,7 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
                   className="px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
                   onMouseDown={(e) => {
                     e.preventDefault();
+                    setSelectedEmployee(employee);
                     setSearchTerm(`${employee.firstName} ${employee.surname}`);
                     setIsSearching(false);
                   }}
@@ -93,13 +122,13 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
           <div className="border border-zinc-200 rounded-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-semibold text-zinc-900">Assigned Personnel</p>
-              <p className="text-xs text-zinc-500">
-                {(branchPersonnel ?? []).length} total
-              </p>
+              <p className="text-xs text-zinc-500">{(branchPersonnel ?? []).length} total</p>
             </div>
 
             {loadingAssigned ? (
-              <div className="text-center text-sm text-zinc-400 italic py-4">Loading personnel...</div>
+              <div className="text-center text-sm text-zinc-400 italic py-4">
+                Loading personnel...
+              </div>
             ) : (branchPersonnel ?? []).length === 0 ? (
               <div className="text-center text-sm text-zinc-500 py-4">No items to display.</div>
             ) : (
@@ -107,16 +136,49 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
                 {(branchPersonnel ?? []).map((personnel) => {
                   const displayName =
                     actorNameById.get(personnel.actorId) ??
-                    `${personnel.actorId.slice(0, 8)}...${personnel.actorId.slice(-4)}`;
+                    (personnel.actorId
+                      ? `${personnel.actorId.slice(0, 8)}...${personnel.actorId.slice(-4)}`
+                      : 'Unknown');
 
                   return (
                     <div
                       key={personnel.id}
-                      className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200"
+                      className="flex items-center justify-between gap-3 p-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200"
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-zinc-900 truncate">{displayName}</p>
                         <p className="text-xs text-zinc-500">{personnel.status}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <select
+                          className="border border-zinc-200 rounded-md px-2 py-1 text-xs bg-white"
+                          value={personnel.status}
+                          onChange={(e) => {
+                            update.mutate({
+                              id: personnel.id,
+                              actorId: personnel.actorId,
+                              branchId,
+                              updatedById: currentActorId || '',
+                              status: e.target.value as BranchPersonnelPutDTOStatusEnum,
+                            });
+                          }}
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
+                        </select>
+
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-8 px-3 text-xs"
+                          onClick={() => remove.mutate({ id: personnel.id, branchId })}
+                        >
+                          Remove
+                        </Button>
                       </div>
                     </div>
                   );
@@ -127,8 +189,37 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
         </div>
 
         <div className="flex justify-end mt-6">
-          <Button variant="default" className="bg-blue-600 hover:bg-blue-700 px-6 py-2">
-            Assign
+          <Button
+            type="button"
+            variant="default"
+            className="bg-blue-600 hover:bg-blue-700 px-6 py-2"
+            disabled={
+              !selectedEmployee ||
+              alreadyAssigned ||
+              assign.isPending ||
+              !currentActorId ||
+              !branchId
+            }
+            onClick={() => {
+              if (!selectedEmployee || !currentActorId || !branchId) return;
+
+              assign.mutate(
+                {
+                  actorId: selectedEmployee.id,
+                  branchId,
+                  createdById: currentActorId,
+                  status: 'ACTIVE' as BranchPersonnelPostDTOStatusEnum,
+                },
+                {
+                  onSuccess: () => {
+                    setSearchTerm('');
+                    setSelectedEmployee(null);
+                  },
+                }
+              );
+            }}
+          >
+            {alreadyAssigned ? 'Already Assigned' : assign.isPending ? 'Assigning...' : 'Assign'}
           </Button>
         </div>
       </div>
