@@ -3,26 +3,45 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useEmployees } from '@/hooks/users/useEmployees';
 import { useMemo, useState } from 'react';
-
+import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
+import { useBranchEmployees } from '@/hooks/Staff/useBranchEmployees';
 
 interface ListViewProps {
+  branchId: string;
   branchName: string;
   staff: any[];
   onAddClick: () => void;
   onSelect: (member: any) => void;
 }
 
-export function StaffListView({ branchName}: ListViewProps) {
+export function StaffListView({ branchId, branchName }: ListViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+
   const { data: employees } = useEmployees();
+  const { data: branchPersonnel, isLoading: loadingBranchPersonnel } = useBranchPersonnel(branchId);
+  const { data: branchEmployees, isLoading: loadingEmployees } = useBranchEmployees(branchId);
+  const actorNameById = useMemo(() => {
+    return new Map(
+      (branchEmployees ?? []).map((e) => {
+        const mid = e.employee?.middleName ? ` ${e.employee.middleName}` : '';
+        const suf = e.employee?.suffix ? ` ${e.employee.suffix}` : '';
+        const fullName = `${e.employee?.firstName ?? ''}${mid} ${e.employee?.surname ?? ''}${suf}`.trim();
+        return [e.actorId, fullName] as const;
+      })
+    );
+  }, [branchEmployees]);
+
+  const loadingAssigned = loadingBranchPersonnel || loadingEmployees;
 
   const filteredEmployees = useMemo(() => {
     if (!searchTerm.trim() || !isSearching) return [];
-    return (employees ?? []).filter((employee) => {
-      const name = `${employee.firstName} ${employee.surname}`.toLowerCase();
-      return name.includes(searchTerm.toLowerCase());
-    }).slice(0, 5);
+    return (employees ?? [])
+      .filter((employee) => {
+        const name = `${employee.firstName} ${employee.surname}`.toLowerCase();
+        return name.includes(searchTerm.toLowerCase());
+      })
+      .slice(0, 5);
   }, [searchTerm, employees, isSearching]);
 
   return (
@@ -50,6 +69,7 @@ export function StaffListView({ branchName}: ListViewProps) {
             }}
             className="w-full bg-transparent outline-none text-zinc-900 placeholder-zinc-400 border border-zinc-200 rounded-lg px-4"
           />
+
           {isSearching && filteredEmployees.length > 0 && (
             <div className="absolute z-50 w-full top-[70px] bg-popover border rounded-md shadow-lg max-h-40 overflow-y-auto">
               {filteredEmployees.map((employee) => (
@@ -70,9 +90,39 @@ export function StaffListView({ branchName}: ListViewProps) {
         </div>
 
         <div className="mt-4">
-          {/* Placeholder for the list */}
-          <div className="border border-zinc-200 rounded-lg p-4 text-center text-zinc-500">
-            No items to display.
+          <div className="border border-zinc-200 rounded-lg p-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-semibold text-zinc-900">Assigned Personnel</p>
+              <p className="text-xs text-zinc-500">
+                {(branchPersonnel ?? []).length} total
+              </p>
+            </div>
+
+            {loadingAssigned ? (
+              <div className="text-center text-sm text-zinc-400 italic py-4">Loading personnel...</div>
+            ) : (branchPersonnel ?? []).length === 0 ? (
+              <div className="text-center text-sm text-zinc-500 py-4">No items to display.</div>
+            ) : (
+              <div className="space-y-2 max-h-[260px] overflow-y-auto">
+                {(branchPersonnel ?? []).map((personnel) => {
+                  const displayName =
+                    actorNameById.get(personnel.actorId) ??
+                    `${personnel.actorId.slice(0, 8)}...${personnel.actorId.slice(-4)}`;
+
+                  return (
+                    <div
+                      key={personnel.id}
+                      className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-zinc-900 truncate">{displayName}</p>
+                        <p className="text-xs text-zinc-500">{personnel.status}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,8 +11,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAuthSession } from '@/lib/auth/auth-session';
-import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
-import { useBranchEmployees } from '@/hooks/Staff/useBranchEmployees';
 
 export interface StaffMember {
   id: string;
@@ -59,27 +57,6 @@ export function BranchDetailsDialog({
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [status, setStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
-
-  const { data: branchPersonnel, isLoading: loadingBranchPersonnel } = useBranchPersonnel(
-    branch?.id || ''
-  );
-
-  const { data: branchEmployees, isLoading: loadingEmployees } = useBranchEmployees(
-    branch?.id || ''
-  );
-
-  const actorNameById = useMemo(() => {
-    return new Map(
-      (branchEmployees ?? []).map((e) => {
-        const mid = e.employee.middleName ? ` ${e.employee.middleName}` : '';
-        const suf = e.employee.suffix ? ` ${e.employee.suffix}` : '';
-        const fullName = `${e.employee.firstName}${mid} ${e.employee.surname}${suf}`.trim();
-        return [e.actorId, fullName] as const;
-      })
-    );
-  }, [branchEmployees]);
-
-  const loadingAssigned = loadingBranchPersonnel || loadingEmployees;
 
   useEffect(() => {
     if (!branch) return;
@@ -156,37 +133,6 @@ export function BranchDetailsDialog({
                     <option value="ACTIVE">Active</option>
                     <option value="INACTIVE">Inactive</option>
                   </select>
-                </div>
-              </div>
-
-              <div className="space-y-4 bg-white rounded-lg shadow-md p-4 border border-zinc-200">
-                <h3 className="text-lg font-semibold">Assigned Personnel</h3>
-
-                <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                  {loadingAssigned ? (
-                    <p className="text-sm text-zinc-400 italic">Loading personnel...</p>
-                  ) : (branchPersonnel ?? []).length === 0 ? (
-                    <p className="text-sm text-zinc-400 italic">
-                      No personnel assigned to this branch.
-                    </p>
-                  ) : (
-                    (branchPersonnel ?? []).map((personnel) => {
-                      const displayName =
-                        actorNameById.get(personnel.actorId) ??
-                        `${personnel.actorId.slice(0, 8)}...${personnel.actorId.slice(-4)}`;
-
-                      return (
-                        <div
-                          key={personnel.id}
-                          className="flex items-center justify-between p-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200"
-                        >
-                          <p className="text-sm font-medium text-zinc-900">
-                            {displayName} - {personnel.status}
-                          </p>
-                        </div>
-                      );
-                    })
-                  )}
                 </div>
               </div>
             </div>
