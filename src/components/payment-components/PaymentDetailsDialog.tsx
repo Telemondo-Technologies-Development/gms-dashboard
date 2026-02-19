@@ -78,15 +78,6 @@ export function PaymentDetailsDialog({
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Payment details</DialogTitle>
-          <DialogDescription>
-            {loading
-              ? 'Loading payment…'
-              : payment
-                ? 'Details from PaymentTableDTO.'
-                : paymentId
-                  ? 'Payment not found.'
-                  : 'No payment selected.'}
-          </DialogDescription>
         </DialogHeader>
 
         {error ? (
@@ -97,11 +88,7 @@ export function PaymentDetailsDialog({
           <div className="rounded-md border p-6 text-sm text-muted-foreground">Loading payment details…</div>
         ) : payment ? (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <div className="text-xs text-muted-foreground">Payment ID</div>
-                <div className="mt-1 break-all font-mono text-xs">{payment.id}</div>
-              </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
                 <div className="text-xs text-muted-foreground">Invoice ID</div>
                 <div className="mt-1 break-all font-mono text-xs">{payment.invoiceId}</div>
@@ -110,9 +97,6 @@ export function PaymentDetailsDialog({
                 <div className="text-xs text-muted-foreground">Payment Method</div>
                 <div className="mt-1 text-sm">
                   {paymentMethodMap.get(payment.paymentMethodId)?.name ?? '—'}
-                </div>
-                <div className="mt-1 break-all font-mono text-xs text-muted-foreground">
-                  {payment.paymentMethodId}
                 </div>
               </div>
               <div>

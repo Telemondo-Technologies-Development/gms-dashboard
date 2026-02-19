@@ -93,7 +93,7 @@ function MembershipRoute() {
             setSelectedMemberGroupSnapshot(memberGroup)
             setDetailsOpen(true)
           }}
-          pageSize={8}
+          pageSize={5}
         />
 
         {/* Attendance Card */}
