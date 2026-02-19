@@ -4,11 +4,6 @@ import { getAuthenticatedApi } from '@/lib/api-client';
 import { BranchPersonnelApi } from '@/api/generated/apis';
 
 const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi);
-
-/**
- * Fetch branch personnel data assigned to a specific branch.
- * @param branchId - The ID of the branch to fetch personnel for.
- */
 export const useBranchPersonnel = (branchId: string) => {
   return useQuery<BranchPersonnelTableDTO[]>({
     queryKey: ['branchPersonnel', branchId],
