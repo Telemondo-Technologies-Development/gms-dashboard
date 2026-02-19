@@ -19,6 +19,8 @@ const badgeVariants = cva(
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         warning:
           "border-transparent bg-warning text-warning-foreground [a&]:hover:bg-warning/90", 
+        tertiary:
+          "border-transparent bg-muted text-muted-foreground [a&]:hover:bg-muted/80",
       },
     },
     defaultVariants: {
