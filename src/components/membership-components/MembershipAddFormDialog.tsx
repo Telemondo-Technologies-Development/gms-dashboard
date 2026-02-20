@@ -306,8 +306,8 @@ export function AddMemberDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl h-[95vh] max-h-[95vh] overflow-hidden p-0">
+        <DialogHeader className="sticky top-0 z-10 border-b bg-background px-6 py-4">
           <DialogTitle>Add New Member</DialogTitle>
           <DialogDescription>Create a new member and assign membership details.</DialogDescription>
         </DialogHeader>
@@ -318,9 +318,9 @@ export function AddMemberDialog() {
             e.stopPropagation()
             void form.handleSubmit()
           }}
-          className=""
+          className="flex h-full min-h-0 flex-col"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto px-6 py-4 min-h-0 flex-1">
             <div className="space-y-6">
               <MemberSubscriptionDetailsCard />
             </div>
@@ -337,7 +337,7 @@ export function AddMemberDialog() {
             />
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="sticky bottom-0 z-10 flex items-center justify-between border-t bg-background px-6 py-4">
             <div className="flex-1">
               {submitError ? (
                 <p className="text-sm text-destructive" role="alert">

@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
+import { Plus, Check, ChevronsUpDown } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -43,114 +44,129 @@ export function AddSubscriptionDialog({ createdById, onCreated }: AddSubscriptio
   }, [billingCyclesQuery.data, formState.billingCycleId])
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => {
+    <Drawer open={open} onOpenChange={(nextOpen) => {
       setOpen(nextOpen)
       if (!nextOpen) reset()
     }}>
-      <DialogTrigger asChild>
-        <Button type="button" variant="link" className="h-auto p-0 text-xs">
-          Add subscription plan
+      <DrawerTrigger asChild>
+        <Button 
+          type="button" 
+          variant="ghost" 
+          size="sm"
+          className="h-8 w-8 p-0 rounded-full bg-primary/10 hover:bg-primary/20 text-primary"
+        >
+          <Plus className="h-4 w-4" />
+          <span className="sr-only">Add subscription plan</span>
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>New Subscription Plan</DialogTitle>
-          <DialogDescription>Create a subscription plan so it can be assigned to members.</DialogDescription>
-        </DialogHeader>
+      </DrawerTrigger>
+      <DrawerContent>
+        <div className="mx-auto w-full max-w-sm">
+          <DrawerHeader>
+            <DrawerTitle>New Subscription Plan</DrawerTitle>
+            <DrawerDescription>Create a subscription plan so it can be assigned to members.</DrawerDescription>
+          </DrawerHeader>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="subscription-name">Plan name</Label>
-            <Input
-              id="subscription-name"
-              value={formState.name}
-              onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Monthly Unlimited"
-            />
-          </div>
+          <div className="p-4 pb-0 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2 space-y-2">
+                <Label htmlFor="subscription-name">Plan Name</Label>
+                <Input
+                  id="subscription-name"
+                  value={formState.name}
+                  onChange={(e) => setFormState((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g. Monthly Gold"
+                  className="bg-background"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="subscription-description">Description</Label>
-            <Textarea
-              id="subscription-description"
-              value={formState.description}
-              onChange={(e) => setFormState((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="Access to all facilities"
-              rows={3}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="subscription-amount">Amount (PHP)</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">₱</span>
+                  <Input
+                    id="subscription-amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="pl-7"
+                    value={formState.amount}
+                    onChange={(e) => setFormState((prev) => ({ ...prev, amount: e.target.value }))}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="subscription-amount">Amount (PHP)</Label>
-            <Input
-              id="subscription-amount"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formState.amount}
-              onChange={(e) => setFormState((prev) => ({ ...prev, amount: e.target.value }))}
-              placeholder="0.00"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="billing-cycle">Billing Cycle</Label>
+                <Select
+                  value={formState.billingCycleId}
+                  onValueChange={(value) => setFormState((prev) => ({ ...prev, billingCycleId: value }))}
+                >
+                  <SelectTrigger id="billing-cycle">
+                    <SelectValue placeholder="Select cycle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {billingCyclesQuery.isLoading ? (
+                      <SelectItem value="__loading__" disabled>Loading...</SelectItem>
+                    ) : billingCyclesQuery.data?.length ? (
+                      billingCyclesQuery.data.map((cycle) => (
+                        <SelectItem key={cycle.id} value={cycle.id}>
+                          {cycle.name} ({cycle.intervalCount} {cycle.intervals})
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="__empty__" disabled>No cycles found</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="billing-cycle">Billing cycle</Label>
-            <Select
-              value={formState.billingCycleId}
-              onValueChange={(value) => setFormState((prev) => ({ ...prev, billingCycleId: value }))}
-            >
-              <SelectTrigger id="billing-cycle">
-                <SelectValue placeholder={billingCyclesQuery.isLoading ? 'Loading cycles...' : 'Select billing cycle'} />
-              </SelectTrigger>
-              <SelectContent>
-                {billingCyclesQuery.data?.length ? (
-                  billingCyclesQuery.data.map((cycle) => (
-                    <SelectItem key={cycle.id} value={cycle.id}>
-                      {cycle.name} · {cycle.intervalCount} {cycle.intervals}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="__no_cycles__" disabled>
-                    {billingCyclesQuery.isLoading ? 'Loading cycles...' : 'No billing cycles found'}
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label htmlFor="subscription-description">Description</Label>
+              <Textarea
+                id="subscription-description"
+                value={formState.description}
+                onChange={(e) => setFormState((prev) => ({ ...prev, description: e.target.value }))}
+                placeholder="What does this plan include?"
+                className="resize-none min-h-[80px]"
+              />
+            </div>
+            
             {selectedCycle ? (
-              <p className="text-xs text-muted-foreground">
-                Grace period: {selectedCycle.gracePeriodDays} days
-              </p>
+              <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground flex items-center justify-between">
+                <span>Grace Period: <span className="font-medium text-foreground">{selectedCycle.gracePeriodDays} days</span></span>
+              </div>
+            ) : null}
+
+            {submitError ? (
+              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive font-medium">
+                {submitError}
+              </div>
             ) : null}
           </div>
-        </div>
 
-        {submitError ? (
-          <p className="text-sm text-destructive" role="alert">
-            {submitError}
-          </p>
-        ) : null}
-
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline" disabled={isSubmitting}>
-              Cancel
+          <DrawerFooter>
+            <Button
+              type="button"
+              onClick={() => void handleSubmit()}
+              disabled={
+                !formState.name.trim() ||
+                !formState.description.trim() ||
+                !formState.amount.trim() ||
+                !formState.billingCycleId ||
+                isSubmitting
+              }
+              className="w-full"
+            >
+              {isSubmitting ? 'Creating Plan...' : 'Create Subscription Plan'}
             </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            onClick={() => void handleSubmit()}
-            disabled={
-              !formState.name.trim() ||
-              !formState.description.trim() ||
-              !formState.amount.trim() ||
-              !formState.billingCycleId ||
-              isSubmitting
-            }
-          >
-            {isSubmitting ? 'Saving...' : 'Create plan'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <DrawerClose asChild>
+              <Button variant="outline" className="w-full">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
   )
 }
