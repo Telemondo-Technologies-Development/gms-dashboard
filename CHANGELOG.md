@@ -6,8 +6,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [Unreleased]
+
+### Changed
+- Membership: Centralized membership logic into `useMembershipDetails` and `useBillingActions` hooks, reducing code duplication.
+- UI: Converted "Add Subscription Plan" to a Drawer component to prevent stacking dialogs and improved the trigger design.
+- UI: Added sticky headers and footers to the "Add Member" dialog for better scrolling behavior on smaller screens.
+
+
+
+## [0.6.0] - 2026-2-16
 
 ### Added
 - Branch: added backend integration for (add,delete,edit) branchpage
@@ -23,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [0.5.0]
+## [0.5.0] - 2026-2-11
 
 ### Added
 -Branch Page : connected the backend through docker for adding branch.
