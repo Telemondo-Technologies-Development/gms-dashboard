@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 
 import { RevenueExpenseChart } from '@/components/analytics-components/AnalyticsRevenue'
@@ -28,6 +29,7 @@ import { IncomeReportCards } from '@/components/analytics-components/AnalyticsIn
 import { analyticsApi, type AnalyticsFilters } from '@/lib/analyticsApi'
 import type { AnalyticsData } from '@/lib/analytics-data'
 import { exportToPDF, exportToExcel } from '@/lib/analytics-export'
+import { useBranches } from '@/hooks/branch/useBranches'
 
 export const Route = createFileRoute('/dashboard/admin/analytics')({
   component: AnalyticsRoute,
@@ -35,14 +37,6 @@ export const Route = createFileRoute('/dashboard/admin/analytics')({
 
 type TimeRange = 'monthly' | 'quarterly' | 'yearly'
 
-/**
- * Filters analytics data by selected branch.
- *
- * NOTE: Financial data (revenue/expenses) cannot be filtered by branch because
- * PaymentTableDTO does not include a branchId field. Membership growth CAN be
- * filtered by branch via MemberSubscriptionTableDTO.branchId — handled inside
- * analyticsApi.getAnalytics().
- */
 function filterByBranch(branch: string, data: AnalyticsData): AnalyticsData {
   if (branch === 'all') return data
   const branchData = data.branches.find((b) => b.name === branch)
@@ -65,6 +59,10 @@ function AnalyticsRoute() {
   const [timeRange, setTimeRange] = useState<TimeRange>('monthly')
   const [isExporting, setIsExporting] = useState(false)
 
+  // Fetch branches independently, same as expense page
+  const { branches, isLoading: branchesLoading, error: branchesError } = useBranches()
+  const branchNames = branches.map((b: { name?: string }) => b.name ?? '').filter(Boolean)
+
   const filters: AnalyticsFilters = useMemo(
     () => ({ branch: selectedBranch, timeRange }),
     [selectedBranch, timeRange],
@@ -72,18 +70,13 @@ function AnalyticsRoute() {
 
   const {
     data: rawData,
-    isLoading,
+    isLoading: analyticsLoading,
     isError,
   } = useQuery({
     queryKey: ['analytics', filters],
     queryFn: () => analyticsApi.getAnalytics(filters),
     staleTime: 1000 * 60 * 5,
   })
-
-  const branches = useMemo(
-    () => (rawData ? ['all', ...rawData.branches.map((b) => b.name)] : ['all']),
-    [rawData],
-  )
 
   const analyticsData = useMemo(
     () => (rawData ? filterByBranch(selectedBranch, rawData) : null),
@@ -110,7 +103,7 @@ function AnalyticsRoute() {
     }
   }
 
-  if (isLoading) {
+  if (analyticsLoading) {
     return (
       <div className="flex flex-1 items-center justify-center py-24">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -143,18 +136,27 @@ function AnalyticsRoute() {
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Financial Analytics</h1>
-          <p className="mt-1 text-muted-foreground">Viewing analytics for {displayBranchName}</p>
+          {branchesLoading ? (
+            <Skeleton className="mt-1 h-4 w-48" />
+          ) : branchesError ? (
+            <p className="mt-1 text-sm text-destructive">
+              {branchesError?.message ?? 'Failed to load branches.'}
+            </p>
+          ) : (
+            <p className="mt-1 text-muted-foreground">Viewing analytics for {displayBranchName}</p>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+          <Select value={selectedBranch} onValueChange={setSelectedBranch} disabled={branchesLoading}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Select branch" />
             </SelectTrigger>
             <SelectContent>
-              {branches.map((branch) => (
-                <SelectItem key={branch} value={branch}>
-                  {branch === 'all' ? 'All Branches' : branch}
+              <SelectItem value="all">All Branches</SelectItem>
+              {branchNames.map((name: string) => (
+                <SelectItem key={name} value={name}>
+                  {name}
                 </SelectItem>
               ))}
             </SelectContent>

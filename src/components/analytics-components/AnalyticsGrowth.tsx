@@ -1,7 +1,6 @@
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
-import { ArrowDown, ArrowUp, Users, AlertCircle } from 'lucide-react'
+import { ArrowDown, ArrowUp, Users } from 'lucide-react'
 import type { AnalyticsData } from '@/lib/analytics-data'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   ChartContainer,
   ChartTooltip,
@@ -75,8 +74,6 @@ export function MembershipGrowthChart({ data, timeRange }: Props) {
       ? (((latestMonth.total - latestMonth.new) / previousMonth.total) * 100).toFixed(1)
       : '0.0'
   const isPositiveGrowth = growthPct >= 0
-
-  const highCancellationRate = latestMonth.new > 0 && latestMonth.cancelled > latestMonth.new * 0.3
 
   return (
     <div className="space-y-4">
@@ -156,16 +153,6 @@ export function MembershipGrowthChart({ data, timeRange }: Props) {
         </AreaChart>
       </ChartContainer>
 
-      {/* High-cancellation alert */}
-      {highCancellationRate && (
-        <Alert className="border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-200">
-          <AlertCircle className="h-4 w-4 !text-orange-600 dark:!text-orange-400" />
-          <AlertDescription className="text-xs">
-            <span className="font-semibold">High cancellation rate detected.</span> Consider
-            reviewing member satisfaction and retention strategies.
-          </AlertDescription>
-        </Alert>
-      )}
     </div>
   )
 }
