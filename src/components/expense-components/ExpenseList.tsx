@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { Search, Plus, Calendar } from 'lucide-react'
+import { Search, Plus, Calendar, Receipt, PackageOpen } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +15,15 @@ interface ExpenseTableProps {
   onRowClick: (expense: ExpenseFormData) => void
 }
 
+const formatAmount = (amount: string) =>
+  `₱${parseFloat(amount).toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+
+const formatExpenseType = (type: string) =>
+  type.replaceAll('-', ' ')
+
 export function ExpenseTable({
   expenses,
   searchQuery,
@@ -22,23 +31,6 @@ export function ExpenseTable({
   onAddClick,
   onRowClick,
 }: ExpenseTableProps) {
-  const formatAmount = (amount: string) => {
-    return `₱${parseFloat(amount).toLocaleString('en-PH', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`
-  }
-
-  const getReceiptBadge = (receipt: File | null) => {
-    return receipt 
-      ? <Badge variant="default" className="bg-primary">Attached</Badge>
-      : <Badge variant="secondary">None</Badge>
-  }
-
-  const formatExpenseType = (type: string) => {
-    return type.replace('-', ' ')
-  }
-
   const handleKeyDown = (e: React.KeyboardEvent, expense: ExpenseFormData) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -62,8 +54,9 @@ export function ExpenseTable({
           </Button>
         </div>
       </CardHeader>
+
       <CardContent className="flex-1 flex flex-col min-h-0">
-        {/* Search Section */}
+        {/* Search */}
         <div className="flex-shrink-0 mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -76,12 +69,13 @@ export function ExpenseTable({
           </div>
         </div>
 
-        {/* Table Content */}
+        {/* Table or Empty State */}
         {expenses.length === 0 ? (
           <div className="flex-1 flex items-center justify-center rounded-lg border border-dashed">
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                {searchQuery 
+            <div className="text-center py-12 space-y-3">
+              <PackageOpen className="h-10 w-10 mx-auto text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">
+                {searchQuery
                   ? 'No expenses found matching your search.'
                   : 'No expenses recorded yet. Click "New Expense" to get started.'}
               </p>
@@ -115,14 +109,12 @@ export function ExpenseTable({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div>
-                        <div className="font-medium">{expense.name}</div>
-                        {expense.description && (
-                          <div className="text-sm text-muted-foreground truncate max-w-md">
-                            {expense.description}
-                          </div>
-                        )}
-                      </div>
+                      <div className="font-medium">{expense.name}</div>
+                      {expense.description && (
+                        <div className="text-sm text-muted-foreground truncate max-w-md">
+                          {expense.description}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -130,13 +122,18 @@ export function ExpenseTable({
                         {format(expense.date, 'MMM dd, yyyy')}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="font-medium">
-                        {formatAmount(expense.amount)}
-                      </div>
+                    <TableCell className="text-right font-medium">
+                      {formatAmount(expense.amount)}
                     </TableCell>
                     <TableCell className="text-center">
-                      {getReceiptBadge(expense.receipt)}
+                      {expense.receipt ? (
+                        <Badge variant="default" className="gap-1 bg-primary">
+                          <Receipt className="h-3 w-3" />
+                          Attached
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">None</Badge>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
