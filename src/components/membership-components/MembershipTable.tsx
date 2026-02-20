@@ -2,8 +2,8 @@
 import { format } from 'date-fns'
 import { Search, Calendar, RefreshCw, Loader2, User, Mail, Phone, CreditCard } from 'lucide-react'
 
-import { useMembersData } from '@/hooks/membership/useMembers'
-import { AddMemberDialog } from '@/components/membership-components/AddMemberDialog'
+import { useMembersData } from '@/hooks/membership/useMembership'
+import { AddMemberDialog } from '@/components/membership-components/MembershipAddFormDialog'
 import type { MemberFormData } from '@/types/membership/memberSchemas'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

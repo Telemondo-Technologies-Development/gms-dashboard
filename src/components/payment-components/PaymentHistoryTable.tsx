@@ -34,8 +34,8 @@ import {
   type InvoiceTableDTOParsed,
 } from '@/types/payment/paymentSchemas'
 
-import { PaymentDetailsDialog } from '@/components/payment-components/PaymentDetailsDialog'
-import { ReceiptDialog } from '@/components/payment-components/ReceiptDialog'
+import { PaymentDetailsDialog } from '@/components/payment-components/PaymentHistoryDialog'
+import { ReceiptDialog } from '@/components/payment-components/PaymentHistoryReceiptDialog'
 
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'

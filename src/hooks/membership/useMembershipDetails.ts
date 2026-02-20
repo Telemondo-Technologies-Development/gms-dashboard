@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { BranchPersonnelApi } from '@/api/generated/apis/BranchPersonnelApi'
@@ -12,6 +12,16 @@ import { useSubscriptionAvailed } from './useSubscriptionAvailed'
 import { userQueryKeys, branchQueryKeys } from '@/lib/QueryKeys'
 import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
 
+
+const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
+
+function getApiBaseUrl(): string {
+  return import.meta.env.DEV ? '' : (import.meta.env.VITE_API_BASE_URL || '')
+}
+
+function buildApiUrl(path: string): string {
+  return `${getApiBaseUrl()}${path}`
+}
 
 
 async function fetchJsonOrThrow(url: string, token?: string): Promise<unknown> {
@@ -36,9 +46,7 @@ async function fetchJsonOrThrow(url: string, token?: string): Promise<unknown> {
 }
 
 async function fetchUserById(userId: string, token?: string): Promise<UserTable> {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-  const url = `${base}/api/user/${encodeURIComponent(userId)}`
+  const url = buildApiUrl(`/api/user/${encodeURIComponent(userId)}`)
 
   const json = await fetchJsonOrThrow(url, token)
   const parsed = apiResponseUserTableSchema.safeParse(json)
@@ -52,9 +60,7 @@ async function fetchUserById(userId: string, token?: string): Promise<UserTable>
 }
 
 async function fetchUserByEmail(email: string, token?: string): Promise<UserTable | null> {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-  const url = `${base}/api/user`
+  const url = buildApiUrl('/api/user')
 
   const json = await fetchJsonOrThrow(url, token)
   const parsed = apiResponseListUserTableSchema.safeParse(json)
@@ -78,16 +84,7 @@ export function useAddMemberDialogData(options: { open: boolean }) {
   const storedUsername = session.username ?? ''
   const storedActorId = session.actorId ?? ''
 
-  /**
-   * React hooks + TanStack Query notes:
-   * - TanStack Query handles remote fetching/caching.
-   * - `useMemo` caches derived values (claims/userId/email) so we don't re-derive
-   *   them on unrelated re-renders.
-   * - `useCallback` stabilizes `queryFn` identities, which helps keep hook outputs
-   *   referentially stable for consumers that memoize.
-   */
-
-  const claims = useMemo(() => (token ? tryDecodeJwtClaims(token) : null), [token])
+  const claims = token ? tryDecodeJwtClaims(token) : null
 
   const authUserId = useMemo(() => {
     const sub = getStringClaim(claims, 'sub')
@@ -97,16 +94,14 @@ export function useAddMemberDialogData(options: { open: boolean }) {
   const currentUserQueryEnabled =
     typeof window !== 'undefined' && open && (!!authUserId || !!storedEmail)
 
-  const currentUserQueryFn = useCallback(async () => {
-    if (authUserId) return await fetchUserById(authUserId, token)
-    if (storedEmail) return await fetchUserByEmail(storedEmail, token)
-    return null
-  }, [authUserId, storedEmail, token])
-
   const currentUserQuery = useQuery({
     queryKey: [userQueryKeys.currentUser, authUserId ?? null, storedEmail || null],
     enabled: currentUserQueryEnabled,
-    queryFn: currentUserQueryFn,
+    queryFn: async () => {
+      if (authUserId) return await fetchUserById(authUserId, token)
+      if (storedEmail) return await fetchUserByEmail(storedEmail, token)
+      return null
+    },
     retry: false,
   })
 
@@ -122,26 +117,23 @@ export function useAddMemberDialogData(options: { open: boolean }) {
     [session.email, session.username, currentUserQuery.data?.email, storedEmail, storedUsername],
   )
 
-  const branchPersonnelApi = getAuthenticatedApi(BranchPersonnelApi)
-
-  const branchPersonnelQueryFn = useCallback(async () => {
-    if (!resolvedActorId) return null
-    const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } })
-    if (!response.success) {
-      throw new Error(response.message ?? 'Failed to fetch branch personnel.')
-    }
-
-    const record =
-      response.data?.find(
-        (r) => r.actorId === resolvedActorId && r.status === BranchPersonnelTableDTOStatusEnum.Active,
-      ) ?? null
-    return record
-  }, [branchPersonnelApi, resolvedActorId])
-
   const branchPersonnelQuery = useQuery<BranchPersonnelTableDTO | null>({
     queryKey: [branchQueryKeys.branches, resolvedActorId ?? null, token || null],
     enabled: open && !!resolvedActorId,
-    queryFn: branchPersonnelQueryFn,
+    queryFn: async () => {
+      if (!resolvedActorId) return null
+      const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } })
+      if (!response.success) {
+        throw new Error(response.message ?? 'Failed to fetch branch personnel.')
+      }
+
+      return (
+        response.data?.find(
+          (record) =>
+            record.actorId === resolvedActorId && record.status === BranchPersonnelTableDTOStatusEnum.Active,
+        ) ?? null
+      )
+    },
     retry: false,
   })
 

@@ -21,9 +21,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import type { MemberFormValues } from '@/types/membership/memberSchemas'
-import { AddBillingDialog } from '@/components/membership-components/AddBillingForm'
-import { AddSubscriptionDialog } from '@/components/membership-components/AddSubscriptionDialog'
-import { useAddMemberDialog } from '@/hooks/membership/useAddMember'
+import { AddBillingDialog } from '@/components/membership-components/MembershipBillForm'
+import { AddSubscriptionDialog } from '@/components/membership-components/MembershipAddSubscriptionDrawer'
+import { useAddMemberDialog } from '@/hooks/membership/useAddMembership'
 
 
 const looksLikeUuid = (value: string): boolean =>
