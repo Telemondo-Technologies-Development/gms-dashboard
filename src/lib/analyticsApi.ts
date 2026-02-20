@@ -15,10 +15,7 @@ export type AnalyticsFilters = {
   timeRange?: 'monthly' | 'quarterly' | 'yearly'
 }
 
-// ---------------------------------------------------------------------------
-// Sample data — used as fallback when API returns no records yet (dev/staging)
-// Remove the fallback in getAnalytics() once real data exists in the database.
-// ---------------------------------------------------------------------------
+// Sample data — used as fallback when API returns no records yet
 const SAMPLE_DATA: AnalyticsData = {
   monthlyIncome: {
     current: 18500000,
@@ -70,9 +67,7 @@ const SAMPLE_DATA: AnalyticsData = {
   ],
 }
 
-// ---------------------------------------------------------------------------
 // Transform helpers
-// ---------------------------------------------------------------------------
 
 function getMonthLabel(date: Date): string {
   return date.toLocaleString('default', { month: 'short' })
@@ -219,9 +214,7 @@ function transform(
   }
 }
 
-// ---------------------------------------------------------------------------
 // Public API
-// ---------------------------------------------------------------------------
 
 export const analyticsApi = {
   getAnalytics: async (filters: AnalyticsFilters): Promise<AnalyticsData> => {
@@ -262,7 +255,7 @@ export const analyticsApi = {
               growth: 0,
             }))
           : SAMPLE_DATA.branches,
-        // Use real membership growth if subscriptions exist
+          
         membershipGrowth: transformed.membershipGrowth.length
           ? transformed.membershipGrowth
           : SAMPLE_DATA.membershipGrowth,

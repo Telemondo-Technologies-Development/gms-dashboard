@@ -1,6 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { MonthlySpendingChart } from '@/components/expense-components/ExpenseMonthly'
 import { AnnualSpendingChart } from '@/components/expense-components/ExpenseAnnual'
 import { ExpenseTable } from '@/components/expense-components/ExpenseList'
@@ -8,6 +16,7 @@ import { AddExpenseDialog } from '@/components/expense-components/ExpenseAdd'
 import { ExpenseDetailsDialog } from '@/components/expense-components/ExpenseDetails'
 import { DeleteConfirmDialog } from '@/components/expense-components/ExpenseDelete'
 import { useExpenseForm, useExpenseEdit } from '@/hooks/useExpenseForm'
+import { useBranches } from '@/hooks/branch/useBranches'
 import { SAMPLE_EXPENSES } from '@/lib/expense-constants'
 import type { ExpenseFormData } from '@/lib/expense-types'
 
@@ -18,8 +27,18 @@ export const Route = createFileRoute('/dashboard/admin/expense')({
 function ExpenseRoute() {
   const [expenses, setExpenses] = useState<ExpenseFormData[]>(SAMPLE_EXPENSES)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedBranch] = useState('Main Branch')
-  
+  const [activeBranch, setActiveBranch] = useState<string>('')
+
+  // Fetch branches from API
+  const { branches, isLoading: branchesLoading, error: branchesError } = useBranches()
+
+  // Auto-select first branch once loaded
+  useEffect(() => {
+    if (!activeBranch && branches.length > 0) {
+      setActiveBranch(branches[0]?.name ?? '')
+    }
+  }, [branches, activeBranch])
+
   // Dialog states
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
@@ -34,22 +53,24 @@ function ExpenseRoute() {
     : null
   const editForm = useExpenseEdit(selectedExpense)
 
-  // Filter expenses based on search query and branch
+  // Filter expenses by search + active branch
   const filteredExpenses = expenses.filter(expense => {
-    const matchesSearch = 
+    const matchesSearch =
       expense.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       expense.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
       expense.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesBranch = expense.branch === selectedBranch
-    
+    const matchesBranch = expense.branch === activeBranch
     return matchesSearch && matchesBranch
   })
 
-  // Handle add expense
+  // Total spend for the active branch (unaffected by search)
+  const totalSpend = expenses
+    .filter(e => e.branch === activeBranch)
+    .reduce((sum, e) => sum + parseFloat(e.amount || '0'), 0)
+
   const handleAddExpense = (e: FormEvent) => {
     e.preventDefault()
     if (!addForm.date) return
-
     const newExpense: ExpenseFormData = {
       id: crypto.randomUUID(),
       type: addForm.formData.type,
@@ -63,17 +84,14 @@ function ExpenseRoute() {
       receipt: addForm.receipt,
       ...(addForm.formData.type === 'salary' && { salaryType: addForm.formData.salaryType }),
     }
-    
     setExpenses(prev => [newExpense, ...prev])
     addForm.resetForm()
     setAddDialogOpen(false)
   }
 
-  // Handle save edited expense
   const handleSaveExpense = (e: FormEvent) => {
     e.preventDefault()
     if (!selectedExpense || !editForm.date) return
-
     const updatedExpense: ExpenseFormData = {
       ...selectedExpense,
       type: editForm.type,
@@ -86,13 +104,11 @@ function ExpenseRoute() {
       receipt: editForm.receipt,
       ...(editForm.type === 'salary' && { salaryType: editForm.salaryType }),
     }
-
     setExpenses(prev => prev.map(e => (e.id === updatedExpense.id ? updatedExpense : e)))
     setIsEditing(false)
     setDetailsDialogOpen(false)
   }
 
-  // Handle delete expense
   const handleDeleteExpense = () => {
     if (!selectedExpenseId) return
     setExpenses(prev => prev.filter(e => e.id !== selectedExpenseId))
@@ -101,7 +117,6 @@ function ExpenseRoute() {
     setSelectedExpenseId(null)
   }
 
-  // Handle row click
   const handleRowClick = (expense: ExpenseFormData) => {
     setSelectedExpenseId(expense.id)
     editForm.loadExpense(expense)
@@ -109,21 +124,57 @@ function ExpenseRoute() {
     setDetailsDialogOpen(true)
   }
 
-  // Handle cancel editing
   const handleCancelEdit = () => {
     setIsEditing(false)
-    if (selectedExpense) {
-      editForm.loadExpense(selectedExpense)
-    }
+    if (selectedExpense) editForm.loadExpense(selectedExpense)
   }
+
+  const branchNames = branches
+    .map((b: { name?: string }) => b.name ?? '')
+    .filter(Boolean)
 
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col p-6 gap-4">
-      {/* Header Section */}
+      {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0">
-        <div>
-          <h1 className="text-2xl font-semibold">Currently viewing expenses for: {selectedBranch}</h1>
+        <div className="space-y-0.5">
+          <h1 className="text-2xl font-semibold">Expense Management</h1>
+          {branchesLoading ? (
+            <Skeleton className="h-4 w-48" />
+          ) : branchesError ? (
+            <p className="text-sm text-destructive">
+              {branchesError?.message ?? 'Failed to load branches.'}
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Total spend for {activeBranch}:{' '}
+              <span className="font-medium text-foreground">
+                ₱{totalSpend.toLocaleString('en-PH', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </p>
+          )}
         </div>
+
+        {/* Branch Switcher */}
+        <Select
+          value={activeBranch}
+          onValueChange={setActiveBranch}
+          disabled={branchesLoading || !!branchesError}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Select branch" />
+          </SelectTrigger>
+          <SelectContent>
+            {branchNames.map((name: string) => (
+              <SelectItem key={name} value={name}>
+                {name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Main Content */}
@@ -132,19 +183,19 @@ function ExpenseRoute() {
         <div className="flex flex-col gap-4 min-h-0">
           <Card className="flex flex-col flex-1 min-h-0">
             <CardHeader className="flex-shrink-0 pb-3">
-              <CardTitle className="text-base">Monthly Spending Trends</CardTitle>
+              <CardTitle className="text-base">Monthly Spending</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 min-h-0 pb-4">
-              <MonthlySpendingChart expenses={expenses} branch={selectedBranch} />
+              <MonthlySpendingChart expenses={expenses} branch={activeBranch} />
             </CardContent>
           </Card>
 
           <Card className="flex flex-col flex-1 min-h-0">
             <CardHeader className="flex-shrink-0 pb-3">
-              <CardTitle className="text-base">Annual Spending Trends</CardTitle>
+              <CardTitle className="text-base">Annual Spending</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 min-h-0 pb-4">
-              <AnnualSpendingChart expenses={expenses} branch={selectedBranch} />
+              <AnnualSpendingChart expenses={expenses} branch={activeBranch} />
             </CardContent>
           </Card>
         </div>
@@ -173,6 +224,7 @@ function ExpenseRoute() {
         setReceipt={addForm.setReceipt}
         onSubmit={handleAddExpense}
         onCancel={addForm.resetForm}
+        branches={branchNames}
       />
 
       <ExpenseDetailsDialog
@@ -208,6 +260,7 @@ function ExpenseRoute() {
         onSubmit={handleSaveExpense}
         onDelete={() => setDeleteDialogOpen(true)}
         onCancel={handleCancelEdit}
+        branches={branchNames}
       />
 
       <DeleteConfirmDialog

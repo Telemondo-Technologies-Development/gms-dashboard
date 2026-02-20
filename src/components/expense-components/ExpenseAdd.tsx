@@ -11,9 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { BRANCHES, EXPENSE_TYPES, SALARY_TYPES, PAYMENT_METHODS } from '@/lib/expense-constants'
+import { EXPENSE_TYPES, SALARY_TYPES, PAYMENT_METHODS } from '@/lib/expense-constants'
 
-// Define the form data type
 type AddExpenseFormData = {
   type: string
   name: string
@@ -36,6 +35,7 @@ interface AddExpenseDialogProps {
   setReceipt: (file: File | null) => void
   onSubmit: (e: FormEvent) => void
   onCancel: () => void
+  branches: string[]
 }
 
 export function AddExpenseDialog({
@@ -49,63 +49,36 @@ export function AddExpenseDialog({
   setReceipt,
   onSubmit,
   onCancel,
+  branches,
 }: AddExpenseDialogProps) {
-  
-  // Client-side validation function
+
   const validateForm = (): { isValid: boolean; errors: string[] } => {
     const errors: string[] = []
-    
-    // Check type
     if (!formData.type) errors.push('Expense Type is required')
-    
-    // Check salary type only if expense type is salary
-    if (formData.type === 'salary' && !formData.salaryType) {
+    if (formData.type === 'salary' && !formData.salaryType)
       errors.push('Salary Type is required for salary expenses')
-    }
-    
-    // Check name
     if (!formData.name.trim()) errors.push('Name/Note is required')
-    
-    // Check date
     if (!date) errors.push('Date is required')
-    
-    // Check amount
     const amountNum = Number.parseFloat(formData.amount)
-    if (!formData.amount || isNaN(amountNum) || amountNum <= 0) {
+    if (!formData.amount || isNaN(amountNum) || amountNum <= 0)
       errors.push('Valid Amount is required (greater than 0)')
-    }
-    
-    // Check branch
     if (!formData.branch) errors.push('Branch is required')
-    
-    // Check payment method
     if (!formData.paymentMethod) errors.push('Payment Method is required')
-    
-    return {
-      isValid: errors.length === 0,
-      errors
-    }
+    return { isValid: errors.length === 0, errors }
   }
-  
-  // Enhanced form submit handler
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
     const validation = validateForm()
-    
     if (!validation.isValid) {
       alert(`Please fix the following errors:\n\n${validation.errors.join('\n')}`)
       return
     }
-    
-    // If all validation passes, call the parent's onSubmit
     onSubmit(e)
   }
-  
-  // Handle amount change with validation
+
   const handleAmountChange = (value: string) => {
-    // Allow only numbers and one decimal point
     const regex = /^\d*\.?\d*$/
     if (value === '' || regex.test(value)) {
       setFormData(prev => ({ ...prev, amount: value }))
@@ -139,13 +112,13 @@ export function AddExpenseDialog({
                       <Label htmlFor="add-type">Expense Type *</Label>
                       <Select
                         value={formData.type}
-                        onValueChange={(v) => {
+                        onValueChange={(v) =>
                           setFormData(prev => ({
                             ...prev,
                             type: v,
-                            salaryType: v === 'salary' ? prev.salaryType : ''
+                            salaryType: v === 'salary' ? prev.salaryType : '',
                           }))
-                        }}
+                        }
                       >
                         <SelectTrigger id="add-type">
                           <SelectValue placeholder="Select type" />
@@ -210,11 +183,11 @@ export function AddExpenseDialog({
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar 
-                            mode="single" 
-                            selected={date} 
+                          <Calendar
+                            mode="single"
+                            selected={date}
                             onSelect={setDate}
-                            initialFocus 
+                            initialFocus
                           />
                         </PopoverContent>
                       </Popover>
@@ -282,7 +255,7 @@ export function AddExpenseDialog({
               </Card>
             </div>
 
-            {/* Right Column: Summary */}
+            {/* Right Column: Payment Details */}
             <Card className="h-full">
               <CardHeader>
                 <CardTitle className="text-base">Payment Details</CardTitle>
@@ -298,7 +271,7 @@ export function AddExpenseDialog({
                       <SelectValue placeholder="Select branch" />
                     </SelectTrigger>
                     <SelectContent>
-                      {BRANCHES.map((branch) => (
+                      {branches.map((branch) => (
                         <SelectItem key={branch} value={branch}>
                           {branch}
                         </SelectItem>
@@ -330,7 +303,7 @@ export function AddExpenseDialog({
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Expense Type</span>
                     <span className="font-medium capitalize">
-                      {formData.type ? formData.type.replace('-', ' ') : '—'}
+                      {formData.type ? formData.type.replaceAll('-', ' ') : '—'}
                     </span>
                   </div>
                   {formData.type === 'salary' && (
@@ -348,7 +321,7 @@ export function AddExpenseDialog({
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Payment Method</span>
                     <span className="font-medium capitalize">
-                      {formData.paymentMethod ? formData.paymentMethod.replace('-', ' ') : '—'}
+                      {formData.paymentMethod ? formData.paymentMethod.replaceAll('-', ' ') : '—'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -358,7 +331,7 @@ export function AddExpenseDialog({
                   <div className="border-t pt-3 flex items-center justify-between">
                     <span className="font-semibold">Total Amount</span>
                     <span className="text-2xl font-bold text-primary">
-                      PHP {formData.amount && Number.parseFloat(formData.amount) > 0
+                      ₱{formData.amount && Number.parseFloat(formData.amount) > 0
                         ? Number.parseFloat(formData.amount).toLocaleString('en-PH', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
@@ -372,11 +345,7 @@ export function AddExpenseDialog({
           </div>
 
           <DialogFooter className="flex items-center justify-end gap-2 mt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleCancel}
-            >
+            <Button type="button" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
             <Button type="submit">Create Expense</Button>
