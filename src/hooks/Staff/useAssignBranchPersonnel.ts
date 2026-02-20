@@ -9,6 +9,7 @@ type Input = {
   actorId: string;
   branchId: string;
   createdById: string;
+  personnelRoleId: string;
   status: BranchPersonnelPostDTOStatusEnum;
 };
 
@@ -17,12 +18,14 @@ export const useAssignBranchPersonnel = () => {
 
   return useMutation({
     mutationFn: async (input: Input) => {
+      const { actorId, branchId, createdById, personnelRoleId, status } = input;
       return api.createBranchPersonnel({
         branchPersonnelPostDTO: {
-          actorId: input.actorId,
-          branchId: input.branchId,
-          createdById: input.createdById,
-          status: input.status,
+          actorId,
+          branchId,
+          createdById,
+          personnelRoleId,
+          status,
         },
       });
     },

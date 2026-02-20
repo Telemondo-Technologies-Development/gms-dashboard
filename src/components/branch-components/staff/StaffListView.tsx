@@ -68,6 +68,10 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
   }, [searchTerm, employees, isSearching]);
 
   const actorIdToAssign = selectedEmployee?.actorId ?? selectedEmployee?.id ?? '';
+  const defaultPersonnelRoleId =
+    (branchPersonnel ?? []).find((personnel) => personnel.status === 'ACTIVE')?.personnelRoleId ??
+    branchPersonnel?.[0]?.personnelRoleId ??
+    '';
 
   const alreadyAssigned = useMemo(() => {
     if (!actorIdToAssign) return false;
@@ -91,6 +95,7 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
         id: existingActive.id,
         actorId: existingActive.actorId,
         branchId: existingActive.branchId,
+        personnelRoleId: existingActive.personnelRoleId,
         updatedById: currentActorId,
         status: 'MOVED',
       });
@@ -101,6 +106,7 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
       actorId: actorIdToAssign,
       branchId,
       createdById: currentActorId,
+      personnelRoleId: existingActive?.personnelRoleId ?? defaultPersonnelRoleId,
       status: 'ACTIVE',
     });
 
@@ -194,6 +200,7 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
                               id: personnel.id,
                               actorId: personnel.actorId,
                               branchId,
+                              personnelRoleId: personnel.personnelRoleId,
                               updatedById: currentActorId || '',
                               status: e.target.value as BranchPersonnelPutDTOStatusEnum,
                             });
@@ -234,7 +241,8 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
               assign.isPending ||
               update.isPending ||
               !currentActorId ||
-              !branchId
+              !branchId ||
+              !defaultPersonnelRoleId
             }
             onClick={() => {
               void handleAssign();

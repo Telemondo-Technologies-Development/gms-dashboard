@@ -9,6 +9,7 @@ type Input = {
   id: string; 
   actorId: string;
   branchId: string;
+  personnelRoleId: string;
   updatedById: string;
   status: BranchPersonnelPutDTOStatusEnum;
 };
@@ -18,13 +19,15 @@ export const useUpdateBranchPersonnel = () => {
 
   return useMutation({
     mutationFn: async (input: Input) => {
+      const { id, actorId, branchId, personnelRoleId, updatedById, status } = input;
       return api.updateBranchPersonnel({
-        id: input.id,
+        id,
         branchPersonnelPutDTO: {
-          actorId: input.actorId,
-          branchId: input.branchId,
-          status: input.status,
-          updatedById: input.updatedById,
+          actorId,
+          branchId,
+          personnelRoleId,
+          status,
+          updatedById,
         },
       });
     },
