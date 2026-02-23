@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createBillingCycle**](BillingCycleApi.md#createbillingcycle) | **POST** /api/billingCycle | Create a new Billing Cycle |
-| [**deleteBillingCycle**](BillingCycleApi.md#deletebillingcycle) | **DELETE** /api/billingCycle/{id} | Delete a Billing Cycle by id |
-| [**getAllBillingCycles**](BillingCycleApi.md#getallbillingcycles) | **GET** /api/billingCycle | Get all Billing Cycles |
-| [**getBillingCycle**](BillingCycleApi.md#getbillingcycle) | **GET** /api/billingCycle/{id} | Get a Billing Cycle by id |
-| [**updateBillingCycle**](BillingCycleApi.md#updatebillingcycle) | **PUT** /api/billingCycle/{id} | Update a Billing Cycle by id |
+| [**createBillingCycle**](BillingCycleApi.md#createbillingcycle) | **POST** /api/billing-cycle | Create a new Billing Cycle |
+| [**deleteBillingCycle**](BillingCycleApi.md#deletebillingcycle) | **DELETE** /api/billing-cycle/{id} | Delete a Billing Cycle by id |
+| [**getAllBillingCycles**](BillingCycleApi.md#getallbillingcycles) | **GET** /api/billing-cycle | Get all Billing Cycles |
+| [**getBillingCycle**](BillingCycleApi.md#getbillingcycle) | **GET** /api/billing-cycle/{id} | Get a Billing Cycle by id |
+| [**updateBillingCycle**](BillingCycleApi.md#updatebillingcycle) | **PUT** /api/billing-cycle/{id} | Update a Billing Cycle by id |
 
 
 

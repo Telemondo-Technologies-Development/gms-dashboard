@@ -586,7 +586,7 @@
         ]
       }
     },
-    "/api/billingCycle": {
+    "/api/billing-cycle": {
       "get": {
         "operationId": "getAllBillingCycles",
         "parameters": [
@@ -646,7 +646,7 @@
         ]
       }
     },
-    "/api/billingCycle/{id}": {
+    "/api/billing-cycle/{id}": {
       "delete": {
         "operationId": "deleteBillingCycle",
         "parameters": [
@@ -904,6 +904,168 @@
         "summary": "Upload a branch logo into the object storage (public)",
         "tags": [
           "Branch Personnel"
+        ]
+      }
+    },
+    "/api/branch/personnel/role": {
+      "get": {
+        "operationId": "getAllPersonnelRoles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListPersonnelRoleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Personnel Roles",
+        "tags": [
+          "Branch Personnel Roles"
+        ]
+      },
+      "post": {
+        "operationId": "createPersonnelRole",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonnelRolePostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePersonnelRoleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Personnel Role",
+        "tags": [
+          "Branch Personnel Roles"
+        ]
+      }
+    },
+    "/api/branch/personnel/role/{id}": {
+      "delete": {
+        "operationId": "deletePersonnelRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Personnel Role by id",
+        "tags": [
+          "Branch Personnel Roles"
+        ]
+      },
+      "get": {
+        "operationId": "getPersonnelRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePersonnelRoleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Personnel Role by id",
+        "tags": [
+          "Branch Personnel Roles"
+        ]
+      },
+      "put": {
+        "operationId": "updatePersonnelRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonnelRolePutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePersonnelRoleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Personnel Role by id",
+        "tags": [
+          "Branch Personnel Roles"
         ]
       }
     },
@@ -3183,12 +3345,22 @@
     "/api/permission": {
       "get": {
         "operationId": "getAllPermissions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseListPermission"
+                  "$ref": "#/components/schemas/ApiResponsePagePermission"
                 }
               }
             },
@@ -3253,7 +3425,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOptionalPermission"
+                  "$ref": "#/components/schemas/ApiResponsePermission"
                 }
               }
             },
@@ -4288,6 +4460,128 @@
         ]
       }
     },
+    "/api/subscription-availed": {
+      "get": {
+        "operationId": "getAllSubscriptionAvailed",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListSubscriptionAvailedTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Subscription Availed",
+        "tags": [
+          "Subscription Availed"
+        ]
+      },
+      "post": {
+        "operationId": "createSubscriptionAvailed",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionAvailedPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSubscriptionAvailedTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Subscription Availed",
+        "tags": [
+          "Subscription Availed"
+        ]
+      }
+    },
+    "/api/subscription-availed/{id}": {
+      "delete": {
+        "operationId": "deleteSubscriptionAvailed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Subscription Availed by id",
+        "tags": [
+          "Subscription Availed"
+        ]
+      },
+      "get": {
+        "operationId": "getSubscriptionAvailed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSubscriptionAvailedTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Subscription Availed by id",
+        "tags": [
+          "Subscription Availed"
+        ]
+      }
+    },
     "/api/subscription/{id}": {
       "delete": {
         "operationId": "deleteSubscription",
@@ -4387,128 +4681,6 @@
         "summary": "Update a Subscription by id",
         "tags": [
           "Subscription"
-        ]
-      }
-    },
-    "/api/subscriptionAvailed": {
-      "get": {
-        "operationId": "getAllSubscriptionAvailed",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "pageable",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/Pageable"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseListSubscriptionAvailedTableDTO"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "summary": "Get all Subscription Availed",
-        "tags": [
-          "Subscription Availed"
-        ]
-      },
-      "post": {
-        "operationId": "createSubscriptionAvailed",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubscriptionAvailedPostDTO"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseSubscriptionAvailedTableDTO"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "summary": "Create a new Subscription Availed",
-        "tags": [
-          "Subscription Availed"
-        ]
-      }
-    },
-    "/api/subscriptionAvailed/{id}": {
-      "delete": {
-        "operationId": "deleteSubscriptionAvailed",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseUnit"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "summary": "Delete a Subscription Availed by id",
-        "tags": [
-          "Subscription Availed"
-        ]
-      },
-      "get": {
-        "operationId": "getSubscriptionAvailed",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseSubscriptionAvailedTableDTO"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "summary": "Get a Subscription Availed by id",
-        "tags": [
-          "Subscription Availed"
         ]
       }
     },
@@ -5941,13 +6113,13 @@
           "timestamp"
         ]
       },
-      "ApiResponseListPermission": {
+      "ApiResponseListPersonnelRoleTableDTO": {
         "type": "object",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Permission"
+              "$ref": "#/components/schemas/PersonnelRoleTableDTO"
             }
           },
           "errors": {
@@ -6476,11 +6648,11 @@
           "timestamp"
         ]
       },
-      "ApiResponseOptionalPermission": {
+      "ApiResponseOtherExpenseReadDTO": {
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/Permission"
+            "$ref": "#/components/schemas/OtherExpenseReadDTO"
           },
           "errors": {
             "type": "array",
@@ -6507,11 +6679,11 @@
           "timestamp"
         ]
       },
-      "ApiResponseOtherExpenseReadDTO": {
+      "ApiResponsePagePermission": {
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/OtherExpenseReadDTO"
+            "$ref": "#/components/schemas/PagePermission"
           },
           "errors": {
             "type": "array",
@@ -6574,6 +6746,68 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/PaymentTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponsePermission": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Permission"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponsePersonnelRoleTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/PersonnelRoleTableDTO"
           },
           "errors": {
             "type": "array",
@@ -7815,6 +8049,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "personnelRoleId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -7830,6 +8068,7 @@
           "actorId",
           "branchId",
           "createdById",
+          "personnelRoleId",
           "status"
         ]
       },
@@ -7842,6 +8081,10 @@
             "format": "uuid"
           },
           "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "personnelRoleId": {
             "type": "string",
             "format": "uuid"
           },
@@ -7863,6 +8106,7 @@
         "required": [
           "actorId",
           "branchId",
+          "personnelRoleId",
           "status",
           "updatedById"
         ]
@@ -7891,6 +8135,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "personnelRoleId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -7915,6 +8163,7 @@
           "branchId",
           "createdAt",
           "id",
+          "personnelRoleId",
           "status",
           "updatedAt"
         ]
@@ -8293,10 +8542,6 @@
             "type": "string",
             "format": "uuid"
           },
-          "branchId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -8322,10 +8567,6 @@
               "OVERDUE"
             ]
           },
-          "subscriptionAvailedId": {
-            "type": "string",
-            "format": "uuid"
-          },
           "subtotal": {
             "type": "number"
           },
@@ -8335,13 +8576,11 @@
         },
         "required": [
           "actorId",
-          "branchId",
           "createdById",
           "dueDate",
           "gracePeriodDate",
           "memberSubscriptionId",
           "status",
-          "subscriptionAvailedId",
           "subtotal"
         ]
       },
@@ -8487,12 +8726,29 @@
           },
           "email": {
             "type": "string"
+          },
+          "permissions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
           "actorId",
           "branches",
-          "email"
+          "email",
+          "permissions",
+          "roles"
         ]
       },
       "MemberPostDTO": {
@@ -8739,9 +8995,31 @@
             "type": "string",
             "format": "uuid"
           },
+          "createdByEmail": {
+            "type": "string"
+          },
+          "createdByFirstName": {
+            "type": "string"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
+          },
+          "createdBySurname": {
+            "type": "string"
+          },
+          "createdByType": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "EMPLOYEE",
+              "MEMBER",
+              "ADMIN",
+              "FLYWAY",
+              "SYSTEM",
+              "CRON",
+              "API"
+            ]
           },
           "firstName": {
             "type": "string"
@@ -8767,9 +9045,31 @@
           "surname": {
             "type": "string"
           },
+          "updatedByEmail": {
+            "type": "string"
+          },
+          "updatedByFirstName": {
+            "type": "string"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
+          },
+          "updatedBySurname": {
+            "type": "string"
+          },
+          "updatedByType": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "EMPLOYEE",
+              "MEMBER",
+              "ADMIN",
+              "FLYWAY",
+              "SYSTEM",
+              "CRON",
+              "API"
+            ]
           }
         },
         "required": [
@@ -8993,6 +9293,52 @@
           "totalCount"
         ]
       },
+      "PagePermission": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            }
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "Pageable": {
         "type": "object",
         "properties": {
@@ -9011,6 +9357,32 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "unpaged": {
+            "type": "boolean"
           }
         }
       },
@@ -9227,6 +9599,78 @@
           },
           "name": {
             "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "PersonnelRolePostDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdById",
+          "name"
+        ]
+      },
+      "PersonnelRolePutDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role update",
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "updatedById"
+        ]
+      },
+      "PersonnelRoleTableDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
@@ -9492,7 +9936,9 @@
             "format": "uuid"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "name": {
             "type": "string"
@@ -9509,7 +9955,9 @@
         "description": "Format for Role update",
         "properties": {
           "description": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
           },
           "name": {
             "type": "string"
@@ -9961,6 +10409,20 @@
           "timeToCompleteHours"
         ]
       },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
       "SubscriptionAvailedPostDTO": {
         "type": "object",
         "description": "Format for Subscription Availed create",
@@ -10020,8 +10482,7 @@
         "description": "Format for Subscription create",
         "properties": {
           "amount": {
-            "type": "number",
-            "format": "double"
+            "type": "number"
           },
           "billingCycleId": {
             "type": "string",
@@ -10051,8 +10512,7 @@
         "description": "Format for Subscription update",
         "properties": {
           "amount": {
-            "type": "number",
-            "format": "double"
+            "type": "number"
           },
           "billingCycleId": {
             "type": "string",

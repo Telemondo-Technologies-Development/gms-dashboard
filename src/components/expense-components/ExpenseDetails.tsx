@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { BRANCHES, EXPENSE_TYPES, SALARY_TYPES, PAYMENT_METHODS } from '@/lib/expense-constants'
+import { EXPENSE_TYPES, SALARY_TYPES, PAYMENT_METHODS } from '@/lib/expense-constants'
 import type { ExpenseFormData } from '@/lib/expense-types'
 
 interface ExpenseDetailsDialogProps {
@@ -42,6 +42,7 @@ interface ExpenseDetailsDialogProps {
   onSubmit: (e: FormEvent) => void
   onDelete: () => void
   onCancel: () => void
+  branches: string[]
 }
 
 export function ExpenseDetailsDialog({
@@ -70,6 +71,7 @@ export function ExpenseDetailsDialog({
   onSubmit,
   onDelete,
   onCancel,
+  branches,
 }: ExpenseDetailsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,9 +101,7 @@ export function ExpenseDetailsDialog({
                           value={type}
                           onValueChange={(v) => {
                             setType(v)
-                            if (v !== 'salary') {
-                              setSalaryType('')
-                            }
+                            if (v !== 'salary') setSalaryType('')
                           }}
                         >
                           <SelectTrigger id="edit-type">
@@ -118,7 +118,7 @@ export function ExpenseDetailsDialog({
                       ) : (
                         <div className="flex items-center h-9">
                           <Badge variant="secondary" className="capitalize">
-                            {type.replace('-', ' ')}
+                            {type.replaceAll('-', ' ')}
                           </Badge>
                         </div>
                       )}
@@ -161,9 +161,9 @@ export function ExpenseDetailsDialog({
                         required
                       />
                     ) : (
-                      <Input 
-                        value={name} 
-                        disabled 
+                      <Input
+                        value={name}
+                        disabled
                         className="bg-muted text-muted-foreground"
                       />
                     )}
@@ -188,11 +188,11 @@ export function ExpenseDetailsDialog({
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar 
-                              mode="single" 
-                              selected={date} 
+                            <Calendar
+                              mode="single"
+                              selected={date}
                               onSelect={setDate}
-                              initialFocus 
+                              initialFocus
                             />
                           </PopoverContent>
                         </Popover>
@@ -216,12 +216,12 @@ export function ExpenseDetailsDialog({
                           required
                         />
                       ) : (
-                        <Input 
+                        <Input
                           value={`₱${Number.parseFloat(amount).toLocaleString('en-PH', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })}`}
-                          disabled 
+                          disabled
                           className="bg-muted text-muted-foreground font-semibold"
                         />
                       )}
@@ -308,7 +308,7 @@ export function ExpenseDetailsDialog({
               </Card>
             </div>
 
-            {/* Right Column: Additional Details */}
+            {/* Right Column: Payment Details */}
             <Card className="h-full">
               <CardHeader>
                 <CardTitle className="text-base">Payment Details</CardTitle>
@@ -322,7 +322,7 @@ export function ExpenseDetailsDialog({
                         <SelectValue placeholder="Select branch" />
                       </SelectTrigger>
                       <SelectContent>
-                        {BRANCHES.map((b) => (
+                        {branches.map((b) => (
                           <SelectItem key={b} value={b}>
                             {b}
                           </SelectItem>
@@ -330,9 +330,9 @@ export function ExpenseDetailsDialog({
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input 
-                      value={branch} 
-                      disabled 
+                    <Input
+                      value={branch}
+                      disabled
                       className="bg-muted text-muted-foreground"
                     />
                   )}
@@ -354,9 +354,9 @@ export function ExpenseDetailsDialog({
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Input 
-                      value={paymentMethod.replace('-', ' ')} 
-                      disabled 
+                    <Input
+                      value={paymentMethod.replaceAll('-', ' ')}
+                      disabled
                       className="bg-muted text-muted-foreground capitalize"
                     />
                   )}
@@ -365,7 +365,7 @@ export function ExpenseDetailsDialog({
                 <div className="rounded-xl bg-muted/50 p-4 space-y-3 mt-6">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Expense Type</span>
-                    <span className="font-medium capitalize">{type.replace('-', ' ')}</span>
+                    <span className="font-medium capitalize">{type.replaceAll('-', ' ')}</span>
                   </div>
                   {type === 'salary' && (
                     <div className="flex items-center justify-between text-sm">
@@ -379,7 +379,7 @@ export function ExpenseDetailsDialog({
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Payment Method</span>
-                    <span className="font-medium capitalize">{paymentMethod.replace('-', ' ')}</span>
+                    <span className="font-medium capitalize">{paymentMethod.replaceAll('-', ' ')}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Receipt Status</span>
@@ -388,7 +388,7 @@ export function ExpenseDetailsDialog({
                   <div className="border-t pt-3 flex items-center justify-between">
                     <span className="font-semibold">Total Amount</span>
                     <span className="text-2xl font-bold text-primary">
-                      PHP {Number.parseFloat(amount).toLocaleString('en-PH', {
+                      ₱{Number.parseFloat(amount).toLocaleString('en-PH', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}

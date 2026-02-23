@@ -1,11 +1,7 @@
 import { Pie, PieChart, Cell } from 'recharts'
 import { Banknote, CreditCard, Smartphone, type LucideIcon } from 'lucide-react'
 import type { AnalyticsData } from '@/lib/analytics-data'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 type Props = {
   data: AnalyticsData
@@ -15,25 +11,36 @@ type Props = {
 type PaymentMethod = 'Cash' | 'Card' | 'Online'
 
 const chartConfig = {
-  Cash: { label: 'Cash', color: '#7c93d4' }, // Blue
-  Card: { label: 'Card', color: '#435F8C' }, // Darker blue
-  Online: { label: 'Online', color: '#8b5cf6' }, // Purple
-} as const
+  Cash: { label: 'Cash', color: '#7c93d4' },
+  Card: { label: 'Card', color: '#435F8C' },
+  Online: { label: 'Online', color: '#8b5cf6' },
+} as const satisfies Record<PaymentMethod, { label: string; color: string }>
 
-const ICONS: Record<PaymentMethod, LucideIcon> = {
+const METHOD_ICONS: Record<PaymentMethod, LucideIcon> = {
   Cash: Banknote,
   Card: CreditCard,
   Online: Smartphone,
 }
 
+function getMethodConfig(method: string) {
+  return chartConfig[method as PaymentMethod] ?? { label: method, color: '#94a3b8' }
+}
+
 export function PaymentMethodChart({ data }: Props) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-PH', {
+  if (!data.paymentMethods?.length) {
+    return (
+      <div className="py-8 text-center text-muted-foreground">
+        No payment data available
+      </div>
+    )
+  }
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-PH', {
       style: 'currency',
       currency: 'PHP',
       maximumFractionDigits: 0,
     }).format(value / 100)
-  }
 
   return (
     <div className="space-y-4">
@@ -51,10 +58,7 @@ export function PaymentMethodChart({ data }: Props) {
             nameKey="method"
           >
             {data.paymentMethods.map((entry) => (
-              <Cell 
-                key={entry.method} 
-                fill={chartConfig[entry.method as PaymentMethod].color}
-              />
+              <Cell key={entry.method} fill={getMethodConfig(entry.method).color} />
             ))}
           </Pie>
           <ChartTooltip content={<ChartTooltipContent hideLabel />} />
@@ -64,24 +68,22 @@ export function PaymentMethodChart({ data }: Props) {
       {/* Legend with details */}
       <div className="space-y-2">
         {data.paymentMethods.map((method) => {
-          const Icon = ICONS[method.method as PaymentMethod]
-          const color = chartConfig[method.method as PaymentMethod].color
-          
+          const config = getMethodConfig(method.method)
+          const Icon = METHOD_ICONS[method.method as PaymentMethod]
+
           return (
             <div key={method.method} className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full flex-shrink-0" 
-                  style={{ backgroundColor: color }}
+                <div
+                  className="h-3 w-3 flex-shrink-0 rounded-full"
+                  style={{ backgroundColor: config.color }}
                 />
-                <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                {Icon && <Icon className="h-4 w-4 flex-shrink-0 text-muted-foreground" />}
                 <span className="text-sm font-medium">{method.method}</span>
               </div>
               <div className="text-right">
                 <div className="text-sm font-semibold">{method.percentage}%</div>
-                <div className="text-xs text-muted-foreground">
-                  {formatCurrency(method.amount)}
-                </div>
+                <div className="text-xs text-muted-foreground">{formatCurrency(method.amount)}</div>
               </div>
             </div>
           )

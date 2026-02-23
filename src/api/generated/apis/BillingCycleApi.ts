@@ -81,7 +81,7 @@ export class BillingCycleApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
 
-        let urlPath = `/api/billingCycle`;
+        let urlPath = `/api/billing-cycle`;
 
         const response = await this.request({
             path: urlPath,
@@ -118,7 +118,7 @@ export class BillingCycleApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/billingCycle/{id}`;
+        let urlPath = `/api/billing-cycle/{id}`;
         urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
 
         const response = await this.request({
@@ -159,7 +159,7 @@ export class BillingCycleApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/billingCycle`;
+        let urlPath = `/api/billing-cycle`;
 
         const response = await this.request({
             path: urlPath,
@@ -195,7 +195,7 @@ export class BillingCycleApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/billingCycle/{id}`;
+        let urlPath = `/api/billing-cycle/{id}`;
         urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
 
         const response = await this.request({
@@ -241,7 +241,7 @@ export class BillingCycleApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
 
-        let urlPath = `/api/billingCycle/{id}`;
+        let urlPath = `/api/billing-cycle/{id}`;
         urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
 
         const response = await this.request({

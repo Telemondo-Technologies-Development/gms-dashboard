@@ -21,6 +21,7 @@ interface AssignStaffDialogProps {
   onOpenChange: (open: boolean) => void;
   branchName: string;
   staff: StaffMember[];
+  branchId: string;
   onUpdateStaff: (newStaff: StaffMember[]) => void;
 }
 
@@ -30,6 +31,7 @@ export function AssignStaffDialog({
   branchName,
   staff,
   onUpdateStaff,
+  branchId,
 }: AssignStaffDialogProps) {
   const [view, setView] = useState<'list' | 'add' | 'details'>('list');
   const [selectedMember, setSelectedMember] = useState<StaffMember | null>(null);
@@ -61,6 +63,7 @@ export function AssignStaffDialog({
       <DialogContent className="sm:max-w-[450px] max-h-[85vh] p-0 flex flex-col overflow-hidden border-none shadow-2xl bg-white">
         {view === 'list' && (
           <StaffListView
+            branchId={branchId}
             branchName={branchName}
             staff={staff}
             onAddClick={() => setView('add')}

@@ -34,13 +34,11 @@ export function useBillingActions() {
       const createInvoiceResp = await invoiceApi.createInvoice({
         invoicePostDTO: {
           actorId: input.actorId,
-          branchId: input.branchId,
           createdById: input.createdById,
           dueDate: input.dueDate,
           gracePeriodDate: addDays(input.dueDate, input.gracePeriodDays),
           memberSubscriptionId: input.memberSubscriptionId,
           status: 'ISSUED',
-          subscriptionAvailedId: input.subscriptionAvailedId,
           subtotal: input.subtotal,
           systemGenerated: true,
         },

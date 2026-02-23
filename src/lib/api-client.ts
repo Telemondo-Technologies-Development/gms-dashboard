@@ -1,5 +1,5 @@
 import { Configuration } from '@/api/generated/runtime'
-import { UserApi, EmployeeApi, PaymentApi, InvoiceApi } from '@/api/generated/apis'
+import { UserApi, EmployeeApi, PaymentApi, InvoiceApi, BranchApi } from '@/api/generated/apis'
 import { readPersistedAuthToken, readAuthSession } from '@/lib/auth/auth-session'
 
 const getConfiguration = () => {
@@ -28,6 +28,7 @@ export const userApi = new UserApi(getConfiguration())
 export const employeeApi = new EmployeeApi(getConfiguration())
 export const paymentApi = new PaymentApi(getConfiguration())
 export const invoiceApi = new InvoiceApi(getConfiguration())
+export const branchApi = new BranchApi(getConfiguration())
 
 // Helper to refresh configuration if token changes (basic approach)
 export const getAuthenticatedApi = <T>(ApiClass: new (config: Configuration) => T): T => {

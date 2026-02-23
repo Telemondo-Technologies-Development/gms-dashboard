@@ -15,9 +15,9 @@
 
 import * as runtime from '../runtime';
 import type {
-  ApiResponseListPermission,
   ApiResponseListRoleTableDTO,
-  ApiResponseOptionalPermission,
+  ApiResponsePagePermission,
+  ApiResponsePermission,
   ApiResponseRolePermissionTableDTO,
   ApiResponseRoleTableDTO,
   ApiResponseUnit,
@@ -27,12 +27,12 @@ import type {
   RolePutDTO,
 } from '../models/index';
 import {
-    ApiResponseListPermissionFromJSON,
-    ApiResponseListPermissionToJSON,
     ApiResponseListRoleTableDTOFromJSON,
     ApiResponseListRoleTableDTOToJSON,
-    ApiResponseOptionalPermissionFromJSON,
-    ApiResponseOptionalPermissionToJSON,
+    ApiResponsePagePermissionFromJSON,
+    ApiResponsePagePermissionToJSON,
+    ApiResponsePermissionFromJSON,
+    ApiResponsePermissionToJSON,
     ApiResponseRolePermissionTableDTOFromJSON,
     ApiResponseRolePermissionTableDTOToJSON,
     ApiResponseRoleTableDTOFromJSON,
@@ -64,6 +64,10 @@ export interface DeleteRoleRequest {
 export interface DeleteRolePermissionsRequest {
     id: string;
     rolePermissionDTO: RolePermissionDTO;
+}
+
+export interface GetAllPermissionsRequest {
+    pageable: Pageable;
 }
 
 export interface GetAllRolesRequest {
@@ -258,8 +262,19 @@ export class AccessControlApi extends runtime.BaseAPI {
     /**
      * Get all Permissions
      */
-    async getAllPermissionsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListPermission>> {
+    async getAllPermissionsRaw(requestParameters: GetAllPermissionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponsePagePermission>> {
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAllPermissions().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -273,14 +288,14 @@ export class AccessControlApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseListPermissionFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponsePagePermissionFromJSON(jsonValue));
     }
 
     /**
      * Get all Permissions
      */
-    async getAllPermissions(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListPermission> {
-        const response = await this.getAllPermissionsRaw(initOverrides);
+    async getAllPermissions(requestParameters: GetAllPermissionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponsePagePermission> {
+        const response = await this.getAllPermissionsRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -327,7 +342,7 @@ export class AccessControlApi extends runtime.BaseAPI {
     /**
      * Get a Permission by id
      */
-    async getPermissionRaw(requestParameters: GetPermissionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseOptionalPermission>> {
+    async getPermissionRaw(requestParameters: GetPermissionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponsePermission>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -350,13 +365,13 @@ export class AccessControlApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseOptionalPermissionFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponsePermissionFromJSON(jsonValue));
     }
 
     /**
      * Get a Permission by id
      */
-    async getPermission(requestParameters: GetPermissionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseOptionalPermission> {
+    async getPermission(requestParameters: GetPermissionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponsePermission> {
         const response = await this.getPermissionRaw(requestParameters, initOverrides);
         return await response.value();
     }

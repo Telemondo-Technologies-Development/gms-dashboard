@@ -1,11 +1,14 @@
 import {
-  FileText,
   Loader2,
+  Mail,
+  User,
+  ShieldCheck,
+  Phone,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -16,6 +19,7 @@ import {
 } from '@/components/ui/table'
 // TabsContent removed — this component no longer relies on tabs
 import type { EmployeeTableDTO } from '@/api/generated/models'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export interface EmployeeTabProps {
   loadingEmployees: boolean
@@ -25,6 +29,10 @@ export interface EmployeeTabProps {
   onDelete: (id: string) => void
 }
 
+function getInitials(firstName: string, surname: string) {
+  return (firstName[0] + surname[0]).toUpperCase()
+}
+
 export function EmployeeTab({
   loadingEmployees,
   filteredEmployees,
@@ -32,77 +40,129 @@ export function EmployeeTab({
   onEdit,
 }: EmployeeTabProps) {
   return (
-    <div className="rounded-md border">
+    <div className="">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-20">Image</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Role / Status</TableHead>
-              <TableHead className="w-24">Has Login</TableHead>
+          <TableHeader className="bg-muted/30">
+            <TableRow className="hover:bg-transparent border-b border-muted/60">
+              <TableHead className="w-[30%] pl-6 py-4 font-semibold text-foreground/70">Employee</TableHead>
+              <TableHead className="w-[25%] py-4 font-semibold text-foreground/70">Contact Details</TableHead>
+              <TableHead className="w-[20%] py-4 font-semibold text-foreground/70">Role & Access</TableHead>
+              <TableHead className="w-[15%] py-4 font-semibold text-foreground/70 text-right pr-6">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loadingEmployees ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
-                  <div className="flex justify-center items-center gap-2">
-                    <Loader2 className="h-6 w-6 animate-spin" /> Loading...
+                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" /> 
+                    <span>Loading employees...</span>
                   </div>
                 </TableCell>
               </TableRow>
             ) : filteredEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
-                  {normalizedSearch
-                    ? 'No matching employees found.'
-                    : 'No employees found.'}
+                <TableCell colSpan={4} className="h-32 text-center">
+                  <div className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
+                    <User className="h-8 w-8 opacity-20 mb-2" />
+                    <p className="font-medium text-foreground">No employees found</p>
+                    <p className="text-xs">
+                      {normalizedSearch
+                        ? `No results matching "${normalizedSearch}"`
+                        : 'Your employee list is currently empty.'}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               filteredEmployees.map((employee) => (
                 <TableRow
                   key={employee.id}
-                  className="cursor-pointer hover:bg-muted/50"
+                  className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
                   onClick={() => onEdit(employee)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onEdit(employee)
+                    }
+                  }}
                 >
-                  <TableCell>
-                    <Avatar>
-                      <AvatarImage
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${employee.firstName}`}
-                      />
-                      <AvatarFallback>
-                        {employee.firstName[0]}
-                        {employee.surname[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">
-                        {employee.firstName} {employee.surname}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {employee.user?.email || 'No Email Linked'}
-                      </span>
+                  <TableCell className="pl-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-foreground">
+                          {employee.firstName} {employee.surname}
+                        </span>
+                        {/* Position field not in DTO yet, temporarily removed */}
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell>{employee.contactNo}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={employee.status === 'IN' ? 'default' : 'secondary'}
-                    >
-                      {employee.status}
-                    </Badge>
+
+                  <TableCell className="py-4">
+                    <div className="flex flex-col gap-1.5 text-sm">
+                      {employee.user?.email ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors max-w-44">
+                                <Mail className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                                <span className="truncate">{employee.user.email}</span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{employee.user.email}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <div className="flex items-center gap-2 text-muted-foreground/60 italic">
+                          <Mail className="h-3.5 w-3.5 shrink-0 opacity-40" />
+                          <span>No username linked</span>
+                        </div>
+                      )}
+                      
+                      {employee.contactNo && (
+                        <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
+                          <Phone className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                          <span>{employee.contactNo}</span>
+                        </div>
+                      )}
+                    </div>
                   </TableCell>
-                  <TableCell>
-                    {employee.user && employee.user.email ? (
-                      <Badge variant="secondary">Yes</Badge>
-                    ) : (
-                      <Badge variant="outline">No</Badge>
-                    )}
+                  
+                  <TableCell className="py-4">
+                    <div className="flex flex-col items-start gap-2">
+                      <div className="flex items-center gap-1.5">
+                        {employee.user ? (
+                           <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800 border-green-200">
+                             <ShieldCheck className="h-3 w-3" />
+                             Has Login
+                           </Badge>
+                        ) : (
+                           <Badge variant="outline" className="gap-1 bg-muted text-muted-foreground hover:bg-muted-foreground/10 border-muted-foreground/20">
+                             No Login
+                           </Badge>
+                        )}
+                      </div>
+                      
+                      {/* Placeholder for future role display if available in DTO */}
+                    </div>
+                  </TableCell>
+                  
+                  <TableCell className="py-4 text-right pr-6">
+                    <div className="flex justify-end">
+                      {employee.status === 'IN' ? (
+                        <Badge className="gap-1 bg-green-500 hover:bg-green-600 border-transparent">
+                           <CheckCircle2 className="h-3 w-3" /> Active
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="gap-1 text-muted-foreground">
+                           <XCircle className="h-3 w-3" /> Inactive
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>                  
                 </TableRow>
               ))

@@ -10,6 +10,7 @@ Name | Type
 `actorId` | string
 `branchId` | string
 `createdById` | string
+`personnelRoleId` | string
 `status` | string
 
 ## Example
@@ -22,6 +23,7 @@ const example = {
   "actorId": null,
   "branchId": null,
   "createdById": null,
+  "personnelRoleId": null,
   "status": null,
 } satisfies BranchPersonnelPostDTO
 

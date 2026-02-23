@@ -30,7 +30,31 @@ export interface MemberTableDTO {
      * @type {string}
      * @memberof MemberTableDTO
      */
+    createdByEmail?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
+    createdByFirstName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
     createdById?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
+    createdBySurname?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
+    createdByType?: MemberTableDTOCreatedByTypeEnum;
     /**
      * 
      * @type {string}
@@ -72,9 +96,48 @@ export interface MemberTableDTO {
      * @type {string}
      * @memberof MemberTableDTO
      */
+    updatedByEmail?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
+    updatedByFirstName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
     updatedById?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
+    updatedBySurname?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
+    updatedByType?: MemberTableDTOUpdatedByTypeEnum;
 }
 
+
+/**
+ * @export
+ */
+export const MemberTableDTOCreatedByTypeEnum = {
+    User: 'USER',
+    Employee: 'EMPLOYEE',
+    Member: 'MEMBER',
+    Admin: 'ADMIN',
+    Flyway: 'FLYWAY',
+    System: 'SYSTEM',
+    Cron: 'CRON',
+    Api: 'API'
+} as const;
+export type MemberTableDTOCreatedByTypeEnum = typeof MemberTableDTOCreatedByTypeEnum[keyof typeof MemberTableDTOCreatedByTypeEnum];
 
 /**
  * @export
@@ -85,6 +148,21 @@ export const MemberTableDTOStatusEnum = {
     Undecided: 'UNDECIDED'
 } as const;
 export type MemberTableDTOStatusEnum = typeof MemberTableDTOStatusEnum[keyof typeof MemberTableDTOStatusEnum];
+
+/**
+ * @export
+ */
+export const MemberTableDTOUpdatedByTypeEnum = {
+    User: 'USER',
+    Employee: 'EMPLOYEE',
+    Member: 'MEMBER',
+    Admin: 'ADMIN',
+    Flyway: 'FLYWAY',
+    System: 'SYSTEM',
+    Cron: 'CRON',
+    Api: 'API'
+} as const;
+export type MemberTableDTOUpdatedByTypeEnum = typeof MemberTableDTOUpdatedByTypeEnum[keyof typeof MemberTableDTOUpdatedByTypeEnum];
 
 
 /**
@@ -109,14 +187,22 @@ export function MemberTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     return {
         
         'actorId': json['actorId'] == null ? undefined : json['actorId'],
+        'createdByEmail': json['createdByEmail'] == null ? undefined : json['createdByEmail'],
+        'createdByFirstName': json['createdByFirstName'] == null ? undefined : json['createdByFirstName'],
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
+        'createdBySurname': json['createdBySurname'] == null ? undefined : json['createdBySurname'],
+        'createdByType': json['createdByType'] == null ? undefined : json['createdByType'],
         'firstName': json['firstName'],
         'id': json['id'],
         'middleName': json['middleName'] == null ? undefined : json['middleName'],
         'status': json['status'],
         'suffix': json['suffix'] == null ? undefined : json['suffix'],
         'surname': json['surname'],
+        'updatedByEmail': json['updatedByEmail'] == null ? undefined : json['updatedByEmail'],
+        'updatedByFirstName': json['updatedByFirstName'] == null ? undefined : json['updatedByFirstName'],
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
+        'updatedBySurname': json['updatedBySurname'] == null ? undefined : json['updatedBySurname'],
+        'updatedByType': json['updatedByType'] == null ? undefined : json['updatedByType'],
     };
 }
 
@@ -132,14 +218,22 @@ export function MemberTableDTOToJSONTyped(value?: MemberTableDTO | null, ignoreD
     return {
         
         'actorId': value['actorId'],
+        'createdByEmail': value['createdByEmail'],
+        'createdByFirstName': value['createdByFirstName'],
         'createdById': value['createdById'],
+        'createdBySurname': value['createdBySurname'],
+        'createdByType': value['createdByType'],
         'firstName': value['firstName'],
         'id': value['id'],
         'middleName': value['middleName'],
         'status': value['status'],
         'suffix': value['suffix'],
         'surname': value['surname'],
+        'updatedByEmail': value['updatedByEmail'],
+        'updatedByFirstName': value['updatedByFirstName'],
         'updatedById': value['updatedById'],
+        'updatedBySurname': value['updatedBySurname'],
+        'updatedByType': value['updatedByType'],
     };
 }
 

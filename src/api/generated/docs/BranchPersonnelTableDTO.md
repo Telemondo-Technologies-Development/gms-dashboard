@@ -12,6 +12,7 @@ Name | Type
 `createdAt` | Date
 `createdById` | string
 `id` | string
+`personnelRoleId` | string
 `status` | string
 `updatedAt` | Date
 `updatedById` | string
@@ -28,6 +29,7 @@ const example = {
   "createdAt": null,
   "createdById": null,
   "id": null,
+  "personnelRoleId": null,
   "status": null,
   "updatedAt": null,
   "updatedById": null,

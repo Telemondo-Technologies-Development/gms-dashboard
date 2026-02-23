@@ -36,6 +36,12 @@ export interface BranchPersonnelPutDTO {
      * @type {string}
      * @memberof BranchPersonnelPutDTO
      */
+    personnelRoleId: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof BranchPersonnelPutDTO
+     */
     status: BranchPersonnelPutDTOStatusEnum;
     /**
      * 
@@ -65,6 +71,7 @@ export type BranchPersonnelPutDTOStatusEnum = typeof BranchPersonnelPutDTOStatus
 export function instanceOfBranchPersonnelPutDTO(value: object): value is BranchPersonnelPutDTO {
     if (!('actorId' in value) || value['actorId'] === undefined) return false;
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
+    if (!('personnelRoleId' in value) || value['personnelRoleId'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
     if (!('updatedById' in value) || value['updatedById'] === undefined) return false;
     return true;
@@ -82,6 +89,7 @@ export function BranchPersonnelPutDTOFromJSONTyped(json: any, ignoreDiscriminato
         
         'actorId': json['actorId'],
         'branchId': json['branchId'],
+        'personnelRoleId': json['personnelRoleId'],
         'status': json['status'],
         'updatedById': json['updatedById'],
     };
@@ -100,6 +108,7 @@ export function BranchPersonnelPutDTOToJSONTyped(value?: BranchPersonnelPutDTO |
         
         'actorId': value['actorId'],
         'branchId': value['branchId'],
+        'personnelRoleId': value['personnelRoleId'],
         'status': value['status'],
         'updatedById': value['updatedById'],
     };

@@ -8,14 +8,22 @@ Format for Member read
 Name | Type
 ------------ | -------------
 `actorId` | string
+`createdByEmail` | string
+`createdByFirstName` | string
 `createdById` | string
+`createdBySurname` | string
+`createdByType` | string
 `firstName` | string
 `id` | string
 `middleName` | string
 `status` | string
 `suffix` | string
 `surname` | string
+`updatedByEmail` | string
+`updatedByFirstName` | string
 `updatedById` | string
+`updatedBySurname` | string
+`updatedByType` | string
 
 ## Example
 
@@ -25,14 +33,22 @@ import type { MemberTableDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "actorId": null,
+  "createdByEmail": null,
+  "createdByFirstName": null,
   "createdById": null,
+  "createdBySurname": null,
+  "createdByType": null,
   "firstName": null,
   "id": null,
   "middleName": null,
   "status": null,
   "suffix": null,
   "surname": null,
+  "updatedByEmail": null,
+  "updatedByFirstName": null,
   "updatedById": null,
+  "updatedBySurname": null,
+  "updatedByType": null,
 } satisfies MemberTableDTO
 
 console.log(example)

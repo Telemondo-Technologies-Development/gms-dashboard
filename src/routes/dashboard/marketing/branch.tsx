@@ -239,6 +239,7 @@ function RouteComponent() {
       <AssignStaffDialog
         open={dialogState.staffDialogOpen}
         onOpenChange={(open) => toggleDialog('staffDialogOpen', open)}
+        branchId={activeBranchForStaff?.id || ''}
         branchName={activeBranchForStaff?.name || ''}
         staff={activeBranchForStaff?.assignedStaff || []}
         onUpdateStaff={handleUpdateStaff}
