@@ -1,4 +1,4 @@
-import { useSubscriptionAvailed } from './useSubscriptionAvailed'
+import { useSubscriptionAvailed } from './useMembershipSubscriptionAvailed'
 import { useMemberSubscriptionByActorId } from './useMembershipSubscriptions'
 
 export function useMemberDetailsDialogData(options: { open: boolean; memberActorId: string | null }) {

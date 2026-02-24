@@ -1,10 +1,11 @@
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import { PaymentApi } from '@/api/generated/apis/PaymentApi'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AddPaymentMethodDialog } from '@/components/membership-components/MembershipAddPaymentMethodDrawer'
+import { InlineAddPaymentMethodForm } from '@/components/membership-components/MembershipAddPaymentMethod'
 import { useQuery } from '@tanstack/react-query'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { paymentQueryKeys } from '@/lib/QueryKeys'
@@ -18,6 +19,13 @@ export interface AddBillingDialogProps {
   disabled?: boolean
   loadPaymentMethods?: boolean
   createdById?: string | null
+  newPaymentMethodForm?: {
+    name: string
+    setName: React.Dispatch<React.SetStateAction<string>>
+    error: string | null
+  }
+  onCreatePaymentMethod?: () => Promise<void>
+  isCreatingPaymentMethod?: boolean
 }
 
 export function AddBillingDialog({
@@ -27,7 +35,10 @@ export function AddBillingDialog({
   totalCost,
   disabled = false,
   loadPaymentMethods = true,
-  createdById = null,
+  createdById: _createdById = null,
+  newPaymentMethodForm,
+  onCreatePaymentMethod,
+  isCreatingPaymentMethod = false,
 }: AddBillingDialogProps) {
   const NONE_PAYMENT_METHOD_VALUE = '__none__'
   const EMPTY_PAYMENT_METHODS_VALUE = '__empty_payment_methods__'
@@ -108,6 +119,10 @@ export function AddBillingDialog({
                 onPaymentMethodChange('', '')
                 return
               }
+              if (id === 'new_payment_method') {
+                onPaymentMethodChange('new_payment_method', '')
+                return
+              }
               const name = paymentMethods.find((m) => m.id === id)?.name ?? ''
               onPaymentMethodChange(id, name)
             }}
@@ -128,16 +143,55 @@ export function AddBillingDialog({
                   No payment methods found
                 </SelectItem>
               )}
+              {!disabled && newPaymentMethodForm && (
+                <SelectItem value="new_payment_method" className="text-primary font-medium">
+                  + Add New Payment Method
+                </SelectItem>
+              )}
             </SelectContent>
           </Select>
-          {!disabled ? (
-            <div className="pt-2">
-              <AddPaymentMethodDialog
-                createdById={createdById}
-                onCreated={(id, name) => onPaymentMethodChange(id, name)}
+          
+          {paymentMethodId === 'new_payment_method' && !disabled && newPaymentMethodForm && (
+            <>
+              <InlineAddPaymentMethodForm
+                name={newPaymentMethodForm.name}
+                setName={newPaymentMethodForm.setName}
+                onCancel={() => onPaymentMethodChange('', '')}
+                error={newPaymentMethodForm.error}
               />
-            </div>
-          ) : null}
+              {onCreatePaymentMethod && (
+                <div className="flex justify-end pt-2">
+                  <Button
+                    type="button"
+                    onClick={() => void onCreatePaymentMethod()}
+                    disabled={isCreatingPaymentMethod || !newPaymentMethodForm.name.trim()}
+                  >
+                    {isCreatingPaymentMethod ? 'Saving...' : 'Create Method'}
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+
+          {disabled && newPaymentMethodForm && onCreatePaymentMethod && (
+            <>
+              <InlineAddPaymentMethodForm
+                name={newPaymentMethodForm.name}
+                setName={newPaymentMethodForm.setName}
+                onCancel={() => onPaymentMethodChange('', '')}
+                error={newPaymentMethodForm.error}
+              />
+              <div className="flex justify-end pt-2">
+                <Button
+                  type="button"
+                  onClick={() => void onCreatePaymentMethod()}
+                  disabled={isCreatingPaymentMethod || !newPaymentMethodForm.name.trim()}
+                >
+                  {isCreatingPaymentMethod ? 'Saving...' : 'Create Method'}
+                </Button>
+              </div>
+            </>
+          )}
         </div>
 
         <Card className="rounded-xl bg-muted/50 p-4 space-y-3">

@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { cn } from '@/lib/utils'
-import type { MemberInfo } from '@/types/membership/memberSchemas'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar } from '@/components/ui/calendar'
@@ -11,7 +9,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -21,260 +18,54 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import type { MemberDetailsDialogProps } from '@/types/membership/memberSchemas'
-import { MemberSubscriptionApi } from '@/api/generated/apis/MemberSubscriptionApi'
-import { SubscriptionApi } from '@/api/generated/apis/SubscriptionApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
-import { getAuthenticatedApi } from '@/lib/api-client'
-import { useAuthSession } from '@/lib/auth/auth-session'
-import { useAddMemberDialogData } from '@/hooks/membership/useMembershipDetails'
 import { AddBillingDialog } from './MembershipBillForm'
-import { AddSubscriptionDialog } from './MembershipAddSubscriptionDrawer'
-import { useMemberDetailsDialogData } from '@/hooks/membership/useMembershipCreationContext'
-import { isAdminSession } from '@/lib/auth/auth-permissions'
-import { useBillingActions } from '@/hooks/billing/useBillingActions'
-import { memberQueryKeys } from '@/lib/QueryKeys'
-
-
+import { InlineAddSubscriptionForm } from './MembershipAddSubscription'
+import { useMembershipDetailsDialog } from '@/hooks/membership/useMembershipDetailsDialog'
 
 export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberDetailsDialogProps) {
-  const [members, setMembers] = useState<MemberInfo[]>([])
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined)
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [selectedSubscriptionId, setSelectedSubscriptionId] = useState('')
-  const [paymentMethodId, setPaymentMethodId] = useState('')
-  const [membershipDetails, setMembershipDetails] = useState('')
-  const [currentMemberSubscriptionId, setCurrentMemberSubscriptionId] = useState<string | undefined>(undefined)
-  
-  const queryClient = useQueryClient()
-  const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
-  const subscriptionApi = getAuthenticatedApi(SubscriptionApi)
-
-  const session = useAuthSession()
-  const { resolvedActorId, selectedBranchId } = useAddMemberDialogData({ open })
-
-  const memberActorId = memberGroup?.actorId ?? memberGroup?.id ?? null
-
-  const isAdmin = useMemo(
-    () => isAdminSession({ token: session.token, roles: session.roles }),
-    [session.token, session.roles],
-  )
-
-  const { ensureInvoiceForSubscription, createPaymentIfNeeded } = useBillingActions()
-
-  const { subscriptionsQuery, memberSubscriptionQuery } = useMemberDetailsDialogData({
+  const {
+    members,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    selectedSubscriptionId,
+    setSelectedSubscriptionId,
+    paymentMethodId,
+    setPaymentMethodId,
+    membershipDetails,
+    setMembershipDetails,
+    selectedSubscription,
+    totalCost,
+    subscriptionsQuery,
+    canEditBilling,
+    createSubscriptionPlan,
+    createPaymentMethod,
+    updateSubscriptionMutation,
+    resolvedActorId,
+    handleSubmit,
+  } = useMembershipDetailsDialog({
     open,
-    memberActorId,
+    memberGroup,
+    onClose: () => onOpenChange(false),
   })
-
-  const hasActiveSubscription = !!memberSubscriptionQuery.data
-  const canEditBilling = !hasActiveSubscription || isAdmin
-  
-  const selectedSubscription = subscriptionsQuery.data?.find(
-    (s: SubscriptionAvailedTableDTO) => s.id === selectedSubscriptionId,
-  )
-
-  useEffect(() => {
-    if (!memberGroup) return
-
-    setMembers(memberGroup.members)
-    setStartDate(memberGroup.startDate)
-    setEndDate(memberGroup.endDate)
-    setPaymentMethodId('')
-    setMembershipDetails(memberGroup.membershipDetails)
-    
-    if (memberSubscriptionQuery.data) {
-      setCurrentMemberSubscriptionId(memberSubscriptionQuery.data.id)
-      if (memberSubscriptionQuery.data.startDate) {
-        setStartDate(new Date(memberSubscriptionQuery.data.startDate))
-      }
-      if (memberSubscriptionQuery.data.endDate) {
-        setEndDate(new Date(memberSubscriptionQuery.data.endDate))
-      }
-
-      if (memberSubscriptionQuery.data.subscriptionAvailedId) {
-        setSelectedSubscriptionId(memberSubscriptionQuery.data.subscriptionAvailedId)
-      }
-    }
-  }, [memberGroup, memberSubscriptionQuery.data])
-
-  const totalCost = useMemo(() => {
-    const amount = selectedSubscription?.amount ?? 0
-    return (amount * Math.max(1, members.length)).toFixed(2)
-  }, [selectedSubscription, members.length])
-
-  const resolveSubscriptionId = async (): Promise<string> => {
-    if (!selectedSubscriptionId) return ''
-    if (!selectedSubscription) return selectedSubscriptionId
-
-    try {
-      const subsResp = await subscriptionApi.getAllSubscriptions({
-        pageable: { page: 0, size: 500 },
-      })
-      const match = (subsResp.data ?? []).find(
-        (s) =>
-          s.name.trim().toLowerCase() === selectedSubscription.name.trim().toLowerCase() &&
-          s.amount === selectedSubscription.amount,
-      )
-      return match?.id ?? selectedSubscriptionId
-    } catch {
-      return selectedSubscriptionId
-    }
-  }
-
-  const updateSubscriptionMutation = useMutation({
-    mutationFn: async () => {
-      if (!memberGroup?.id || !selectedSubscriptionId || !startDate) {
-        throw new Error('Missing required fields for subscription update')
-      }
-      
-      const memberSub = memberSubscriptionQuery.data
-      const branchId = memberSub?.branchId ?? selectedBranchId
-      if (!branchId) {
-        throw new Error('Branch not found. Please ensure your user is assigned to a branch.')
-      }
-      
-      const updatedById = memberSub?.updatedById || memberSub?.createdById || resolvedActorId || null
-      if (!updatedById) {
-        throw new Error(`Cannot determine user ID for session: ${session.username ?? session.email ?? 'unknown'}`)
-      }
-      
-      const subscriptionIdToUse = await resolveSubscriptionId()
-      if (!subscriptionIdToUse) {
-        throw new Error('Please select a subscription plan.')
-      }
-
-      let resultingMemberSubscriptionId: string | undefined = currentMemberSubscriptionId
-      let creatorIdForPayment = updatedById
-      
-      if (currentMemberSubscriptionId) {
-        await memberSubscriptionApi.updateMemberSubscription({
-          id: currentMemberSubscriptionId,
-          memberSubscriptionPutDTO: {
-            actorId: memberActorId ?? memberGroup.id,
-            branchId,
-            startDate,
-            endDate,
-            status: 'ACTIVE',
-            subscriptionId: subscriptionIdToUse,
-            updateCurrentSubscription: true,
-            updatedById,
-          },
-        })
-      } else {
-        const createdById = memberSub?.createdById || updatedById
-        if (!createdById) throw new Error('Cannot determine creator ID')
-        
-        const createResp = await memberSubscriptionApi.createMemberSubscription({
-          memberSubscriptionPostDTO: {
-            actorId: memberActorId ?? memberGroup.id,
-            branchId,
-            createdById,
-            startDate,
-            endDate,
-            status: 'ACTIVE',
-            subscriptionId: subscriptionIdToUse,
-          },
-        })
-        if (!createResp.success || !createResp.data) {
-          throw new Error(createResp.message ?? 'Failed to create subscription')
-        }
-        resultingMemberSubscriptionId = createResp.data.id
-        creatorIdForPayment = createdById
-      }
-      return { memberSubscriptionId: resultingMemberSubscriptionId, createdById: creatorIdForPayment }
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscriptions, memberActorId] })
-      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
-    },
-  })
-  
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!memberGroup) return
-
-    try {
-      // Update subscription if changed
-      let subscriptionResult: { memberSubscriptionId?: string; createdById?: string } | undefined
-      if (canEditBilling && selectedSubscriptionId && startDate) {
-        subscriptionResult = await updateSubscriptionMutation.mutateAsync()
-      }
-
-      let ensuredInvoiceId: string | undefined
-      try {
-        if (!canEditBilling) {
-          ensuredInvoiceId = undefined
-        } else {
-          const memberSubscriptionId = subscriptionResult?.memberSubscriptionId ?? currentMemberSubscriptionId
-          const createdById = subscriptionResult?.createdById ?? memberSubscriptionQuery.data?.createdById
-          const branchId = memberSubscriptionQuery.data?.branchId ?? selectedBranchId
-          
-          if (memberSubscriptionId && selectedSubscription && createdById && branchId) {
-            const dueDate = startDate ?? new Date()
-            const actorId = memberActorId ?? memberGroup.id
-
-            ensuredInvoiceId = await ensureInvoiceForSubscription({
-              actorId,
-              branchId,
-              createdById,
-              memberSubscriptionId,
-              subscriptionAvailedId: selectedSubscriptionId,
-              dueDate,
-              gracePeriodDays: selectedSubscription.gracePeriodDays ?? 0,
-              subtotal: selectedSubscription.amount,
-            })
-          }
-        }
-      } catch (invError) {
-        console.warn('Invoice creation skipped or failed:', invError)
-      }
-
-      try {
-        if (!canEditBilling) throw new Error('Billing locked')
-        
-        const memberSubscriptionId = subscriptionResult?.memberSubscriptionId ?? currentMemberSubscriptionId
-        const createdById = subscriptionResult?.createdById ?? memberSubscriptionQuery.data?.createdById
-        const branchId = memberSubscriptionQuery.data?.branchId ?? selectedBranchId
-        
-        if (memberSubscriptionId && selectedSubscription && createdById && branchId) {
-          await createPaymentIfNeeded({
-            paymentMethodId,
-            invoiceId: ensuredInvoiceId,
-            createdById,
-            amount: selectedSubscription.amount,
-            paidAt: new Date(),
-          })
-        }
-      } catch (payError) {
-        if (!(payError instanceof Error && payError.message === 'Billing locked')) {
-          console.warn('Payment creation skipped or failed:', payError)
-        }
-      }
-
-      // Invalidate members cache to trigger refetch
-      queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
-      onOpenChange(false)
-    } catch (error) {
-      console.error('Failed to save member details:', error)
-      alert(error instanceof Error ? error.message : 'Failed to save changes')
-    }
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-auto">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <DialogHeader>
-            <DialogTitle>Member Details</DialogTitle>
-            <DialogDescription>
-              Review member info and update billing to renew memberships when they expire.
-            </DialogDescription>
-          </DialogHeader>
+      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl h-[95vh] max-h-[95vh] overflow-hidden p-0">
+        <DialogHeader className="sticky top-0 z-10 border-b bg-background px-6 py-4">
+          <DialogTitle>Member Details</DialogTitle>
+          <DialogDescription>
+            Review member info and update billing to renew memberships when they expire.
+          </DialogDescription>
+        </DialogHeader>
 
+        <form onSubmit={handleSubmit} className="flex h-full min-h-0 flex-col">
           {!memberGroup ? (
-            <div className="text-sm text-muted-foreground">No member selected.</div>
+            <div className="text-sm text-muted-foreground px-6 py-4">No member selected.</div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto px-6 py-4 min-h-0 flex-1">
               <div className="space-y-6">
                 <Card className="h-full">
                   <CardHeader>
@@ -283,44 +74,44 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                   <CardContent className="space-y-8">
                     <div className="space-y-6">
                       <h3 className="font-semibold leading-none tracking-tight">Member Information</h3>
-                      {members.map((m) => (
-                        <div key={m.id} className="rounded-lg space-y-4">
+                      {members.map((member) => (
+                        <div key={member.id} className="rounded-lg space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor={`firstName-${m.id}`}>First Name *</Label>
+                              <Label htmlFor={`firstName-${member.id}`}>First Name *</Label>
                               <Input
-                                id={`firstName-${m.id}`}
-                                value={m.firstName || ''}
+                                id={`firstName-${member.id}`}
+                                value={member.firstName || ''}
                                 placeholder="Enter first name"
                                 disabled
                               />
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`middleName-${m.id}`}>Middle Name </Label>
+                              <Label htmlFor={`middleName-${member.id}`}>Middle Name </Label>
                               <Input
-                                id={`middleName-${m.id}`}
-                                value={m.middleName || ''}
+                                id={`middleName-${member.id}`}
+                                value={member.middleName || ''}
                                 placeholder="Enter middle name"
                                 disabled
                               />
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`surname-${m.id}`}>Surname *</Label>
+                              <Label htmlFor={`surname-${member.id}`}>Surname *</Label>
                               <Input
-                                id={`surname-${m.id}`}
-                                value={m.surname || ''}
+                                id={`surname-${member.id}`}
+                                value={member.surname || ''}
                                 placeholder="Enter surname"
                                 disabled
                               />
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`suffix-${m.id}`}>Suffix </Label>
+                              <Label htmlFor={`suffix-${member.id}`}>Suffix </Label>
                               <Input
-                                id={`suffix-${m.id}`}
-                                value={m.suffix || ''}
+                                id={`suffix-${member.id}`}
+                                value={member.suffix || ''}
                                 placeholder="Enter suffix"
                                 disabled
                               />
@@ -328,10 +119,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
 
                             <div className="space-y-2 md:col-span-2">
                               <Label>Status</Label>
-                              <Select
-                                value={m.status || 'UNDECIDED'}
-                                disabled
-                              >
+                              <Select value={member.status || 'UNDECIDED'} disabled>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
@@ -386,16 +174,40 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                                     {sub.name} - PHP {sub.amount.toFixed(2)}
                                   </SelectItem>
                                 ))}
+                                {canEditBilling && (
+                                  <SelectItem value="new_subscription" className="text-primary font-medium">
+                                    + Add New Subscription
+                                  </SelectItem>
+                                )}
                               </SelectContent>
                             </Select>
-                            {canEditBilling ? (
-                              <div className="flex items-center">
-                                <AddSubscriptionDialog
-                                  createdById={session.actorId ?? null}
-                                  onCreated={(id) => setSelectedSubscriptionId(id)}
+
+                            {canEditBilling && selectedSubscriptionId === 'new_subscription' && (
+                              <>
+                                <InlineAddSubscriptionForm
+                                  formState={createSubscriptionPlan.formState}
+                                  setFormState={createSubscriptionPlan.setFormState}
+                                  onCancel={() => {
+                                    setSelectedSubscriptionId('')
+                                    createSubscriptionPlan.reset()
+                                  }}
+                                  error={createSubscriptionPlan.submitError}
                                 />
-                              </div>
-                            ) : null}
+                                <div className="flex justify-end pt-2">
+                                  <Button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.preventDefault()
+                                      void createSubscriptionPlan.handleSubmit()
+                                    }}
+                                    disabled={createSubscriptionPlan.isSubmitting || !createSubscriptionPlan.formState.name}
+                                  >
+                                    Create Plan
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+
                             {selectedSubscription ? (
                               <p className="text-xs text-muted-foreground">
                                 Interval: {selectedSubscription.intervalCount} {selectedSubscription.intervals} · Grace:{' '}
@@ -459,7 +271,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                         <Textarea
                           id="membershipDetails"
                           value={membershipDetails}
-                          onChange={(e) => setMembershipDetails(e.target.value)}
+                          onChange={(event) => setMembershipDetails(event.target.value)}
                           rows={3}
                           disabled={!canEditBilling}
                         />
@@ -473,25 +285,41 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                 <AddBillingDialog
                   selectedSubscription={selectedSubscription}
                   paymentMethodId={paymentMethodId}
-                  onPaymentMethodChange={(id) => {
+                  onPaymentMethodChange={(id, _name) => {
                     setPaymentMethodId(id)
+                    if (id !== 'new_payment_method') createPaymentMethod.reset()
                   }}
                   totalCost={totalCost}
                   disabled={!canEditBilling}
                   createdById={resolvedActorId ?? null}
+                  newPaymentMethodForm={{
+                    name: createPaymentMethod.name,
+                    setName: createPaymentMethod.setName,
+                    error: createPaymentMethod.submitError,
+                  }}
+                  onCreatePaymentMethod={async () => {
+                    const newMethod = await createPaymentMethod.handleSubmit()
+                    setPaymentMethodId(newMethod.id)
+                  }}
+                  isCreatingPaymentMethod={createPaymentMethod.isSubmitting}
                 />
               </div>
             </div>
           )}
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={updateSubscriptionMutation.isPending}>
+          <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t bg-background px-6 py-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={updateSubscriptionMutation.isPending}
+            >
               Close
             </Button>
             <Button type="submit" disabled={!memberGroup || updateSubscriptionMutation.isPending}>
               {updateSubscriptionMutation.isPending ? 'Saving...' : 'Save changes'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

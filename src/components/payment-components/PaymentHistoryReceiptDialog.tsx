@@ -18,46 +18,81 @@ import type { PaymentTableDTOParsed, PaymentMethodTableDTOParsed } from '@/types
 interface ReceiptProps {
   payment: PaymentTableDTOParsed
   paymentMethod?: PaymentMethodTableDTOParsed
+  memberName?: string
 } 
 
-export function Receipt({ payment, paymentMethod }: ReceiptProps) {
+export function Receipt({ payment, paymentMethod, memberName }: ReceiptProps) {
   return (
-    <div className="w-full bg-white p-8 text-black" id="receipt-content">
+    <div className="w-full  bg-white p-8 text-black" id="receipt-content">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold uppercase tracking-wider">Official Receipt</h1>
-        <p className="text-sm text-muted-foreground">Gym Management System</p>
+        <h1 className="text-xl font-bold uppercase tracking-wider">Official Receipt</h1>
+        <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Gym Fitness Inc.</p>
       </div>
 
-      <div className="mb-6 flex justify-between border-b pb-4">
+      <div className="mb-8 flex justify-between ">
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase">Date</p>
-          <p>{payment.paidAt ? format(new Date(payment.paidAt), 'PPP') : '—'}</p>
+           <div className="mb-2">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Date Issued</p>
+              <p className="text-sm font-medium">{payment.paidAt ? format(new Date(payment.paidAt), 'MMMM d, yyyy') : '—'}</p>
+              <p className="text-xs text-muted-foreground">{payment.paidAt ? format(new Date(payment.paidAt), 'h:mm a') : ''}</p>
+           </div>
+           
+           <div>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Billed To</p>
+              <p className="text-sm font-bold uppercase">{memberName || 'Guest / Walk-in'}</p>
+           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs font-semibold text-muted-foreground uppercase">Receipt #</p>
-          <p className="font-mono">{payment.id.slice(0, 8).toUpperCase()}</p>
+          <div className="mb-2">
+             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Receipt No.</p>
+             <p className="font-mono text-sm">{payment.id.slice(0, 8).toUpperCase()}</p>
+          </div>
         </div>
       </div>
 
-      <div className="mb-8 space-y-2">
-        <div className="flex justify-between">
-          <span>Payment Method</span>
-          <span>{paymentMethod?.name ?? payment.paymentMethodId}</span>
+      <div className="mb-8">
+        <div className=" p-0 overflow-hidden">
+             <div className=" px-4 py-2  flex justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                 <span>Description</span>
+                 <span>Amount</span>
+             </div>
+             <div className="px-4 py-3 flex justify-between text-sm">
+                 <div>
+                    <span className="font-medium block">Membership / Service Payment</span>
+                    <span className="text-xs text-muted-foreground block mt-0.5">Via {paymentMethod?.name ?? 'Unknown Method'}</span>
+                 </div>
+                 <span className="font-mono">
+                    {new Intl.NumberFormat('en-PH', { minimumFractionDigits: 2 }).format(payment.amount)}
+                 </span>
+             </div>
         </div>
-        <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
-          <span>Total Amount</span>
-          <span>
-            {new Intl.NumberFormat('en-PH', {
-              style: 'currency',
-              currency: 'PHP',
-            }).format(payment.amount)}
-          </span>
+
+        <div className="flex justify-end mt-4">
+            <div className="w-1/2">
+                <div className="flex justify-between py-1 text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>{new Intl.NumberFormat('en-PH', { minimumFractionDigits: 2 }).format(payment.amount)}</span>
+                </div>
+                <div className="flex justify-between py-1 text-sm border-b pb-2 mb-2">
+                    <span className="text-muted-foreground">Tax (0%)</span>
+                    <span>0.00</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span>
+                        {new Intl.NumberFormat('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP',
+                        }).format(payment.amount)}
+                    </span>
+                </div>
+            </div>
         </div>
       </div>
 
-      <div className="text-center text-xs text-muted-foreground mt-12 pt-4 border-t">
+      <div className="text-center text-[10px] text-muted-foreground mt-12 pt-4 border-t uppercase tracking-widest">
         <p>Thank you for your business!</p>
-        <p>This is a computer generated receipt.</p>
+        <p className="mt-1">This is a system generated receipt.</p>
       </div>
     </div>
   )
@@ -71,6 +106,7 @@ interface ReceiptDialogProps {
   loading?: boolean
   error?: string
   paymentMethodMap: Map<string, PaymentMethodTableDTOParsed>
+  memberName?: string
 }
 
 export function ReceiptDialog({
@@ -81,6 +117,7 @@ export function ReceiptDialog({
   loading,
   error,
   paymentMethodMap,
+  memberName,
 }: ReceiptDialogProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
@@ -92,12 +129,12 @@ export function ReceiptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Print Receipt</DialogTitle>
           <DialogDescription>
             {payment ? (
-              <>Preview of the receipt for payment {payment.id}</>
+              <>Preview of the receipt for payment <span className="font-mono text-xs">{payment.id.slice(0, 8)}</span></>
             ) : loading ? (
               <>Loading payment…</>
             ) : paymentId ? (
@@ -108,28 +145,28 @@ export function ReceiptDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {error ? (
-          <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-            {error}
-          </div>
-        ) : loading ? (
-          <div className="rounded-md border p-6 text-sm text-muted-foreground">Loading receipt preview…</div>
-        ) : payment ? (
-          <>
-            <div className="rounded-md border bg-gray-50 p-4">
-              <div ref={contentRef} className="mx-auto max-w-75 bg-white shadow-sm">
-                <Receipt payment={payment} paymentMethod={method} />
-              </div>
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {error ? (
+            <div className="border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+              {error}
             </div>
+          ) : loading ? (
+            <div className="flex flex-col items-center justify-center p-8 space-y-2 text-muted-foreground">
+              <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-primary" />
+              <p className="text-sm">Loading receipt preview…</p>
+            </div>
+          ) : payment ? (
+            <>
+              <div className="bg-gray-50/50 p-4">
+                <div ref={contentRef} className="mx-auto max-w-[320px] bg-white shadow-sm border">
+                  <Receipt payment={payment} paymentMethod={method} memberName={memberName}/>
+                </div>
+              </div>
+            </>
+          ) : null}
+        </div>
 
-            <Separator />
-          </>
-        ) : null}
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
+        <DialogFooter className="mt-4">
           <Button onClick={() => handlePrint && handlePrint()} disabled={!payment || !!loading || !!error}>
             <Printer className="mr-2 h-4 w-4" />
             Print

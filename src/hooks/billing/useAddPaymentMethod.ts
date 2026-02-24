@@ -20,7 +20,7 @@ interface UseCreatePaymentMethodResult {
   setName: React.Dispatch<React.SetStateAction<string>>
   submitError: string | null
   isSubmitting: boolean
-  handleSubmit: () => Promise<void>
+  handleSubmit: () => Promise<PaymentMethodTableDTOParsed>
   reset: () => void
 }
 
@@ -63,7 +63,7 @@ export function useCreatePaymentMethod(
 
   const handleSubmit = async () => {
     setSubmitError(null)
-    await mutation.mutateAsync()
+    return await mutation.mutateAsync()
   }
 
   const reset = () => {

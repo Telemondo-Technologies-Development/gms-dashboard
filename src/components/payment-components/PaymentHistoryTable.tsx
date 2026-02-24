@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from 'react'
 import { useForm } from '@tanstack/react-form'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { 
   AlertTriangle, 
@@ -16,7 +16,11 @@ import {
   User, 
   ArrowUpDown, 
   RefreshCw,
-  Loader2
+  Loader2,
+  Trash2,
+  MoreHorizontal,
+  Eye,
+  Printer
 } from 'lucide-react'
 
 import { usePayments, usePayment } from '@/hooks/billing/usePayments'
@@ -24,6 +28,7 @@ import { usePaymentMethods } from '@/hooks/billing/usePaymentMethods'
 import { useInvoices } from '@/hooks/billing/useInvoices'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { MemberApi } from '@/api/generated/apis/MemberApi'
+import { PaymentApi } from '@/api/generated/apis/PaymentApi'
 import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
 import type { MemberTableData } from '@/types/membership/memberSchemas'
 import {
@@ -36,6 +41,7 @@ import {
 
 import { PaymentDetailsDialog } from '@/components/payment-components/PaymentHistoryDialog'
 import { ReceiptDialog } from '@/components/payment-components/PaymentHistoryReceiptDialog'
+import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm'
 
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -56,6 +62,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Separator } from '@/components/ui/separator'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 type DisplayStatus = 'paid' | 'failed' | 'pending'
 
@@ -114,8 +121,25 @@ export function PaymentHistoryTable() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [receiptOpen, setReceiptOpen] = useState(false)
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
+  
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [paymentToDelete, setPaymentToDelete] = useState<PaymentTableDTOParsed | null>(null)
+
   const [pageSize, setPageSize] = useState(10)
   const [pageIndex, setPageIndex] = useState(0)
+
+  const queryClient = useQueryClient()
+  const deletePaymentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const api = getAuthenticatedApi(PaymentApi)
+      await api.deletePayment({ id })
+    },
+    onSuccess: () => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['payments'] })
+      queryClient.invalidateQueries({ queryKey: ['invoices'] }) // Invoices might update status
+    },
+  })
 
   const defaultValues: PaymentHistoryFilters = {
     query: '',
@@ -433,16 +457,7 @@ export function PaymentHistoryTable() {
                         <Receipt className="h-6 w-6 text-muted-foreground" />
                        </div>
                        <h3 className="mt-4 text-lg font-semibold">No payments found</h3>
-                       <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-                         We couldn't find any payment records matching your current filters.
-                       </p>
-                       <Button 
-                         variant="outline" 
-                         className="mt-4"
-                         onClick={() => form.reset()}
-                        >
-                         Clear Filters
-                       </Button>
+                       <p className="mt-2 text-sm text-muted-foreground">Try adjusting your filters.</p>
                     </div>
                   ) : (
                     <div className="relative overflow-hidden">
@@ -459,6 +474,7 @@ export function PaymentHistoryTable() {
                             </TableHead>
                             <TableHead className="w-[15%] py-4 font-semibold text-foreground/70">Amount</TableHead>
                             <TableHead className="w-[15%] py-4 font-semibold text-foreground/70 text-right pr-6">Status</TableHead>
+                            <TableHead className="w-[50px]"></TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -531,8 +547,62 @@ export function PaymentHistoryTable() {
                                   </span>
                                 </TableCell>
                                 
-                                <TableCell className="py-4 text-right pr-6">
+                                <TableCell className="py-4 text-right">
                                   {statusBadge(st)}
+                                </TableCell>
+
+                                <TableCell className="py-4 pr-6 text-right">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        className="h-8 w-8 p-0"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        <span className="sr-only">Open menu</span>
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                        <DropdownMenuItem
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedPaymentId(p.id)
+                                          setDetailsOpen(true)
+                                        }}
+                                        >
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View Details
+                                        </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedPaymentId(p.id)
+                                          // Need to ensure payment data is loaded before opening receipt
+                                          // but we can set ID and let the dialog fetch/select it
+                                          setReceiptOpen(true)
+                                        }}
+                                      >
+                                        <Printer className="mr-2 h-4 w-4" />
+                                        Print Receipt
+                                      </DropdownMenuItem>
+                                      
+                                      <DropdownMenuSeparator />
+                                      
+                                      <DropdownMenuItem
+                                        className="text-destructive focus:text-destructive"
+                                        onClick={(e) => {
+                                           e.stopPropagation()
+                                           setPaymentToDelete(p)
+                                           setDeleteConfirmOpen(true)
+                                        }}
+                                      >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </TableCell>
                               </TableRow>
                             )
@@ -644,8 +714,12 @@ export function PaymentHistoryTable() {
         paymentId={selectedPaymentId}
         payment={selectedPayment}
         loading={selectedPaymentLoading}
-        error={selectedPaymentError}
+        error={selectedPaymentError ?? undefined}
         paymentMethodMap={paymentMethodById}
+        memberName={selectedPayment ? (() => {
+           const invoice = invoiceById.get(selectedPayment.invoiceId)
+           return invoice?.actorId ? memberNameByActorId.get(invoice.actorId) : undefined
+        })() : undefined}
         onPrintReceipt={() => setReceiptOpen(true)}
       />
 
@@ -655,8 +729,26 @@ export function PaymentHistoryTable() {
         paymentId={selectedPaymentId}
         payment={selectedPayment}
         loading={selectedPaymentLoading}
-        error={selectedPaymentError}
+        error={selectedPaymentError ?? undefined}
         paymentMethodMap={paymentMethodById}
+        memberName={selectedPayment ? (() => {
+           const invoice = invoiceById.get(selectedPayment.invoiceId)
+           return invoice?.actorId ? memberNameByActorId.get(invoice.actorId) : undefined
+        })() : undefined}
+      />
+
+      <DeleteAdminConfirmDialog
+         open={deleteConfirmOpen}
+         onOpenChange={setDeleteConfirmOpen}
+         onConfirm={async () => {
+             if (paymentToDelete?.id) {
+                 await deletePaymentMutation.mutateAsync(paymentToDelete.id)
+                 setPaymentToDelete(null)
+             }
+         }}
+         title={`Delete Payment: ${paymentToDelete?.id}`}
+         description="Are you sure you want to delete this payment record? This action cannot be undone."
+         confirmText="Delete Payment"
       />
     </div>
   )

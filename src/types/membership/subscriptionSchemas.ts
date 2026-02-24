@@ -89,7 +89,12 @@ export const apiResponseSubscriptionAvailedTableDTOSchema = z.object({
 
 export interface UseCreateSubscriptionPlanOptions {
   createdById: string | null
-  onCreated?: (plan: SubscriptionAvailedTableDTOParsed) => void
+  onCreated?: (plan: CreateSubscriptionPlanCreatedResult) => void
+}
+
+export interface CreateSubscriptionPlanCreatedResult extends SubscriptionAvailedTableDTOParsed {
+  /** The ID of the raw/base Subscription entity (needed for MemberSubscriptionPostDTO.subscriptionId) */
+  rawSubscriptionId: string
 }
 
 export interface UseCreateSubscriptionPlanResult {
@@ -97,7 +102,7 @@ export interface UseCreateSubscriptionPlanResult {
   setFormState: React.Dispatch<React.SetStateAction<SubscriptionPlanFormState>>
   submitError: string | null
   isSubmitting: boolean
-  handleSubmit: () => Promise<void>
+  handleSubmit: () => Promise<CreateSubscriptionPlanCreatedResult>
   reset: () => void
 }
 

@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import {
   Loader2,
   Mail,
@@ -5,10 +7,15 @@ import {
   ShieldCheck,
   Phone,
   CheckCircle2,
-  XCircle
+  XCircle,
+  MoreHorizontal,
+  Pencil,
+  Trash2
 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm'
 import {
   Table,
   TableBody,
@@ -17,6 +24,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
 // TabsContent removed — this component no longer relies on tabs
 import type { EmployeeTableDTO } from '@/api/generated/models'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -38,8 +54,13 @@ export function EmployeeTab({
   filteredEmployees,
   normalizedSearch,
   onEdit,
+  onDelete,
 }: EmployeeTabProps) {
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeTableDTO | null>(null)
+
   return (
+    <>
     <div className="">
         <Table>
           <TableHeader className="bg-muted/30">
@@ -47,13 +68,14 @@ export function EmployeeTab({
               <TableHead className="w-[30%] pl-6 py-4 font-semibold text-foreground/70">Employee</TableHead>
               <TableHead className="w-[25%] py-4 font-semibold text-foreground/70">Contact Details</TableHead>
               <TableHead className="w-[20%] py-4 font-semibold text-foreground/70">Role & Access</TableHead>
-              <TableHead className="w-[15%] py-4 font-semibold text-foreground/70 text-right pr-6">Status</TableHead>
+              <TableHead className="w-[15%] py-4 font-semibold text-foreground/70 text-right">Status</TableHead>
+              <TableHead className="w-[10%] py-4 font-semibold text-foreground/70 text-right pr-6">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loadingEmployees ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" /> 
                     <span>Loading employees...</span>
@@ -62,7 +84,7 @@ export function EmployeeTab({
               </TableRow>
             ) : filteredEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center">
+                <TableCell colSpan={5} className="h-32 text-center">
                   <div className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
                     <User className="h-8 w-8 opacity-20 mb-2" />
                     <p className="font-medium text-foreground">No employees found</p>
@@ -151,7 +173,7 @@ export function EmployeeTab({
                     </div>
                   </TableCell>
                   
-                  <TableCell className="py-4 text-right pr-6">
+                  <TableCell className="py-4 text-right">
                     <div className="flex justify-end">
                       {employee.status === 'IN' ? (
                         <Badge className="gap-1 bg-green-500 hover:bg-green-600 border-transparent">
@@ -163,12 +185,56 @@ export function EmployeeTab({
                         </Badge>
                       )}
                     </div>
-                  </TableCell>                  
+                  </TableCell>
+
+                  <TableCell className="py-4 pr-6 text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => onEdit(employee)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => {
+                            setEmployeeToDelete(employee)
+                            setDeleteConfirmOpen(true)
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      <DeleteAdminConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        onConfirm={async () => {
+          if (employeeToDelete?.id) {
+            await onDelete(employeeToDelete.id)
+            setEmployeeToDelete(null)
+          }
+        }}
+        title={`Delete Employee: ${employeeToDelete?.firstName} ${employeeToDelete?.surname}`}
+        description="Are you sure you want to delete this employee? This action cannot be undone."
+        confirmText="Delete Employee"
+      />
+    </>
   )
 }

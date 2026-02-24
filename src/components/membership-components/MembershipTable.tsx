@@ -1,9 +1,13 @@
 ﻿import { useMemo, useState, useCallback, memo } from 'react'
 import { format } from 'date-fns'
-import { Search, Calendar, RefreshCw, Loader2, User, Mail, Phone, CreditCard } from 'lucide-react'
+import { Search, Calendar, RefreshCw, Loader2, User, Mail, Phone, CreditCard, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { useMembersData } from '@/hooks/membership/useMembership'
 import { AddMemberDialog } from '@/components/membership-components/MembershipAddFormDialog'
+import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm'
+import { getAuthenticatedApi } from '@/lib/api-client'
+import { MemberApi } from '@/api/generated/apis/MemberApi'
 import type { MemberFormData } from '@/types/membership/memberSchemas'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +16,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface Props {
   onSelectMember: (m: MemberFormData) => void
@@ -29,8 +41,21 @@ function getInitials(name: string) {
 function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
   const [searchQuery, setSearchQuery] = useState('')
   const [pageIndex, setPageIndex] = useState(0)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [memberToDelete, setMemberToDelete] = useState<MemberFormData | null>(null)
 
   const { enrichedMembers, isFetching, error, refetchAll } = useMembersData()
+  const queryClient = useQueryClient()
+
+  const deleteMemberMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const api = getAuthenticatedApi(MemberApi)
+      await api.deleteMember({ id })
+    },
+    onSuccess: () => {
+      refetchAll()
+    },
+  })
 
   // Reset page when search changes
   const handleSearchChange = useCallback((value: string) => {
@@ -138,22 +163,21 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
               <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
                 <User className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium text-foreground">No members found</h3>
-              <p className="text-sm text-muted-foreground max-w-sm mt-1">
-                {enrichedMembers.length === 0
-                  ? 'Get started by adding your first member to the system.'
-                  : `No results matching "${searchQuery}". Try a different search term.`}
+              <h3 className="text-lg font-semibold mb-2">No members found</h3>
+              <p className="text-muted-foreground max-w-sm mb-6">
+                Try adjusting your search or filters to find what you're looking for.
               </p>
             </div>
           ) : (
-            <div className="relative">
+            <div className="relative w-full overflow-auto">
               <Table>
                 <TableHeader className="bg-muted/30">
                   <TableRow className="hover:bg-transparent border-b border-muted/60">
-                    <TableHead className="w-[35%] pl-6 py-4 font-semibold text-foreground/70">Member Details</TableHead>
+                    <TableHead className="w-[30%] pl-6 py-4 font-semibold text-foreground/70">Member Details</TableHead>
                     <TableHead className="w-[25%] py-4 font-semibold text-foreground/70">Plan & Billing</TableHead>
                     <TableHead className="w-[25%] py-4 font-semibold text-foreground/70">Subscription Period</TableHead>
-                    <TableHead className="w-[15%] py-4 font-semibold text-foreground/70 text-right pr-6">Status</TableHead>
+                    <TableHead className="w-[10%] py-4 font-semibold text-foreground/70 text-right">Status</TableHead>
+                    <TableHead className="w-[10%] py-4 font-semibold text-foreground/70 text-right pr-6">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -164,9 +188,9 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
                     return (
                       <TableRow
                         key={memberGroup.id}
+                        className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
                         role="button"
                         tabIndex={0}
-                        className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
                         onClick={() => onSelectMember(memberGroup)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
@@ -178,38 +202,27 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
                         <TableCell className="pl-6 py-4 align-top">
                           <div className="flex items-start gap-3">
                             <div className="flex flex-col gap-0.5">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium text-foreground">{mainMember.name}</span>
-                                {otherMembersCount > 0 && (
-                                  <Badge variant="default" className="h-5 px-1.5 text-[10px] bg-muted-foreground/15 text-muted-foreground hover:bg-muted-foreground/25">
-                                    +{otherMembersCount} others
-                                  </Badge>
-                                )}
-                              </div>
+                              <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                {memberGroup.members[0]?.name || 'Unknown Member'}
+                              </span>
                               
-                              <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-                                {mainMember.email && (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="flex items-center gap-1.5 max-w-48">
-                                          <Mail className="h-3 w-3 shrink-0 opacity-70" />
-                                          <span className="truncate">{mainMember.email}</span>
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>{mainMember.email}</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                )}
-                                {mainMember.phone && (
-                                  <div className="flex items-center gap-1.5">
-                                    <Phone className="h-3 w-3 shrink-0 opacity-70" />
-                                    <span>{mainMember.phone}</span>
-                                  </div>
-                                )}
-                              </div>
+                              
+                              {/* Contact Info Tooltip */}
+                              {mainMember.email && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-muted">
+                                        <Mail className="h-3 w-3" />
+                                        <span className="truncate max-w-[150px]">{mainMember.email}</span>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>{mainMember.email}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
                             </div>
                           </div>
                         </TableCell>
@@ -218,7 +231,7 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
                           <div className="flex flex-col gap-1.5">
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary">
-                                {memberGroup.membershipType || "Standard"} 
+                                {memberGroup.membershipType || 'Standard'}
                               </Badge>
                               {memberGroup.membershipDuration && (
                                 <span className="text-xs text-muted-foreground font-medium px-1.5 py-0.5 rounded-sm bg-muted">
@@ -226,7 +239,7 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
                                 </span>
                               )}
                             </div>
-                            
+
                             {(memberGroup.billingAmount || memberGroup.billingCycle) && (
                               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                 <CreditCard className="h-3.5 w-3.5 opacity-70" />
@@ -240,27 +253,55 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
                         </TableCell>
 
                         <TableCell className="py-4 align-top">
-                          <div className="flex flex-col gap-1.5">
-                            {memberGroup.startDate && memberGroup.endDate ? (
-                              <>
-                                <div className="flex items-center gap-2 text-sm text-foreground/80">
-                                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                                  <span className="font-medium">
-                                    {format(memberGroup.startDate, 'MMM d, yyyy')}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground pl-[0.35rem] border-l-2 border-muted ml-1.5 py-0.5">
-                                  <span className="ml-2">Ends {format(memberGroup.endDate, 'MMM d, yyyy')}</span>
-                                </div>
-                              </>
-                            ) : (
-                              <span className="text-sm text-muted-foreground italic">No active subscription</span>
-                            )}
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Calendar className="h-3.5 w-3.5 text-muted-foreground/70" />
+                              <span className="font-medium">
+                                {memberGroup.startDate ? format(new Date(memberGroup.startDate), 'MMM d, yyyy') : 'N/A'}
+                              </span>
+                            </div>
+                            <div className="h-4 w-[1px] bg-border ml-1.5 opacity-50 my-0.5" />
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <RefreshCw className="h-3.5 w-3.5 opacity-50" />
+                              <span>
+                                {memberGroup.endDate ? format(new Date(memberGroup.endDate), 'MMM d, yyyy') : 'No Expiry'}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
 
                         <TableCell className="py-4 align-top text-right pr-6">
                           {getMembershipStatusBadge(memberGroup.endDate)}
+                        </TableCell>
+
+                        <TableCell className="py-4 align-top text-right pr-6">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
+                                  <span className="sr-only">Open menu</span>
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSelectMember(memberGroup); }}>
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Edit Details
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setMemberToDelete(memberGroup)
+                                    setDeleteConfirmOpen(true)
+                                  }}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Member
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     )
@@ -272,12 +313,25 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
         </CardContent>
       </div>
 
-      <div className="border-t bg-muted/5 p-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-xs text-muted-foreground font-medium">
-            Showing {Math.min(pageIndex * pageSize + 1, filteredMembers.length)} to {Math.min((pageIndex + 1) * pageSize, filteredMembers.length)} of {filteredMembers.length} entries
-          </div>
-          <div className="flex items-center gap-2">
+      <DeleteAdminConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        onConfirm={async () => {
+          if (memberToDelete?.id) {
+            await deleteMemberMutation.mutateAsync(memberToDelete.id)
+            setMemberToDelete(null)
+          }
+        }}
+        title={`Delete Member: ${memberToDelete?.members[0]?.name}`}
+        description="Are you sure you want to delete this member?"
+        confirmText="Delete Member"
+      />
+
+      <div className="flex items-center justify-between px-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          Showing {Math.min(pageIndex * pageSize + 1, filteredMembers.length)} to {Math.min((pageIndex + 1) * pageSize, filteredMembers.length)} of {filteredMembers.length} entries
+        </div>
+        <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="outline"
@@ -300,7 +354,6 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
             </Button>
           </div>
         </div>
-      </div>
     </Card>
   )
 }
