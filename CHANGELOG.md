@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Membership: Centralized membership logic into `useMembershipDetails` and `useBillingActions` hooks, reducing code duplication.
 - UI: Converted "Add Subscription Plan" to a Drawer component to prevent stacking dialogs and improved the trigger design.
 - UI: Added sticky headers and footers to the "Add Member" dialog for better scrolling behavior on smaller screens.
+- Analytics: minor design changes and connected branch api to dropdown selector
+- Expense: refactored code and connected branch api to dropdown selector
 
 
 
