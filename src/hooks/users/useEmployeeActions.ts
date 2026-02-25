@@ -10,6 +10,12 @@ import type {
 import type { EmployeeFormValues } from '@/types/user/userSchemas'
 import { employeeQueryKeys } from '@/lib/QueryKeys'
 
+function toOptionalString(value: string | undefined): string | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
+}
+
 /**
  * Hook for employee mutations (create, update, delete)
  */
@@ -19,16 +25,21 @@ export function useEmployeeActions() {
 
   const createEmployee = useMutation({
     mutationFn: async (values: EmployeeFormValues) => {
+      const middleName = toOptionalString(values.middleName)
+      const suffix = toOptionalString(values.suffix)
+      const userId = toOptionalString(values.userId)
+      const profilePictureId = toOptionalString(values.profilePictureId)
+
       const response = await employeeApi.createEmployee({
         employeePostDTO: {
           firstName: values.firstName,
           surname: values.surname,
-          middleName: values.middleName,
+          middleName,
           contactNo: values.contactNo,
           status: values.status as EmployeePostDTOStatusEnum,
-          suffix: values.suffix,
-          userId: values.userId,
-          profilePictureId: values.profilePictureId,
+          suffix,
+          userId,
+          profilePictureId,
         },
       })
       return response
@@ -46,17 +57,22 @@ export function useEmployeeActions() {
       id: string
       values: EmployeeFormValues 
     }) => {
+      const middleName = toOptionalString(values.middleName)
+      const suffix = toOptionalString(values.suffix)
+      const userId = toOptionalString(values.userId)
+      const profilePictureId = toOptionalString(values.profilePictureId)
+
       const response = await employeeApi.updateEmployee({
         id,
         employeePutDTO: {
           firstName: values.firstName,
           surname: values.surname,
-          middleName: values.middleName,
+          middleName,
           contactNo: values.contactNo,
           status: values.status as EmployeePutDTOStatusEnum,
-          suffix: values.suffix,
-          userId: values.userId,
-          profilePictureId: values.profilePictureId,
+          suffix,
+          userId,
+          profilePictureId,
         },
       })
       return response

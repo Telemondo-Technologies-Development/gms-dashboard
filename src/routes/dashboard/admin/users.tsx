@@ -8,16 +8,18 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { Card } from "@/components/ui/card";
 
-import { EmployeeDialog } from "@/components/user-components/EmployeeDialog";
-import { EmployeeTab } from "@/components/user-components/EmployeeTab";
+import { EmployeeDialog } from "@/components/user-components/StaffDetailsDialog";
+import { CreateEmployeeLoginDialog } from "@/components/user-components/StaffAddLogin";
+import { EmployeeTab } from "@/components/user-components/StaffTab";
 
 import { useEmployees } from "@/hooks/users/useEmployees";
 import { useEmployeeActions } from "@/hooks/users/useEmployeeActions";
+import { useUserActions } from "@/hooks/users/useUserActions";
 import { useAuthSession } from "@/lib/auth/auth-session";
 import { isAdminSession } from "@/lib/auth/auth-permissions";
 
 import type { EmployeeTableDTO } from "@/api/generated/models";
-import type { EmployeeFormValues } from "@/types/user/userSchemas";
+import type { CreateUserFormValues, EmployeeFormValues } from "@/types/user/userSchemas";
 
 export const Route = createFileRoute("/dashboard/admin/users")({
   component: UsersPage,
@@ -27,6 +29,10 @@ function UsersPage() {
   const [isEmployeeDialogOpen, setIsEmployeeDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] =
     useState<EmployeeTableDTO | null>(null);
+  const [isCreateLoginOpen, setIsCreateLoginOpen] = useState(false);
+  const [loginTargetEmployee, setLoginTargetEmployee] = useState<EmployeeTableDTO | null>(null);
+  const [createLoginError, setCreateLoginError] = useState<string | null>(null);
+  const [permissionNotice, setPermissionNotice] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const session = useAuthSession();
   const isAdmin = isAdminSession({ token: session.token, roles: session.roles });
@@ -42,6 +48,7 @@ function UsersPage() {
   // system users removed - only employees shown here
 
   const { saveEmployee, deleteEmployee } = useEmployeeActions();
+  const { createUser } = useUserActions();
 
   const handleRefresh = () => {
     refetchEmployees();
@@ -72,6 +79,50 @@ function UsersPage() {
 
   const handleDelete = async (id: string) => {
     await deleteEmployee.mutateAsync(id);
+  };
+
+  const handleAddLogin = (employee: EmployeeTableDTO) => {
+    setCreateLoginError(null);
+    setLoginTargetEmployee(employee);
+    setIsCreateLoginOpen(true);
+  };
+
+  const handleCreateLoginSubmit = async (values: CreateUserFormValues) => {
+    if (!loginTargetEmployee) return;
+
+    setCreateLoginError(null);
+
+    try {
+      const result = await createUser.mutateAsync(values);
+      const createdUserId = result.data?.id;
+
+      if (!createdUserId) {
+        throw new Error(result.message ?? "User created but no user ID returned.");
+      }
+
+      await saveEmployee.mutateAsync({
+        employee: loginTargetEmployee,
+        values: {
+          firstName: loginTargetEmployee.firstName,
+          surname: loginTargetEmployee.surname,
+          middleName: loginTargetEmployee.middleName ?? "",
+          contactNo: loginTargetEmployee.contactNo,
+          status: loginTargetEmployee.status,
+          suffix: loginTargetEmployee.suffix ?? "",
+          userId: createdUserId,
+        },
+      });
+
+      setIsCreateLoginOpen(false);
+      setLoginTargetEmployee(null);
+    } catch (error) {
+      setCreateLoginError(error instanceof Error ? error.message : "Failed to create login access.");
+    }
+  };
+
+  const handleAddPermission = (employee: EmployeeTableDTO) => {
+    setPermissionNotice(`Add Permission for ${employee.firstName} ${employee.surname} is not yet connected.`);
+    window.setTimeout(() => setPermissionNotice(null), 3000);
   };
 
   const normalizedSearch = useMemo(
@@ -109,6 +160,13 @@ function UsersPage() {
           </AlertDescription>
         </Alert>
       )}
+      {permissionNotice && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Permission API</AlertTitle>
+          <AlertDescription>{permissionNotice}</AlertDescription>
+        </Alert>
+      )}
       <h1 className="text-2xl font-bold text-primary">Employee Management</h1>
 
       <Card className="space-y-4">
@@ -144,6 +202,8 @@ function UsersPage() {
         normalizedSearch={normalizedSearch}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onAddLogin={handleAddLogin}
+        onAddPermission={handleAddPermission}
       />
 
       </Card>
@@ -156,6 +216,21 @@ function UsersPage() {
         }}
         employee={selectedEmployee}
         onSubmit={handleEmployeeSubmit}
+      />
+
+      <CreateEmployeeLoginDialog
+        open={isCreateLoginOpen}
+        onOpenChange={(open) => {
+          setIsCreateLoginOpen(open);
+          if (!open) {
+            setLoginTargetEmployee(null);
+            setCreateLoginError(null);
+          }
+        }}
+        employeeName={loginTargetEmployee ? `${loginTargetEmployee.firstName} ${loginTargetEmployee.surname}` : "Employee"}
+        onSubmit={handleCreateLoginSubmit}
+        isSubmitting={createUser.isPending || saveEmployee.isPending}
+        errorMessage={createLoginError}
       />
     </div>
   );
