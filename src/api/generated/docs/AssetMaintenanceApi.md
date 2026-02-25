@@ -4,9 +4,9 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**getAllMaintenance**](AssetMaintenanceApi.md#getallmaintenance) | **GET** /api/asset/maintenance | Get all maintenance logs (paginated) |
-| [**getMaintenanceById**](AssetMaintenanceApi.md#getmaintenancebyid) | **GET** /api/asset/maintenance/{id} | Get a maintenance log by id |
-| [**updateMaintenanceStatus**](AssetMaintenanceApi.md#updatemaintenancestatus) | **PATCH** /api/asset/maintenance/{id} | Update maintenance status, description, files, and completion date |
+| [**getAllMaintenance**](AssetMaintenanceApi.md#getallmaintenance) | **GET** /api/asset/maintenance | Get all Asset Maintenances |
+| [**getMaintenanceById**](AssetMaintenanceApi.md#getmaintenancebyid) | **GET** /api/asset/maintenance/{id} | Get an Asset Maintenance by id |
+| [**updateMaintenanceStatus**](AssetMaintenanceApi.md#updatemaintenancestatus) | **PATCH** /api/asset/maintenance/{id} | Update an Asset Maintenance status, description, files, and completion date by id |
 
 
 
@@ -14,7 +14,7 @@ All URIs are relative to *http://localhost:8080*
 
 > ApiResponseListAssetMaintenanceTableDTO getAllMaintenance(pageable)
 
-Get all maintenance logs (paginated)
+Get all Asset Maintenances
 
 ### Example
 
@@ -79,7 +79,7 @@ No authorization required
 
 > ApiResponseAssetMaintenanceTableDTO getMaintenanceById(id)
 
-Get a maintenance log by id
+Get an Asset Maintenance by id
 
 ### Example
 
@@ -144,7 +144,7 @@ No authorization required
 
 > ApiResponseAssetMaintenanceTableDTO updateMaintenanceStatus(id, assetMaintenancePatchDTO)
 
-Update maintenance status, description, files, and completion date
+Update an Asset Maintenance status, description, files, and completion date by id
 
 ### Example
 

@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createReport**](ReportApi.md#createreport) | **POST** /api/report |  |
-| [**deleteReport**](ReportApi.md#deletereport) | **DELETE** /api/report/{id} |  |
-| [**getAllReports**](ReportApi.md#getallreports) | **GET** /api/report |  |
-| [**getReport**](ReportApi.md#getreport) | **GET** /api/report/{id} |  |
-| [**updateReport**](ReportApi.md#updatereport) | **PUT** /api/report/{id} |  |
+| [**createReport**](ReportApi.md#createreport) | **POST** /api/report | Create a Report |
+| [**deleteReport**](ReportApi.md#deletereport) | **DELETE** /api/report/{id} | Delete a Report by id |
+| [**getAllReports**](ReportApi.md#getallreports) | **GET** /api/report | Get all Reports |
+| [**getReport**](ReportApi.md#getreport) | **GET** /api/report/{id} | Get a Report by id |
+| [**updateReport**](ReportApi.md#updatereport) | **PUT** /api/report/{id} | Update a Report by id |
 
 
 
@@ -16,7 +16,7 @@ All URIs are relative to *http://localhost:8080*
 
 > ApiResponseReportTableDTO createReport(reportPostDTO)
 
-
+Create a Report
 
 ### Example
 
@@ -81,7 +81,7 @@ No authorization required
 
 > ApiResponseUnit deleteReport(id)
 
-
+Delete a Report by id
 
 ### Example
 
@@ -146,7 +146,7 @@ No authorization required
 
 > ApiResponseListReportTableDTO getAllReports(pageable)
 
-
+Get all Reports
 
 ### Example
 
@@ -211,7 +211,7 @@ No authorization required
 
 > ApiResponseReportTableDTO getReport(id)
 
-
+Get a Report by id
 
 ### Example
 
@@ -276,7 +276,7 @@ No authorization required
 
 > ApiResponseReportTableDTO updateReport(id, reportPutDTO)
 
-
+Update a Report by id
 
 ### Example
 

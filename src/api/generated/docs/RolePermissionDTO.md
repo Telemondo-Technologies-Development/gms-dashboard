@@ -8,6 +8,7 @@ Format for Role Permission\'s update & delete
 Name | Type
 ------------ | -------------
 `permissionIds` | Set&lt;string&gt;
+`updatedById` | string
 
 ## Example
 
@@ -17,6 +18,7 @@ import type { RolePermissionDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "permissionIds": null,
+  "updatedById": null,
 } satisfies RolePermissionDTO
 
 console.log(example)

@@ -9,6 +9,7 @@ Name | Type
 ------------ | -------------
 `assetId` | string
 `completionDate` | Date
+`createdAt` | Date
 `createdById` | string
 `description` | string
 `dueDate` | Date
@@ -17,6 +18,7 @@ Name | Type
 `maintenanceScheduleId` | string
 `objectIds` | Array&lt;string&gt;
 `status` | string
+`updatedAt` | Date
 `updatedById` | string
 
 ## Example
@@ -28,6 +30,7 @@ import type { AssetMaintenanceTableDTO } from ''
 const example = {
   "assetId": null,
   "completionDate": null,
+  "createdAt": null,
   "createdById": null,
   "description": null,
   "dueDate": null,
@@ -36,6 +39,7 @@ const example = {
   "maintenanceScheduleId": null,
   "objectIds": null,
   "status": null,
+  "updatedAt": null,
   "updatedById": null,
 } satisfies AssetMaintenanceTableDTO
 

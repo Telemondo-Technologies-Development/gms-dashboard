@@ -4,11 +4,13 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createAsset**](AssetApi.md#createasset) | **POST** /api/asset | Create an asset |
-| [**deleteAsset**](AssetApi.md#deleteasset) | **DELETE** /api/asset/{id} | Delete an asset by ID |
-| [**getAllAssets**](AssetApi.md#getallassets) | **GET** /api/asset | Get all assets |
-| [**getAsset**](AssetApi.md#getasset) | **GET** /api/asset/{id} | Get an asset by ID |
-| [**updateAsset**](AssetApi.md#updateasset) | **PUT** /api/asset/{id} | Update an asset by ID |
+| [**createAsset**](AssetApi.md#createasset) | **POST** /api/asset | Create an Asset |
+| [**deleteAsset**](AssetApi.md#deleteasset) | **DELETE** /api/asset/{id} | Delete an Asset by ID |
+| [**getAllAssets**](AssetApi.md#getallassets) | **GET** /api/asset | Get all Assets |
+| [**getAsset**](AssetApi.md#getasset) | **GET** /api/asset/{id} | Get an Asset by ID |
+| [**getAssetMaintenance**](AssetApi.md#getassetmaintenance) | **GET** /api/asset/{id}/maintenance | Get Asset Maintenance Logs by Asset ID |
+| [**getAssetSchedules**](AssetApi.md#getassetschedules) | **GET** /api/asset/{id}/maintenance/schedule | Get Asset Maintenance Schedules by Asset ID |
+| [**updateAsset**](AssetApi.md#updateasset) | **PUT** /api/asset/{id} | Update an Asset by ID |
 
 
 
@@ -16,7 +18,7 @@ All URIs are relative to *http://localhost:8080*
 
 > ApiResponseAssetTableDTO createAsset(assetPostDTO)
 
-Create an asset
+Create an Asset
 
 ### Example
 
@@ -81,7 +83,7 @@ No authorization required
 
 > ApiResponseUnit deleteAsset(id)
 
-Delete an asset by ID
+Delete an Asset by ID
 
 ### Example
 
@@ -146,7 +148,7 @@ No authorization required
 
 > ApiResponseListAssetTableDTO getAllAssets(pageable)
 
-Get all assets
+Get all Assets
 
 ### Example
 
@@ -211,7 +213,7 @@ No authorization required
 
 > ApiResponseAssetTableDTO getAsset(id)
 
-Get an asset by ID
+Get an Asset by ID
 
 ### Example
 
@@ -272,11 +274,147 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
+## getAssetMaintenance
+
+> ApiResponseListAssetMaintenanceTableDTO getAssetMaintenance(id, pageable)
+
+Get Asset Maintenance Logs by Asset ID
+
+### Example
+
+```ts
+import {
+  Configuration,
+  AssetApi,
+} from '';
+import type { GetAssetMaintenanceRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new AssetApi();
+
+  const body = {
+    // string
+    id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
+    // Pageable
+    pageable: ...,
+  } satisfies GetAssetMaintenanceRequest;
+
+  try {
+    const data = await api.getAssetMaintenance(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `string` |  | [Defaults to `undefined`] |
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
+
+### Return type
+
+[**ApiResponseListAssetMaintenanceTableDTO**](ApiResponseListAssetMaintenanceTableDTO.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## getAssetSchedules
+
+> ApiResponseListScheduleTableDTO getAssetSchedules(id, pageable)
+
+Get Asset Maintenance Schedules by Asset ID
+
+### Example
+
+```ts
+import {
+  Configuration,
+  AssetApi,
+} from '';
+import type { GetAssetSchedulesRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new AssetApi();
+
+  const body = {
+    // string
+    id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
+    // Pageable
+    pageable: ...,
+  } satisfies GetAssetSchedulesRequest;
+
+  try {
+    const data = await api.getAssetSchedules(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `string` |  | [Defaults to `undefined`] |
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
+
+### Return type
+
+[**ApiResponseListScheduleTableDTO**](ApiResponseListScheduleTableDTO.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
 ## updateAsset
 
 > ApiResponseAssetTableDTO updateAsset(id, assetPutDTO)
 
-Update an asset by ID
+Update an Asset by ID
 
 ### Example
 

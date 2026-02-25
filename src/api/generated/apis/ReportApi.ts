@@ -64,6 +64,7 @@ export interface UpdateReportRequest {
 export class ReportApi extends runtime.BaseAPI {
 
     /**
+     * Create a Report
      */
     async createReportRaw(requestParameters: CreateReportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseReportTableDTO>> {
         if (requestParameters['reportPostDTO'] == null) {
@@ -94,6 +95,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Create a Report
      */
     async createReport(requestParameters: CreateReportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseReportTableDTO> {
         const response = await this.createReportRaw(requestParameters, initOverrides);
@@ -101,6 +103,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Delete a Report by id
      */
     async deleteReportRaw(requestParameters: DeleteReportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseUnit>> {
         if (requestParameters['id'] == null) {
@@ -129,6 +132,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Delete a Report by id
      */
     async deleteReport(requestParameters: DeleteReportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseUnit> {
         const response = await this.deleteReportRaw(requestParameters, initOverrides);
@@ -136,6 +140,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get all Reports
      */
     async getAllReportsRaw(requestParameters: GetAllReportsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListReportTableDTO>> {
         if (requestParameters['pageable'] == null) {
@@ -167,6 +172,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get all Reports
      */
     async getAllReports(requestParameters: GetAllReportsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListReportTableDTO> {
         const response = await this.getAllReportsRaw(requestParameters, initOverrides);
@@ -174,6 +180,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get a Report by id
      */
     async getReportRaw(requestParameters: GetReportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseReportTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -202,6 +209,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get a Report by id
      */
     async getReport(requestParameters: GetReportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseReportTableDTO> {
         const response = await this.getReportRaw(requestParameters, initOverrides);
@@ -209,6 +217,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Update a Report by id
      */
     async updateReportRaw(requestParameters: UpdateReportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseReportTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -247,6 +256,7 @@ export class ReportApi extends runtime.BaseAPI {
     }
 
     /**
+     * Update a Report by id
      */
     async updateReport(requestParameters: UpdateReportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseReportTableDTO> {
         const response = await this.updateReportRaw(requestParameters, initOverrides);

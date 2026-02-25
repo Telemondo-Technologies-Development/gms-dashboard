@@ -15,10 +15,13 @@
 
 import * as runtime from '../runtime';
 import type {
+  ApiResponseLogInResponse,
   LogInDTO,
   LogInResponse,
 } from '../models/index';
 import {
+    ApiResponseLogInResponseFromJSON,
+    ApiResponseLogInResponseToJSON,
     LogInDTOFromJSON,
     LogInDTOToJSON,
     LogInResponseFromJSON,
@@ -33,6 +36,33 @@ export interface LoginRequest {
  * 
  */
 export class AuthApi extends runtime.BaseAPI {
+
+    /**
+     */
+    async getMyDetailsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseLogInResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/auth/me`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseLogInResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getMyDetails(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseLogInResponse> {
+        const response = await this.getMyDetailsRaw(initOverrides);
+        return await response.value();
+    }
 
     /**
      */

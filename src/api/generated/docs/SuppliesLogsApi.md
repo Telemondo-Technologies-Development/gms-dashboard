@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createSuppliesLog**](SuppliesLogsApi.md#createsupplieslog) | **POST** /api/supply/log | Create a new Supplies Log |
+| [**createSuppliesLog**](SuppliesLogsApi.md#createsupplieslog) | **POST** /api/supply/log | Create a Supplies Log |
 | [**deleteSuppliesLog**](SuppliesLogsApi.md#deletesupplieslog) | **DELETE** /api/supply/log/{id} | Delete a Supplies Log by id |
 | [**getAllSuppliesLogs**](SuppliesLogsApi.md#getallsupplieslogs) | **GET** /api/supply/log | Get all Supplies Logs |
 | [**getSuppliesLog**](SuppliesLogsApi.md#getsupplieslog) | **GET** /api/supply/log/{id} | Get a Supplies Log by id |
@@ -16,7 +16,7 @@ All URIs are relative to *http://localhost:8080*
 
 > ApiResponseSuppliesLogTableDTO createSuppliesLog(suppliesLogPostDTO)
 
-Create a new Supplies Log
+Create a Supplies Log
 
 ### Example
 

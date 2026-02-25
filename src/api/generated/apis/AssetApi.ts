@@ -16,7 +16,9 @@
 import * as runtime from '../runtime';
 import type {
   ApiResponseAssetTableDTO,
+  ApiResponseListAssetMaintenanceTableDTO,
   ApiResponseListAssetTableDTO,
+  ApiResponseListScheduleTableDTO,
   ApiResponseUnit,
   AssetPostDTO,
   AssetPutDTO,
@@ -25,8 +27,12 @@ import type {
 import {
     ApiResponseAssetTableDTOFromJSON,
     ApiResponseAssetTableDTOToJSON,
+    ApiResponseListAssetMaintenanceTableDTOFromJSON,
+    ApiResponseListAssetMaintenanceTableDTOToJSON,
     ApiResponseListAssetTableDTOFromJSON,
     ApiResponseListAssetTableDTOToJSON,
+    ApiResponseListScheduleTableDTOFromJSON,
+    ApiResponseListScheduleTableDTOToJSON,
     ApiResponseUnitFromJSON,
     ApiResponseUnitToJSON,
     AssetPostDTOFromJSON,
@@ -53,6 +59,16 @@ export interface GetAssetRequest {
     id: string;
 }
 
+export interface GetAssetMaintenanceRequest {
+    id: string;
+    pageable: Pageable;
+}
+
+export interface GetAssetSchedulesRequest {
+    id: string;
+    pageable: Pageable;
+}
+
 export interface UpdateAssetRequest {
     id: string;
     assetPutDTO: AssetPutDTO;
@@ -64,7 +80,7 @@ export interface UpdateAssetRequest {
 export class AssetApi extends runtime.BaseAPI {
 
     /**
-     * Create an asset
+     * Create an Asset
      */
     async createAssetRaw(requestParameters: CreateAssetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseAssetTableDTO>> {
         if (requestParameters['assetPostDTO'] == null) {
@@ -95,7 +111,7 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Create an asset
+     * Create an Asset
      */
     async createAsset(requestParameters: CreateAssetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseAssetTableDTO> {
         const response = await this.createAssetRaw(requestParameters, initOverrides);
@@ -103,7 +119,7 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Delete an asset by ID
+     * Delete an Asset by ID
      */
     async deleteAssetRaw(requestParameters: DeleteAssetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseUnit>> {
         if (requestParameters['id'] == null) {
@@ -132,7 +148,7 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Delete an asset by ID
+     * Delete an Asset by ID
      */
     async deleteAsset(requestParameters: DeleteAssetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseUnit> {
         const response = await this.deleteAssetRaw(requestParameters, initOverrides);
@@ -140,7 +156,7 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get all assets
+     * Get all Assets
      */
     async getAllAssetsRaw(requestParameters: GetAllAssetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListAssetTableDTO>> {
         if (requestParameters['pageable'] == null) {
@@ -172,7 +188,7 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get all assets
+     * Get all Assets
      */
     async getAllAssets(requestParameters: GetAllAssetsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListAssetTableDTO> {
         const response = await this.getAllAssetsRaw(requestParameters, initOverrides);
@@ -180,7 +196,7 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get an asset by ID
+     * Get an Asset by ID
      */
     async getAssetRaw(requestParameters: GetAssetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseAssetTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -209,7 +225,7 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get an asset by ID
+     * Get an Asset by ID
      */
     async getAsset(requestParameters: GetAssetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseAssetTableDTO> {
         const response = await this.getAssetRaw(requestParameters, initOverrides);
@@ -217,7 +233,103 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Update an asset by ID
+     * Get Asset Maintenance Logs by Asset ID
+     */
+    async getAssetMaintenanceRaw(requestParameters: GetAssetMaintenanceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListAssetMaintenanceTableDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling getAssetMaintenance().'
+            );
+        }
+
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAssetMaintenance().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/asset/{id}/maintenance`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseListAssetMaintenanceTableDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Get Asset Maintenance Logs by Asset ID
+     */
+    async getAssetMaintenance(requestParameters: GetAssetMaintenanceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListAssetMaintenanceTableDTO> {
+        const response = await this.getAssetMaintenanceRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Get Asset Maintenance Schedules by Asset ID
+     */
+    async getAssetSchedulesRaw(requestParameters: GetAssetSchedulesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListScheduleTableDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling getAssetSchedules().'
+            );
+        }
+
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getAssetSchedules().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/asset/{id}/maintenance/schedule`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseListScheduleTableDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Get Asset Maintenance Schedules by Asset ID
+     */
+    async getAssetSchedules(requestParameters: GetAssetSchedulesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListScheduleTableDTO> {
+        const response = await this.getAssetSchedulesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Update an Asset by ID
      */
     async updateAssetRaw(requestParameters: UpdateAssetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseAssetTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -256,7 +368,7 @@ export class AssetApi extends runtime.BaseAPI {
     }
 
     /**
-     * Update an asset by ID
+     * Update an Asset by ID
      */
     async updateAsset(requestParameters: UpdateAssetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseAssetTableDTO> {
         const response = await this.updateAssetRaw(requestParameters, initOverrides);

@@ -15,21 +15,21 @@
 
 import * as runtime from '../runtime';
 import type {
+  ApiResponseListSuppliesLogTableDTO,
   ApiResponseListSupplyTableDTO,
   ApiResponseSupplyTableDTO,
-  ApiResponseSupplyWithLogsDTO,
   ApiResponseUnit,
   Pageable,
   SupplyPostDTO,
   SupplyPutDTO,
 } from '../models/index';
 import {
+    ApiResponseListSuppliesLogTableDTOFromJSON,
+    ApiResponseListSuppliesLogTableDTOToJSON,
     ApiResponseListSupplyTableDTOFromJSON,
     ApiResponseListSupplyTableDTOToJSON,
     ApiResponseSupplyTableDTOFromJSON,
     ApiResponseSupplyTableDTOToJSON,
-    ApiResponseSupplyWithLogsDTOFromJSON,
-    ApiResponseSupplyWithLogsDTOToJSON,
     ApiResponseUnitFromJSON,
     ApiResponseUnitToJSON,
     PageableFromJSON,
@@ -72,7 +72,7 @@ export interface UpdateSupplyRequest {
 export class SuppliesApi extends runtime.BaseAPI {
 
     /**
-     * Create a new Supply
+     * Create a Supply
      */
     async createSupplyRaw(requestParameters: CreateSupplyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseSupplyTableDTO>> {
         if (requestParameters['supplyPostDTO'] == null) {
@@ -103,7 +103,7 @@ export class SuppliesApi extends runtime.BaseAPI {
     }
 
     /**
-     * Create a new Supply
+     * Create a Supply
      */
     async createSupply(requestParameters: CreateSupplyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseSupplyTableDTO> {
         const response = await this.createSupplyRaw(requestParameters, initOverrides);
@@ -225,9 +225,9 @@ export class SuppliesApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get supply info and its logs
+     * Get Supply Logs by Supply ID
      */
-    async getSupplyLogsRaw(requestParameters: GetSupplyLogsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseSupplyWithLogsDTO>> {
+    async getSupplyLogsRaw(requestParameters: GetSupplyLogsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListSuppliesLogTableDTO>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -261,13 +261,13 @@ export class SuppliesApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseSupplyWithLogsDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseListSuppliesLogTableDTOFromJSON(jsonValue));
     }
 
     /**
-     * Get supply info and its logs
+     * Get Supply Logs by Supply ID
      */
-    async getSupplyLogs(requestParameters: GetSupplyLogsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseSupplyWithLogsDTO> {
+    async getSupplyLogs(requestParameters: GetSupplyLogsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListSuppliesLogTableDTO> {
         const response = await this.getSupplyLogsRaw(requestParameters, initOverrides);
         return await response.value();
     }

@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createAssetCategory**](AssetCategoryApi.md#createassetcategory) | **POST** /api/asset/category | Create a new Asset Category |
-| [**deleteAssetCategory**](AssetCategoryApi.md#deleteassetcategory) | **DELETE** /api/asset/category/{id} | Delete a Asset Category by id |
+| [**createAssetCategory**](AssetCategoryApi.md#createassetcategory) | **POST** /api/asset/category | Create an Asset Category |
+| [**deleteAssetCategory**](AssetCategoryApi.md#deleteassetcategory) | **DELETE** /api/asset/category/{id} | Delete an Asset Category by id |
 | [**getAllAssetCategories**](AssetCategoryApi.md#getallassetcategories) | **GET** /api/asset/category | Get all Asset Categories |
-| [**getAssetCategory**](AssetCategoryApi.md#getassetcategory) | **GET** /api/asset/category/{id} | Get a Asset Category by id |
-| [**updateAssetCategory**](AssetCategoryApi.md#updateassetcategory) | **PUT** /api/asset/category/{id} | Update a Asset Category by id |
+| [**getAssetCategory**](AssetCategoryApi.md#getassetcategory) | **GET** /api/asset/category/{id} | Get an Asset Category by id |
+| [**updateAssetCategory**](AssetCategoryApi.md#updateassetcategory) | **PUT** /api/asset/category/{id} | Update an Asset Category by id |
 
 
 
@@ -16,7 +16,7 @@ All URIs are relative to *http://localhost:8080*
 
 > ApiResponseAssetCategoryTableDTO createAssetCategory(assetCategoryPostDTO)
 
-Create a new Asset Category
+Create an Asset Category
 
 ### Example
 
@@ -81,7 +81,7 @@ No authorization required
 
 > ApiResponseUnit deleteAssetCategory(id)
 
-Delete a Asset Category by id
+Delete an Asset Category by id
 
 ### Example
 
@@ -203,7 +203,7 @@ No authorization required
 
 > ApiResponseAssetCategoryTableDTO getAssetCategory(id)
 
-Get a Asset Category by id
+Get an Asset Category by id
 
 ### Example
 
@@ -268,7 +268,7 @@ No authorization required
 
 > ApiResponseAssetCategoryTableDTO updateAssetCategory(id, assetCategoryPutDTO)
 
-Update a Asset Category by id
+Update an Asset Category by id
 
 ### Example
 

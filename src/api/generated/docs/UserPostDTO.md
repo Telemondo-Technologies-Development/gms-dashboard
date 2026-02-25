@@ -8,6 +8,7 @@ Name | Type
 ------------ | -------------
 `email` | string
 `password` | string
+`roles` | Array&lt;string&gt;
 
 ## Example
 
@@ -18,6 +19,7 @@ import type { UserPostDTO } from ''
 const example = {
   "email": null,
   "password": null,
+  "roles": null,
 } satisfies UserPostDTO
 
 console.log(example)

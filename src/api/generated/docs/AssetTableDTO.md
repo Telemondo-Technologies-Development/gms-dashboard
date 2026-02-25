@@ -1,6 +1,7 @@
 
 # AssetTableDTO
 
+Format for Asset read
 
 ## Properties
 
@@ -8,6 +9,7 @@ Name | Type
 ------------ | -------------
 `assetCategoryId` | string
 `branchId` | string
+`createdAt` | Date
 `createdById` | string
 `endOfLife` | Date
 `id` | string
@@ -15,6 +17,7 @@ Name | Type
 `name` | string
 `objectIds` | Array&lt;string&gt;
 `remarks` | string
+`updatedAt` | Date
 `updatedById` | string
 
 ## Example
@@ -26,6 +29,7 @@ import type { AssetTableDTO } from ''
 const example = {
   "assetCategoryId": null,
   "branchId": null,
+  "createdAt": null,
   "createdById": null,
   "endOfLife": null,
   "id": null,
@@ -33,6 +37,7 @@ const example = {
   "name": null,
   "objectIds": null,
   "remarks": null,
+  "updatedAt": null,
   "updatedById": null,
 } satisfies AssetTableDTO
 

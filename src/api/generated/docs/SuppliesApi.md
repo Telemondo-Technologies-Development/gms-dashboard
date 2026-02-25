@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createSupply**](SuppliesApi.md#createsupply) | **POST** /api/supply | Create a new Supply |
+| [**createSupply**](SuppliesApi.md#createsupply) | **POST** /api/supply | Create a Supply |
 | [**deleteSupply**](SuppliesApi.md#deletesupply) | **DELETE** /api/supply/{id} | Delete a Supply by id |
 | [**getAllSupplies**](SuppliesApi.md#getallsupplies) | **GET** /api/supply | Get all Supplies |
 | [**getSupply**](SuppliesApi.md#getsupply) | **GET** /api/supply/{id} | Get a Supply by id |
-| [**getSupplyLogs**](SuppliesApi.md#getsupplylogs) | **GET** /api/supply/{id}/log | Get supply info and its logs |
+| [**getSupplyLogs**](SuppliesApi.md#getsupplylogs) | **GET** /api/supply/{id}/log | Get Supply Logs by Supply ID |
 | [**updateSupply**](SuppliesApi.md#updatesupply) | **PUT** /api/supply/{id} | Update a Supply by id |
 
 
@@ -17,7 +17,7 @@ All URIs are relative to *http://localhost:8080*
 
 > ApiResponseSupplyTableDTO createSupply(supplyPostDTO)
 
-Create a new Supply
+Create a Supply
 
 ### Example
 
@@ -275,9 +275,9 @@ No authorization required
 
 ## getSupplyLogs
 
-> ApiResponseSupplyWithLogsDTO getSupplyLogs(id, pageable)
+> ApiResponseListSuppliesLogTableDTO getSupplyLogs(id, pageable)
 
-Get supply info and its logs
+Get Supply Logs by Supply ID
 
 ### Example
 
@@ -321,7 +321,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**ApiResponseSupplyWithLogsDTO**](ApiResponseSupplyWithLogsDTO.md)
+[**ApiResponseListSuppliesLogTableDTO**](ApiResponseListSuppliesLogTableDTO.md)
 
 ### Authorization
 

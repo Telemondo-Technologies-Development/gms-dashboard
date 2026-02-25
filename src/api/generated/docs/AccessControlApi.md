@@ -4,6 +4,7 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
+| [**addRolePermissions**](AccessControlApi.md#addrolepermissions) | **POST** /api/role/{id}/permission | Update a Role\&#39;s Permission by id |
 | [**createPermission**](AccessControlApi.md#createpermission) | **POST** /api/permission | [DEV] Create a new Permission |
 | [**createRole**](AccessControlApi.md#createrole) | **POST** /api/role | Create a new Role |
 | [**deleteRole**](AccessControlApi.md#deleterole) | **DELETE** /api/role/{id} | Delete a Role by id |
@@ -15,6 +16,74 @@ All URIs are relative to *http://localhost:8080*
 | [**updateRole**](AccessControlApi.md#updaterole) | **PUT** /api/role/{id} | Update a Role by id |
 | [**updateRolePermissions**](AccessControlApi.md#updaterolepermissions) | **PUT** /api/role/{id}/permission | Update a Role\&#39;s Permission by id |
 
+
+
+## addRolePermissions
+
+> ApiResponseRolePermissionTableDTO addRolePermissions(id, rolePermissionDTO)
+
+Update a Role\&#39;s Permission by id
+
+### Example
+
+```ts
+import {
+  Configuration,
+  AccessControlApi,
+} from '';
+import type { AddRolePermissionsRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new AccessControlApi();
+
+  const body = {
+    // string
+    id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
+    // RolePermissionDTO
+    rolePermissionDTO: ...,
+  } satisfies AddRolePermissionsRequest;
+
+  try {
+    const data = await api.addRolePermissions(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | `string` |  | [Defaults to `undefined`] |
+| **rolePermissionDTO** | [RolePermissionDTO](RolePermissionDTO.md) |  | |
+
+### Return type
+
+[**ApiResponseRolePermissionTableDTO**](ApiResponseRolePermissionTableDTO.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
 
 
 ## createPermission
@@ -282,7 +351,7 @@ No authorization required
 
 ## getAllPermissions
 
-> ApiResponsePagePermission getAllPermissions(pageable)
+> ApiResponseListPermission getAllPermissions(pageable)
 
 Get all Permissions
 
@@ -325,7 +394,7 @@ example().catch(console.error);
 
 ### Return type
 
-[**ApiResponsePagePermission**](ApiResponsePagePermission.md)
+[**ApiResponseListPermission**](ApiResponseListPermission.md)
 
 ### Authorization
 

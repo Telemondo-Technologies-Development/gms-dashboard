@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { UserRoleBriefDTO } from './UserRoleBriefDTO';
+import {
+    UserRoleBriefDTOFromJSON,
+    UserRoleBriefDTOFromJSONTyped,
+    UserRoleBriefDTOToJSON,
+    UserRoleBriefDTOToJSONTyped,
+} from './UserRoleBriefDTO';
+
 /**
  * 
  * @export
@@ -49,6 +57,12 @@ export interface UserTableDTO {
      * @memberof UserTableDTO
      */
     updatedAt: Date;
+    /**
+     * 
+     * @type {Array<UserRoleBriefDTO>}
+     * @memberof UserTableDTO
+     */
+    userRoles: Array<UserRoleBriefDTO>;
 }
 
 /**
@@ -59,6 +73,7 @@ export function instanceOfUserTableDTO(value: object): value is UserTableDTO {
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
+    if (!('userRoles' in value) || value['userRoles'] === undefined) return false;
     return true;
 }
 
@@ -77,6 +92,7 @@ export function UserTableDTOFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'email': json['email'],
         'id': json['id'],
         'updatedAt': (new Date(json['updatedAt'])),
+        'userRoles': ((json['userRoles'] as Array<any>).map(UserRoleBriefDTOFromJSON)),
     };
 }
 
@@ -96,6 +112,7 @@ export function UserTableDTOToJSONTyped(value?: UserTableDTO | null, ignoreDiscr
         'email': value['email'],
         'id': value['id'],
         'updatedAt': value['updatedAt'].toISOString(),
+        'userRoles': ((value['userRoles'] as Array<any>).map(UserRoleBriefDTOToJSON)),
     };
 }
 

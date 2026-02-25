@@ -7,6 +7,7 @@ Format for Supplies Log read
 
 Name | Type
 ------------ | -------------
+`createdAt` | Date
 `createdById` | string
 `id` | string
 `name` | string
@@ -14,6 +15,7 @@ Name | Type
 `quantity` | number
 `remarks` | string
 `suppliesId` | string
+`updatedAt` | Date
 `updatedById` | string
 
 ## Example
@@ -23,6 +25,7 @@ import type { SuppliesLogTableDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "createdAt": null,
   "createdById": null,
   "id": null,
   "name": null,
@@ -30,6 +33,7 @@ const example = {
   "quantity": null,
   "remarks": null,
   "suppliesId": null,
+  "updatedAt": null,
   "updatedById": null,
 } satisfies SuppliesLogTableDTO
 

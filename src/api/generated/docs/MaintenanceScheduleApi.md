@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**createSchedule**](MaintenanceScheduleApi.md#createschedule) | **POST** /api/asset/maintenance/schedule |  |
-| [**deleteSchedule**](MaintenanceScheduleApi.md#deleteschedule) | **DELETE** /api/asset/maintenance/schedule/{id} |  |
-| [**getAllSchedules**](MaintenanceScheduleApi.md#getallschedules) | **GET** /api/asset/maintenance/schedule |  |
-| [**getAsset1**](MaintenanceScheduleApi.md#getasset1) | **GET** /api/asset/maintenance/schedule/{id} | Get an asset by ID |
-| [**updateSchedule**](MaintenanceScheduleApi.md#updateschedule) | **PUT** /api/asset/maintenance/schedule/{id} |  |
+| [**createSchedule**](MaintenanceScheduleApi.md#createschedule) | **POST** /api/asset/maintenance/schedule | Create a Maintenance Schedule |
+| [**deleteSchedule**](MaintenanceScheduleApi.md#deleteschedule) | **DELETE** /api/asset/maintenance/schedule/{id} | Delete a Maintenance Schedule by ID |
+| [**getAllSchedules**](MaintenanceScheduleApi.md#getallschedules) | **GET** /api/asset/maintenance/schedule | Get all Maintenance Schedules |
+| [**getAsset1**](MaintenanceScheduleApi.md#getasset1) | **GET** /api/asset/maintenance/schedule/{id} | Get a Maintenance Schedule by ID |
+| [**updateSchedule**](MaintenanceScheduleApi.md#updateschedule) | **PUT** /api/asset/maintenance/schedule/{id} | Update a Maintenance Schedule by id |
 
 
 
@@ -16,7 +16,7 @@ All URIs are relative to *http://localhost:8080*
 
 > ApiResponseScheduleTableDTO createSchedule(schedulePostDTO)
 
-
+Create a Maintenance Schedule
 
 ### Example
 
@@ -81,7 +81,7 @@ No authorization required
 
 > ApiResponseUnit deleteSchedule(id)
 
-
+Delete a Maintenance Schedule by ID
 
 ### Example
 
@@ -146,7 +146,7 @@ No authorization required
 
 > ApiResponseListScheduleTableDTO getAllSchedules(pageable)
 
-
+Get all Maintenance Schedules
 
 ### Example
 
@@ -211,7 +211,7 @@ No authorization required
 
 > ApiResponseScheduleTableDTO getAsset1(id)
 
-Get an asset by ID
+Get a Maintenance Schedule by ID
 
 ### Example
 
@@ -276,7 +276,7 @@ No authorization required
 
 > ApiResponseScheduleTableDTO updateSchedule(id, schedulePutDTO)
 
-
+Update a Maintenance Schedule by id
 
 ### Example
 

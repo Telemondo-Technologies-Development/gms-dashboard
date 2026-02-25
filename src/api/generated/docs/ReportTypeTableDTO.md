@@ -7,9 +7,11 @@ Format for Report Type read
 
 Name | Type
 ------------ | -------------
+`createdAt` | Date
 `createdById` | string
 `id` | string
 `name` | string
+`updatedAt` | Date
 `updatedById` | string
 
 ## Example
@@ -19,9 +21,11 @@ import type { ReportTypeTableDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "createdAt": null,
   "createdById": null,
   "id": null,
   "name": null,
+  "updatedAt": null,
   "updatedById": null,
 } satisfies ReportTypeTableDTO
 

@@ -25,6 +25,12 @@ export interface RolePermissionDTO {
      * @memberof RolePermissionDTO
      */
     permissionIds: Set<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof RolePermissionDTO
+     */
+    updatedById: string;
 }
 
 /**
@@ -32,6 +38,7 @@ export interface RolePermissionDTO {
  */
 export function instanceOfRolePermissionDTO(value: object): value is RolePermissionDTO {
     if (!('permissionIds' in value) || value['permissionIds'] === undefined) return false;
+    if (!('updatedById' in value) || value['updatedById'] === undefined) return false;
     return true;
 }
 
@@ -46,6 +53,7 @@ export function RolePermissionDTOFromJSONTyped(json: any, ignoreDiscriminator: b
     return {
         
         'permissionIds': new Set(json['permissionIds']),
+        'updatedById': json['updatedById'],
     };
 }
 
@@ -61,6 +69,7 @@ export function RolePermissionDTOToJSONTyped(value?: RolePermissionDTO | null, i
     return {
         
         'permissionIds': Array.from(value['permissionIds'] as Set<any>),
+        'updatedById': value['updatedById'],
     };
 }
 

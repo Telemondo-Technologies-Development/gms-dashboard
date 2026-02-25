@@ -27,6 +27,12 @@ export interface SupplyTableDTO {
     branchId: string;
     /**
      * 
+     * @type {Date}
+     * @memberof SupplyTableDTO
+     */
+    createdAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof SupplyTableDTO
      */
@@ -63,6 +69,12 @@ export interface SupplyTableDTO {
     quantity: number;
     /**
      * 
+     * @type {Date}
+     * @memberof SupplyTableDTO
+     */
+    updatedAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof SupplyTableDTO
      */
@@ -74,10 +86,12 @@ export interface SupplyTableDTO {
  */
 export function instanceOfSupplyTableDTO(value: object): value is SupplyTableDTO {
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
+    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
     if (!('quantity' in value) || value['quantity'] === undefined) return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -92,12 +106,14 @@ export function SupplyTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     return {
         
         'branchId': json['branchId'],
+        'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'description': json['description'] == null ? undefined : json['description'],
         'id': json['id'],
         'name': json['name'],
         'objectIds': json['objectIds'],
         'quantity': json['quantity'],
+        'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
 }
@@ -114,12 +130,14 @@ export function SupplyTableDTOToJSONTyped(value?: SupplyTableDTO | null, ignoreD
     return {
         
         'branchId': value['branchId'],
+        'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'description': value['description'],
         'id': value['id'],
         'name': value['name'],
         'objectIds': value['objectIds'],
         'quantity': value['quantity'],
+        'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],
     };
 }

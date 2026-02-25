@@ -25,6 +25,12 @@ export interface UserPutDTO {
      * @memberof UserPutDTO
      */
     email: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserPutDTO
+     */
+    roles: Array<string>;
 }
 
 /**
@@ -32,6 +38,7 @@ export interface UserPutDTO {
  */
 export function instanceOfUserPutDTO(value: object): value is UserPutDTO {
     if (!('email' in value) || value['email'] === undefined) return false;
+    if (!('roles' in value) || value['roles'] === undefined) return false;
     return true;
 }
 
@@ -46,6 +53,7 @@ export function UserPutDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     return {
         
         'email': json['email'],
+        'roles': json['roles'],
     };
 }
 
@@ -61,6 +69,7 @@ export function UserPutDTOToJSONTyped(value?: UserPutDTO | null, ignoreDiscrimin
     return {
         
         'email': value['email'],
+        'roles': value['roles'],
     };
 }
 

@@ -21,6 +21,12 @@ import { mapValues } from '../runtime';
 export interface SuppliesLogPutDTO {
     /**
      * 
+     * @type {boolean}
+     * @memberof SuppliesLogPutDTO
+     */
+    isQuantityValid: boolean;
+    /**
+     * 
      * @type {string}
      * @memberof SuppliesLogPutDTO
      */
@@ -61,6 +67,7 @@ export interface SuppliesLogPutDTO {
  * Check if a given object implements the SuppliesLogPutDTO interface.
  */
 export function instanceOfSuppliesLogPutDTO(value: object): value is SuppliesLogPutDTO {
+    if (!('isQuantityValid' in value) || value['isQuantityValid'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
     if (!('quantity' in value) || value['quantity'] === undefined) return false;
@@ -79,6 +86,7 @@ export function SuppliesLogPutDTOFromJSONTyped(json: any, ignoreDiscriminator: b
     }
     return {
         
+        'isQuantityValid': json['isQuantityValid'],
         'name': json['name'],
         'objectIds': json['objectIds'],
         'quantity': json['quantity'],
@@ -99,6 +107,7 @@ export function SuppliesLogPutDTOToJSONTyped(value?: SuppliesLogPutDTO | null, i
 
     return {
         
+        'isQuantityValid': value['isQuantityValid'],
         'name': value['name'],
         'objectIds': value['objectIds'],
         'quantity': value['quantity'],

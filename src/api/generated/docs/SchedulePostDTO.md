@@ -1,6 +1,7 @@
 
 # SchedulePostDTO
 
+Format for Maintenance Schedule create
 
 ## Properties
 

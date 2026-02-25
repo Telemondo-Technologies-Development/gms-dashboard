@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * 
+ * Format for Maintenance Schedule update
  * @export
  * @interface SchedulePutDTO
  */

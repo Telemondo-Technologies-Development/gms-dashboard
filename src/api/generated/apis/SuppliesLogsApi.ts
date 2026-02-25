@@ -64,7 +64,7 @@ export interface UpdateSupply1Request {
 export class SuppliesLogsApi extends runtime.BaseAPI {
 
     /**
-     * Create a new Supplies Log
+     * Create a Supplies Log
      */
     async createSuppliesLogRaw(requestParameters: CreateSuppliesLogRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseSuppliesLogTableDTO>> {
         if (requestParameters['suppliesLogPostDTO'] == null) {
@@ -95,7 +95,7 @@ export class SuppliesLogsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Create a new Supplies Log
+     * Create a Supplies Log
      */
     async createSuppliesLog(requestParameters: CreateSuppliesLogRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseSuppliesLogTableDTO> {
         const response = await this.createSuppliesLogRaw(requestParameters, initOverrides);

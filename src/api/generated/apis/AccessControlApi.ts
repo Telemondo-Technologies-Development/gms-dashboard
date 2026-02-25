@@ -15,8 +15,8 @@
 
 import * as runtime from '../runtime';
 import type {
+  ApiResponseListPermission,
   ApiResponseListRoleTableDTO,
-  ApiResponsePagePermission,
   ApiResponsePermission,
   ApiResponseRolePermissionTableDTO,
   ApiResponseRoleTableDTO,
@@ -27,10 +27,10 @@ import type {
   RolePutDTO,
 } from '../models/index';
 import {
+    ApiResponseListPermissionFromJSON,
+    ApiResponseListPermissionToJSON,
     ApiResponseListRoleTableDTOFromJSON,
     ApiResponseListRoleTableDTOToJSON,
-    ApiResponsePagePermissionFromJSON,
-    ApiResponsePagePermissionToJSON,
     ApiResponsePermissionFromJSON,
     ApiResponsePermissionToJSON,
     ApiResponseRolePermissionTableDTOFromJSON,
@@ -48,6 +48,11 @@ import {
     RolePutDTOFromJSON,
     RolePutDTOToJSON,
 } from '../models/index';
+
+export interface AddRolePermissionsRequest {
+    id: string;
+    rolePermissionDTO: RolePermissionDTO;
+}
 
 export interface CreatePermissionRequest {
     requestBody: Set<string>;
@@ -96,6 +101,53 @@ export interface UpdateRolePermissionsRequest {
  * 
  */
 export class AccessControlApi extends runtime.BaseAPI {
+
+    /**
+     * Update a Role\'s Permission by id
+     */
+    async addRolePermissionsRaw(requestParameters: AddRolePermissionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseRolePermissionTableDTO>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling addRolePermissions().'
+            );
+        }
+
+        if (requestParameters['rolePermissionDTO'] == null) {
+            throw new runtime.RequiredError(
+                'rolePermissionDTO',
+                'Required parameter "rolePermissionDTO" was null or undefined when calling addRolePermissions().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/role/{id}/permission`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: RolePermissionDTOToJSON(requestParameters['rolePermissionDTO']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseRolePermissionTableDTOFromJSON(jsonValue));
+    }
+
+    /**
+     * Update a Role\'s Permission by id
+     */
+    async addRolePermissions(requestParameters: AddRolePermissionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseRolePermissionTableDTO> {
+        const response = await this.addRolePermissionsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * [DEV] Create a new Permission
@@ -262,7 +314,7 @@ export class AccessControlApi extends runtime.BaseAPI {
     /**
      * Get all Permissions
      */
-    async getAllPermissionsRaw(requestParameters: GetAllPermissionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponsePagePermission>> {
+    async getAllPermissionsRaw(requestParameters: GetAllPermissionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListPermission>> {
         if (requestParameters['pageable'] == null) {
             throw new runtime.RequiredError(
                 'pageable',
@@ -288,13 +340,13 @@ export class AccessControlApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponsePagePermissionFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseListPermissionFromJSON(jsonValue));
     }
 
     /**
      * Get all Permissions
      */
-    async getAllPermissions(requestParameters: GetAllPermissionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponsePagePermission> {
+    async getAllPermissions(requestParameters: GetAllPermissionsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListPermission> {
         const response = await this.getAllPermissionsRaw(requestParameters, initOverrides);
         return await response.value();
     }

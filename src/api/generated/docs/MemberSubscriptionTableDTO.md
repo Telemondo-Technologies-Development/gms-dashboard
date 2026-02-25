@@ -9,12 +9,17 @@ Name | Type
 ------------ | -------------
 `actorId` | string
 `branchId` | string
+`branchName` | string
 `createdById` | string
 `endDate` | Date
+`firstName` | string
 `id` | string
+`middleName` | string
 `startDate` | Date
 `status` | string
 `subscriptionAvailedId` | string
+`subscriptionName` | string
+`surname` | string
 `updatedById` | string
 
 ## Example
@@ -26,12 +31,17 @@ import type { MemberSubscriptionTableDTO } from ''
 const example = {
   "actorId": null,
   "branchId": null,
+  "branchName": null,
   "createdById": null,
   "endDate": null,
+  "firstName": null,
   "id": null,
+  "middleName": null,
   "startDate": null,
   "status": null,
   "subscriptionAvailedId": null,
+  "subscriptionName": null,
+  "surname": null,
   "updatedById": null,
 } satisfies MemberSubscriptionTableDTO
 

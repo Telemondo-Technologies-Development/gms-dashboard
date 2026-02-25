@@ -7,6 +7,7 @@ Format for Supplies Log update
 
 Name | Type
 ------------ | -------------
+`isQuantityValid` | boolean
 `name` | string
 `objectIds` | Array&lt;string&gt;
 `quantity` | number
@@ -21,6 +22,7 @@ import type { SuppliesLogPutDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "isQuantityValid": null,
   "name": null,
   "objectIds": null,
   "quantity": null,

@@ -21,6 +21,12 @@ import { mapValues } from '../runtime';
 export interface SuppliesLogTableDTO {
     /**
      * 
+     * @type {Date}
+     * @memberof SuppliesLogTableDTO
+     */
+    createdAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof SuppliesLogTableDTO
      */
@@ -63,6 +69,12 @@ export interface SuppliesLogTableDTO {
     suppliesId: string;
     /**
      * 
+     * @type {Date}
+     * @memberof SuppliesLogTableDTO
+     */
+    updatedAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof SuppliesLogTableDTO
      */
@@ -73,11 +85,13 @@ export interface SuppliesLogTableDTO {
  * Check if a given object implements the SuppliesLogTableDTO interface.
  */
 export function instanceOfSuppliesLogTableDTO(value: object): value is SuppliesLogTableDTO {
+    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
     if (!('quantity' in value) || value['quantity'] === undefined) return false;
     if (!('suppliesId' in value) || value['suppliesId'] === undefined) return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -91,6 +105,7 @@ export function SuppliesLogTableDTOFromJSONTyped(json: any, ignoreDiscriminator:
     }
     return {
         
+        'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'id': json['id'],
         'name': json['name'],
@@ -98,6 +113,7 @@ export function SuppliesLogTableDTOFromJSONTyped(json: any, ignoreDiscriminator:
         'quantity': json['quantity'],
         'remarks': json['remarks'] == null ? undefined : json['remarks'],
         'suppliesId': json['suppliesId'],
+        'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
 }
@@ -113,6 +129,7 @@ export function SuppliesLogTableDTOToJSONTyped(value?: SuppliesLogTableDTO | nul
 
     return {
         
+        'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'id': value['id'],
         'name': value['name'],
@@ -120,6 +137,7 @@ export function SuppliesLogTableDTOToJSONTyped(value?: SuppliesLogTableDTO | nul
         'quantity': value['quantity'],
         'remarks': value['remarks'],
         'suppliesId': value['suppliesId'],
+        'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],
     };
 }

@@ -7,6 +7,7 @@
 Name | Type
 ------------ | -------------
 `email` | string
+`roles` | Array&lt;string&gt;
 
 ## Example
 
@@ -16,6 +17,7 @@ import type { UserPutDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "email": null,
+  "roles": null,
 } satisfies UserPutDTO
 
 console.log(example)

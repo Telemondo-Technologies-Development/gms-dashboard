@@ -8,7 +8,7 @@ All URIs are relative to *http://localhost:8080*
 | [**deleteBranch**](BranchApi.md#deletebranch) | **DELETE** /api/branch/{id} | Delete a Branch by id |
 | [**getAllBranches**](BranchApi.md#getallbranches) | **GET** /api/branch | Get all Branches |
 | [**getBranch**](BranchApi.md#getbranch) | **GET** /api/branch/{id} | Get a Branch by id |
-| [**getBranchEmployees**](BranchApi.md#getbranchemployees) | **GET** /api/branch/{id}/employees | Get all Personnel per Branch by id |
+| [**getBranchEmployees**](BranchApi.md#getbranchemployees) | **GET** /api/branch/{id}/employee | Get all Personnel per Branch by id |
 | [**updateBranch**](BranchApi.md#updatebranch) | **PUT** /api/branch/{id} | Update a Branch by id |
 
 
@@ -275,7 +275,7 @@ No authorization required
 
 ## getBranchEmployees
 
-> ApiResponseBranchEmployeesDTO getBranchEmployees(id, status)
+> ApiResponseListEmployeeInBranchDTO getBranchEmployees(id, pageable, branchPersonnelStatus, employeeStatus)
 
 Get all Personnel per Branch by id
 
@@ -295,8 +295,12 @@ async function example() {
   const body = {
     // string
     id: 38400000-8cf0-11bd-b23e-10b96e4ef00d,
+    // Pageable
+    pageable: ...,
     // 'ACTIVE' | 'MOVED' | 'TERMINATED' | 'RESIGNED' | 'UNDECIDED' (optional)
-    status: status_example,
+    branchPersonnelStatus: branchPersonnelStatus_example,
+    // 'IN' | 'OUT' | 'UNDECIDED' (optional)
+    employeeStatus: employeeStatus_example,
   } satisfies GetBranchEmployeesRequest;
 
   try {
@@ -317,11 +321,13 @@ example().catch(console.error);
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **id** | `string` |  | [Defaults to `undefined`] |
-| **status** | `ACTIVE`, `MOVED`, `TERMINATED`, `RESIGNED`, `UNDECIDED` |  | [Optional] [Defaults to `undefined`] [Enum: ACTIVE, MOVED, TERMINATED, RESIGNED, UNDECIDED] |
+| **pageable** | [](.md) |  | [Defaults to `undefined`] |
+| **branchPersonnelStatus** | `ACTIVE`, `MOVED`, `TERMINATED`, `RESIGNED`, `UNDECIDED` |  | [Optional] [Defaults to `undefined`] [Enum: ACTIVE, MOVED, TERMINATED, RESIGNED, UNDECIDED] |
+| **employeeStatus** | `IN`, `OUT`, `UNDECIDED` |  | [Optional] [Defaults to `undefined`] [Enum: IN, OUT, UNDECIDED] |
 
 ### Return type
 
-[**ApiResponseBranchEmployeesDTO**](ApiResponseBranchEmployeesDTO.md)
+[**ApiResponseListEmployeeInBranchDTO**](ApiResponseListEmployeeInBranchDTO.md)
 
 ### Authorization
 

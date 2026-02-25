@@ -50,7 +50,7 @@ export interface UpdateMaintenanceStatusRequest {
 export class AssetMaintenanceApi extends runtime.BaseAPI {
 
     /**
-     * Get all maintenance logs (paginated)
+     * Get all Asset Maintenances
      */
     async getAllMaintenanceRaw(requestParameters: GetAllMaintenanceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListAssetMaintenanceTableDTO>> {
         if (requestParameters['pageable'] == null) {
@@ -82,7 +82,7 @@ export class AssetMaintenanceApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get all maintenance logs (paginated)
+     * Get all Asset Maintenances
      */
     async getAllMaintenance(requestParameters: GetAllMaintenanceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListAssetMaintenanceTableDTO> {
         const response = await this.getAllMaintenanceRaw(requestParameters, initOverrides);
@@ -90,7 +90,7 @@ export class AssetMaintenanceApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get a maintenance log by id
+     * Get an Asset Maintenance by id
      */
     async getMaintenanceByIdRaw(requestParameters: GetMaintenanceByIdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseAssetMaintenanceTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -119,7 +119,7 @@ export class AssetMaintenanceApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get a maintenance log by id
+     * Get an Asset Maintenance by id
      */
     async getMaintenanceById(requestParameters: GetMaintenanceByIdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseAssetMaintenanceTableDTO> {
         const response = await this.getMaintenanceByIdRaw(requestParameters, initOverrides);
@@ -127,7 +127,7 @@ export class AssetMaintenanceApi extends runtime.BaseAPI {
     }
 
     /**
-     * Update maintenance status, description, files, and completion date
+     * Update an Asset Maintenance status, description, files, and completion date by id
      */
     async updateMaintenanceStatusRaw(requestParameters: UpdateMaintenanceStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseAssetMaintenanceTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -166,7 +166,7 @@ export class AssetMaintenanceApi extends runtime.BaseAPI {
     }
 
     /**
-     * Update maintenance status, description, files, and completion date
+     * Update an Asset Maintenance status, description, files, and completion date by id
      */
     async updateMaintenanceStatus(requestParameters: UpdateMaintenanceStatusRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseAssetMaintenanceTableDTO> {
         const response = await this.updateMaintenanceStatusRaw(requestParameters, initOverrides);

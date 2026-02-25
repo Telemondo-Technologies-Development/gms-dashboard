@@ -1,6 +1,7 @@
 
 # AssetPostDTO
 
+Format for Asset create
 
 ## Properties
 

@@ -33,6 +33,12 @@ export interface AssetMaintenanceTableDTO {
     completionDate?: Date;
     /**
      * 
+     * @type {Date}
+     * @memberof AssetMaintenanceTableDTO
+     */
+    createdAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AssetMaintenanceTableDTO
      */
@@ -81,6 +87,12 @@ export interface AssetMaintenanceTableDTO {
     status: string;
     /**
      * 
+     * @type {Date}
+     * @memberof AssetMaintenanceTableDTO
+     */
+    updatedAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AssetMaintenanceTableDTO
      */
@@ -91,11 +103,13 @@ export interface AssetMaintenanceTableDTO {
  * Check if a given object implements the AssetMaintenanceTableDTO interface.
  */
 export function instanceOfAssetMaintenanceTableDTO(value: object): value is AssetMaintenanceTableDTO {
+    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('dueDate' in value) || value['dueDate'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('maintenanceDate' in value) || value['maintenanceDate'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -111,6 +125,7 @@ export function AssetMaintenanceTableDTOFromJSONTyped(json: any, ignoreDiscrimin
         
         'assetId': json['assetId'] == null ? undefined : json['assetId'],
         'completionDate': json['completionDate'] == null ? undefined : (new Date(json['completionDate'])),
+        'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'description': json['description'] == null ? undefined : json['description'],
         'dueDate': (new Date(json['dueDate'])),
@@ -119,6 +134,7 @@ export function AssetMaintenanceTableDTOFromJSONTyped(json: any, ignoreDiscrimin
         'maintenanceScheduleId': json['maintenanceScheduleId'] == null ? undefined : json['maintenanceScheduleId'],
         'objectIds': json['objectIds'],
         'status': json['status'],
+        'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
 }
@@ -136,6 +152,7 @@ export function AssetMaintenanceTableDTOToJSONTyped(value?: AssetMaintenanceTabl
         
         'assetId': value['assetId'],
         'completionDate': value['completionDate'] == null ? value['completionDate'] : value['completionDate'].toISOString(),
+        'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'description': value['description'],
         'dueDate': value['dueDate'].toISOString(),
@@ -144,6 +161,7 @@ export function AssetMaintenanceTableDTOToJSONTyped(value?: AssetMaintenanceTabl
         'maintenanceScheduleId': value['maintenanceScheduleId'],
         'objectIds': value['objectIds'],
         'status': value['status'],
+        'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],
     };
 }

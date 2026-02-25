@@ -24,19 +24,85 @@ export interface ReportTableDTO {
      * @type {string}
      * @memberof ReportTableDTO
      */
-    actorId: string;
+    actorFirstname?: string;
     /**
      * 
      * @type {string}
      * @memberof ReportTableDTO
      */
-    branchId: string;
+    actorId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    actorStatus?: ReportTableDTOActorStatusEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    actorSurname?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    branchAddress?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    branchId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    branchName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    branchStatus?: ReportTableDTOBranchStatusEnum;
+    /**
+     * 
+     * @type {Date}
+     * @memberof ReportTableDTO
+     */
+    createdAt: Date;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    createdByEmail?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    createdByFirstName?: string;
     /**
      * 
      * @type {string}
      * @memberof ReportTableDTO
      */
     createdById?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    createdBySurname?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    createdByType?: ReportTableDTOCreatedByTypeEnum;
     /**
      * 
      * @type {string}
@@ -69,21 +135,103 @@ export interface ReportTableDTO {
     reportTypeId: string;
     /**
      * 
+     * @type {Date}
+     * @memberof ReportTableDTO
+     */
+    updatedAt: Date;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    updatedByEmail?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    updatedByFirstName?: string;
+    /**
+     * 
      * @type {string}
      * @memberof ReportTableDTO
      */
     updatedById?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    updatedBySurname?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReportTableDTO
+     */
+    updatedByType?: ReportTableDTOUpdatedByTypeEnum;
 }
+
+
+/**
+ * @export
+ */
+export const ReportTableDTOActorStatusEnum = {
+    In: 'IN',
+    Out: 'OUT',
+    Undecided: 'UNDECIDED'
+} as const;
+export type ReportTableDTOActorStatusEnum = typeof ReportTableDTOActorStatusEnum[keyof typeof ReportTableDTOActorStatusEnum];
+
+/**
+ * @export
+ */
+export const ReportTableDTOBranchStatusEnum = {
+    Active: 'ACTIVE',
+    Closed: 'CLOSED',
+    Undecided: 'UNDECIDED'
+} as const;
+export type ReportTableDTOBranchStatusEnum = typeof ReportTableDTOBranchStatusEnum[keyof typeof ReportTableDTOBranchStatusEnum];
+
+/**
+ * @export
+ */
+export const ReportTableDTOCreatedByTypeEnum = {
+    User: 'USER',
+    Employee: 'EMPLOYEE',
+    Member: 'MEMBER',
+    Admin: 'ADMIN',
+    Flyway: 'FLYWAY',
+    System: 'SYSTEM',
+    Cron: 'CRON',
+    Api: 'API'
+} as const;
+export type ReportTableDTOCreatedByTypeEnum = typeof ReportTableDTOCreatedByTypeEnum[keyof typeof ReportTableDTOCreatedByTypeEnum];
+
+/**
+ * @export
+ */
+export const ReportTableDTOUpdatedByTypeEnum = {
+    User: 'USER',
+    Employee: 'EMPLOYEE',
+    Member: 'MEMBER',
+    Admin: 'ADMIN',
+    Flyway: 'FLYWAY',
+    System: 'SYSTEM',
+    Cron: 'CRON',
+    Api: 'API'
+} as const;
+export type ReportTableDTOUpdatedByTypeEnum = typeof ReportTableDTOUpdatedByTypeEnum[keyof typeof ReportTableDTOUpdatedByTypeEnum];
+
 
 /**
  * Check if a given object implements the ReportTableDTO interface.
  */
 export function instanceOfReportTableDTO(value: object): value is ReportTableDTO {
-    if (!('actorId' in value) || value['actorId'] === undefined) return false;
-    if (!('branchId' in value) || value['branchId'] === undefined) return false;
+    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
     if (!('reportTypeId' in value) || value['reportTypeId'] === undefined) return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -97,15 +245,31 @@ export function ReportTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
     }
     return {
         
-        'actorId': json['actorId'],
-        'branchId': json['branchId'],
+        'actorFirstname': json['actorFirstname'] == null ? undefined : json['actorFirstname'],
+        'actorId': json['actorId'] == null ? undefined : json['actorId'],
+        'actorStatus': json['actorStatus'] == null ? undefined : json['actorStatus'],
+        'actorSurname': json['actorSurname'] == null ? undefined : json['actorSurname'],
+        'branchAddress': json['branchAddress'] == null ? undefined : json['branchAddress'],
+        'branchId': json['branchId'] == null ? undefined : json['branchId'],
+        'branchName': json['branchName'] == null ? undefined : json['branchName'],
+        'branchStatus': json['branchStatus'] == null ? undefined : json['branchStatus'],
+        'createdAt': (new Date(json['createdAt'])),
+        'createdByEmail': json['createdByEmail'] == null ? undefined : json['createdByEmail'],
+        'createdByFirstName': json['createdByFirstName'] == null ? undefined : json['createdByFirstName'],
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
+        'createdBySurname': json['createdBySurname'] == null ? undefined : json['createdBySurname'],
+        'createdByType': json['createdByType'] == null ? undefined : json['createdByType'],
         'description': json['description'] == null ? undefined : json['description'],
         'id': json['id'],
         'objectIds': json['objectIds'],
         'occurredAt': json['occurredAt'] == null ? undefined : (new Date(json['occurredAt'])),
         'reportTypeId': json['reportTypeId'],
+        'updatedAt': (new Date(json['updatedAt'])),
+        'updatedByEmail': json['updatedByEmail'] == null ? undefined : json['updatedByEmail'],
+        'updatedByFirstName': json['updatedByFirstName'] == null ? undefined : json['updatedByFirstName'],
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
+        'updatedBySurname': json['updatedBySurname'] == null ? undefined : json['updatedBySurname'],
+        'updatedByType': json['updatedByType'] == null ? undefined : json['updatedByType'],
     };
 }
 
@@ -120,15 +284,31 @@ export function ReportTableDTOToJSONTyped(value?: ReportTableDTO | null, ignoreD
 
     return {
         
+        'actorFirstname': value['actorFirstname'],
         'actorId': value['actorId'],
+        'actorStatus': value['actorStatus'],
+        'actorSurname': value['actorSurname'],
+        'branchAddress': value['branchAddress'],
         'branchId': value['branchId'],
+        'branchName': value['branchName'],
+        'branchStatus': value['branchStatus'],
+        'createdAt': value['createdAt'].toISOString(),
+        'createdByEmail': value['createdByEmail'],
+        'createdByFirstName': value['createdByFirstName'],
         'createdById': value['createdById'],
+        'createdBySurname': value['createdBySurname'],
+        'createdByType': value['createdByType'],
         'description': value['description'],
         'id': value['id'],
         'objectIds': value['objectIds'],
         'occurredAt': value['occurredAt'] == null ? value['occurredAt'] : value['occurredAt'].toISOString(),
         'reportTypeId': value['reportTypeId'],
+        'updatedAt': value['updatedAt'].toISOString(),
+        'updatedByEmail': value['updatedByEmail'],
+        'updatedByFirstName': value['updatedByFirstName'],
         'updatedById': value['updatedById'],
+        'updatedBySurname': value['updatedBySurname'],
+        'updatedByType': value['updatedByType'],
     };
 }
 

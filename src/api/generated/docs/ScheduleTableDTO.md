@@ -1,6 +1,7 @@
 
 # ScheduleTableDTO
 
+Format for Maintenance Schedule read
 
 ## Properties
 
@@ -8,6 +9,7 @@ Name | Type
 ------------ | -------------
 `active` | boolean
 `assetId` | string
+`createdAt` | Date
 `createdById` | string
 `dayOfWeek` | number
 `id` | string
@@ -18,6 +20,7 @@ Name | Type
 `name` | string
 `startDate` | Date
 `timeToCompleteHours` | number
+`updatedAt` | Date
 `weekRank` | number
 
 ## Example
@@ -29,6 +32,7 @@ import type { ScheduleTableDTO } from ''
 const example = {
   "active": null,
   "assetId": null,
+  "createdAt": null,
   "createdById": null,
   "dayOfWeek": null,
   "id": null,
@@ -39,6 +43,7 @@ const example = {
   "name": null,
   "startDate": null,
   "timeToCompleteHours": null,
+  "updatedAt": null,
   "weekRank": null,
 } satisfies ScheduleTableDTO
 

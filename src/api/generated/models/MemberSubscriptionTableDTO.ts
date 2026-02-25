@@ -36,6 +36,12 @@ export interface MemberSubscriptionTableDTO {
      * @type {string}
      * @memberof MemberSubscriptionTableDTO
      */
+    branchName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberSubscriptionTableDTO
+     */
     createdById?: string;
     /**
      * 
@@ -48,7 +54,19 @@ export interface MemberSubscriptionTableDTO {
      * @type {string}
      * @memberof MemberSubscriptionTableDTO
      */
+    firstName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberSubscriptionTableDTO
+     */
     id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberSubscriptionTableDTO
+     */
+    middleName?: string;
     /**
      * 
      * @type {Date}
@@ -67,6 +85,18 @@ export interface MemberSubscriptionTableDTO {
      * @memberof MemberSubscriptionTableDTO
      */
     subscriptionAvailedId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberSubscriptionTableDTO
+     */
+    subscriptionName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberSubscriptionTableDTO
+     */
+    surname?: string;
     /**
      * 
      * @type {string}
@@ -111,12 +141,17 @@ export function MemberSubscriptionTableDTOFromJSONTyped(json: any, ignoreDiscrim
         
         'actorId': json['actorId'],
         'branchId': json['branchId'],
+        'branchName': json['branchName'] == null ? undefined : json['branchName'],
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'endDate': json['endDate'] == null ? undefined : (new Date(json['endDate'])),
+        'firstName': json['firstName'] == null ? undefined : json['firstName'],
         'id': json['id'],
+        'middleName': json['middleName'] == null ? undefined : json['middleName'],
         'startDate': (new Date(json['startDate'])),
         'status': json['status'],
         'subscriptionAvailedId': json['subscriptionAvailedId'] == null ? undefined : json['subscriptionAvailedId'],
+        'subscriptionName': json['subscriptionName'] == null ? undefined : json['subscriptionName'],
+        'surname': json['surname'] == null ? undefined : json['surname'],
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
 }
@@ -134,12 +169,17 @@ export function MemberSubscriptionTableDTOToJSONTyped(value?: MemberSubscription
         
         'actorId': value['actorId'],
         'branchId': value['branchId'],
+        'branchName': value['branchName'],
         'createdById': value['createdById'],
         'endDate': value['endDate'] == null ? value['endDate'] : value['endDate'].toISOString(),
+        'firstName': value['firstName'],
         'id': value['id'],
+        'middleName': value['middleName'],
         'startDate': value['startDate'].toISOString(),
         'status': value['status'],
         'subscriptionAvailedId': value['subscriptionAvailedId'],
+        'subscriptionName': value['subscriptionName'],
+        'surname': value['surname'],
         'updatedById': value['updatedById'],
     };
 }

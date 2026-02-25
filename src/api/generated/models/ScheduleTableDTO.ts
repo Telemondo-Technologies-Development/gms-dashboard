@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * 
+ * Format for Maintenance Schedule read
  * @export
  * @interface ScheduleTableDTO
  */
@@ -31,6 +31,12 @@ export interface ScheduleTableDTO {
      * @memberof ScheduleTableDTO
      */
     assetId: string;
+    /**
+     * 
+     * @type {Date}
+     * @memberof ScheduleTableDTO
+     */
+    createdAt: Date;
     /**
      * 
      * @type {string}
@@ -93,6 +99,12 @@ export interface ScheduleTableDTO {
     timeToCompleteHours: number;
     /**
      * 
+     * @type {Date}
+     * @memberof ScheduleTableDTO
+     */
+    updatedAt: Date;
+    /**
+     * 
      * @type {number}
      * @memberof ScheduleTableDTO
      */
@@ -130,6 +142,7 @@ export type ScheduleTableDTOIntervalUnitEnum = typeof ScheduleTableDTOIntervalUn
 export function instanceOfScheduleTableDTO(value: object): value is ScheduleTableDTO {
     if (!('active' in value) || value['active'] === undefined) return false;
     if (!('assetId' in value) || value['assetId'] === undefined) return false;
+    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('intervalUnit' in value) || value['intervalUnit'] === undefined) return false;
     if (!('intervalValue' in value) || value['intervalValue'] === undefined) return false;
@@ -137,6 +150,7 @@ export function instanceOfScheduleTableDTO(value: object): value is ScheduleTabl
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('startDate' in value) || value['startDate'] === undefined) return false;
     if (!('timeToCompleteHours' in value) || value['timeToCompleteHours'] === undefined) return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -152,6 +166,7 @@ export function ScheduleTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bo
         
         'active': json['active'],
         'assetId': json['assetId'],
+        'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'dayOfWeek': json['dayOfWeek'] == null ? undefined : json['dayOfWeek'],
         'id': json['id'],
@@ -162,6 +177,7 @@ export function ScheduleTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bo
         'name': json['name'],
         'startDate': (new Date(json['startDate'])),
         'timeToCompleteHours': json['timeToCompleteHours'],
+        'updatedAt': (new Date(json['updatedAt'])),
         'weekRank': json['weekRank'] == null ? undefined : json['weekRank'],
     };
 }
@@ -179,6 +195,7 @@ export function ScheduleTableDTOToJSONTyped(value?: ScheduleTableDTO | null, ign
         
         'active': value['active'],
         'assetId': value['assetId'],
+        'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'dayOfWeek': value['dayOfWeek'],
         'id': value['id'],
@@ -189,6 +206,7 @@ export function ScheduleTableDTOToJSONTyped(value?: ScheduleTableDTO | null, ign
         'name': value['name'],
         'startDate': value['startDate'].toISOString(),
         'timeToCompleteHours': value['timeToCompleteHours'],
+        'updatedAt': value['updatedAt'].toISOString(),
         'weekRank': value['weekRank'],
     };
 }

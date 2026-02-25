@@ -27,6 +27,12 @@ export interface SuppliesLogPostDTO {
     createdById: string;
     /**
      * 
+     * @type {boolean}
+     * @memberof SuppliesLogPostDTO
+     */
+    isQuantityValid: boolean;
+    /**
+     * 
      * @type {string}
      * @memberof SuppliesLogPostDTO
      */
@@ -62,6 +68,7 @@ export interface SuppliesLogPostDTO {
  */
 export function instanceOfSuppliesLogPostDTO(value: object): value is SuppliesLogPostDTO {
     if (!('createdById' in value) || value['createdById'] === undefined) return false;
+    if (!('isQuantityValid' in value) || value['isQuantityValid'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
     if (!('quantity' in value) || value['quantity'] === undefined) return false;
@@ -80,6 +87,7 @@ export function SuppliesLogPostDTOFromJSONTyped(json: any, ignoreDiscriminator: 
     return {
         
         'createdById': json['createdById'],
+        'isQuantityValid': json['isQuantityValid'],
         'name': json['name'],
         'objectIds': json['objectIds'],
         'quantity': json['quantity'],
@@ -100,6 +108,7 @@ export function SuppliesLogPostDTOToJSONTyped(value?: SuppliesLogPostDTO | null,
     return {
         
         'createdById': value['createdById'],
+        'isQuantityValid': value['isQuantityValid'],
         'name': value['name'],
         'objectIds': value['objectIds'],
         'quantity': value['quantity'],

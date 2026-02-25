@@ -15,21 +15,21 @@
 
 import * as runtime from '../runtime';
 import type {
-  ApiResponseBranchEmployeesDTO,
   ApiResponseBranchTableDTO,
   ApiResponseListBranchTableDTO,
+  ApiResponseListEmployeeInBranchDTO,
   ApiResponseUnit,
   BranchPostDTO,
   BranchPutDTO,
   Pageable,
 } from '../models/index';
 import {
-    ApiResponseBranchEmployeesDTOFromJSON,
-    ApiResponseBranchEmployeesDTOToJSON,
     ApiResponseBranchTableDTOFromJSON,
     ApiResponseBranchTableDTOToJSON,
     ApiResponseListBranchTableDTOFromJSON,
     ApiResponseListBranchTableDTOToJSON,
+    ApiResponseListEmployeeInBranchDTOFromJSON,
+    ApiResponseListEmployeeInBranchDTOToJSON,
     ApiResponseUnitFromJSON,
     ApiResponseUnitToJSON,
     BranchPostDTOFromJSON,
@@ -58,7 +58,9 @@ export interface GetBranchRequest {
 
 export interface GetBranchEmployeesRequest {
     id: string;
-    status?: GetBranchEmployeesStatusEnum;
+    pageable: Pageable;
+    branchPersonnelStatus?: GetBranchEmployeesBranchPersonnelStatusEnum;
+    employeeStatus?: GetBranchEmployeesEmployeeStatusEnum;
 }
 
 export interface UpdateBranchRequest {
@@ -227,7 +229,7 @@ export class BranchApi extends runtime.BaseAPI {
     /**
      * Get all Personnel per Branch by id
      */
-    async getBranchEmployeesRaw(requestParameters: GetBranchEmployeesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseBranchEmployeesDTO>> {
+    async getBranchEmployeesRaw(requestParameters: GetBranchEmployeesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListEmployeeInBranchDTO>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -235,16 +237,31 @@ export class BranchApi extends runtime.BaseAPI {
             );
         }
 
+        if (requestParameters['pageable'] == null) {
+            throw new runtime.RequiredError(
+                'pageable',
+                'Required parameter "pageable" was null or undefined when calling getBranchEmployees().'
+            );
+        }
+
         const queryParameters: any = {};
 
-        if (requestParameters['status'] != null) {
-            queryParameters['status'] = requestParameters['status'];
+        if (requestParameters['branchPersonnelStatus'] != null) {
+            queryParameters['branchPersonnelStatus'] = requestParameters['branchPersonnelStatus'];
+        }
+
+        if (requestParameters['employeeStatus'] != null) {
+            queryParameters['employeeStatus'] = requestParameters['employeeStatus'];
+        }
+
+        if (requestParameters['pageable'] != null) {
+            queryParameters['pageable'] = requestParameters['pageable'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
 
-        let urlPath = `/api/branch/{id}/employees`;
+        let urlPath = `/api/branch/{id}/employee`;
         urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
 
         const response = await this.request({
@@ -254,13 +271,13 @@ export class BranchApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseBranchEmployeesDTOFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseListEmployeeInBranchDTOFromJSON(jsonValue));
     }
 
     /**
      * Get all Personnel per Branch by id
      */
-    async getBranchEmployees(requestParameters: GetBranchEmployeesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseBranchEmployeesDTO> {
+    async getBranchEmployees(requestParameters: GetBranchEmployeesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListEmployeeInBranchDTO> {
         const response = await this.getBranchEmployeesRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -317,11 +334,20 @@ export class BranchApi extends runtime.BaseAPI {
 /**
  * @export
  */
-export const GetBranchEmployeesStatusEnum = {
+export const GetBranchEmployeesBranchPersonnelStatusEnum = {
     Active: 'ACTIVE',
     Moved: 'MOVED',
     Terminated: 'TERMINATED',
     Resigned: 'RESIGNED',
     Undecided: 'UNDECIDED'
 } as const;
-export type GetBranchEmployeesStatusEnum = typeof GetBranchEmployeesStatusEnum[keyof typeof GetBranchEmployeesStatusEnum];
+export type GetBranchEmployeesBranchPersonnelStatusEnum = typeof GetBranchEmployeesBranchPersonnelStatusEnum[keyof typeof GetBranchEmployeesBranchPersonnelStatusEnum];
+/**
+ * @export
+ */
+export const GetBranchEmployeesEmployeeStatusEnum = {
+    In: 'IN',
+    Out: 'OUT',
+    Undecided: 'UNDECIDED'
+} as const;
+export type GetBranchEmployeesEmployeeStatusEnum = typeof GetBranchEmployeesEmployeeStatusEnum[keyof typeof GetBranchEmployeesEmployeeStatusEnum];

@@ -57,7 +57,7 @@ export interface UpdateAssetCategoryRequest {
 export class AssetCategoryApi extends runtime.BaseAPI {
 
     /**
-     * Create a new Asset Category
+     * Create an Asset Category
      */
     async createAssetCategoryRaw(requestParameters: CreateAssetCategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseAssetCategoryTableDTO>> {
         if (requestParameters['assetCategoryPostDTO'] == null) {
@@ -88,7 +88,7 @@ export class AssetCategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Create a new Asset Category
+     * Create an Asset Category
      */
     async createAssetCategory(requestParameters: CreateAssetCategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseAssetCategoryTableDTO> {
         const response = await this.createAssetCategoryRaw(requestParameters, initOverrides);
@@ -96,7 +96,7 @@ export class AssetCategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Delete a Asset Category by id
+     * Delete an Asset Category by id
      */
     async deleteAssetCategoryRaw(requestParameters: DeleteAssetCategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseUnit>> {
         if (requestParameters['id'] == null) {
@@ -125,7 +125,7 @@ export class AssetCategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Delete a Asset Category by id
+     * Delete an Asset Category by id
      */
     async deleteAssetCategory(requestParameters: DeleteAssetCategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseUnit> {
         const response = await this.deleteAssetCategoryRaw(requestParameters, initOverrides);
@@ -162,7 +162,7 @@ export class AssetCategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get a Asset Category by id
+     * Get an Asset Category by id
      */
     async getAssetCategoryRaw(requestParameters: GetAssetCategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseAssetCategoryTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -191,7 +191,7 @@ export class AssetCategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get a Asset Category by id
+     * Get an Asset Category by id
      */
     async getAssetCategory(requestParameters: GetAssetCategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseAssetCategoryTableDTO> {
         const response = await this.getAssetCategoryRaw(requestParameters, initOverrides);
@@ -199,7 +199,7 @@ export class AssetCategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Update a Asset Category by id
+     * Update an Asset Category by id
      */
     async updateAssetCategoryRaw(requestParameters: UpdateAssetCategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseAssetCategoryTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -238,7 +238,7 @@ export class AssetCategoryApi extends runtime.BaseAPI {
     }
 
     /**
-     * Update a Asset Category by id
+     * Update an Asset Category by id
      */
     async updateAssetCategory(requestParameters: UpdateAssetCategoryRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseAssetCategoryTableDTO> {
         const response = await this.updateAssetCategoryRaw(requestParameters, initOverrides);

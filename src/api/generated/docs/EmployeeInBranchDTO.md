@@ -7,7 +7,15 @@
 Name | Type
 ------------ | -------------
 `actorId` | string
-`employee` | [EmployeeSummaryDTO](EmployeeSummaryDTO.md)
+`employeeContactNo` | string
+`employeeFirstName` | string
+`employeeId` | string
+`employeeMiddleName` | string
+`employeeSuffix` | string
+`employeeSurname` | string
+`personnelRoleDescription` | string
+`personnelRoleId` | string
+`personnelRoleName` | string
 
 ## Example
 
@@ -17,7 +25,15 @@ import type { EmployeeInBranchDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "actorId": null,
-  "employee": null,
+  "employeeContactNo": null,
+  "employeeFirstName": null,
+  "employeeId": null,
+  "employeeMiddleName": null,
+  "employeeSuffix": null,
+  "employeeSurname": null,
+  "personnelRoleDescription": null,
+  "personnelRoleId": null,
+  "personnelRoleName": null,
 } satisfies EmployeeInBranchDTO
 
 console.log(example)

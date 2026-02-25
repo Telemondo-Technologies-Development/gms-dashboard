@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { EmployeeSummaryDTO } from './EmployeeSummaryDTO';
-import {
-    EmployeeSummaryDTOFromJSON,
-    EmployeeSummaryDTOFromJSONTyped,
-    EmployeeSummaryDTOToJSON,
-    EmployeeSummaryDTOToJSONTyped,
-} from './EmployeeSummaryDTO';
-
 /**
  * 
  * @export
@@ -35,10 +27,58 @@ export interface EmployeeInBranchDTO {
     actorId: string;
     /**
      * 
-     * @type {EmployeeSummaryDTO}
+     * @type {string}
      * @memberof EmployeeInBranchDTO
      */
-    employee?: EmployeeSummaryDTO;
+    employeeContactNo?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeInBranchDTO
+     */
+    employeeFirstName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeInBranchDTO
+     */
+    employeeId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeInBranchDTO
+     */
+    employeeMiddleName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeInBranchDTO
+     */
+    employeeSuffix?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeInBranchDTO
+     */
+    employeeSurname?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeInBranchDTO
+     */
+    personnelRoleDescription?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeInBranchDTO
+     */
+    personnelRoleId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeInBranchDTO
+     */
+    personnelRoleName?: string;
 }
 
 /**
@@ -60,7 +100,15 @@ export function EmployeeInBranchDTOFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'actorId': json['actorId'],
-        'employee': json['employee'] == null ? undefined : EmployeeSummaryDTOFromJSON(json['employee']),
+        'employeeContactNo': json['employeeContactNo'] == null ? undefined : json['employeeContactNo'],
+        'employeeFirstName': json['employeeFirstName'] == null ? undefined : json['employeeFirstName'],
+        'employeeId': json['employeeId'] == null ? undefined : json['employeeId'],
+        'employeeMiddleName': json['employeeMiddleName'] == null ? undefined : json['employeeMiddleName'],
+        'employeeSuffix': json['employeeSuffix'] == null ? undefined : json['employeeSuffix'],
+        'employeeSurname': json['employeeSurname'] == null ? undefined : json['employeeSurname'],
+        'personnelRoleDescription': json['personnelRoleDescription'] == null ? undefined : json['personnelRoleDescription'],
+        'personnelRoleId': json['personnelRoleId'] == null ? undefined : json['personnelRoleId'],
+        'personnelRoleName': json['personnelRoleName'] == null ? undefined : json['personnelRoleName'],
     };
 }
 
@@ -76,7 +124,15 @@ export function EmployeeInBranchDTOToJSONTyped(value?: EmployeeInBranchDTO | nul
     return {
         
         'actorId': value['actorId'],
-        'employee': EmployeeSummaryDTOToJSON(value['employee']),
+        'employeeContactNo': value['employeeContactNo'],
+        'employeeFirstName': value['employeeFirstName'],
+        'employeeId': value['employeeId'],
+        'employeeMiddleName': value['employeeMiddleName'],
+        'employeeSuffix': value['employeeSuffix'],
+        'employeeSurname': value['employeeSurname'],
+        'personnelRoleDescription': value['personnelRoleDescription'],
+        'personnelRoleId': value['personnelRoleId'],
+        'personnelRoleName': value['personnelRoleName'],
     };
 }
 

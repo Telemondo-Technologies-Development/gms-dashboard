@@ -36,7 +36,7 @@
             "description": "OK"
           }
         },
-        "summary": "Get all assets",
+        "summary": "Get all Assets",
         "tags": [
           "Asset"
         ]
@@ -65,7 +65,7 @@
             "description": "OK"
           }
         },
-        "summary": "Create an asset",
+        "summary": "Create an Asset",
         "tags": [
           "Asset"
         ]
@@ -115,7 +115,7 @@
             "description": "OK"
           }
         },
-        "summary": "Create a new Asset Category",
+        "summary": "Create an Asset Category",
         "tags": [
           "Asset Category"
         ]
@@ -147,7 +147,7 @@
             "description": "OK"
           }
         },
-        "summary": "Delete a Asset Category by id",
+        "summary": "Delete an Asset Category by id",
         "tags": [
           "Asset Category"
         ]
@@ -177,7 +177,7 @@
             "description": "OK"
           }
         },
-        "summary": "Get a Asset Category by id",
+        "summary": "Get an Asset Category by id",
         "tags": [
           "Asset Category"
         ]
@@ -217,7 +217,7 @@
             "description": "OK"
           }
         },
-        "summary": "Update a Asset Category by id",
+        "summary": "Update an Asset Category by id",
         "tags": [
           "Asset Category"
         ]
@@ -248,7 +248,7 @@
             "description": "OK"
           }
         },
-        "summary": "Get all maintenance logs (paginated)",
+        "summary": "Get all Asset Maintenances",
         "tags": [
           "Asset Maintenance"
         ]
@@ -279,6 +279,7 @@
             "description": "OK"
           }
         },
+        "summary": "Get all Maintenance Schedules",
         "tags": [
           "Maintenance Schedule"
         ]
@@ -307,6 +308,7 @@
             "description": "OK"
           }
         },
+        "summary": "Create a Maintenance Schedule",
         "tags": [
           "Maintenance Schedule"
         ]
@@ -338,6 +340,7 @@
             "description": "OK"
           }
         },
+        "summary": "Delete a Maintenance Schedule by ID",
         "tags": [
           "Maintenance Schedule"
         ]
@@ -367,7 +370,7 @@
             "description": "OK"
           }
         },
-        "summary": "Get an asset by ID",
+        "summary": "Get a Maintenance Schedule by ID",
         "tags": [
           "Maintenance Schedule"
         ]
@@ -407,6 +410,7 @@
             "description": "OK"
           }
         },
+        "summary": "Update a Maintenance Schedule by id",
         "tags": [
           "Maintenance Schedule"
         ]
@@ -438,7 +442,7 @@
             "description": "OK"
           }
         },
-        "summary": "Get a maintenance log by id",
+        "summary": "Get an Asset Maintenance by id",
         "tags": [
           "Asset Maintenance"
         ]
@@ -478,7 +482,7 @@
             "description": "OK"
           }
         },
-        "summary": "Update maintenance status, description, files, and completion date",
+        "summary": "Update an Asset Maintenance status, description, files, and completion date by id",
         "tags": [
           "Asset Maintenance"
         ]
@@ -510,7 +514,7 @@
             "description": "OK"
           }
         },
-        "summary": "Delete an asset by ID",
+        "summary": "Delete an Asset by ID",
         "tags": [
           "Asset"
         ]
@@ -540,7 +544,7 @@
             "description": "OK"
           }
         },
-        "summary": "Get an asset by ID",
+        "summary": "Get an Asset by ID",
         "tags": [
           "Asset"
         ]
@@ -580,7 +584,87 @@
             "description": "OK"
           }
         },
-        "summary": "Update an asset by ID",
+        "summary": "Update an Asset by ID",
+        "tags": [
+          "Asset"
+        ]
+      }
+    },
+    "/api/asset/{id}/maintenance": {
+      "get": {
+        "operationId": "getAssetMaintenance",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListAssetMaintenanceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get Asset Maintenance Logs by Asset ID",
+        "tags": [
+          "Asset"
+        ]
+      }
+    },
+    "/api/asset/{id}/maintenance/schedule": {
+      "get": {
+        "operationId": "getAssetSchedules",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListScheduleTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get Asset Maintenance Schedules by Asset ID",
         "tags": [
           "Asset"
         ]
@@ -1273,7 +1357,7 @@
         ]
       }
     },
-    "/api/branch/{id}/employees": {
+    "/api/branch/{id}/employee": {
       "get": {
         "operationId": "getBranchEmployees",
         "parameters": [
@@ -1288,7 +1372,7 @@
           },
           {
             "in": "query",
-            "name": "status",
+            "name": "branchPersonnelStatus",
             "required": false,
             "schema": {
               "type": "string",
@@ -1300,6 +1384,27 @@
                 "UNDECIDED"
               ]
             }
+          },
+          {
+            "in": "query",
+            "name": "employeeStatus",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IN",
+                "OUT",
+                "UNDECIDED"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
           }
         ],
         "responses": {
@@ -1307,7 +1412,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseBranchEmployeesDTO"
+                  "$ref": "#/components/schemas/ApiResponseListEmployeeInBranchDTO"
                 }
               }
             },
@@ -2715,6 +2820,168 @@
         ]
       }
     },
+    "/api/member/attendance": {
+      "get": {
+        "operationId": "getAllAttendances",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListAttendanceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Attendances",
+        "tags": [
+          "Attendance"
+        ]
+      },
+      "post": {
+        "operationId": "createAttendance",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendancePostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAttendanceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Attendance",
+        "tags": [
+          "Attendance"
+        ]
+      }
+    },
+    "/api/member/attendance/{id}": {
+      "delete": {
+        "operationId": "deleteAttendance",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Attendance by id",
+        "tags": [
+          "Attendance"
+        ]
+      },
+      "get": {
+        "operationId": "getAttendance",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAttendanceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Attendance by id",
+        "tags": [
+          "Attendance"
+        ]
+      },
+      "put": {
+        "operationId": "updateAttendance",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttendancePutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAttendanceTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Attendance by id",
+        "tags": [
+          "Attendance"
+        ]
+      }
+    },
     "/api/member/picture": {
       "post": {
         "operationId": "uploadMemberProfile",
@@ -2751,6 +3018,492 @@
         "summary": "Upload a member profile picture into the object storage (public)",
         "tags": [
           "Member"
+        ]
+      }
+    },
+    "/api/member/progress": {
+      "get": {
+        "operationId": "getAllMemberProgress",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListMemberProgressTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Member Progress",
+        "tags": [
+          "Member Progress"
+        ]
+      },
+      "post": {
+        "operationId": "createMemberProgress",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberProgressPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberProgressTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Member Progress",
+        "tags": [
+          "Member Progress"
+        ]
+      }
+    },
+    "/api/member/progress-option": {
+      "get": {
+        "operationId": "getAllProgressOptions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListProgressOptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Personnel Roles",
+        "tags": [
+          "Progress Option"
+        ]
+      },
+      "post": {
+        "operationId": "createProgressOption",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressOptionPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProgressOptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Personnel Role",
+        "tags": [
+          "Progress Option"
+        ]
+      }
+    },
+    "/api/member/progress-option/progress": {
+      "get": {
+        "operationId": "getAllProgress",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListProgressTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Personnel Roles",
+        "tags": [
+          "Progress"
+        ]
+      },
+      "post": {
+        "operationId": "createProgress",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProgressTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a new Personnel Role",
+        "tags": [
+          "Progress"
+        ]
+      }
+    },
+    "/api/member/progress-option/progress/{id}": {
+      "delete": {
+        "operationId": "deleteProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Personnel Role by id",
+        "tags": [
+          "Progress"
+        ]
+      },
+      "get": {
+        "operationId": "getProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProgressTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Personnel Role by id",
+        "tags": [
+          "Progress"
+        ]
+      },
+      "put": {
+        "operationId": "updateProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProgressTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Personnel Role by id",
+        "tags": [
+          "Progress"
+        ]
+      }
+    },
+    "/api/member/progress-option/{id}": {
+      "delete": {
+        "operationId": "deleteProgressOption",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Personnel Role by id",
+        "tags": [
+          "Progress Option"
+        ]
+      },
+      "get": {
+        "operationId": "getProgressOption",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProgressOptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Personnel Role by id",
+        "tags": [
+          "Progress Option"
+        ]
+      },
+      "put": {
+        "operationId": "updateProgressOption",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressOptionPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProgressOptionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Personnel Role by id",
+        "tags": [
+          "Progress Option"
+        ]
+      }
+    },
+    "/api/member/progress/{id}": {
+      "delete": {
+        "operationId": "deleteMemberProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Member Progress by id",
+        "tags": [
+          "Member Progress"
+        ]
+      },
+      "get": {
+        "operationId": "getMemberProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberProgressTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Member Progress by id",
+        "tags": [
+          "Member Progress"
+        ]
+      },
+      "put": {
+        "operationId": "updateMemberProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberProgressPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseMemberProgressTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Member Progress by id",
+        "tags": [
+          "Member Progress"
         ]
       }
     },
@@ -3360,7 +4113,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponsePagePermission"
+                  "$ref": "#/components/schemas/ApiResponseListPermission"
                 }
               }
             },
@@ -3463,6 +4216,7 @@
             "description": "OK"
           }
         },
+        "summary": "Get all Reports",
         "tags": [
           "Report"
         ]
@@ -3491,6 +4245,7 @@
             "description": "OK"
           }
         },
+        "summary": "Create a Report",
         "tags": [
           "Report"
         ]
@@ -3521,6 +4276,7 @@
             "description": "OK"
           }
         },
+        "summary": "Get all Report Types",
         "tags": [
           "Report Type"
         ]
@@ -3549,6 +4305,7 @@
             "description": "OK"
           }
         },
+        "summary": "Create a Report Type",
         "tags": [
           "Report Type"
         ]
@@ -3580,6 +4337,7 @@
             "description": "OK"
           }
         },
+        "summary": "Delete a Report Type by id",
         "tags": [
           "Report Type"
         ]
@@ -3609,6 +4367,7 @@
             "description": "OK"
           }
         },
+        "summary": "Get a Report Type by id",
         "tags": [
           "Report Type"
         ]
@@ -3648,6 +4407,7 @@
             "description": "OK"
           }
         },
+        "summary": "Update a Report Type",
         "tags": [
           "Report Type"
         ]
@@ -3679,6 +4439,7 @@
             "description": "OK"
           }
         },
+        "summary": "Delete a Report by id",
         "tags": [
           "Report"
         ]
@@ -3708,6 +4469,7 @@
             "description": "OK"
           }
         },
+        "summary": "Get a Report by id",
         "tags": [
           "Report"
         ]
@@ -3747,6 +4509,7 @@
             "description": "OK"
           }
         },
+        "summary": "Update a Report by id",
         "tags": [
           "Report"
         ]
@@ -3951,6 +4714,46 @@
           }
         },
         "summary": "Delete a Role's Permission by id",
+        "tags": [
+          "Access Control"
+        ]
+      },
+      "post": {
+        "operationId": "addRolePermissions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RolePermissionDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseRolePermissionTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Role's Permission by id",
         "tags": [
           "Access Control"
         ]
@@ -4738,7 +5541,7 @@
             "description": "OK"
           }
         },
-        "summary": "Create a new Supply",
+        "summary": "Create a Supply",
         "tags": [
           "Supplies"
         ]
@@ -4798,7 +5601,7 @@
             "description": "OK"
           }
         },
-        "summary": "Create a new Supplies Log",
+        "summary": "Create a Supplies Log",
         "tags": [
           "Supplies Logs"
         ]
@@ -5035,14 +5838,14 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseSupplyWithLogsDTO"
+                  "$ref": "#/components/schemas/ApiResponseListSuppliesLogTableDTO"
                 }
               }
             },
             "description": "OK"
           }
         },
-        "summary": "Get supply info and its logs",
+        "summary": "Get Supply Logs by Supply ID",
         "tags": [
           "Supplies"
         ]
@@ -5240,6 +6043,26 @@
           "Auth"
         ]
       }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "getMyDetails",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseLogInResponse"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
     }
   },
   "components": {
@@ -5417,11 +6240,11 @@
           "timestamp"
         ]
       },
-      "ApiResponseBillingCycleTableDTO": {
+      "ApiResponseAttendanceTableDTO": {
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/BillingCycleTableDTO"
+            "$ref": "#/components/schemas/AttendanceTableDTO"
           },
           "errors": {
             "type": "array",
@@ -5448,11 +6271,11 @@
           "timestamp"
         ]
       },
-      "ApiResponseBranchEmployeesDTO": {
+      "ApiResponseBillingCycleTableDTO": {
         "type": "object",
         "properties": {
           "data": {
-            "$ref": "#/components/schemas/BranchEmployeesDTO"
+            "$ref": "#/components/schemas/BillingCycleTableDTO"
           },
           "errors": {
             "type": "array",
@@ -5773,6 +6596,40 @@
           "timestamp"
         ]
       },
+      "ApiResponseListAttendanceTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttendanceTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListBillingCycleTableDTO": {
         "type": "object",
         "properties": {
@@ -5875,6 +6732,40 @@
           "timestamp"
         ]
       },
+      "ApiResponseListEmployeeInBranchDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployeeInBranchDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListEmployeeTableDTO": {
         "type": "object",
         "properties": {
@@ -5916,6 +6807,40 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/InvoiceTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListMemberProgressTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberProgressTableDTO"
             }
           },
           "errors": {
@@ -6113,6 +7038,40 @@
           "timestamp"
         ]
       },
+      "ApiResponseListPermission": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseListPersonnelRoleTableDTO": {
         "type": "object",
         "properties": {
@@ -6120,6 +7079,74 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PersonnelRoleTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListProgressOptionTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgressOptionTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListProgressTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgressTableDTO"
             }
           },
           "errors": {
@@ -6555,6 +7582,68 @@
           "timestamp"
         ]
       },
+      "ApiResponseLogInResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/LogInResponse"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseMemberProgressTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MemberProgressTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseMemberSubscriptionTableDTO": {
         "type": "object",
         "properties": {
@@ -6679,37 +7768,6 @@
           "timestamp"
         ]
       },
-      "ApiResponsePagePermission": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/PagePermission"
-          },
-          "errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ApiError"
-            }
-          },
-          "message": {
-            "type": "string"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/PageMetadata"
-          },
-          "success": {
-            "type": "boolean"
-          },
-          "timestamp": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "required": [
-          "success",
-          "timestamp"
-        ]
-      },
       "ApiResponsePaymentMethodTableDTO": {
         "type": "object",
         "properties": {
@@ -6808,6 +7866,68 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/PersonnelRoleTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseProgressOptionTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ProgressOptionTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseProgressTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ProgressTableDTO"
           },
           "errors": {
             "type": "array",
@@ -7206,37 +8326,6 @@
           "timestamp"
         ]
       },
-      "ApiResponseSupplyWithLogsDTO": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/SupplyWithLogsDTO"
-          },
-          "errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ApiError"
-            }
-          },
-          "message": {
-            "type": "string"
-          },
-          "meta": {
-            "$ref": "#/components/schemas/PageMetadata"
-          },
-          "success": {
-            "type": "boolean"
-          },
-          "timestamp": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "required": [
-          "success",
-          "timestamp"
-        ]
-      },
       "ApiResponseUnit": {
         "type": "object",
         "properties": {
@@ -7365,6 +8454,10 @@
         "type": "object",
         "description": "Format for Asset Category read",
         "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -7376,14 +8469,20 @@
           "name": {
             "type": "string"
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
           }
         },
         "required": [
+          "createdAt",
           "id",
-          "name"
+          "name",
+          "updatedAt"
         ]
       },
       "AssetExpenseCreateDTO": {
@@ -7644,6 +8743,7 @@
       },
       "AssetMaintenancePatchDTO": {
         "type": "object",
+        "description": "Format for Asset Maintenance Log patch",
         "properties": {
           "completionDate": {
             "type": "string",
@@ -7691,6 +8791,10 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -7724,21 +8828,28 @@
           "status": {
             "type": "string"
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
           }
         },
         "required": [
+          "createdAt",
           "dueDate",
           "id",
           "maintenanceDate",
           "objectIds",
-          "status"
+          "status",
+          "updatedAt"
         ]
       },
       "AssetPostDTO": {
         "type": "object",
+        "description": "Format for Asset create",
         "properties": {
           "assetCategoryId": {
             "type": "string",
@@ -7788,6 +8899,7 @@
       },
       "AssetPutDTO": {
         "type": "object",
+        "description": "Format for Asset update",
         "properties": {
           "assetCategoryId": {
             "type": "string",
@@ -7837,6 +8949,7 @@
       },
       "AssetTableDTO": {
         "type": "object",
+        "description": "Format for Asset read",
         "properties": {
           "assetCategoryId": {
             "type": "string",
@@ -7845,6 +8958,10 @@
           "branchId": {
             "type": "string",
             "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "createdById": {
             "type": "string",
@@ -7875,6 +8992,10 @@
           "remarks": {
             "type": "string"
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
@@ -7883,9 +9004,133 @@
         "required": [
           "assetCategoryId",
           "branchId",
+          "createdAt",
           "id",
           "name",
-          "objectIds"
+          "objectIds",
+          "updatedAt"
+        ]
+      },
+      "AttendancePostDTO": {
+        "type": "object",
+        "description": "Format for Attendance create",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "QR",
+              "FACE",
+              "FINGERPRINT"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "createdById",
+          "source",
+          "type"
+        ]
+      },
+      "AttendancePutDTO": {
+        "type": "object",
+        "description": "Format for Attendance update",
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "QR",
+              "FACE",
+              "FINGERPRINT"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "source",
+          "type",
+          "updatedById"
+        ]
+      },
+      "AttendanceTableDTO": {
+        "type": "object",
+        "description": "Format for Attendance read",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "QR",
+              "FACE",
+              "FINGERPRINT"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "type"
         ]
       },
       "BillingCyclePostDTO": {
@@ -7997,24 +9242,6 @@
           "intervalCount",
           "intervals",
           "name"
-        ]
-      },
-      "BranchEmployeesDTO": {
-        "type": "object",
-        "description": "Format for Branch with Personnel read",
-        "properties": {
-          "branch": {
-            "$ref": "#/components/schemas/BranchSummaryDTO"
-          },
-          "employees": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EmployeeInBranchDTO"
-            }
-          }
-        },
-        "required": [
-          "branch"
         ]
       },
       "BranchListDTO": {
@@ -8256,44 +9483,6 @@
           "updatedById"
         ]
       },
-      "BranchSummaryDTO": {
-        "type": "object",
-        "description": "Format for Branch read summary",
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "latitude": {
-            "type": "string"
-          },
-          "longitude": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "ACTIVE",
-              "CLOSED",
-              "UNDECIDED"
-            ]
-          }
-        },
-        "required": [
-          "address",
-          "id",
-          "latitude",
-          "longitude",
-          "name",
-          "status"
-        ]
-      },
       "BranchTableDTO": {
         "type": "object",
         "description": "Format for Branch read",
@@ -8357,8 +9546,34 @@
             "type": "string",
             "format": "uuid"
           },
-          "employee": {
-            "$ref": "#/components/schemas/EmployeeSummaryDTO"
+          "employeeContactNo": {
+            "type": "string"
+          },
+          "employeeFirstName": {
+            "type": "string"
+          },
+          "employeeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "employeeMiddleName": {
+            "type": "string"
+          },
+          "employeeSuffix": {
+            "type": "string"
+          },
+          "employeeSurname": {
+            "type": "string"
+          },
+          "personnelRoleDescription": {
+            "type": "string"
+          },
+          "personnelRoleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "personnelRoleName": {
+            "type": "string"
           }
         },
         "required": [
@@ -8461,30 +9676,6 @@
           "firstName",
           "status",
           "surname"
-        ]
-      },
-      "EmployeeSummaryDTO": {
-        "type": "object",
-        "properties": {
-          "firstName": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "middleName": {
-            "type": "string"
-          },
-          "suffix": {
-            "type": "string"
-          },
-          "surname": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id"
         ]
       },
       "EmployeeTableDTO": {
@@ -8795,6 +9986,167 @@
           "surname"
         ]
       },
+      "MemberProgressHistoryBrief": {
+        "type": "object",
+        "properties": {
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "progressId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "progressName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "changedAt",
+          "id",
+          "progressId",
+          "progressName"
+        ]
+      },
+      "MemberProgressPostDTO": {
+        "type": "object",
+        "description": "Format for Member Progress create",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "progressId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "progressOptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "remarks": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          }
+        },
+        "required": [
+          "actorId",
+          "branchId",
+          "createdById",
+          "progressId",
+          "progressOptionId",
+          "status"
+        ]
+      },
+      "MemberProgressPutDTO": {
+        "type": "object",
+        "description": "Format for Member Progress update",
+        "properties": {
+          "progressId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "remarks": {
+            "type": "string",
+            "maxLength": 2147483647,
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "progressId",
+          "status",
+          "updatedById"
+        ]
+      },
+      "MemberProgressTableDTO": {
+        "type": "object",
+        "description": "Format for Member Progress read",
+        "properties": {
+          "actorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "progressHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberProgressHistoryBrief"
+            }
+          },
+          "progressId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "progressOptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "progressHistory",
+          "status"
+        ]
+      },
       "MemberPutDTO": {
         "type": "object",
         "description": "Format for Member update",
@@ -8946,6 +10298,9 @@
             "type": "string",
             "format": "uuid"
           },
+          "branchName": {
+            "type": "string"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -8954,9 +10309,15 @@
             "type": "string",
             "format": "date-time"
           },
+          "firstName": {
+            "type": "string"
+          },
           "id": {
             "type": "string",
             "format": "uuid"
+          },
+          "middleName": {
+            "type": "string"
           },
           "startDate": {
             "type": "string",
@@ -8973,6 +10334,12 @@
           "subscriptionAvailedId": {
             "type": "string",
             "format": "uuid"
+          },
+          "subscriptionName": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
           },
           "updatedById": {
             "type": "string",
@@ -9293,52 +10660,6 @@
           "totalCount"
         ]
       },
-      "PagePermission": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Permission"
-            }
-          },
-          "empty": {
-            "type": "boolean"
-          },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
-          },
-          "number": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "numberOfElements": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "Pageable": {
         "type": "object",
         "properties": {
@@ -9357,32 +10678,6 @@
             "items": {
               "type": "string"
             }
-          }
-        }
-      },
-      "PageableObject": {
-        "type": "object",
-        "properties": {
-          "offset": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "paged": {
-            "type": "boolean"
-          },
-          "sort": {
-            "$ref": "#/components/schemas/SortObject"
-          },
-          "unpaged": {
-            "type": "boolean"
           }
         }
       },
@@ -9678,6 +10973,138 @@
           "name"
         ]
       },
+      "ProgressOptionPostDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdById",
+          "name"
+        ]
+      },
+      "ProgressOptionPutDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role update",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "updatedById"
+        ]
+      },
+      "ProgressOptionTableDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ProgressPostDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "progressOptionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "createdById",
+          "name",
+          "progressOptionId"
+        ]
+      },
+      "ProgressPutDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role update",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "progressOptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "progressOptionId",
+          "updatedById"
+        ]
+      },
+      "ProgressTableDTO": {
+        "type": "object",
+        "description": "Format for Personnel Role read",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "progressOptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
       "ReportPostDTO": {
         "type": "object",
         "description": "Format for Report create",
@@ -9768,17 +11195,71 @@
         "type": "object",
         "description": "Format for Report read",
         "properties": {
+          "actorFirstname": {
+            "type": "string"
+          },
           "actorId": {
             "type": "string",
             "format": "uuid"
+          },
+          "actorStatus": {
+            "type": "string",
+            "enum": [
+              "IN",
+              "OUT",
+              "UNDECIDED"
+            ]
+          },
+          "actorSurname": {
+            "type": "string"
+          },
+          "branchAddress": {
+            "type": "string"
           },
           "branchId": {
             "type": "string",
             "format": "uuid"
           },
+          "branchName": {
+            "type": "string"
+          },
+          "branchStatus": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CLOSED",
+              "UNDECIDED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdByEmail": {
+            "type": "string"
+          },
+          "createdByFirstName": {
+            "type": "string"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
+          },
+          "createdBySurname": {
+            "type": "string"
+          },
+          "createdByType": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "EMPLOYEE",
+              "MEMBER",
+              "ADMIN",
+              "FLYWAY",
+              "SYSTEM",
+              "CRON",
+              "API"
+            ]
           },
           "description": {
             "type": "string"
@@ -9802,17 +11283,43 @@
             "type": "string",
             "format": "uuid"
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedByEmail": {
+            "type": "string"
+          },
+          "updatedByFirstName": {
+            "type": "string"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
+          },
+          "updatedBySurname": {
+            "type": "string"
+          },
+          "updatedByType": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "EMPLOYEE",
+              "MEMBER",
+              "ADMIN",
+              "FLYWAY",
+              "SYSTEM",
+              "CRON",
+              "API"
+            ]
           }
         },
         "required": [
-          "actorId",
-          "branchId",
+          "createdAt",
           "id",
           "objectIds",
-          "reportTypeId"
+          "reportTypeId",
+          "updatedAt"
         ]
       },
       "ReportTypePostDTO": {
@@ -9853,6 +11360,10 @@
         "type": "object",
         "description": "Format for Report Type read",
         "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -9864,14 +11375,20 @@
           "name": {
             "type": "string"
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
           }
         },
         "required": [
+          "createdAt",
           "id",
-          "name"
+          "name",
+          "updatedAt"
         ]
       },
       "RolePermissionDTO": {
@@ -9885,10 +11402,15 @@
               "format": "uuid"
             },
             "uniqueItems": true
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
-          "permissionIds"
+          "permissionIds",
+          "updatedById"
         ]
       },
       "RolePermissionTableDTO": {
@@ -10159,6 +11681,7 @@
       },
       "SchedulePostDTO": {
         "type": "object",
+        "description": "Format for Maintenance Schedule create",
         "properties": {
           "assetId": {
             "type": "string",
@@ -10244,6 +11767,7 @@
       },
       "SchedulePutDTO": {
         "type": "object",
+        "description": "Format for Maintenance Schedule update",
         "properties": {
           "active": {
             "type": "boolean"
@@ -10328,6 +11852,7 @@
       },
       "ScheduleTableDTO": {
         "type": "object",
+        "description": "Format for Maintenance Schedule read",
         "properties": {
           "active": {
             "type": "boolean"
@@ -10335,6 +11860,10 @@
           "assetId": {
             "type": "string",
             "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "createdById": {
             "type": "string",
@@ -10392,6 +11921,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "weekRank": {
             "type": "integer",
             "format": "int32"
@@ -10400,28 +11933,16 @@
         "required": [
           "active",
           "assetId",
+          "createdAt",
           "id",
           "intervalUnit",
           "intervalValue",
           "leadTimeHours",
           "name",
           "startDate",
-          "timeToCompleteHours"
+          "timeToCompleteHours",
+          "updatedAt"
         ]
-      },
-      "SortObject": {
-        "type": "object",
-        "properties": {
-          "empty": {
-            "type": "boolean"
-          },
-          "sorted": {
-            "type": "boolean"
-          },
-          "unsorted": {
-            "type": "boolean"
-          }
-        }
       },
       "SubscriptionAvailedPostDTO": {
         "type": "object",
@@ -10721,6 +12242,9 @@
             "type": "string",
             "format": "uuid"
           },
+          "isQuantityValid": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -10745,6 +12269,7 @@
         },
         "required": [
           "createdById",
+          "isQuantityValid",
           "name",
           "objectIds",
           "quantity",
@@ -10755,6 +12280,9 @@
         "type": "object",
         "description": "Format for Supplies Log update",
         "properties": {
+          "isQuantityValid": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -10782,6 +12310,7 @@
           }
         },
         "required": [
+          "isQuantityValid",
           "name",
           "objectIds",
           "quantity",
@@ -10793,6 +12322,10 @@
         "type": "object",
         "description": "Format for Supplies Log read",
         "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -10822,17 +12355,23 @@
             "type": "string",
             "format": "uuid"
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
           }
         },
         "required": [
+          "createdAt",
           "id",
           "name",
           "objectIds",
           "quantity",
-          "suppliesId"
+          "suppliesId",
+          "updatedAt"
         ]
       },
       "SupplyPostDTO": {
@@ -10909,6 +12448,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "createdById": {
             "type": "string",
             "format": "uuid"
@@ -10934,6 +12477,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "updatedById": {
             "type": "string",
             "format": "uuid"
@@ -10941,28 +12488,12 @@
         },
         "required": [
           "branchId",
+          "createdAt",
           "id",
           "name",
           "objectIds",
-          "quantity"
-        ]
-      },
-      "SupplyWithLogsDTO": {
-        "type": "object",
-        "description": "Wrapper for Supply and its Logs",
-        "properties": {
-          "logs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SuppliesLogTableDTO"
-            }
-          },
-          "supply": {
-            "$ref": "#/components/schemas/SupplyTableDTO"
-          }
-        },
-        "required": [
-          "supply"
+          "quantity",
+          "updatedAt"
         ]
       },
       "UserPostDTO": {
@@ -10975,11 +12506,19 @@
             "type": "string",
             "maxLength": 64,
             "minLength": 8
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "required": [
           "email",
-          "password"
+          "password",
+          "roles"
         ]
       },
       "UserPutDTO": {
@@ -10987,10 +12526,34 @@
         "properties": {
           "email": {
             "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "required": [
-          "email"
+          "email",
+          "roles"
+        ]
+      },
+      "UserRoleBriefDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ]
       },
       "UserTableDTO": {
@@ -11014,13 +12577,20 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "userRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserRoleBriefDTO"
+            }
           }
         },
         "required": [
           "createdAt",
           "email",
           "id",
-          "updatedAt"
+          "updatedAt",
+          "userRoles"
         ]
       },
       "UtilityExpenseCreateDTO": {

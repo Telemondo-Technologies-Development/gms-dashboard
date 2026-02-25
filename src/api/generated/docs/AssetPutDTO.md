@@ -1,6 +1,7 @@
 
 # AssetPutDTO
 
+Format for Asset update
 
 ## Properties
 

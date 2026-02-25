@@ -8,6 +8,7 @@ Format for Supplies Log create
 Name | Type
 ------------ | -------------
 `createdById` | string
+`isQuantityValid` | boolean
 `name` | string
 `objectIds` | Array&lt;string&gt;
 `quantity` | number
@@ -22,6 +23,7 @@ import type { SuppliesLogPostDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "createdById": null,
+  "isQuantityValid": null,
   "name": null,
   "objectIds": null,
   "quantity": null,

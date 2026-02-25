@@ -64,6 +64,7 @@ export interface UpdateScheduleRequest {
 export class MaintenanceScheduleApi extends runtime.BaseAPI {
 
     /**
+     * Create a Maintenance Schedule
      */
     async createScheduleRaw(requestParameters: CreateScheduleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseScheduleTableDTO>> {
         if (requestParameters['schedulePostDTO'] == null) {
@@ -94,6 +95,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
+     * Create a Maintenance Schedule
      */
     async createSchedule(requestParameters: CreateScheduleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseScheduleTableDTO> {
         const response = await this.createScheduleRaw(requestParameters, initOverrides);
@@ -101,6 +103,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
+     * Delete a Maintenance Schedule by ID
      */
     async deleteScheduleRaw(requestParameters: DeleteScheduleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseUnit>> {
         if (requestParameters['id'] == null) {
@@ -129,6 +132,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
+     * Delete a Maintenance Schedule by ID
      */
     async deleteSchedule(requestParameters: DeleteScheduleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseUnit> {
         const response = await this.deleteScheduleRaw(requestParameters, initOverrides);
@@ -136,6 +140,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get all Maintenance Schedules
      */
     async getAllSchedulesRaw(requestParameters: GetAllSchedulesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseListScheduleTableDTO>> {
         if (requestParameters['pageable'] == null) {
@@ -167,6 +172,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
+     * Get all Maintenance Schedules
      */
     async getAllSchedules(requestParameters: GetAllSchedulesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseListScheduleTableDTO> {
         const response = await this.getAllSchedulesRaw(requestParameters, initOverrides);
@@ -174,7 +180,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get an asset by ID
+     * Get a Maintenance Schedule by ID
      */
     async getAsset1Raw(requestParameters: GetAsset1Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseScheduleTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -203,7 +209,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get an asset by ID
+     * Get a Maintenance Schedule by ID
      */
     async getAsset1(requestParameters: GetAsset1Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseScheduleTableDTO> {
         const response = await this.getAsset1Raw(requestParameters, initOverrides);
@@ -211,6 +217,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
+     * Update a Maintenance Schedule by id
      */
     async updateScheduleRaw(requestParameters: UpdateScheduleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseScheduleTableDTO>> {
         if (requestParameters['id'] == null) {
@@ -249,6 +256,7 @@ export class MaintenanceScheduleApi extends runtime.BaseAPI {
     }
 
     /**
+     * Update a Maintenance Schedule by id
      */
     async updateSchedule(requestParameters: UpdateScheduleRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseScheduleTableDTO> {
         const response = await this.updateScheduleRaw(requestParameters, initOverrides);

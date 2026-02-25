@@ -8,12 +8,14 @@ Format for Supply read
 Name | Type
 ------------ | -------------
 `branchId` | string
+`createdAt` | Date
 `createdById` | string
 `description` | string
 `id` | string
 `name` | string
 `objectIds` | Array&lt;string&gt;
 `quantity` | number
+`updatedAt` | Date
 `updatedById` | string
 
 ## Example
@@ -24,12 +26,14 @@ import type { SupplyTableDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "branchId": null,
+  "createdAt": null,
   "createdById": null,
   "description": null,
   "id": null,
   "name": null,
   "objectIds": null,
   "quantity": null,
+  "updatedAt": null,
   "updatedById": null,
 } satisfies SupplyTableDTO
 

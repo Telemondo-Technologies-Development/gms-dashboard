@@ -1,6 +1,7 @@
 
 # AssetMaintenancePatchDTO
 
+Format for Asset Maintenance Log patch
 
 ## Properties
 

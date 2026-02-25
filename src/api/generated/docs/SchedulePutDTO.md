@@ -1,6 +1,7 @@
 
 # SchedulePutDTO
 
+Format for Maintenance Schedule update
 
 ## Properties
 

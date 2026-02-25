@@ -11,6 +11,7 @@ Name | Type
 `email` | string
 `id` | string
 `updatedAt` | Date
+`userRoles` | [Array&lt;UserRoleBriefDTO&gt;](UserRoleBriefDTO.md)
 
 ## Example
 
@@ -24,6 +25,7 @@ const example = {
   "email": null,
   "id": null,
   "updatedAt": null,
+  "userRoles": null,
 } satisfies UserTableDTO
 
 console.log(example)

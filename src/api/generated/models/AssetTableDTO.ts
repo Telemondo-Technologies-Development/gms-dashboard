@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * 
+ * Format for Asset read
  * @export
  * @interface AssetTableDTO
  */
@@ -31,6 +31,12 @@ export interface AssetTableDTO {
      * @memberof AssetTableDTO
      */
     branchId: string;
+    /**
+     * 
+     * @type {Date}
+     * @memberof AssetTableDTO
+     */
+    createdAt: Date;
     /**
      * 
      * @type {string}
@@ -75,6 +81,12 @@ export interface AssetTableDTO {
     remarks?: string;
     /**
      * 
+     * @type {Date}
+     * @memberof AssetTableDTO
+     */
+    updatedAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AssetTableDTO
      */
@@ -87,9 +99,11 @@ export interface AssetTableDTO {
 export function instanceOfAssetTableDTO(value: object): value is AssetTableDTO {
     if (!('assetCategoryId' in value) || value['assetCategoryId'] === undefined) return false;
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
+    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -105,6 +119,7 @@ export function AssetTableDTOFromJSONTyped(json: any, ignoreDiscriminator: boole
         
         'assetCategoryId': json['assetCategoryId'],
         'branchId': json['branchId'],
+        'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'endOfLife': json['endOfLife'] == null ? undefined : (new Date(json['endOfLife'])),
         'id': json['id'],
@@ -112,6 +127,7 @@ export function AssetTableDTOFromJSONTyped(json: any, ignoreDiscriminator: boole
         'name': json['name'],
         'objectIds': json['objectIds'],
         'remarks': json['remarks'] == null ? undefined : json['remarks'],
+        'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
 }
@@ -129,6 +145,7 @@ export function AssetTableDTOToJSONTyped(value?: AssetTableDTO | null, ignoreDis
         
         'assetCategoryId': value['assetCategoryId'],
         'branchId': value['branchId'],
+        'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'endOfLife': value['endOfLife'] == null ? value['endOfLife'] : value['endOfLife'].toISOString(),
         'id': value['id'],
@@ -136,6 +153,7 @@ export function AssetTableDTOToJSONTyped(value?: AssetTableDTO | null, ignoreDis
         'name': value['name'],
         'objectIds': value['objectIds'],
         'remarks': value['remarks'],
+        'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],
     };
 }

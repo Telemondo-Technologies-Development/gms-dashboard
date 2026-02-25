@@ -21,6 +21,12 @@ import { mapValues } from '../runtime';
 export interface ReportTypeTableDTO {
     /**
      * 
+     * @type {Date}
+     * @memberof ReportTypeTableDTO
+     */
+    createdAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof ReportTypeTableDTO
      */
@@ -39,6 +45,12 @@ export interface ReportTypeTableDTO {
     name: string;
     /**
      * 
+     * @type {Date}
+     * @memberof ReportTypeTableDTO
+     */
+    updatedAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof ReportTypeTableDTO
      */
@@ -49,8 +61,10 @@ export interface ReportTypeTableDTO {
  * Check if a given object implements the ReportTypeTableDTO interface.
  */
 export function instanceOfReportTypeTableDTO(value: object): value is ReportTypeTableDTO {
+    if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
+    if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
 
@@ -64,9 +78,11 @@ export function ReportTypeTableDTOFromJSONTyped(json: any, ignoreDiscriminator: 
     }
     return {
         
+        'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'id': json['id'],
         'name': json['name'],
+        'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
 }
@@ -82,9 +98,11 @@ export function ReportTypeTableDTOToJSONTyped(value?: ReportTypeTableDTO | null,
 
     return {
         
+        'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'id': value['id'],
         'name': value['name'],
+        'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],
     };
 }

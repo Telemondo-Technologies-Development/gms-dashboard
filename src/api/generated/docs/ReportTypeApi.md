@@ -4,11 +4,11 @@ All URIs are relative to *http://localhost:8080*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
-| [**_delete**](ReportTypeApi.md#_delete) | **DELETE** /api/report/type/{id} |  |
-| [**create**](ReportTypeApi.md#create) | **POST** /api/report/type |  |
-| [**getAll**](ReportTypeApi.md#getall) | **GET** /api/report/type |  |
-| [**getById**](ReportTypeApi.md#getbyid) | **GET** /api/report/type/{id} |  |
-| [**update**](ReportTypeApi.md#update) | **PUT** /api/report/type/{id} |  |
+| [**_delete**](ReportTypeApi.md#_delete) | **DELETE** /api/report/type/{id} | Delete a Report Type by id |
+| [**create**](ReportTypeApi.md#create) | **POST** /api/report/type | Create a Report Type |
+| [**getAll**](ReportTypeApi.md#getall) | **GET** /api/report/type | Get all Report Types |
+| [**getById**](ReportTypeApi.md#getbyid) | **GET** /api/report/type/{id} | Get a Report Type by id |
+| [**update**](ReportTypeApi.md#update) | **PUT** /api/report/type/{id} | Update a Report Type |
 
 
 
@@ -16,7 +16,7 @@ All URIs are relative to *http://localhost:8080*
 
 > ApiResponseUnit _delete(id)
 
-
+Delete a Report Type by id
 
 ### Example
 
@@ -81,7 +81,7 @@ No authorization required
 
 > ApiResponseReportTypeTableDTO create(reportTypePostDTO)
 
-
+Create a Report Type
 
 ### Example
 
@@ -146,7 +146,7 @@ No authorization required
 
 > ApiResponseListReportTypeTableDTO getAll(pageable)
 
-
+Get all Report Types
 
 ### Example
 
@@ -211,7 +211,7 @@ No authorization required
 
 > ApiResponseReportTypeTableDTO getById(id)
 
-
+Get a Report Type by id
 
 ### Example
 
@@ -276,7 +276,7 @@ No authorization required
 
 > ApiResponseReportTypeTableDTO update(id, reportTypePutDTO)
 
-
+Update a Report Type
 
 ### Example
 

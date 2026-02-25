@@ -14,7 +14,7 @@
 
 import { mapValues } from '../runtime';
 /**
- * 
+ * Format for Asset create
  * @export
  * @interface AssetPostDTO
  */
