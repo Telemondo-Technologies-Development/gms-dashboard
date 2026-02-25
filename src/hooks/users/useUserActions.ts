@@ -92,6 +92,7 @@ export function useUserActions() {
       body: JSON.stringify({
         username: values.username.trim(),
         password: values.password,
+        roles: [],
       }),
     })
 
@@ -107,6 +108,7 @@ export function useUserActions() {
       userPostDTO: {
         email: values.username.trim(),
         password: values.password,
+        roles: [],
       },
     })
   }
