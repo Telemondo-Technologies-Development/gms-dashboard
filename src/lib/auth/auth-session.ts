@@ -16,17 +16,40 @@ import { persist } from 'zustand/middleware'
 import type { BranchListDTO } from '@/api/generated/models'
 import { normalizeBranches } from '@/lib/auth/auth-branches'
 
+export type PermissionMap = Record<string, string[]>
+
+function normalizePermissions(value: unknown): PermissionMap {
+  if (!value || typeof value !== 'object') return {}
+
+  const permissions: PermissionMap = {}
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof key !== 'string' || !Array.isArray(entry)) continue
+
+    const actions = entry
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter(Boolean)
+
+    if (actions.length > 0) {
+      permissions[key.trim()] = Array.from(new Set(actions))
+    }
+  }
+
+  return permissions
+}
+
 export type AuthSession = {
   token: string | null
   email: string | null
   username: string | null
   actorId: string | null
   roles: string[]
+  permissions: PermissionMap
   assignedBranches: BranchListDTO[] // All branches user can access
 }
 
 type AuthStore = AuthSession & {
-  setAuthSession: (data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'roles' | 'assignedBranches'>>) => void
+  setAuthSession: (data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'roles' | 'permissions' | 'assignedBranches'>>) => void
   clearAuthSession: () => void
 }
 
@@ -36,6 +59,7 @@ const initialState: AuthSession = {
   username: null,
   actorId: null,
   roles: [],
+  permissions: {},
   assignedBranches: [],
 }
 
@@ -57,6 +81,9 @@ export const useAuthStore = create<AuthStore>()(
             roles: 'roles' in data && Array.isArray(data.roles)
               ? data.roles.filter((role): role is string => typeof role === 'string' && role.trim().length > 0)
               : state.roles,
+            permissions: 'permissions' in data
+              ? normalizePermissions(data.permissions)
+              : state.permissions,
             assignedBranches,
           }
         }),
@@ -74,6 +101,7 @@ export function useAuthSession(): AuthSession {
   const username = useAuthStore((state) => state.username)
   const actorId = useAuthStore((state) => state.actorId)
   const roles = useAuthStore((state) => state.roles)
+  const permissions = useAuthStore((state) => state.permissions)
   const assignedBranches = useAuthStore((state) => state.assignedBranches)
 
   return {
@@ -82,11 +110,12 @@ export function useAuthSession(): AuthSession {
     username,
     actorId,
     roles,
+    permissions,
     assignedBranches,
   }
 }
 
-export function setAuthSession(data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'roles' | 'assignedBranches'>>): void {
+export function setAuthSession(data: Partial<Pick<AuthSession, 'token' | 'email' | 'username' | 'actorId' | 'roles' | 'permissions' | 'assignedBranches'>>): void {
   useAuthStore.getState().setAuthSession(data)
 }
 
@@ -102,6 +131,7 @@ export function readAuthSession(): AuthSession {
     username: state.username,
     actorId: state.actorId,
     roles: state.roles,
+    permissions: state.permissions,
     assignedBranches: state.assignedBranches,
   }
 }

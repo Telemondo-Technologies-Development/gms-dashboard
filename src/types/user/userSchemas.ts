@@ -83,8 +83,8 @@ export type UserFormInput = z.input<typeof userFormSchema>
 
 // Schema for creating a system user (matches UserPostDTO requirements)
 export const createUserFormSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  username: z.string().min(1, 'Username is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
 export type CreateUserFormValues = z.infer<typeof createUserFormSchema>

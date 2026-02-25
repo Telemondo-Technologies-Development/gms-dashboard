@@ -9,6 +9,7 @@ import { normalizeBranches } from "@/lib/auth/auth-branches";
 import { clearAuthSession, readAuthSession, setAuthSession } from "@/lib/auth/auth-session";
 import { extractRoleCandidates, getRoleBasedDashboardPath } from "@/lib/auth/auth-permissions";
 import { tryDecodeJwtClaims } from "@/lib/auth/jwt-utils";
+import type { PermissionMap } from "@/lib/auth/auth-session";
 
 interface UseLoginOptions {
   redirectUrl?: string;
@@ -26,6 +27,26 @@ interface UseLoginResult {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object";
+}
+
+function normalizePermissionMap(value: unknown): PermissionMap {
+  if (!value || typeof value !== "object") return {};
+
+  const permissions: PermissionMap = {};
+  for (const [resource, actions] of Object.entries(value as Record<string, unknown>)) {
+    if (!Array.isArray(actions)) continue;
+
+    const normalizedActions = actions
+      .filter((action): action is string => typeof action === "string")
+      .map((action) => action.trim())
+      .filter(Boolean);
+
+    if (normalizedActions.length > 0) {
+      permissions[resource] = Array.from(new Set(normalizedActions));
+    }
+  }
+
+  return permissions;
 }
 
 function storeLoginIdentityFromPayload(
@@ -49,6 +70,7 @@ function storeLoginIdentityFromPayload(
   const email = username && username.includes("@") ? username : null;
 
   const branches = normalizeBranches(payload["branches"]);
+  const permissions = normalizePermissionMap(payload["permissions"]);
   const payloadRoles = extractRoleCandidates(payload);
   const tokenRoles = extractRoleCandidates(token ? tryDecodeJwtClaims(token) : null);
   const roles = Array.from(new Set([...payloadRoles, ...tokenRoles]));
@@ -59,6 +81,7 @@ function storeLoginIdentityFromPayload(
     username,
     email,
     roles,
+    permissions,
     assignedBranches: branches,
   });
 }

@@ -7,6 +7,8 @@
 
 import { tryDecodeJwtClaims, type JwtClaims } from './jwt-utils'
 
+export type PermissionMap = Record<string, string[]>
+
 export type { JwtClaims }
 
 function toStringArray(value: unknown): string[] {
@@ -156,4 +158,18 @@ export function getRoleBasedDashboardPath(
 ): string {
   if (isAdminSession({ token, roles })) return '/dashboard/admin/users'
   return '/dashboard/marketing/membership'
+}
+
+export function hasPermission(
+  permissions: PermissionMap | null | undefined,
+  resource: string,
+  action: string,
+): boolean {
+  if (!permissions || !resource || !action) return false
+
+  const actions = permissions[resource]
+  if (!Array.isArray(actions) || actions.length === 0) return false
+
+  const normalizedAction = action.trim().toLowerCase()
+  return actions.some((entry) => entry.trim().toLowerCase() === normalizedAction)
 }

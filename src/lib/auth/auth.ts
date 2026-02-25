@@ -40,6 +40,7 @@ export {
   isAdminSession,
   rolesHaveAdmin,
   extractRoleCandidates,
+  hasPermission,
   type JwtClaims,
 } from './auth-permissions'
 
