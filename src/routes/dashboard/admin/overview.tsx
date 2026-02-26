@@ -305,13 +305,13 @@ function DashboardOverview() {
             title="Add Asset"
             description="Register new equipment or supplies"
             icon={Package}
-            onClick={() => navigate({ to: '/dashboard/marketing/assets' })}
+            onClick={() => navigate({ to: '/dashboard/marketing/asset' })}
           />
           <QuickActionCard
             title="Schedule Maintenance"
             description="Plan asset maintenance tasks"
             icon={Wrench}
-            onClick={() => navigate({ to: '/dashboard/marketing/assets' })}
+            onClick={() => navigate({ to: '/dashboard/marketing/asset' })}
           />
         </div>
       </div>

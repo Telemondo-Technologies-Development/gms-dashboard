@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { useBillingCycles } from '@/hooks/membership/useMembershipBillingCycles'
 
 interface InlineAddSubscriptionFormProps {
@@ -101,17 +100,6 @@ export function InlineAddSubscriptionForm({ formState, setFormState, onCancel, e
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="subscription-description">Description</Label>
-        <Textarea
-          id="subscription-description"
-          value={formState.description}
-          onChange={(e) => setFormState((prev) => ({ ...prev, description: e.target.value }))}
-          placeholder="What does this plan include?"
-          className="resize-none min-h-[80px] bg-background"
-        />
       </div>
       
       {selectedCycle ? (

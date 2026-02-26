@@ -67,7 +67,7 @@ export function EmployeeTab({
 
   return (
     <>
-    <div className="">
+    <div className="relative w-full overflow-auto">
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b border-muted/60">
@@ -91,10 +91,12 @@ export function EmployeeTab({
             ) : filteredEmployees.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center">
-                  <div className="flex flex-col items-center justify-center gap-1 text-muted-foreground">
-                    <User className="h-8 w-8 opacity-20 mb-2" />
-                    <p className="font-medium text-foreground">No employees found</p>
-                    <p className="text-xs">
+                  <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                      <User className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">No employees found</h3>
+                    <p className="text-muted-foreground max-w-sm mb-6">
                       {normalizedSearch
                         ? `No results matching "${normalizedSearch}"`
                         : 'Your employee list is currently empty.'}
@@ -117,10 +119,10 @@ export function EmployeeTab({
                     }
                   }}
                 >
-                  <TableCell className="pl-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-foreground">
+                  <TableCell className="pl-6 py-4 align-top">
+                    <div className="flex items-start gap-3">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                           {employee.firstName} {employee.surname}
                         </span>
                         {/* Position field not in DTO yet, temporarily removed */}
@@ -128,15 +130,15 @@ export function EmployeeTab({
                     </div>
                   </TableCell>
 
-                  <TableCell className="py-4">
+                  <TableCell className="py-4 align-top">
                     <div className="flex flex-col gap-1.5 text-sm">
                       {employee.user?.email ? (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors max-w-44">
+                              <div className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-muted">
                                 <Mail className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                                <span className="truncate">{employee.user.email}</span>
+                                <span className="truncate max-w-[150px]">{employee.user.email}</span>
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -145,14 +147,14 @@ export function EmployeeTab({
                           </Tooltip>
                         </TooltipProvider>
                       ) : (
-                        <div className="flex items-center gap-2 text-muted-foreground/60 italic">
+                        <div className="flex items-center gap-1.5 text-muted-foreground/60 italic p-1 -ml-1">
                           <Mail className="h-3.5 w-3.5 shrink-0 opacity-40" />
                           <span>No username linked</span>
                         </div>
                       )}
                       
                       {employee.contactNo && (
-                        <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
+                        <div className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-muted">
                           <Phone className="h-3.5 w-3.5 shrink-0 opacity-70" />
                           <span>{employee.contactNo}</span>
                         </div>
@@ -160,7 +162,7 @@ export function EmployeeTab({
                     </div>
                   </TableCell>
                   
-                  <TableCell className="py-4">
+                  <TableCell className="py-4 align-top">
                     <div className="flex flex-col items-start gap-2">
                       <div className="flex items-center gap-1.5">
                         {employee.user ? (
@@ -179,7 +181,7 @@ export function EmployeeTab({
                     </div>
                   </TableCell>
                   
-                  <TableCell className="py-4 text-right">
+                  <TableCell className="py-4 align-top text-right">
                     <div className="flex justify-end">
                       {employee.status === 'IN' ? (
                         <Badge className="gap-1 bg-green-500 hover:bg-green-600 border-transparent">
@@ -193,7 +195,7 @@ export function EmployeeTab({
                     </div>
                   </TableCell>
 
-                  <TableCell className="py-4 pr-6 text-right">
+                  <TableCell className="py-4 align-top pr-6 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
