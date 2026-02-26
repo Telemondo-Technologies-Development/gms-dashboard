@@ -1,6 +1,7 @@
   export const memberQueryKeys = {
     members: 'members',
     memberSubscriptions: 'memberSubscriptions',
+    attendances: 'attendances',
 
   }
 

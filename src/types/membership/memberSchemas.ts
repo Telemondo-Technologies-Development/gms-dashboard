@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 export const memberStatusSchema = z.enum(['IN', 'OUT', 'UNDECIDED'])
 
+export const attendanceSourceSchema = z.enum(['MANUAL', 'QR', 'FACE', 'FINGERPRINT'])
+
 export const subscriptionStatusSchema = z.enum(['ACTIVE', 'CANCELED', 'DONE'])
 
 export interface AttendanceRecord {
@@ -140,6 +142,29 @@ export const apiResponseListMemberTableSchema = z.object({
 
 export type ApiResponseListMemberTable = z.infer<typeof apiResponseListMemberTableSchema>
 
+export const attendanceTableDataSchema = z.object({
+  actorId: z.string().uuid().nullable().default(null),
+  branchId: z.string().uuid().nullable().default(null),
+  createdById: z.string().uuid().nullable().default(null),
+  id: z.string().uuid(),
+  source: attendanceSourceSchema,
+  type: memberStatusSchema,
+  updatedById: z.string().uuid().nullable().default(null),
+})
+
+export type AttendanceTableData = z.infer<typeof attendanceTableDataSchema>
+
+export const apiResponseListAttendanceTableSchema = z.object({
+  data: z.array(attendanceTableDataSchema),
+  errors: z.array(apiErrorSchema).nullable().default(null),
+  message: z.string().optional(),
+  meta: apiMetaSchema.nullable().default(null),
+  success: z.boolean(),
+  timestamp: z.number().optional(),
+})
+
+export type ApiResponseListAttendanceTable = z.infer<typeof apiResponseListAttendanceTableSchema>
+
 // Member Subscription schemas
 export const memberSubscriptionPostDtoSchema = z.object({
   actorId: z.string().uuid(),
@@ -179,3 +204,17 @@ export const memberSubscriptionTableDataSchema = z.object({
 })
 
 export type MemberSubscriptionTableData = z.infer<typeof memberSubscriptionTableDataSchema>
+
+
+export interface MembershipAddAttendanceProps {
+  members: MemberFormData[]
+}
+
+export interface AttendanceTableRow {
+  id: string
+  actorId: string
+  memberName: string
+  membershipType: string
+  source: string
+  status: string
+}

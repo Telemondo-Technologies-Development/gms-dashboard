@@ -2,12 +2,18 @@
 import { format } from 'date-fns'
 import { Search, Calendar, RefreshCw, Loader2, User, Mail, Phone, CreditCard, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { useMembersData } from '@/hooks/membership/useMembership'
 import { AddMemberDialog } from '@/components/membership-components/MembershipAddFormDialog'
 import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm'
 import { getAuthenticatedApi } from '@/lib/api-client'
+import { useAuthSession } from '@/lib/auth/auth-session'
+import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
 import { MemberApi } from '@/api/generated/apis/MemberApi'
+import { AttendanceApi } from '@/api/generated/apis/AttendanceApi'
+import { AttendancePostDTOSourceEnum, AttendancePostDTOTypeEnum } from '@/api/generated/models/AttendancePostDTO'
+import { memberQueryKeys } from '@/lib/QueryKeys'
 import type { MemberFormData } from '@/types/membership/memberSchemas'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -45,6 +51,8 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
   const [memberToDelete, setMemberToDelete] = useState<MemberFormData | null>(null)
 
   const { enrichedMembers, isFetching, error, refetchAll } = useMembersData()
+  const session = useAuthSession()
+  const selectedBranchId = useSelectedBranchId()
   const queryClient = useQueryClient()
 
   const deleteMemberMutation = useMutation({
@@ -54,6 +62,48 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
     },
     onSuccess: () => {
       refetchAll()
+    },
+  })
+
+  const addAttendanceMutation = useMutation({
+    mutationFn: async (memberGroup: MemberFormData) => {
+      const actorId = memberGroup.actorId
+      if (!actorId) {
+        throw new Error('Cannot add attendance: member has no actor id.')
+      }
+
+      const createdById = session.actorId
+      if (!createdById) {
+        throw new Error('Cannot add attendance: current user actor id is missing.')
+      }
+
+      if (!selectedBranchId) {
+        throw new Error('Cannot add attendance: no branch selected.')
+      }
+
+      const attendanceApi = getAuthenticatedApi(AttendanceApi)
+      const response = await attendanceApi.createAttendance({
+        attendancePostDTO: {
+          actorId,
+          branchId: selectedBranchId,
+          createdById,
+          source: AttendancePostDTOSourceEnum.Manual,
+          type: AttendancePostDTOTypeEnum.In,
+        },
+      })
+
+      if (!response.success) {
+        throw new Error(response.message ?? 'Failed to add attendance.')
+      }
+
+      return response
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [memberQueryKeys.attendances] })
+      toast.success('Attendance added.')
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : 'Failed to add attendance.')
     },
   })
 
@@ -113,7 +163,7 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
               Manage your {enrichedMembers.length} {enrichedMembers.length === 1 ? 'member' : 'members'} and their subscription details.
             </CardDescription>
           </div>
-          <Badge variant="secondary" className="px-3 py-1 text-sm">
+          <Badge variant="default" className="px-3 py-1 text-sm">
             Total: {enrichedMembers.length}
           </Badge>
         </div>
@@ -287,6 +337,15 @@ function MembersTable({ onSelectMember, pageSize = 8 }: Props) {
                                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSelectMember(memberGroup); }}>
                                   <Pencil className="mr-2 h-4 w-4" />
                                   Edit Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    addAttendanceMutation.mutate(memberGroup)
+                                  }}
+                                >
+                                  <Calendar className="mr-2 h-4 w-4" />
+                                  Add Attendance
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem 
