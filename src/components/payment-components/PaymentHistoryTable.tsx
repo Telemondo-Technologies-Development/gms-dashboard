@@ -272,26 +272,7 @@ export function PaymentHistoryTable() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-primary">Payment History</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            View and manage billing records, invoices, and transaction statuses.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={paymentsLoading}>
-            <RefreshCw className={cn("h-4 w-4 mr-2", paymentsLoading && "animate-spin")} />
-            Refresh
-          </Button>
-          <Button size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-        </div>
-      </div>
-      
+    <div className="space-y-6 h-full flex flex-col">
       <form.Subscribe selector={(state) => state.values}>
         {(filters) => {
           // Compute filtered data inside render
@@ -312,20 +293,44 @@ export function PaymentHistoryTable() {
           const pageItems = filteredPayments.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
 
           return (
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-4 h-full">
               {/* Main Table Card */}
-              <Card className="xl:col-span-3  flex flex-col h-full">
-                <CardHeader className="pb-4 space-y-4">
-                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                     <div>
-                       <CardTitle className="text-lg font-semibold">Transactions</CardTitle>
-                       <CardDescription>
-                         Showing {filteredPayments.length} records based on current filters
-                       </CardDescription>
-                     </div>
-                     
-                      {/* Status Filter */}
-                     <div className="w-full md:w-48">
+              <Card className="xl:col-span-3 flex flex-col h-full shadow-md border-muted/40">
+                <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl font-bold tracking-tight">Payment History</CardTitle>
+                    <CardDescription className="mt-1">
+                      View and manage {filteredPayments.length} billing records, invoices, and transaction statuses.
+                    </CardDescription>
+                  </div>
+                  <Badge variant="default" className="px-3 py-1 text-sm">
+                    Total: {filteredPayments.length}
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <div className="flex-1 min-h-0 overflow-auto">
+                <CardContent className="p-0">
+                  <div className="px-6 py-4 border-b bg-muted/5 flex flex-col md:flex-row items-start md:items-center gap-3">
+                    <div className="relative flex-1 w-full max-w-sm">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
+                      <form.Field name="query">
+                        {(field) => (
+                          <Input
+                            value={field.state.value}
+                            onChange={(e) => {
+                              field.handleChange(e.target.value)
+                              setPageIndex(0) 
+                            }}
+                            placeholder="Search by ID, member, or method..."
+                            className="pl-9 h-10 bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
+                          />
+                        )}
+                      </form.Field>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 w-full md:w-auto">
                       <form.Field name="status">
                         {(field) => (
                           <Select
@@ -335,7 +340,7 @@ export function PaymentHistoryTable() {
                               setPageIndex(0)
                             }}
                           >
-                            <SelectTrigger className="h-9">
+                            <SelectTrigger className="h-10 w-[140px] bg-background/50 border-muted-foreground/20">
                               <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -347,120 +352,115 @@ export function PaymentHistoryTable() {
                           </Select>
                         )}
                       </form.Field>
-                     </div>
-                   </div>
 
-                   <Separator />
+                      <form.Field name="fromDate">
+                        {(field) => (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  'justify-start text-left font-normal h-10 w-[130px] bg-background/50 border-muted-foreground/20',
+                                  !field.state.value && 'text-muted-foreground',
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {field.state.value ? (
+                                  format(new Date(field.state.value), 'MMM d, yyyy')
+                                ) : (
+                                  <span>From Date</span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="end">
+                              <Calendar
+                                mode="single"
+                                selected={field.state.value ? new Date(field.state.value) : undefined}
+                                onSelect={(date) => {
+                                  field.handleChange(date ? format(date, 'yyyy-MM-dd') : '')
+                                  setPageIndex(0)
+                                }}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </form.Field>
 
-                   {/* Search and Date Filters */}
-                   <div className="flex flex-col md:flex-row gap-3">
-                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
-                        <form.Field name="query">
-                          {(field) => (
-                            <Input
-                              value={field.state.value}
-                              onChange={(e) => {
-                                field.handleChange(e.target.value)
-                                setPageIndex(0) 
-                              }}
-                              placeholder="Search by ID, member, or method..."
-                              className="pl-9 h-9 bg-background/50"
-                            />
-                          )}
-                        </form.Field>
-                     </div>
-                     
-                     <div className="flex gap-2 w-full md:w-auto">
-                        <form.Field name="fromDate">
-                          {(field) => (
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className={cn(
-                                    'justify-start text-left font-normal h-9 w-full md:w-[130px]',
-                                    !field.state.value && 'text-muted-foreground',
-                                  )}
-                                >
-                                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                                  {field.state.value ? (
-                                    format(new Date(field.state.value), 'MMM d, yyyy')
-                                  ) : (
-                                    <span>From Date</span>
-                                  )}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.state.value ? new Date(field.state.value) : undefined}
-                                  onSelect={(date) => {
-                                    field.handleChange(date ? format(date, 'yyyy-MM-dd') : '')
-                                    setPageIndex(0)
-                                  }}
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          )}
-                        </form.Field>
+                      <form.Field name="toDate">
+                        {(field) => (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  'justify-start text-left font-normal h-10 w-[130px] bg-background/50 border-muted-foreground/20',
+                                  !field.state.value && 'text-muted-foreground',
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {field.state.value ? (
+                                  format(new Date(field.state.value), 'MMM d, yyyy')
+                                ) : (
+                                  <span>To Date</span>
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="end">
+                              <Calendar
+                                mode="single"
+                                selected={field.state.value ? new Date(field.state.value) : undefined}
+                                onSelect={(date) => {
+                                  field.handleChange(date ? format(date, 'yyyy-MM-dd') : '')
+                                  setPageIndex(0)
+                                }}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </form.Field>
+                    </div>
 
-                        <form.Field name="toDate">
-                          {(field) => (
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className={cn(
-                                    'justify-start text-left font-normal h-9 w-full md:w-[130px]',
-                                    !field.state.value && 'text-muted-foreground',
-                                  )}
-                                >
-                                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                                  {field.state.value ? (
-                                    format(new Date(field.state.value), 'MMM d, yyyy')
-                                  ) : (
-                                    <span>To Date</span>
-                                  )}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.state.value ? new Date(field.state.value) : undefined}
-                                  onSelect={(date) => {
-                                    field.handleChange(date ? format(date, 'yyyy-MM-dd') : '')
-                                    setPageIndex(0)
-                                  }}
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          )}
-                        </form.Field>
-                     </div>
-                   </div>
-                </CardHeader>
+                    <div className="flex items-center gap-2 ml-auto">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={handleRefresh}
+                        disabled={paymentsLoading}
+                        className="h-10 w-10 shrink-0"
+                      >
+                        {paymentsLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                      <Button className="h-10">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export
+                      </Button>
+                    </div>
+                  </div>
 
-                <CardContent className="flex-1 p-0">
                   {paymentsLoading || invoicesLoading ? (
                     <div className="flex min-h-[300px] flex-col items-center justify-center gap-2 text-muted-foreground">
                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
                        <p className="text-sm">Loading payment history...</p>
                     </div>
                   ) : filteredPayments.length === 0 ? (
-                    <div className="flex min-h-[300px] flex-col items-center justify-center p-8 text-center">
-                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                    <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
                         <Receipt className="h-6 w-6 text-muted-foreground" />
-                       </div>
-                       <h3 className="mt-4 text-lg font-semibold">No payments found</h3>
-                       <p className="mt-2 text-sm text-muted-foreground">Try adjusting your filters.</p>
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">No payments found</h3>
+                      <p className="text-muted-foreground max-w-sm mb-6">
+                        Try adjusting your filters to find what you're looking for.
+                      </p>
                     </div>
                   ) : (
-                    <div className="relative overflow-hidden">
+                    <div className="relative w-full overflow-auto">
                       <Table>
                         <TableHeader className="bg-muted/30">
                           <TableRow className="hover:bg-transparent border-b border-muted/60">
@@ -502,12 +502,12 @@ export function PaymentHistoryTable() {
                                     }
                                 }}
                               >
-                                <TableCell className="pl-6 py-4">
-                                  <div className="flex items-center gap-3">
-                                    <div>
-                                      <div className="font-medium text-sm text-foreground">
+                                <TableCell className="pl-6 py-4 align-top">
+                                  <div className="flex items-start gap-3">
+                                    <div className="flex flex-col gap-0.5">
+                                      <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                                         {membersLoading ? '...' : (memberName || 'Unknown Member')}
-                                      </div>
+                                      </span>
                                       <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                                          <span className="truncate max-w-[120px]">
                                             Invoice #{p.invoiceId.slice(0, 8)}...
@@ -517,14 +517,14 @@ export function PaymentHistoryTable() {
                                   </div>
                                 </TableCell>
                                 
-                                <TableCell className="py-4">
-                                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <TableCell className="py-4 align-top">
+                                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-muted">
                                      <CreditCard className="h-3.5 w-3.5 opacity-70" />
                                      <span>{methodsLoading ? '...' : (methodName || '—')}</span>
                                    </div>
                                 </TableCell>
                                 
-                                <TableCell className="py-4">
+                                <TableCell className="py-4 align-top">
                                    <div className="flex flex-col gap-0.5">
                                       {p.paidAt ? (
                                         <>
@@ -541,17 +541,17 @@ export function PaymentHistoryTable() {
                                    </div>
                                 </TableCell>
                                 
-                                <TableCell className="py-4">
+                                <TableCell className="py-4 align-top">
                                   <span className="font-semibold text-sm">
                                     {formatCurrency(p.amount, 'PHP')}
                                   </span>
                                 </TableCell>
                                 
-                                <TableCell className="py-4 text-right">
+                                <TableCell className="py-4 align-top text-right">
                                   {statusBadge(st)}
                                 </TableCell>
 
-                                <TableCell className="py-4 pr-6 text-right">
+                                <TableCell className="py-4 align-top pr-6 text-right">
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button
@@ -612,33 +612,34 @@ export function PaymentHistoryTable() {
                     </div>
                   )}
                 </CardContent>
+              </div>
 
-                <div className="border-t bg-muted/5 p-4 mt-auto">
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="text-xs text-muted-foreground font-medium">
-                            Page {pageIndex + 1} of {pageCount}
-                        </div>
-                        <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-                            disabled={pageIndex <= 0}
-                            className="h-8 px-3 text-xs"
-                        >
-                            Previous
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
-                            disabled={pageIndex >= pageCount - 1}
-                            className="h-8 px-3 text-xs"
-                        >
-                            Next
-                        </Button>
-                        </div>
-                    </div>
+              <div className="flex items-center justify-between px-2 py-4">
+                  <div className="flex-1 text-sm text-muted-foreground">
+                    Showing {Math.min(pageIndex * pageSize + 1, filteredPayments.length)} to {Math.min((pageIndex + 1) * pageSize, filteredPayments.length)} of {filteredPayments.length} entries
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+                      disabled={pageIndex <= 0}
+                      className="h-8 px-3 text-xs"
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+                      disabled={pageIndex >= pageCount - 1}
+                      className="h-8 px-3 text-xs"
+                    >
+                      Next
+                    </Button>
+                  </div>
                 </div>
               </Card>
 

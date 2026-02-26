@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertCircle, Plus, RefreshCw, Search } from "lucide-react";
+import { AlertCircle, Plus, RefreshCw, Search, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { EmployeeDialog } from "@/components/user-components/StaffDetailsDialog";
 import { CreateEmployeeLoginDialog } from "@/components/user-components/StaffAddLogin";
@@ -167,45 +168,71 @@ function UsersPage() {
           <AlertDescription>{permissionNotice}</AlertDescription>
         </Alert>
       )}
-      <h1 className="text-2xl font-bold text-primary">Employee Management</h1>
+      <Card className="flex flex-col h-full shadow-md border-muted/40">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl font-bold tracking-tight">Employee Management</CardTitle>
+              <CardDescription className="mt-1">
+                Manage your {filteredEmployees.length} {filteredEmployees.length === 1 ? 'employee' : 'employees'} and their access.
+              </CardDescription>
+            </div>
+            <Badge variant="default" className="px-3 py-1 text-sm">
+              Total: {filteredEmployees.length}
+            </Badge>
+          </div>
+        </CardHeader>
 
-      <Card className="space-y-4">
-        <div className="grid grid-cols-1 items-center gap-2 md:grid-cols-2 p-2">
-        <div className="relative w-full md:justify-self-start">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search employees or users..."
-            className="pl-9 rounded-2xl"
-          />
+        <div className="flex-1 min-h-0 overflow-auto">
+          <CardContent className="p-0">
+            <div className="px-6 py-4 border-b bg-muted/5 flex items-center gap-3">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search employees or users..."
+                  className="pl-9 h-10 bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 ml-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleRefresh}
+                  disabled={loadingEmployees}
+                  className="h-10 w-10 shrink-0"
+                >
+                  {loadingEmployees ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSelectedEmployee(null);
+                    setIsEmployeeDialogOpen(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Add Employee
+                </Button>
+              </div>
+            </div>
+
+            <EmployeeTab
+              loadingEmployees={loadingEmployees}
+              filteredEmployees={filteredEmployees}
+              normalizedSearch={normalizedSearch}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onAddLogin={handleAddLogin}
+              onAddPermission={handleAddPermission}
+            />
+          </CardContent>
         </div>
-
-        <div className="flex w-full justify-end gap-2 md:w-auto md:justify-self-end">
-          <Button variant="outline" size="icon" onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={() => {
-              setSelectedEmployee(null);
-              setIsEmployeeDialogOpen(true);
-            }}
-          >
-            <Plus className="h-4 w-4" /> Add Employee
-          </Button>
-        </div>
-      </div>
-
-      <EmployeeTab
-        loadingEmployees={loadingEmployees}
-        filteredEmployees={filteredEmployees}
-        normalizedSearch={normalizedSearch}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onAddLogin={handleAddLogin}
-        onAddPermission={handleAddPermission}
-      />
-
       </Card>
 
       <EmployeeDialog
