@@ -14,7 +14,9 @@ import {
 	Menu,
 	PanelRightOpen,
 	ClipboardClock,
-	IdCardLanyard 
+	IdCardLanyard,
+	KeyRound,
+	Shield,
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '@/lib/utils'
@@ -102,7 +104,7 @@ export default function Aside() {
 			items: [
                 { label: "Membership", href: "/dashboard/marketing/membership", icon: Users },
 				{ label: "Branch", href: "/dashboard/marketing/branch", icon: GitBranch  },
-				{ label: "Assets", href: "/dashboard/marketing/assets", icon: ChartCandlestick   },
+				{ label: "Asset", href: "/dashboard/marketing/asset", icon: ChartCandlestick   },
 	
 			],
 		},
@@ -115,7 +117,9 @@ export default function Aside() {
 		{
 			title: "Admin",
 			items: [
-				{ label: "Staff", href: "/dashboard/admin/users", icon: IdCardLanyard  },
+				{ label: "Staff", href: "/dashboard/admin/users", icon: IdCardLanyard },
+				{ label: "Roles & Access", href: "/dashboard/admin/access", icon: KeyRound },
+				{ label: "Audit Log", href: "/dashboard/admin/audit", icon: Shield },
 				{ label: "Expenses", href: "/dashboard/admin/expense", icon: BanknoteArrowDown  },
 				{ label: "Analytics", href: "/dashboard/admin/analytics", icon: LineChart },
 				{ label: "Tracking", href: "/dashboard/admin/tracking", icon: ClipboardClock  },
