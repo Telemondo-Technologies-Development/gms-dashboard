@@ -14,7 +14,7 @@ import {
   type SubscriptionPlanFormState,
   type UseCreateSubscriptionPlanOptions,
   type UseCreateSubscriptionPlanResult,
-} from '@/types/membership/subscriptionSchemas'
+} from '@/types/membership/MembershipsubscriptionSchemas'
 
 
 
@@ -22,7 +22,6 @@ import {
 
 const defaultFormState: SubscriptionPlanFormState = {
   name: '',
-  description: '',
   amount: '',
   billingCycleId: '',
 }
@@ -47,7 +46,7 @@ export function useCreateSubscriptionPlan(
       const validated = subscriptionPostSchema.parse({
         createdById,
         name: formState.name.trim(),
-        description: formState.description.trim(),
+        description: formState.name.trim() || 'Subscription plan',
         amount: formState.amount,
         billingCycleId: formState.billingCycleId,
       })

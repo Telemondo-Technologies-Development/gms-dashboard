@@ -6,7 +6,7 @@ import { billingCycleQueryKeys } from '@/lib/QueryKeys'
 import {
   apiResponseListBillingCycleTableDTOSchema,
   type BillingCycleTableDTOParsed,
-} from '@/types/membership/subscriptionSchemas'
+} from '@/types/membership/MembershipsubscriptionSchemas'
 
 export function useBillingCycles(enabled = true) {
   const billingCycleApi = getAuthenticatedApi(BillingCycleApi)

@@ -11,11 +11,15 @@ import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAddMemberDialogData } from '@/hooks/membership/useMembershipDetails'
 import { useBillingActions } from '@/hooks/billing/useBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
-import { apiResponseMemberTableSchema, memberPostDtoSchema } from '@/types/membership/memberSchemas'
-import type { MemberFormValues } from '@/types/membership/memberSchemas'
+import {
+  apiResponseMemberTableSchema,
+  getMembershipApiErrorMessage,
+  memberPostDtoSchema,
+} from '@/types/membership/MembershipManagementSchema'
+import type { MemberFormValues } from '@/types/membership/MembershipManagementSchema'
 import { useCreateSubscriptionPlan } from '@/hooks/membership/useMembershipAddSubscriptionPlan'
 import { useCreatePaymentMethod } from '@/hooks/billing/useAddPaymentMethod'
-import type { SubscriptionPlanFormState } from '@/types/membership/subscriptionSchemas'
+import type { SubscriptionPlanFormState } from '@/types/membership/MembershipsubscriptionSchemas'
 
 interface UseAddMemberDialogResult {
   open: boolean
@@ -30,6 +34,8 @@ interface UseAddMemberDialogResult {
   setSelectedSubscriptionId: React.Dispatch<React.SetStateAction<string>>
   paymentMethodId: string
   setPaymentMethodId: React.Dispatch<React.SetStateAction<string>>
+  paymentReferenceNum: string
+  setPaymentReferenceNum: React.Dispatch<React.SetStateAction<string>>
   membershipDetails: string
   setMembershipDetails: React.Dispatch<React.SetStateAction<string>>
   selectedSubscription: SubscriptionAvailedTableDTO | undefined
@@ -62,6 +68,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState('')
   const [paymentMethodId, setPaymentMethodId] = useState('')
+  const [paymentReferenceNum, setPaymentReferenceNum] = useState('')
   const [membershipDetails, setMembershipDetails] = useState('')
 
   const {
@@ -226,7 +233,29 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
 
       const rawText = await response.text().catch(() => '')
       if (!response.ok) {
-        throw new Error(`Create member failed (${response.status}). ${rawText || 'Check server logs for details.'}`)
+        let parsedErrorPayload: unknown = null
+        if (rawText.trim()) {
+          try {
+            parsedErrorPayload = JSON.parse(rawText)
+          } catch {
+            parsedErrorPayload = null
+          }
+        }
+        const parsedErrorMessage = getMembershipApiErrorMessage(
+          parsedErrorPayload,
+          `Create member failed (${response.status}). ${rawText || 'Check server logs for details.'}`,
+        )
+
+        const isDuplicateMember =
+          response.status === 409 &&
+          typeof rawText === 'string' &&
+          (rawText.includes('VAL_009') || rawText.includes('members.uk_name'))
+
+        if (isDuplicateMember) {
+          throw new Error('A member with this name already exists. Please review the name details or edit the existing member record.')
+        }
+
+        throw new Error(parsedErrorMessage)
       }
 
       const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
@@ -309,6 +338,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
           createdById,
           amount: selectedSubscription?.amount ?? 0,
           paidAt: new Date(),
+          referenceNum: paymentReferenceNum,
         })
       } catch (payError) {
         console.warn('Payment creation skipped or failed:', payError)
@@ -341,6 +371,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
         setEndDate(undefined)
         setSelectedSubscriptionId('')
         setPaymentMethodId('')
+        setPaymentReferenceNum('')
         setMembershipDetails('')
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to create member.'
@@ -370,6 +401,8 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
     setSelectedSubscriptionId,
     paymentMethodId,
     setPaymentMethodId,
+    paymentReferenceNum,
+    setPaymentReferenceNum,
     membershipDetails,
     setMembershipDetails,
     selectedSubscription,

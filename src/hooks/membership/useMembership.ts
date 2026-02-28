@@ -4,11 +4,11 @@ import { useInvoices } from '@/hooks/billing/useInvoices'
 import { useMemberSubscriptions } from './useMembershipSubscriptions'
 import { useSubscriptionAvailed } from './useMembershipSubscriptionAvailed'
 import { readPersistedAuthToken } from '@/lib/auth/auth-session'
-import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
+import { apiResponseListMemberTableSchema } from '@/types/membership/MembershipManagementSchema'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 import type { MemberSubscriptionTableDTO } from '@/api/generated/models/MemberSubscriptionTableDTO'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
-import type { MemberFormData } from '@/types/membership/memberSchemas'
+import type { MemberFormData } from '@/types/membership/MembershipManagementSchema'
 import type { InvoiceTableDTOParsed } from '@/types/payment/paymentSchemas'
 
 const EMPTY_INVOICES: InvoiceTableDTOParsed[] = []
@@ -37,7 +37,12 @@ async function fetchMembersFromApi() {
   }
 
   const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
-  const envelope = apiResponseListMemberTableSchema.parse(parsedJson)
+  const envelopeResult = apiResponseListMemberTableSchema.safeParse(parsedJson)
+  if (!envelopeResult.success) {
+    throw new Error(`Failed to validate members response: ${envelopeResult.error.message}`)
+  }
+
+  const envelope = envelopeResult.data
   if (!envelope.success) {
     throw new Error(envelope.message ?? 'Failed to load members.')
   }

@@ -12,8 +12,14 @@ import { useMemberDetailsDialogData } from '@/hooks/membership/useMembershipCrea
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { isAdminSession } from '@/lib/auth/auth-permissions'
 import { useAuthSession } from '@/lib/auth/auth-session'
-import { memberQueryKeys } from '@/lib/QueryKeys'
-import type { MemberDetailsDialogProps, MemberInfo } from '@/types/membership/memberSchemas'
+import { invoiceQueryKeys, memberQueryKeys, paymentQueryKeys, subscriptionAvailedQueryKeys } from '@/lib/QueryKeys'
+import {
+  assertMembershipApiSuccess,
+  getCreatedMemberSubscriptionId,
+  toMembershipErrorMessage,
+  type MemberDetailsDialogProps,
+  type MemberInfo,
+} from '@/types/membership/MembershipManagementSchema'
 
 type UseMembershipDetailsDialogOptions = Pick<MemberDetailsDialogProps, 'open' | 'memberGroup'> & {
   onClose: () => void
@@ -30,6 +36,7 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState('')
   const [paymentMethodId, setPaymentMethodId] = useState('')
+  const [paymentReferenceNum, setPaymentReferenceNum] = useState('')
   const [membershipDetails, setMembershipDetails] = useState('')
   const [currentMemberSubscriptionId, setCurrentMemberSubscriptionId] = useState<string | undefined>(undefined)
 
@@ -77,6 +84,7 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
     setStartDate(memberGroup.startDate)
     setEndDate(memberGroup.endDate)
     setPaymentMethodId('')
+    setPaymentReferenceNum('')
     setMembershipDetails(memberGroup.membershipDetails)
 
     if (memberSubscriptionQuery.data) {
@@ -144,7 +152,7 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
       let creatorIdForPayment = updatedById
 
       if (currentMemberSubscriptionId) {
-        await memberSubscriptionApi.updateMemberSubscription({
+        const updateResponse = await memberSubscriptionApi.updateMemberSubscription({
           id: currentMemberSubscriptionId,
           memberSubscriptionPutDTO: {
             actorId: memberActorId ?? memberGroup.id,
@@ -157,6 +165,7 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
             updatedById,
           },
         })
+        assertMembershipApiSuccess(updateResponse, 'Failed to update subscription.')
       } else {
         const createdById = memberSubscription?.createdById || updatedById
         if (!createdById) throw new Error('Cannot determine creator ID')
@@ -172,18 +181,19 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
             subscriptionId: subscriptionIdToUse,
           },
         })
-        if (!createResponse.success || !createResponse.data) {
-          throw new Error(createResponse.message ?? 'Failed to create subscription')
-        }
-        resultingMemberSubscriptionId = createResponse.data.id
+
+        resultingMemberSubscriptionId = getCreatedMemberSubscriptionId(createResponse, 'Failed to create subscription.')
         creatorIdForPayment = createdById
       }
 
       return { memberSubscriptionId: resultingMemberSubscriptionId, createdById: creatorIdForPayment }
     },
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscriptions] })
       void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscriptions, memberActorId] })
       void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
+      void queryClient.invalidateQueries({ queryKey: [invoiceQueryKeys.invoices] })
+      void queryClient.invalidateQueries({ queryKey: [paymentQueryKeys.payments] })
     },
   })
 
@@ -248,6 +258,7 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
             createdById,
             amount: selectedSubscription.amount,
             paidAt: new Date(),
+            referenceNum: paymentReferenceNum,
           })
         }
       } catch (paymentError) {
@@ -256,11 +267,25 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
         }
       }
 
-      void queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: [memberQueryKeys.members] }),
+        queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscriptions] }),
+        queryClient.invalidateQueries({ queryKey: [memberQueryKeys.memberSubscriptions, memberActorId] }),
+        queryClient.invalidateQueries({ queryKey: [invoiceQueryKeys.invoices] }),
+        queryClient.invalidateQueries({ queryKey: [paymentQueryKeys.payments] }),
+        queryClient.invalidateQueries({ queryKey: [subscriptionAvailedQueryKeys.subscriptionAvailed] }),
+      ])
+
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: [memberQueryKeys.members], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: [memberQueryKeys.memberSubscriptions], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: [invoiceQueryKeys.invoices], type: 'active' }),
+      ])
+
       onClose()
     } catch (error) {
       console.error('Failed to save member details:', error)
-      alert(error instanceof Error ? error.message : 'Failed to save changes')
+      alert(toMembershipErrorMessage(error, 'Failed to save changes'))
     }
   }
 
@@ -274,6 +299,8 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
     setSelectedSubscriptionId,
     paymentMethodId,
     setPaymentMethodId,
+    paymentReferenceNum,
+    setPaymentReferenceNum,
     membershipDetails,
     setMembershipDetails,
     selectedSubscription,

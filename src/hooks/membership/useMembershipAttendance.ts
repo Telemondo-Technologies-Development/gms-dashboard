@@ -5,7 +5,7 @@ import { AttendanceApi } from '@/api/generated/apis/AttendanceApi'
 import type { AttendanceTableDTO } from '@/api/generated/models/AttendanceTableDTO'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 import { getAuthenticatedApi } from '@/lib/api-client'
-import { apiResponseListAttendanceTableSchema } from '@/types/membership/memberSchemas'
+import { apiResponseListAttendanceTableSchema } from '@/types/membership/MembershipManagementSchema'
 
 export function useAttendance(enabled = true) {
   const attendanceApi = getAuthenticatedApi(AttendanceApi)
@@ -18,12 +18,16 @@ export function useAttendance(enabled = true) {
       },
     })
 
-    const parsed = apiResponseListAttendanceTableSchema.parse(response)
+    const parsed = apiResponseListAttendanceTableSchema.safeParse(response)
     if (!parsed.success) {
-      throw new Error(parsed.message ?? 'Failed to fetch attendance records.')
+      throw new Error(`Failed to validate attendance response: ${parsed.error.message}`)
     }
 
-    return parsed.data as AttendanceTableDTO[]
+    if (!parsed.data.success) {
+      throw new Error(parsed.data.message ?? 'Failed to fetch attendance records.')
+    }
+
+    return parsed.data.data as AttendanceTableDTO[]
   }, [attendanceApi])
 
   return useQuery<AttendanceTableDTO[]>({
