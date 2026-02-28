@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthSession } from '@/lib/auth/auth-session'
 import { tryDecodeJwtClaims, getStringClaim, looksLikeUuid } from '@/lib/auth/jwt-utils'
-import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
+import { parseUserResponse, parseUsersResponse, type UserTable } from '@/types/user/userSchemas'
 import { userQueryKeys } from '@/lib/QueryKeys'
 
 async function fetchJsonOrThrow(url: string, token?: string): Promise<unknown> {
@@ -32,14 +32,7 @@ async function fetchUserById(userId: string, token?: string): Promise<UserTable>
   const url = `/api/user/${encodeURIComponent(userId)}`
 
   const json = await fetchJsonOrThrow(url, token)
-  const parsed = apiResponseUserTableSchema.safeParse(json)
-  if (!parsed.success) {
-    throw new Error('Failed to validate user response.')
-  }
-  if (!parsed.data.success) {
-    throw new Error(parsed.data.message ?? 'Failed to fetch user.')
-  }
-  return parsed.data.data
+  return parseUserResponse(json)
 }
 
 async function fetchUserByEmail(email: string, token?: string): Promise<UserTable | null> {
@@ -48,16 +41,9 @@ async function fetchUserByEmail(email: string, token?: string): Promise<UserTabl
   const url = `/api/user`
 
   const json = await fetchJsonOrThrow(url, token)
-  const parsed = apiResponseListUserTableSchema.safeParse(json)
-  if (!parsed.success) {
-    throw new Error('Failed to validate users response.')
-  }
-  if (!parsed.data.success) {
-    throw new Error(parsed.data.message ?? 'Failed to fetch users.')
-  }
-
+  const users = parseUsersResponse(json)
   const needle = email.trim().toLowerCase()
-  return parsed.data.data.find((u) => u.email.toLowerCase() === needle) ?? null
+  return users.find((u) => u.email.toLowerCase() === needle) ?? null
 }
 
 export function useCurrentUser() {

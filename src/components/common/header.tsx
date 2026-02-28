@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useEmployees } from '@/hooks/users/useEmployees'
+import { useEffect, useState } from 'react'
 import { useCurrentUser } from '@/hooks/users/useCurrentUser'
+import { useEmployeeDisplayName } from '@/hooks/users/useEmployeeDisplayName'
 import { Bell, Search, User2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,14 +16,17 @@ export default function Header() {
 
 	// prefer actorId from identity, then currentUser, then session
 	const resolvedActorId = identity?.actorId ?? currentUser?.actorId ?? session.actorId
+	const resolvedUserId = currentUser?.id ?? null
+	const resolvedEmail = (currentUser?.email ?? identity?.email ?? '').trim().toLowerCase()
 
-	// only fetch employees when we have an actorId; use a smaller page size
-	const { data: employees } = useEmployees(0, 50, !!resolvedActorId)
-
-	const currentEmployee = useMemo(() => {
-		if (!employees || !resolvedActorId) return null
-		return employees.find((e) => e.actorId === resolvedActorId) ?? null
-	}, [employees, resolvedActorId])
+	const {
+		displayName: resolvedEmployeeName,
+		employee: currentEmployee,
+		isLoading: isEmployeeLoading,
+	} = useEmployeeDisplayName({
+		ids: [resolvedActorId, resolvedUserId],
+		email: resolvedEmail,
+	})
 
 	// Update Zustand store whenever currentEmployee changes
 	useEffect(() => {
@@ -48,8 +51,9 @@ export default function Header() {
 		}
 	}, [session.assignedBranches, selectedBranchName, setSelectedBranch])
 
-	// Use Zustand store for display, with fallback to identity/currentUser
-	const displayName = employeeFullName || currentUser?.email || identity?.email || identity?.username || 'Account'
+	// Prefer employee-table name for display
+	const displayName = resolvedEmployeeName || employeeFullName || identity?.username || 'Account'
+	const isDisplayLoading = isLoading || isEmployeeLoading
 	const displayBranchName = selectedBranchName || session.assignedBranches[0]?.name || 'No Branch Assigned'
 	const searchInput = (
 		<div className="relative">
@@ -94,7 +98,7 @@ export default function Header() {
 						>
 							<User2 className="h-5 w-5" />
 							<span className="text-sm font-medium">
-							{isLoading ? 'Loading…' : displayName}
+							{isDisplayLoading ? 'Loading…' : displayName}
 							</span>
 						</Button>
 					</div>
@@ -120,7 +124,7 @@ export default function Header() {
 						>
 							<User2 className="h-5 w-5" />
 							<span className="text-sm font-medium">
-						{isLoading ? 'Loading…' : displayName}
+						{isDisplayLoading ? 'Loading…' : displayName}
 							</span>
 						</Button>
 						<Button
