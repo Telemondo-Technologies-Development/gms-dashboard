@@ -27,10 +27,11 @@ import { usePayments, usePayment } from '@/hooks/billing/usePayments'
 import { usePaymentMethods } from '@/hooks/billing/usePaymentMethods'
 import { useInvoices } from '@/hooks/billing/useInvoices'
 import { getAuthenticatedApi } from '@/lib/api-client'
+import { parseCalendarDay } from '@/lib/date-utils'
 import { MemberApi } from '@/api/generated/apis/MemberApi'
 import { PaymentApi } from '@/api/generated/apis/PaymentApi'
-import { apiResponseListMemberTableSchema } from '@/types/membership/memberSchemas'
-import type { MemberTableData } from '@/types/membership/memberSchemas'
+import { apiResponseListMemberTableSchema } from '@/types/membership/MembershipManagementSchema'
+import type { MemberTableData } from '@/types/membership/MembershipManagementSchema'
 import {
   paymentHistoryFiltersSchema,
   type PaymentHistoryFilters,
@@ -43,14 +44,11 @@ import { PaymentDetailsDialog } from '@/components/payment-components/PaymentHis
 import { ReceiptDialog } from '@/components/payment-components/PaymentHistoryReceiptDialog'
 import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm'
 
-import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Select,
   SelectContent,
@@ -59,10 +57,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Separator } from '@/components/ui/separator'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { invoiceQueryKeys, paymentQueryKeys } from '@/lib/QueryKeys'
 
 type DisplayStatus = 'paid' | 'failed' | 'pending'
 
@@ -125,7 +122,7 @@ export function PaymentHistoryTable() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [paymentToDelete, setPaymentToDelete] = useState<PaymentTableDTOParsed | null>(null)
 
-  const [pageSize, setPageSize] = useState(10)
+  const [pageSize, setPageSize] = useState(6)
   const [pageIndex, setPageIndex] = useState(0)
 
   const queryClient = useQueryClient()
@@ -136,8 +133,8 @@ export function PaymentHistoryTable() {
     },
     onSuccess: () => {
       // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: ['payments'] })
-      queryClient.invalidateQueries({ queryKey: ['invoices'] }) // Invoices might update status
+      queryClient.invalidateQueries({ queryKey: [paymentQueryKeys.payments]})
+      queryClient.invalidateQueries({ queryKey: [invoiceQueryKeys.invoices] }) // Invoices might update status
     },
   })
 
@@ -358,30 +355,48 @@ export function PaymentHistoryTable() {
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button
+                                type="button"
                                 variant="outline"
-                                className={cn(
-                                  'justify-start text-left font-normal h-10 w-[130px] bg-background/50 border-muted-foreground/20',
-                                  !field.state.value && 'text-muted-foreground',
-                                )}
+                                className={`justify-start text-left font-normal h-10 w-40 bg-background/50 border-muted-foreground/20 ${!field.state.value ? 'text-muted-foreground' : ''}`}
+                                aria-label="From date"
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.state.value ? (
-                                  format(new Date(field.state.value), 'MMM d, yyyy')
-                                ) : (
-                                  <span>From Date</span>
-                                )}
+                                {field.state.value ? format(new Date(field.state.value), 'MMM d, yyyy') : <span>From Date</span>}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
+                            <PopoverContent className="w-auto p-2" align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.state.value ? new Date(field.state.value) : undefined}
+                                selected={field.state.value ? parseCalendarDay(field.state.value) ?? undefined : undefined}
                                 onSelect={(date) => {
                                   field.handleChange(date ? format(date, 'yyyy-MM-dd') : '')
                                   setPageIndex(0)
                                 }}
                                 initialFocus
                               />
+                              <div className="mt-2 flex items-center justify-end gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    field.handleChange('')
+                                    setPageIndex(0)
+                                  }}
+                                >
+                                  Clear
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() => {
+                                    field.handleChange(format(new Date(), 'yyyy-MM-dd'))
+                                    setPageIndex(0)
+                                  }}
+                                >
+                                  Today
+                                </Button>
+                              </div>
                             </PopoverContent>
                           </Popover>
                         )}
@@ -392,30 +407,48 @@ export function PaymentHistoryTable() {
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button
+                                type="button"
                                 variant="outline"
-                                className={cn(
-                                  'justify-start text-left font-normal h-10 w-[130px] bg-background/50 border-muted-foreground/20',
-                                  !field.state.value && 'text-muted-foreground',
-                                )}
+                                className={`justify-start text-left font-normal h-10 w-40 bg-background/50 border-muted-foreground/20 ${!field.state.value ? 'text-muted-foreground' : ''}`}
+                                aria-label="To date"
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.state.value ? (
-                                  format(new Date(field.state.value), 'MMM d, yyyy')
-                                ) : (
-                                  <span>To Date</span>
-                                )}
+                                {field.state.value ? format(new Date(field.state.value), 'MMM d, yyyy') : <span>To Date</span>}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
+                            <PopoverContent className="w-auto p-2" align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.state.value ? new Date(field.state.value) : undefined}
+                                selected={field.state.value ? parseCalendarDay(field.state.value) ?? undefined : undefined}
                                 onSelect={(date) => {
                                   field.handleChange(date ? format(date, 'yyyy-MM-dd') : '')
                                   setPageIndex(0)
                                 }}
                                 initialFocus
                               />
+                              <div className="mt-2 flex items-center justify-end gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    field.handleChange('')
+                                    setPageIndex(0)
+                                  }}
+                                >
+                                  Clear
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() => {
+                                    field.handleChange(format(new Date(), 'yyyy-MM-dd'))
+                                    setPageIndex(0)
+                                  }}
+                                >
+                                  Today
+                                </Button>
+                              </div>
                             </PopoverContent>
                           </Popover>
                         )}
@@ -464,17 +497,17 @@ export function PaymentHistoryTable() {
                       <Table>
                         <TableHeader className="bg-muted/30">
                           <TableRow className="hover:bg-transparent border-b border-muted/60">
-                            <TableHead className="w-[30%] pl-6 py-4 font-semibold text-foreground/70">Member</TableHead>
-                            <TableHead className="w-[20%] py-4 font-semibold text-foreground/70">Method</TableHead>
-                            <TableHead className="w-[20%] py-4 font-semibold text-foreground/70">
+                            <TableHead className="w-[30%] pl-6 ">Member</TableHead>
+                            <TableHead className="w-[20%]">Method</TableHead>
+                            <TableHead className="w-[20%] ">
                                <div className="flex items-center gap-1">
                                  Paid Date
                                  <ArrowUpDown className="h-3 w-3" />
                                </div>
                             </TableHead>
-                            <TableHead className="w-[15%] py-4 font-semibold text-foreground/70">Amount</TableHead>
-                            <TableHead className="w-[15%] py-4 font-semibold text-foreground/70 text-right pr-6">Status</TableHead>
-                            <TableHead className="w-[50px]"></TableHead>
+                            <TableHead className="w-[15%] ">Amount</TableHead>
+                            <TableHead className="w-[15%] ">Status</TableHead>
+                            <TableHead className="w-[15%] pr-4">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -490,17 +523,7 @@ export function PaymentHistoryTable() {
                                 role="button"
                                 tabIndex={0}
                                 className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
-                                onClick={() => {
-                                  setSelectedPaymentId(p.id)
-                                  setDetailsOpen(true)
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                        e.preventDefault()
-                                        setSelectedPaymentId(p.id)
-                                        setDetailsOpen(true)
-                                    }
-                                }}
+
                               >
                                 <TableCell className="pl-6 py-4 align-top">
                                   <div className="flex items-start gap-3">
@@ -518,10 +541,15 @@ export function PaymentHistoryTable() {
                                 </TableCell>
                                 
                                 <TableCell className="py-4 align-top">
-                                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-muted">
-                                     <CreditCard className="h-3.5 w-3.5 opacity-70" />
-                                     <span>{methodsLoading ? '...' : (methodName || '—')}</span>
-                                   </div>
+                                  <div className="w-fit p-1 -ml-1 rounded-md hover:bg-muted transition-colors">
+                                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+                                      <CreditCard className="h-3.5 w-3.5 opacity-70" />
+                                      <span>{methodsLoading ? '...' : (methodName || '—')}</span>
+                                    </div>
+                                    <div className="pl-5 text-xs text-muted-foreground">
+                                      {p.referenceNum ? `Ref: ${p.referenceNum}` : 'Ref: —'}
+                                    </div>
+                                  </div>
                                 </TableCell>
                                 
                                 <TableCell className="py-4 align-top">
@@ -547,7 +575,7 @@ export function PaymentHistoryTable() {
                                   </span>
                                 </TableCell>
                                 
-                                <TableCell className="py-4 align-top text-right">
+                                <TableCell className="py-4 align-top text-left">
                                   {statusBadge(st)}
                                 </TableCell>
 
@@ -688,12 +716,6 @@ export function PaymentHistoryTable() {
                         </div>
                      </div>
                   </CardContent>
-                  <CardFooter className="bg-muted/5 border-t p-4">
-                     <Button className="w-full" variant="outline" onClick={() => setReceiptOpen(true)} disabled={!selectedPaymentId}>
-                        <Receipt className="h-4 w-4 mr-2" />
-                        Generate Receipt
-                     </Button>
-                  </CardFooter>
                 </Card>
                 
                 {/* Could add another card for filters summary or quick actions */}

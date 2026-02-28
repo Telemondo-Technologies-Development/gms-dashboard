@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import {
   CheckCircle2,
@@ -11,8 +12,19 @@ import {
   Info,
   AlertTriangle 
 } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { PaymentApi } from '@/api/generated/apis/PaymentApi'
+import { getAuthenticatedApi } from '@/lib/api-client'
+import { isAdminSession } from '@/lib/auth/auth-permissions'
+import { useAuthSession } from '@/lib/auth/auth-session'
+import { useEmployeeDisplayName } from '@/hooks/users/useEmployeeDisplayName'
+import { invoiceQueryKeys, paymentQueryKeys } from '@/lib/QueryKeys'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -90,13 +102,105 @@ export function PaymentDetailsDialog({
   onPrintReceipt,
   memberName,
 }: PaymentDetailsDialogProps) {
+  const session = useAuthSession()
+  const queryClient = useQueryClient()
+  const isAdmin = useMemo(
+    () => isAdminSession({ token: session.token, roles: session.roles }),
+    [session.token, session.roles],
+  )
+
+  const [isEditing, setIsEditing] = useState(false)
+  const [editError, setEditError] = useState<string | null>(null)
+  const [amountInput, setAmountInput] = useState('')
+  const [methodId, setMethodId] = useState('')
+  const [statusValue, setStatusValue] = useState<PaymentTableDTOParsed['status']>('IN')
+  const [paidAtInput, setPaidAtInput] = useState('')
+  const [failureReason, setFailureReason] = useState('')
+
+  const paymentMethodOptions = useMemo(
+    () => Array.from(paymentMethodMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
+    [paymentMethodMap],
+  )
+  const { displayName: createdByName, isLoading: isCreatedByLoading } = useEmployeeDisplayName(payment?.createdById)
+
+  useEffect(() => {
+    if (!payment) {
+      setIsEditing(false)
+      setEditError(null)
+      return
+    }
+
+    setAmountInput(payment.amount.toString())
+    setMethodId(payment.paymentMethodId)
+    setStatusValue(payment.status)
+    setPaidAtInput(toDateTimeLocalValue(payment.paidAt))
+    setFailureReason(payment.failureReason ?? '')
+    setEditError(null)
+    setIsEditing(false)
+  }, [payment])
+
+  const updatePaymentMutation = useMutation({
+    mutationFn: async () => {
+      if (!payment) throw new Error('No payment selected.')
+      if (!session.actorId) throw new Error('Missing actor ID for current user.')
+
+      const parsedAmount = Number(amountInput)
+      if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
+        throw new Error('Amount must be a valid positive number.')
+      }
+      if (!methodId.trim()) {
+        throw new Error('Payment method is required.')
+      }
+
+      const paidAt = paidAtInput ? new Date(paidAtInput) : undefined
+      if (paidAtInput && Number.isNaN(paidAt?.getTime())) {
+        throw new Error('Paid date is invalid.')
+      }
+
+      const paymentApi = getAuthenticatedApi(PaymentApi)
+      const response = await paymentApi.updatePayment({
+        id: payment.id,
+        paymentPutDTO: {
+          amount: parsedAmount,
+          paymentMethodId: methodId,
+          status: statusValue,
+          updatedById: session.actorId,
+          paidAt,
+          failureReason: failureReason.trim() || undefined,
+        },
+      })
+
+      if (!response.success || !response.data) {
+        throw new Error(response.message ?? 'Failed to update payment.')
+      }
+
+      return response.data
+    },
+    onSuccess: () => {
+      setEditError(null)
+      setIsEditing(false)
+      void queryClient.invalidateQueries({ queryKey: [paymentQueryKeys.payments] })
+      void queryClient.invalidateQueries({ queryKey: [invoiceQueryKeys.invoices] })
+    },
+    onError: (error: unknown) => {
+      setEditError(error instanceof Error ? error.message : 'Failed to update payment.')
+    },
+  })
+
+  const canSave =
+    !!payment &&
+    !!methodId.trim() &&
+    !!amountInput.trim() &&
+    Number(amountInput) >= 0 &&
+    !updatePaymentMutation.isPending
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl">Payment Details</DialogTitle>
           <DialogDescription>
-            Reference ID: <span className="font-mono text-xs">{payment?.id ?? '—'}</span>
+           <p>Created by:{' '} <span className="text-xs">{isCreatedByLoading ? 'Loading…' : (createdByName ?? 'Unknown user')}</span></p>
           </DialogDescription>
         </DialogHeader>
 
@@ -113,6 +217,12 @@ export function PaymentDetailsDialog({
             </div>
           ) : payment ? (
             <div className="space-y-6 pb-4">
+              {editError ? (
+                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                  {editError}
+                </div>
+              ) : null}
+
               {/* Status Card */}
             <Card className="bg-muted/10 border-none shadow-sm">
                 <CardContent className="p-4 flex flex-row items-center justify-between">
@@ -129,7 +239,7 @@ export function PaymentDetailsDialog({
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className={isEditing ? 'grid grid-cols-1 gap-6' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
                 <div className="space-y-4">
                      <h4 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
                         <User className="h-4 w-4" /> Member Information
@@ -151,19 +261,89 @@ export function PaymentDetailsDialog({
                         <CreditCard className="h-4 w-4" /> Transaction Details
                      </h4>
                      <div className="rounded-lg border p-3 bg-card space-y-3">
-                         <div>
-                            <p className="text-xs text-muted-foreground uppercase tracking-wider">Payment Method</p>
-                            <p className="font-medium text-sm mt-0.5 flex items-center gap-2">
-                               {paymentMethodMap.get(payment.paymentMethodId)?.name ?? 'Unknown Method'}
-                            </p>
-                         </div>
-                         <div>
-                            <p className="text-xs text-muted-foreground uppercase tracking-wider">Paid Date</p>
-                            <p className="font-medium text-sm mt-0.5 flex items-center gap-2">
-                               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                               {payment.paidAt ? format(new Date(payment.paidAt), 'MMM d, yyyy h:mm a') : '—'}
-                            </p>
-                         </div>
+                        {isEditing ? (
+                          <>
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Payment Method</Label>
+                              <Select value={methodId} onValueChange={setMethodId}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select payment method" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {paymentMethodOptions.map((method) => (
+                                    <SelectItem key={method.id} value={method.id}>
+                                      {method.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Amount</Label>
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={amountInput}
+                                onChange={(event) => setAmountInput(event.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Status</Label>
+                              <Select value={statusValue} onValueChange={(value) => setStatusValue(value as PaymentTableDTOParsed['status'])}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="IN">IN</SelectItem>
+                                  <SelectItem value="OUT">OUT</SelectItem>
+                                  <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Paid Date</Label>
+                              <Input
+                                type="datetime-local"
+                                value={paidAtInput}
+                                onChange={(event) => setPaidAtInput(event.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Failure Reason</Label>
+                              <Textarea
+                                rows={2}
+                                value={failureReason}
+                                onChange={(event) => setFailureReason(event.target.value)}
+                                placeholder="Optional"
+                              />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wider">Payment Method</p>
+                              <p className="font-medium text-sm mt-0.5 flex items-center gap-2">
+                                {paymentMethodMap.get(payment.paymentMethodId)?.name ?? 'Unknown Method'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wider">Reference Number</p>
+                              <p className="font-medium text-sm mt-0.5">{payment.referenceNum ?? '—'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground uppercase tracking-wider">Paid Date</p>
+                              <p className="font-medium text-sm mt-0.5 flex items-center gap-2">
+                                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                {payment.paidAt ? format(new Date(payment.paidAt), 'MMM d, yyyy h:mm a') : '—'}
+                              </p>
+                            </div>
+                          </>
+                        )}
                      </div>
                 </div>
             </div>
@@ -195,7 +375,33 @@ export function PaymentDetailsDialog({
           </div>
         )}
         </div>
+
+        {payment ? (
+          <DialogFooter className="mt-2 gap-2">
+            {isAdmin ? (
+              isEditing ? (
+                <>
+                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)} disabled={updatePaymentMutation.isPending}>
+                    Cancel
+                  </Button>
+                  <Button type="button" onClick={() => void updatePaymentMutation.mutateAsync()} disabled={!canSave}>
+                    {updatePaymentMutation.isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </>
+              ) : (
+                <Button type="button" onClick={() => setIsEditing(true)}>
+                  Edit Transaction
+                </Button>
+              )
+            ) : null}
+          </DialogFooter>
+        ) : null}
       </DialogContent>
     </Dialog>
   )
+}
+
+function toDateTimeLocalValue(value: Date | null): string {
+  if (!value) return ''
+  return format(new Date(value), "yyyy-MM-dd'T'HH:mm")
 }

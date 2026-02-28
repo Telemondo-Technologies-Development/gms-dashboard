@@ -18,6 +18,7 @@ export interface CreatePaymentIfNeededInput {
   createdById: string
   amount: number
   paidAt?: Date
+	referenceNum?: string
 }
 
 
@@ -49,6 +50,7 @@ export const paymentTableDTOSchema = z.object({
 	invoiceId: z.string(),
 	paidAt: coerceNullableDate,
 	paymentMethodId: z.string(),
+	referenceNum: z.string().nullable().default(null),
 	status: paymentStatusSchema,
 	updatedById: z.string().nullable().default(null),
 })

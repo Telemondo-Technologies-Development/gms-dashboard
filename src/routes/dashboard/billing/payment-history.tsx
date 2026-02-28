@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PaymentHistoryTable } from '@/components/payment-components/PaymentHistoryTable'
+import { PaymentHistoryTable } from '@/components/payment-components/PaymentHistoryManagementTable'
 
 export const Route = createFileRoute('/dashboard/billing/payment-history')({
   component: PaymentHistoryRoute,
