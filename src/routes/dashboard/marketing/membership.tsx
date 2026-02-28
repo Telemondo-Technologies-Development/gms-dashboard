@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
-import type { MemberFormData } from '@/types/membership/memberSchemas'
-import MembershipAddAttendance from '@/components/membership-components/MembershipAddAttendance'
-import MembersTable from '@/components/membership-components/MembershipTable'
+import type { MemberFormData } from '@/types/membership/MembershipManagementSchema'
+import MembershipAddAttendance from '@/components/membership-components/MembershipAttendanceTable'
+import MembersTable from '@/components/membership-components/MembershipManagementTable'
 import { MemberDetailsDialog } from '@/components/membership-components/MembershipDetailsDialog'
 import { useMembersData } from '@/hooks/membership/useMembership'
 
@@ -19,14 +19,13 @@ function MembershipRoute() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-11 gap-4">
         <div className="lg:col-span-7">
           <MembersTable
             onSelectMember={(memberGroup) => {
               setSelectedMemberGroupSnapshot(memberGroup)
               setDetailsOpen(true)
             }}
-            pageSize={5}
           />
         </div>
         <div className="lg:col-span-3">

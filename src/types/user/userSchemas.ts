@@ -49,6 +49,32 @@ export type JwtClaims = Record<string, unknown>
 
 export type ApiResponseListUserTable = z.infer<typeof apiResponseListUserTableSchema>
 
+export function parseUserResponse(json: unknown): UserTable {
+  const parsed = apiResponseUserTableSchema.safeParse(json)
+  if (!parsed.success) {
+    throw new Error('Failed to validate user response.')
+  }
+
+  if (!parsed.data.success) {
+    throw new Error(parsed.data.message ?? 'Failed to fetch user.')
+  }
+
+  return parsed.data.data
+}
+
+export function parseUsersResponse(json: unknown): UserTable[] {
+  const parsed = apiResponseListUserTableSchema.safeParse(json)
+  if (!parsed.success) {
+    throw new Error('Failed to validate users response.')
+  }
+
+  if (!parsed.data.success) {
+    throw new Error(parsed.data.message ?? 'Failed to fetch users.')
+  }
+
+  return parsed.data.data
+}
+
 
 // Schema for employee form (matches backend EmployeePostDTO/EmployeeTableDTO)
 export const employeeFormSchema = z.object({

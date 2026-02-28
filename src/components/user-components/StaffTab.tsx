@@ -71,11 +71,11 @@ export function EmployeeTab({
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b border-muted/60">
-              <TableHead className="w-[30%] pl-6 py-4 font-semibold text-foreground/70">Employee</TableHead>
-              <TableHead className="w-[25%] py-4 font-semibold text-foreground/70">Contact Details</TableHead>
-              <TableHead className="w-[20%] py-4 font-semibold text-foreground/70">Role & Access</TableHead>
-              <TableHead className="w-[15%] py-4 font-semibold text-foreground/70 text-right">Status</TableHead>
-              <TableHead className="w-[10%] py-4 font-semibold text-foreground/70 text-right pr-6">Actions</TableHead>
+              <TableHead className="w-[30%] pl-6">Employee</TableHead>
+              <TableHead className="w-[25%] ">Contact Details</TableHead>
+              <TableHead className="w-[20%]">Role & Access</TableHead>
+              <TableHead className="w-[15%] ">Status</TableHead>
+              <TableHead className="w-[10%] pl-20">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -181,8 +181,8 @@ export function EmployeeTab({
                     </div>
                   </TableCell>
                   
-                  <TableCell className="py-4 align-top text-right">
-                    <div className="flex justify-end">
+                  <TableCell className="py-4 align-top text-left">
+                    <div className="flex ">
                       {employee.status === 'IN' ? (
                         <Badge className="gap-1 bg-green-500 hover:bg-green-600 border-transparent">
                            <CheckCircle2 className="h-3 w-3" /> Active

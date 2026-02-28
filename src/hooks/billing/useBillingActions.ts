@@ -54,13 +54,13 @@ export function useBillingActions() {
     [invoiceApi, queryClient],
   )
 
-  const ensurePaymentMethodExists = useCallback(
-    async (paymentMethodId: string): Promise<boolean> => {
-      if (!paymentMethodId) return false
+  const getPaymentMethod = useCallback(
+    async (paymentMethodId: string): Promise<PaymentMethodTableDTOParsed | null> => {
+      if (!paymentMethodId) return null
       const methodsResp = await paymentApi.getAllPaymentMethods({ pageable: { page: 0, size: 200 } })
       const methodsParsed = apiResponseListPaymentMethodTableDTOSchema.parse(methodsResp)
       const methods = (methodsParsed.data ?? []) as PaymentMethodTableDTOParsed[]
-      return methods.some((m) => m.id === paymentMethodId)
+      return methods.find((m) => m.id === paymentMethodId) ?? null
     },
     [paymentApi],
   )
@@ -69,8 +69,16 @@ export function useBillingActions() {
     async (input: CreatePaymentIfNeededInput): Promise<void> => {
       if (!input.invoiceId) return
 
-      const ok = await ensurePaymentMethodExists(input.paymentMethodId)
-      if (!ok) return
+      const selectedMethod = await getPaymentMethod(input.paymentMethodId)
+      if (!selectedMethod) return
+
+      const requiresReference = !selectedMethod.name.trim().toLowerCase().includes('cash')
+      const rawReferenceNum = input.referenceNum?.trim()
+      const referenceNum = rawReferenceNum ? rawReferenceNum : undefined
+
+      if (requiresReference && !referenceNum) {
+        throw new Error('Reference number is required for non-cash payments.')
+      }
 
       await paymentApi.createPayment({
         paymentPostDTO: {
@@ -79,6 +87,7 @@ export function useBillingActions() {
           invoiceId: input.invoiceId,
           paidAt: input.paidAt ?? new Date(),
           paymentMethodId: input.paymentMethodId,
+          referenceNum,
           status: 'IN',
         },
       })
@@ -87,7 +96,7 @@ export function useBillingActions() {
       void queryClient.invalidateQueries({ queryKey: [paymentQueryKeys.paymentMethods] })
       void queryClient.invalidateQueries({ queryKey: [invoiceQueryKeys.invoices] })
     },
-    [ensurePaymentMethodExists, paymentApi, queryClient],
+    [getPaymentMethod, paymentApi, queryClient],
   )
 
   return {
