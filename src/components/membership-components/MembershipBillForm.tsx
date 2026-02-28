@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { InlineAddPaymentMethodForm } from '@/components/membership-components/MembershipAddPaymentMethod'
 import { useQuery } from '@tanstack/react-query'
 import { getAuthenticatedApi } from '@/lib/api-client'
@@ -15,6 +14,8 @@ export interface AddBillingDialogProps {
   selectedSubscription: SubscriptionAvailedTableDTO | null | undefined
   paymentMethodId: string
   onPaymentMethodChange: (id: string, name: string) => void
+  paymentReferenceNum: string
+  onPaymentReferenceNumChange: (value: string) => void
   totalCost: string
   disabled?: boolean
   loadPaymentMethods?: boolean
@@ -32,6 +33,8 @@ export function AddBillingDialog({
   selectedSubscription,
   paymentMethodId,
   onPaymentMethodChange,
+  paymentReferenceNum,
+  onPaymentReferenceNumChange,
   totalCost,
   disabled = false,
   loadPaymentMethods = true,
@@ -63,51 +66,22 @@ export function AddBillingDialog({
     return id.length > 0 && id !== NONE_PAYMENT_METHOD_VALUE && id !== EMPTY_PAYMENT_METHODS_VALUE
   })
   const selectedPaymentMethodName = paymentMethods.find((m) => m.id === paymentMethodId)?.name ?? ''
+  const effectivePaymentMethodName =
+    paymentMethodId === 'new_payment_method'
+      ? (newPaymentMethodForm?.name ?? '')
+      : selectedPaymentMethodName
+  const requiresReference =
+    !!paymentMethodId &&
+    paymentMethodId !== NONE_PAYMENT_METHOD_VALUE &&
+    effectivePaymentMethodName.trim().length > 0 &&
+    !effectivePaymentMethodName.trim().toLowerCase().includes('cash')
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-base">Billing & Payment</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {selectedSubscription ? (
-          <>
-            <div className="space-y-2">
-              <Label>Subscription Plan</Label>
-              <Input value={selectedSubscription.name} disabled className="bg-muted text-muted-foreground" />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Amount (PHP)</Label>
-              <Input value={selectedSubscription.amount.toFixed(2)} disabled className="bg-muted text-muted-foreground" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Billing Interval</Label>
-                <Input
-                  value={`${selectedSubscription.intervalCount} ${selectedSubscription.intervals}`}
-                  disabled
-                  className="bg-muted text-muted-foreground"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Grace Period</Label>
-                <Input
-                  value={`${selectedSubscription.gracePeriodDays} days`}
-                  disabled
-                  className="bg-muted text-muted-foreground"
-                />
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-            Please select a subscription plan to view billing details
-          </div>
-        )}
-
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h3 className="text-lg font-medium leading-none tracking-tight">Billing & Payment</h3>
+      </div>
+      <div className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="paymentMethod">Mode of Payment * </Label>
           <Select
@@ -145,7 +119,7 @@ export function AddBillingDialog({
               )}
               {!disabled && newPaymentMethodForm && (
                 <SelectItem value="new_payment_method" className="text-primary font-medium">
-                  + Add New Payment Method
+                  + New Payment Method
                 </SelectItem>
               )}
             </SelectContent>
@@ -192,9 +166,25 @@ export function AddBillingDialog({
               </div>
             </>
           )}
+
+          {requiresReference && (
+            <div className="space-y-2">
+              <Label htmlFor="paymentReferenceNum">Reference Number *</Label>
+              <Input
+                id="paymentReferenceNum"
+                value={paymentReferenceNum}
+                onChange={(event) => onPaymentReferenceNumChange(event.target.value)}
+                placeholder="Enter transaction reference number"
+                disabled={disabled}
+              />
+              {!paymentReferenceNum.trim() ? (
+                <p className="text-xs text-destructive">Reference number is required for non-cash payments.</p>
+              ) : null}
+            </div>
+          )}
         </div>
 
-        <Card className="rounded-xl bg-muted/50 p-4 space-y-3">
+        <div className="rounded-xl bg-muted/50 p-4 space-y-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Subscription</span>
             <span className="font-medium">{selectedSubscription?.name || '—'}</span>
@@ -221,9 +211,9 @@ export function AddBillingDialog({
             <span className="font-semibold">Total</span>
             <span className="text-2xl font-bold text-primary">PHP {totalCost}</span>
           </div>
-        </Card>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -3,7 +3,6 @@ import { CalendarIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Dialog,
@@ -17,11 +16,12 @@ import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import type { MemberDetailsDialogProps } from '@/types/membership/memberSchemas'
+import type { MemberDetailsDialogProps } from '@/types/membership/MembershipManagementSchema'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import { AddBillingDialog } from './MembershipBillForm'
 import { InlineAddSubscriptionForm } from './MembershipAddSubscription'
 import { useMembershipDetailsDialog } from '@/hooks/membership/useMembershipDetailsDialog'
+import { useEmployeeDisplayName } from '@/hooks/users/useEmployeeDisplayName'
 
 export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberDetailsDialogProps) {
   const {
@@ -34,6 +34,8 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
     setSelectedSubscriptionId,
     paymentMethodId,
     setPaymentMethodId,
+    paymentReferenceNum,
+    setPaymentReferenceNum,
     membershipDetails,
     setMembershipDetails,
     selectedSubscription,
@@ -51,32 +53,30 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
     onClose: () => onOpenChange(false),
   })
 
+  const operatorId = resolvedActorId?.trim() ?? ''
+  const { displayName: operatorName, isLoading: isOperatorLoading } = useEmployeeDisplayName(operatorId)
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl h-[95vh] max-h-[95vh] overflow-hidden p-0">
-        <DialogHeader className="sticky top-0 z-10 border-b bg-background px-6 py-4">
+      <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col overflow-hidden p-0">
+        <DialogHeader className="shrink-0 border-b bg-background px-6 py-4">
           <DialogTitle>Member Details</DialogTitle>
           <DialogDescription>
             Review member info and update billing to renew memberships when they expire.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex h-full min-h-0 flex-col">
-          {!memberGroup ? (
-            <div className="text-sm text-muted-foreground px-6 py-4">No member selected.</div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto px-6 py-4 min-h-0 flex-1">
-              <div className="space-y-6">
-                <Card className="h-full">
-                  <CardHeader>
-                    <CardTitle>Member & Subscription Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-8">
-                    <div className="space-y-6">
-                      <h3 className="font-semibold leading-none tracking-tight">Member Information</h3>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+            {!memberGroup ? (
+              <div className="text-sm text-muted-foreground">No member selected.</div>
+            ) : (
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium leading-none tracking-tight">Member Information</h3>
                       {members.map((member) => (
                         <div key={member.id} className="rounded-lg space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
                               <Label htmlFor={`firstName-${member.id}`}>First Name *</Label>
                               <Input
@@ -117,7 +117,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                               />
                             </div>
 
-                            <div className="space-y-2 md:col-span-2">
+                            <div className="space-y-2">
                               <Label>Status</Label>
                               <Select value={member.status || 'UNDECIDED'} disabled>
                                 <SelectTrigger>
@@ -133,10 +133,10 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                           </div>
                         </div>
                       ))}
-                    </div>
+                </div>
 
-                    <div className="space-y-6 pt-4 border-t">
-                      <h3 className="font-semibold leading-none tracking-tight">Subscription Details</h3>
+                <div className="space-y-4 border-t pt-4">
+                  <h3 className="text-lg font-medium leading-none tracking-tight">Subscription Details</h3>
                       {!canEditBilling ? (
                         <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
                           Billing details are locked because this member has an active subscription. Only admins can edit billing.
@@ -218,7 +218,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                         </div>
                       )}
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
                           <Label>Start Date</Label>
                           <Popover>
@@ -264,6 +264,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                             </PopoverContent>
                           </Popover>
                         </div>
+
                       </div>
 
                       <div className="space-y-2">
@@ -276,19 +277,18 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                           disabled={!canEditBilling}
                         />
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                </div>
 
-              <div>
                 <AddBillingDialog
                   selectedSubscription={selectedSubscription}
                   paymentMethodId={paymentMethodId}
                   onPaymentMethodChange={(id, _name) => {
                     setPaymentMethodId(id)
+                    setPaymentReferenceNum('')
                     if (id !== 'new_payment_method') createPaymentMethod.reset()
                   }}
+                  paymentReferenceNum={paymentReferenceNum}
+                  onPaymentReferenceNumChange={setPaymentReferenceNum}
                   totalCost={totalCost}
                   disabled={!canEditBilling}
                   createdById={resolvedActorId ?? null}
@@ -304,10 +304,14 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                   isCreatingPaymentMethod={createPaymentMethod.isSubmitting}
                 />
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 border-t bg-background px-6 py-4">
+          <div className="shrink-0 flex items-center justify-between gap-2 border-t bg-background px-6 py-4">
+            <div className="text-sm text-muted-foreground">
+              <Label>User: {isOperatorLoading ? 'Loading…' : (operatorName ?? '—')}</Label> 
+            </div>
+            <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="outline"
@@ -319,6 +323,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
             <Button type="submit" disabled={!memberGroup || updateSubscriptionMutation.isPending}>
               {updateSubscriptionMutation.isPending ? 'Saving...' : 'Save changes'}
             </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

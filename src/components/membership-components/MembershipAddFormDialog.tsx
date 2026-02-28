@@ -1,10 +1,10 @@
+import { useEffect, useState } from 'react'
 import { CalendarIcon, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogClose,
@@ -20,16 +20,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
-import type { MemberFormValues } from '@/types/membership/memberSchemas'
+import type { MemberFormValues } from '@/types/membership/MembershipManagementSchema'
 import { AddBillingDialog } from '@/components/membership-components/MembershipBillForm'
 import { InlineAddSubscriptionForm } from '@/components/membership-components/MembershipAddSubscription'
 import { useAddMemberDialog } from '@/hooks/membership/useMembershipAdd'
-
-
-const looksLikeUuid = (value: string): boolean =>
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+import { useEmployeeDisplayName } from '@/hooks/users/useEmployeeDisplayName'
 
 export function AddMemberDialog() {
+  const [step, setStep] = useState<1 | 2>(1)
+
   const {
     open,
     setOpen,
@@ -43,6 +42,8 @@ export function AddMemberDialog() {
     setSelectedSubscriptionId,
     paymentMethodId,
     setPaymentMethodId,
+    paymentReferenceNum,
+    setPaymentReferenceNum,
     membershipDetails,
     setMembershipDetails,
     selectedSubscription,
@@ -55,6 +56,15 @@ export function AddMemberDialog() {
     newPaymentMethodForm,
   } = useAddMemberDialog()
 
+  const creatorId = form.state.values.createdById.trim()
+  const { displayName: createdByName, isLoading: isCreatorNameLoading } = useEmployeeDisplayName(creatorId)
+
+  useEffect(() => {
+    if (!open) {
+      setStep(1)
+    }
+  }, [open])
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -64,8 +74,8 @@ export function AddMemberDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl h-[95vh] max-h-[95vh] overflow-hidden p-0">
-        <DialogHeader className="sticky top-0 z-10 border-b bg-background px-6 py-4">
+      <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col overflow-hidden p-0">
+        <DialogHeader className="shrink-0 border-b bg-background px-6 py-4">
           <DialogTitle>Add New Member</DialogTitle>
           <DialogDescription>Create a new member and assign membership details.</DialogDescription>
         </DialogHeader>
@@ -76,55 +86,76 @@ export function AddMemberDialog() {
             e.stopPropagation()
             void form.handleSubmit()
           }}
-          className="flex h-full min-h-0 flex-col"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto px-6 py-4 min-h-0 flex-1">
-            <div className="space-y-6">
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle>Member & Subscription Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-8">
-                  <div className="space-y-6">
-                    <h3 className="font-semibold leading-none tracking-tight">Member Information</h3>
-                    <form.Field name="createdById">
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+            <form.Field name="createdById">
+              {(field) => (
+                <input
+                  type="hidden"
+                  name={field.name}
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+              )}
+            </form.Field>
+
+            {step === 1 ? (
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium leading-none tracking-tight">Member Information</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <form.Field
+                      name="firstName"
+                      validators={{
+                        onChange: ({ value }) => (!value.trim() ? 'First name is required.' : undefined),
+                      }}
+                    >
                       {(field) => (
-                        <input
-                          type="hidden"
-                          name={field.name}
-                          value={field.state.value}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                        />
+                        <div className="space-y-2">
+                          <Label htmlFor={field.name}>First name *</Label>
+                          <Input
+                            id={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="First name"
+                          />
+                          {field.state.meta.isTouched && field.state.meta.errors.length ? (
+                            <p className="text-sm text-destructive" role="alert">
+                              {field.state.meta.errors[0]}
+                            </p>
+                          ) : null}
+                        </div>
                       )}
                     </form.Field>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <form.Field
-                        name="firstName"
-                        validators={{
-                          onChange: ({ value }) => (!value.trim() ? 'First name is required.' : undefined),
-                        }}
-                      >
-                        {(field) => (
-                          <div className="space-y-2">
-                            <Label htmlFor={field.name}>First name *</Label>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="First name"
-                            />
-                            {field.state.meta.isTouched && field.state.meta.errors.length ? (
-                              <p className="text-sm text-destructive" role="alert">
-                                {field.state.meta.errors[0]}
-                              </p>
-                            ) : null}
-                          </div>
-                        )}
-                      </form.Field>
-
-                      <form.Field name="middleName">
+                    <form.Field
+                      name="surname"
+                      validators={{
+                        onChange: ({ value }) => (!value.trim() ? 'Surname is required.' : undefined),
+                      }}
+                    >
+                      {(field) => (
+                        <div className="space-y-2">
+                          <Label htmlFor={field.name}>Surname *</Label>
+                          <Input
+                            id={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="Surname"
+                          />
+                          {field.state.meta.isTouched && field.state.meta.errors.length ? (
+                            <p className="text-sm text-destructive" role="alert">
+                              {field.state.meta.errors[0]}
+                            </p>
+                          ) : null}
+                        </div>
+                      )}
+                    </form.Field>
+                    <div className="grid grid-cols-2 gap-4">
+                       <form.Field name="middleName">
                         {(field) => (
                           <div className="space-y-2">
                             <Label htmlFor={field.name}>Middle name</Label>
@@ -139,30 +170,6 @@ export function AddMemberDialog() {
                         )}
                       </form.Field>
 
-                      <form.Field
-                        name="surname"
-                        validators={{
-                          onChange: ({ value }) => (!value.trim() ? 'Surname is required.' : undefined),
-                        }}
-                      >
-                        {(field) => (
-                          <div className="space-y-2">
-                            <Label htmlFor={field.name}>Surname *</Label>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="Surname"
-                            />
-                            {field.state.meta.isTouched && field.state.meta.errors.length ? (
-                              <p className="text-sm text-destructive" role="alert">
-                                {field.state.meta.errors[0]}
-                              </p>
-                            ) : null}
-                          </div>
-                        )}
-                      </form.Field>
 
                       <form.Field name="suffix">
                         {(field) => (
@@ -179,57 +186,31 @@ export function AddMemberDialog() {
                         )}
                       </form.Field>
                     </div>
-
-                    <form.Field
-                      name="profilePictureId"
-                      validators={{
-                        onChange: ({ value }) => {
-                          const trimmed = value.trim()
-                          if (!trimmed) return undefined
-                          return looksLikeUuid(trimmed) ? undefined : 'Must be a UUID.'
-                        },
-                      }}
-                    >
-                      {(field) => (
-                        <div className="space-y-2">
-                          <Label htmlFor={field.name}>Upload Picture </Label>
-                          <Input
-                            id={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            placeholder="UUID"
-                          />
-                          {field.state.meta.isTouched && field.state.meta.errors.length ? (
-                            <p className="text-sm text-destructive" role="alert">
-                              {field.state.meta.errors[0]}
-                            </p>
-                          ) : null}
-                        </div>
-                      )}
-                    </form.Field>
-
-                    <form.Field name="status">
-                      {(field) => (
-                        <div className="space-y-2">
-                          <Label>Status</Label>
-                          <Select value={field.state.value} onValueChange={(v) => field.handleChange(v as MemberFormValues['status'])}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="IN">IN</SelectItem>
-                              <SelectItem value="OUT">OUT</SelectItem>
-                              <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </form.Field>
                   </div>
-
-                  <div className="space-y-6 pt-4 border-t">
-                    <h3 className="font-semibold leading-none tracking-tight">Subscription Details</h3>
+                  <form.Field name="status">
+                    {(field) => (
+                        <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={field.state.value} onValueChange={(v) => field.handleChange(v as MemberFormValues['status'])}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="IN">IN</SelectItem>
+                            <SelectItem value="OUT">OUT</SelectItem>
+                            <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </form.Field>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium leading-none tracking-tight">Subscription Details</h3>
+                  <div className="space-y-4">
                     {subscriptionsQuery.isLoading ? (
                       <div className="text-sm text-muted-foreground">Loading subscriptions...</div>
                     ) : subscriptionsQuery.error ? (
@@ -246,7 +227,7 @@ export function AddMemberDialog() {
                           <Label htmlFor="subscription">Subscription Plan *</Label>
                           <Select value={selectedSubscriptionId} onValueChange={setSelectedSubscriptionId}>
                             <SelectTrigger id="subscription">
-                              <SelectValue placeholder="Select subscription plan" />
+                              <SelectValue placeholder="Select Plan" />
                             </SelectTrigger>
                             <SelectContent position="popper" sideOffset={4}>
                               {subscriptionsQuery.data?.map((sub: SubscriptionAvailedTableDTO) => (
@@ -255,63 +236,68 @@ export function AddMemberDialog() {
                                 </SelectItem>
                               ))}
                               <SelectItem value="new_subscription" className="text-primary font-medium">
-                                + Add New Subscription
+                                + New Subscription
                               </SelectItem>
                             </SelectContent>
                           </Select>
-                          
-                          {selectedSubscriptionId === 'new_subscription' && (
-                            <InlineAddSubscriptionForm
-                              formState={newSubscriptionForm.state}
-                              setFormState={newSubscriptionForm.setState}
-                              onCancel={() => setSelectedSubscriptionId('')}
-                              error={newSubscriptionForm.error}
-                            />
-                          )}
                         </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label>Start Date</Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className={cn(
+                                    'w-full justify-start text-left font-normal overflow-hidden text-ellipsis whitespace-nowrap text-sm',
+                                    !startDate && 'text-muted-foreground',
+                                  )}
+                                >
+                                  <CalendarIcon className="h-4 w-4" />
+                                  {startDate ? format(startDate, 'PPP') : 'Pick a date'}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>End Date</Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className={cn(
+                                    'w-full justify-start text-left font-normal overflow-hidden text-ellipsis whitespace-nowrap text-sm',
+                                    !endDate && 'text-muted-foreground',
+                                  )}
+                                >
+                                  <CalendarIcon className=" h-4 w-4" />
+                                  {endDate ? format(endDate, 'PPP') : 'Pick a date'}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        </div>
+
+                        {selectedSubscriptionId === 'new_subscription' && (
+                          <InlineAddSubscriptionForm
+                            formState={newSubscriptionForm.state}
+                            setFormState={newSubscriptionForm.setState}
+                            onCancel={() => setSelectedSubscriptionId('')}
+                            error={newSubscriptionForm.error}
+                          />
+                        )}
                       </div>
                     )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Start Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={cn('w-full justify-start text-left font-normal', !startDate && 'text-muted-foreground')}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {startDate ? format(startDate, 'PPP') : 'Pick a date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>End Date</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={cn('w-full justify-start text-left font-normal', !endDate && 'text-muted-foreground')}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {endDate ? format(endDate, 'PPP') : 'Pick a date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-
                     <div className="space-y-2">
                       <Label htmlFor="membershipDetails">Additional Details</Label>
                       <Textarea
@@ -322,25 +308,28 @@ export function AddMemberDialog() {
                       />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
 
-            {/* Right Column: Billing */}
-            <AddBillingDialog
-              selectedSubscription={selectedSubscription ?? null}
-              paymentMethodId={paymentMethodId}
-              onPaymentMethodChange={(id, _name) => {
-                setPaymentMethodId(id)
-                if (id !== 'new_payment_method') newPaymentMethodForm.reset()
-              }}
-              totalCost={totalCost}
-              createdById={form.state.values.createdById.trim() || null}
-              newPaymentMethodForm={newPaymentMethodForm}
-            />
+                <AddBillingDialog
+                  selectedSubscription={selectedSubscription ?? null}
+                  paymentMethodId={paymentMethodId}
+                  onPaymentMethodChange={(id, _name) => {
+                    setPaymentMethodId(id)
+                    setPaymentReferenceNum('')
+                    if (id !== 'new_payment_method') newPaymentMethodForm.reset()
+                  }}
+                  paymentReferenceNum={paymentReferenceNum}
+                  onPaymentReferenceNumChange={setPaymentReferenceNum}
+                  totalCost={totalCost}
+                  createdById={form.state.values.createdById.trim() || null}
+                  newPaymentMethodForm={newPaymentMethodForm}
+                />
+              </div>
+            )}
           </div>
 
-          <div className="sticky bottom-0 z-10 flex items-center justify-between border-t bg-background px-6 py-4">
+          <div className="shrink-0 border-t bg-background px-6 py-4">
+            <div className="flex flex-col gap-4">
             <div className="flex-1">
               {submitError ? (
                 <p className="text-sm text-destructive" role="alert">
@@ -355,38 +344,60 @@ export function AddMemberDialog() {
               ) : null}
             </div>
             
-            <div className="flex items-center gap-2 w-full  justify-evenly mt-4 ">
-              <div className="w-full">
-                <Label>
-                  User: {currentUserQuery.isLoading ? 'Loading…' : (currentUserEmail || '—')}
-                </Label>
+              <div className="flex w-full items-center justify-between gap-2">
+              <div className="text-sm text-muted-foreground">
+                <Label>User: {(currentUserQuery.isLoading || isCreatorNameLoading) ? 'Loading…' : (createdByName || currentUserEmail || '—')}</Label> 
               </div>
-              <div className="w-full justify-end flex gap-2">
+              <div className="flex gap-2">
                 <DialogClose asChild>
                   <Button type="button" variant="outline" disabled={createMemberMutation.isPending}>
                     Cancel
                   </Button>
                 </DialogClose>
-                <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting] as const}>
-                  {([canSubmit, isSubmitting]) => (
-                    <Button
-                      type="submit"
-                      disabled={
-                        !form.state.values.createdById.trim() || 
-                        !selectedSubscriptionId || 
-                        !startDate || 
-                        !canSubmit || 
-                        isSubmitting || 
+                {step === 1 ? (
+                  <form.Subscribe
+                    selector={(state) => {
+                      const firstName = state.values.firstName.trim()
+                      const surname = state.values.surname.trim()
+                      return !(firstName && surname)
+                    }}
+                  >
+                    {(isNextDisabled) => (
+                      <Button
+                        type="button"
+                        onClick={() => setStep(2)}
+                        disabled={isNextDisabled}
+                      >
+                        Next: Billing
+                      </Button>
+                    )}
+                  </form.Subscribe>
+                ) : (
+                  <>
+                    <Button type="button" variant="outline" onClick={() => setStep(1)} disabled={createMemberMutation.isPending}>
+                      Back
+                    </Button>
+                    <form.Subscribe
+                      selector={(state) =>
+                        !state.values.createdById.trim() ||
+                        !selectedSubscriptionId ||
+                        !startDate ||
+                        !state.canSubmit ||
+                        state.isSubmitting ||
                         createMemberMutation.isPending
                       }
                     >
-                      {createMemberMutation.isPending ? 'Creating…' : 'Create Member'}
-                    </Button>
-                  )}
-                </form.Subscribe>
+                      {(isCreateDisabled) => (
+                        <Button type="submit" disabled={isCreateDisabled}>
+                          {createMemberMutation.isPending ? 'Creating…' : 'Create Member'}
+                        </Button>
+                      )}
+                    </form.Subscribe>
+                  </>
+                )}
               </div>
-
             </div>
+          </div>
           </div>
         </form>
       </DialogContent>

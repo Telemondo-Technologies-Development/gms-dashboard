@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { SubscriptionPlanFormState } from '@/types/membership/subscriptionSchemas'
+import type { SubscriptionPlanFormState } from '@/types/membership/MembershipsubscriptionSchemas'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
