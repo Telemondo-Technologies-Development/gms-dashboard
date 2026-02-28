@@ -30,6 +30,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -207,9 +208,9 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
   }, [])
 
   return (
-    <Card className="flex flex-col h-full shadow-md border-muted/40">
-      <CardHeader >
-        <div className="flex items-center justify-between">
+    <Card className="flex flex-col shadow-md border-muted/40 max-h-[88vh]">
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
             <CardTitle className="text-xl font-bold tracking-tight">Members Record</CardTitle>
             <CardDescription className="mt-1">
@@ -222,78 +223,82 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
         </div>
       </CardHeader>
 
-      <div className="flex-1 min-h-0 overflow-auto ">
+      <div>
         <CardContent className="p-0">
-          <div className="px-6 py-2  border-b bg-muted/5 flex items-center gap-3">
-            <div className="relative flex-1 max-w-sm">
+          <div className="p-4 border-b bg-muted/5 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+            <div className="relative w-full md:max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
               <Input
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Search members..."
-                className="pl-9 h-10 bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
+                className="pl-9 h-10 w-full bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
               />
             </div>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className={cn(
-                    'justify-start text-left font-normal h-10 w-45 bg-background/50 border-muted-foreground/20',
-                    !selectedDay && 'text-muted-foreground',
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {selectedDay ? format(new Date(selectedDay), 'MMM d, yyyy') : <span>Select Date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-2" align="start">
-                <Calendar
-                  mode="single"
-                  selected={selectedDay ? parseCalendarDay(selectedDay) ?? undefined : undefined}
-                  onSelect={(date) => {
-                    handleSelectedDayChange(date ? format(date, 'yyyy-MM-dd') : '')
-                  }}
-                  initialFocus
-                />
-                <div className="mt-2 flex items-center justify-end gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto md:ml-auto">
+              <Popover>
+                <PopoverTrigger asChild>
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
-                    onClick={() => handleSelectedDayChange('')}
+                    className={cn(
+                      'justify-start text-left font-normal h-10 w-full sm:w-auto bg-background/50 border-muted-foreground/20',
+                      !selectedDay && 'text-muted-foreground',
+                    )}
                   >
-                    Clear
+                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      {selectedDay ? format(new Date(selectedDay), 'MMM d, yyyy') : 'Select Date'}
+                    </span>
                   </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => handleSelectedDayChange(format(new Date(), 'yyyy-MM-dd'))}
-                  >
-                    Today
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-            
-            <div className="flex items-center gap-2 ml-auto">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={refetchAll}
-                disabled={isFetching}
-                className="h-10 w-10 shrink-0"
-              >
-                {isFetching ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 text-muted-foreground" />
-                )}
-              </Button>
-              <AddMemberDialog />
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDay ? parseCalendarDay(selectedDay) ?? undefined : undefined}
+                    onSelect={(date) => {
+                      handleSelectedDayChange(date ? format(date, 'yyyy-MM-dd') : '')
+                    }}
+                    initialFocus
+                  />
+                  <div className="mt-2 flex items-center justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSelectedDayChange('')}
+                    >
+                      Clear
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => handleSelectedDayChange(format(new Date(), 'yyyy-MM-dd'))}
+                    >
+                      Today
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
+              <div className="flex items-center gap-2 justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={refetchAll}
+                  disabled={isFetching}
+                  className="h-10 w-10 shrink-0"
+                >
+                  {isFetching ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+                <AddMemberDialog />
+              </div>
             </div>
           </div>
 
@@ -315,15 +320,16 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
               </p>
             </div>
           ) : (
-            <div className="relative w-full overflow-auto">
-              <Table>
+            <div className="relative w-full">
+              <Table className="w-full table-fixed">
                 <TableHeader className="bg-muted/30">
                   <TableRow className="hover:bg-transparent border-b border-muted/60">
-                    <TableHead className="w-[30%] ">Member Details</TableHead>
-                    <TableHead className="w-[25%] ">Plan & Billing</TableHead>
-                    <TableHead className="w-[25%] ">Subscription Period</TableHead>
-                    <TableHead className="w-[10%]">Status</TableHead>
-                    <TableHead className="w-[10%] ">Actions</TableHead>
+                    <TableHead className="w-[70%] md:w-[45%] lg:w-[30%] pl-4 md:pl-6">Name</TableHead>
+                    <TableHead className="hidden lg:table-cell lg:w-[25%]">Plan & Billing</TableHead>
+                    <TableHead className="hidden md:table-cell lg:hidden md:w-[35%]">Subscription</TableHead>
+                    <TableHead className="hidden lg:table-cell lg:w-[25%]">Subscription Period</TableHead>
+                    <TableHead className="hidden lg:table-cell lg:w-[10%]">Status</TableHead>
+                    <TableHead className="w-[30%] md:w-[20%] lg:w-[10%] text-right pr-4 md:pr-6 whitespace-nowrap">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -336,20 +342,25 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
                         key={memberGroup.id}
                         className="hover:bg-muted/40 transition-colors group border-b border-muted/40"
                       >
-                        <TableCell className="pl-6 py-4 align-top">
-                          <div className="flex items-start gap-3">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                                {memberGroup.members[0]?.name || 'Unknown Member'}
-                              </span>
+                        <TableCell className="pl-4 md:pl-6 py-4 align-top w-[70%] md:w-[45%] lg:w-[30%]">
+                          <div className="flex items-start gap-3 w-full min-w-0">
+                            <div className="flex flex-col gap-0.5 w-full min-w-0">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 w-full min-w-0">
+                                <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate w-full sm:max-w-[180px] lg:max-w-none">
+                                  {memberGroup.members[0]?.name || 'Unknown Member'}
+                                </span>
+                                <span className="lg:hidden w-fit transform origin-left scale-90 sm:scale-100 flex-shrink-0">
+                                  {getMembershipStatusBadge(memberGroup.endDate)}
+                                </span>
+                              </div>
                               {/* Contact Info Tooltip */}
                               {mainMember.email && (
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-muted">
-                                        <Mail className="h-3 w-3" />
-                                        <span className="truncate max-w-37.5">{mainMember.email}</span>
+                                      <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit max-w-full p-1 -ml-1 rounded-md hover:bg-muted">
+                                        <Mail className="h-3 w-3 shrink-0" />
+                                        <span className="truncate flex-1 max-w-[140px] sm:max-w-[200px] md:max-w-xs">{mainMember.email}</span>
                                       </div>
                                     </TooltipTrigger>
                                     <TooltipContent>
@@ -362,7 +373,7 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
                           </div>
                         </TableCell>
 
-                        <TableCell className="py-4 align-top">
+                        <TableCell className="hidden lg:table-cell py-4 align-top w-[25%]">
                           <div className="flex flex-col gap-1.5">
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary">
@@ -387,7 +398,24 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
                           </div>
                         </TableCell>
 
-                        <TableCell className="py-4 align-top">
+                        <TableCell className="hidden md:table-cell lg:hidden py-4 align-top w-[35%]">
+                          <div className="flex flex-col gap-1 text-sm pt-1">
+                            <div className="flex items-center gap-2">
+                              <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground/70" />
+                              <span className="font-medium">
+                                {memberGroup.startDate ? format(new Date(memberGroup.startDate), 'MMM d, yyyy') : 'N/A'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <RefreshCw className="h-3.5 w-3.5 opacity-50" />
+                              <span>
+                                {memberGroup.endDate ? format(new Date(memberGroup.endDate), 'MMM d, yyyy') : 'No Expiry'}
+                              </span>
+                            </div>
+                          </div>
+                        </TableCell>
+
+                        <TableCell className="hidden lg:table-cell py-4 align-top w-[25%]">
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2 text-sm">
                               <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground/70" />
@@ -405,11 +433,11 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
                           </div>
                         </TableCell>
 
-                        <TableCell className="py-4 align-top text-left pr-6">
+                        <TableCell className="hidden lg:table-cell py-4 align-top text-left pr-4 md:pr-6 w-[10%]">
                           {getMembershipStatusBadge(memberGroup.endDate)}
                         </TableCell>
 
-                        <TableCell className="py-4 align-top text-center pr-6">
+                        <TableCell className="py-4 align-top text-right pr-4 md:pr-6 w-[30%] md:w-[20%] lg:w-[10%]">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
@@ -418,6 +446,17 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuLabel className="lg:hidden">Member Summary</DropdownMenuLabel>
+                                <div className="px-2 py-1.5 space-y-1 text-xs text-muted-foreground lg:hidden">
+                                  <p>Plan: {memberGroup.membershipType || 'Standard'}</p>
+                                  <p>
+                                    Billing: {memberGroup.billingAmount ? `₱${memberGroup.billingAmount}` : '—'}
+                                    {memberGroup.billingCycle ? ` / ${memberGroup.billingCycle}` : ''}
+                                  </p>
+                                  <p>Start: {memberGroup.startDate ? format(new Date(memberGroup.startDate), 'MMM d, yyyy') : 'N/A'}</p>
+                                  <p>End: {memberGroup.endDate ? format(new Date(memberGroup.endDate), 'MMM d, yyyy') : 'No Expiry'}</p>
+                                </div>
+                                <DropdownMenuSeparator className="lg:hidden" />
                                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSelectMember(memberGroup); }}>
                                   <Pencil className="mr-2 h-4 w-4" />
                                   Edit Details
@@ -475,8 +514,8 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
         confirmText="Delete Member"
       />
 
-      <div className="flex items-center justify-between px-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
+      <div className="flex flex-col items-center gap-2 p-4 border-t bg-muted/5 sm:flex-row sm:justify-between">
+        <div className="text-sm text-center text-muted-foreground sm:text-left">
           Showing {Math.min(pageIndex * pageSize + 1, filteredMembers.length)} to {Math.min((pageIndex + 1) * pageSize, filteredMembers.length)} of {filteredMembers.length} entries
         </div>
         <div className="flex items-center gap-2">

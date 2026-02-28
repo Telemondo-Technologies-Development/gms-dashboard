@@ -10,8 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { EmployeeDialog } from "@/components/user-components/StaffDetailsDialog";
-import { CreateEmployeeLoginDialog } from "@/components/user-components/StaffAddLogin";
-import { EmployeeTab } from "@/components/user-components/StaffTab";
+import { CreateEmployeeLoginDialog } from "@/components/user-components/StaffAddUserLogin";
+import { EmployeeTab } from "@/components/user-components/StaffManagementTable";
 
 import { useEmployees } from "@/hooks/users/useEmployees";
 import { useEmployeeActions } from "@/hooks/users/useEmployeeActions";

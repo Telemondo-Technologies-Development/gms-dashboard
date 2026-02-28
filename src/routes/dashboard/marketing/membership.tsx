@@ -18,9 +18,9 @@ function MembershipRoute() {
   const { enrichedMembers } = useMembersData()
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-11 gap-4">
-        <div className="lg:col-span-7">
+    <div className="space-y-6 w-full">
+      <div className="flex flex-col xl:flex-row gap-6 w-full">
+        <div className="w-full xl:w-[65%] 2xl:w-[65%]">
           <MembersTable
             onSelectMember={(memberGroup) => {
               setSelectedMemberGroupSnapshot(memberGroup)
@@ -28,7 +28,7 @@ function MembershipRoute() {
             }}
           />
         </div>
-        <div className="lg:col-span-3">
+        <div className="w-full xl:w-[35%] 2xl:w-[40%]">
           <MembershipAddAttendance members={enrichedMembers} />
         </div>
       </div>

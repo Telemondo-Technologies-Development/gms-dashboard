@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
-import { Search, User, Calendar as CalendarIcon } from 'lucide-react'
+import { Search, User, Calendar as CalendarIcon, Eye, Trash2, MoreHorizontal } from 'lucide-react'
 
 import type { AttendanceTableRow, MembershipAddAttendanceProps } from '@/types/membership/MembershipManagementSchema'
 import { useAttendance } from '@/hooks/membership/useMembershipAttendance'
@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 
 export default function MembershipAddAttendance({ members }: MembershipAddAttendanceProps) {
@@ -98,9 +99,9 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 	}
 
 	return (
-		<Card className="flex flex-col h-full shadow-md border-muted/40 w-[585px]">
-			<CardHeader className="">
-				<div className="flex items-center justify-between">
+		<Card className="flex flex-col h-[88vh] shadow-md border-muted/40 w-full">
+			<CardHeader>
+				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 					<div>
 						<CardTitle className="text-xl font-bold tracking-tight">Today's Attendance</CardTitle>
 						<CardDescription className="mt-1">
@@ -114,28 +115,31 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 			</CardHeader>
 			<div className="flex-1 min-h-0 overflow-auto">
 				<CardContent className="p-0">
-					<div className="px-6 py-2 border-b bg-muted/5 flex items-center gap-3">
-						<form className="relative flex-1 max-w-sm" onSubmit={handleSearchSubmit}>
+					<div className="p-4 border-b bg-muted/5 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+						<form className="relative w-full md:max-w-sm" onSubmit={handleSearchSubmit}>
 							<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
 							<Input
 								placeholder="Search attended member..."
 								value={searchInput}
 								onChange={(event) => setSearchInput(event.target.value)}
-								className="pl-9 h-10 bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
+								className="pl-9 h-10 w-full bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
 							/>
 							<button type="submit" className="hidden">Search</button>
 						</form>
-						<Popover>
-							<PopoverTrigger asChild>
-								<Button
-									type="button"
-									variant="outline"
-									className={`justify-start text-left font-normal h-10 w-45 bg-background/50 border-muted-foreground/20 ${!selectedDay ? 'text-muted-foreground' : ''}`}
-								>
-									<CalendarIcon className="mr-2 h-4 w-4" />
-									{selectedDay ? format(new Date(selectedDay), 'MMM d, yyyy') : <span>Select Date</span>}
-								</Button>
-							</PopoverTrigger>
+						<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto md:ml-auto">
+							<Popover>
+								<PopoverTrigger asChild>
+									<Button
+										type="button"
+										variant="outline"
+										className={`justify-start text-left font-normal h-10 w-full sm:w-45 bg-background/50 border-muted-foreground/20 ${!selectedDay ? 'text-muted-foreground' : ''}`}
+									>
+										<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+										<span className="truncate">
+											{selectedDay ? format(new Date(selectedDay), 'MMM d, yyyy') : 'Select Date'}
+										</span>
+									</Button>
+								</PopoverTrigger>
 							<PopoverContent className="w-auto p-2" align="start">
 								<Calendar
 									mode="single"
@@ -162,6 +166,7 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 								</div>
 							</PopoverContent>
 						</Popover>
+						</div>
 					</div>
 
 					{attendanceQuery.isLoading ? (
@@ -181,26 +186,54 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 							<Table>
 								<TableHeader className="bg-muted/30">
 									<TableRow className="hover:bg-transparent border-b border-muted/60">
-										<TableHead className="w-[40%] pl-6 ">Member Name</TableHead>
-										<TableHead className="w-[25%] ">Membership Type</TableHead>
-										<TableHead className="w-[20%]">Source</TableHead>
-										<TableHead className="w-[15%] pr-6">Status</TableHead>
+										<TableHead className="w-[50%] md:w-[65%] pl-4 md:pl-6">Member</TableHead>
+										<TableHead className="hidden md:table-cell md:w-[15%]">Source</TableHead>
+										<TableHead className="hidden md:table-cell md:w-[10%] pr-4 md:pr-6 text-right">Status</TableHead>
+										<TableHead className="w-[40%] md:w-[10%] pr-4 md:pr-6 text-right">Actions</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
 									{filteredRows.map((record) => (
 										<TableRow key={record.id} className="hover:bg-muted/40 transition-colors group border-b border-muted/40">
-											<TableCell className="pl-6 py-4 align-top">
-												<div className="font-medium text-foreground group-hover:text-primary transition-colors">{record.memberName}</div>
+											<TableCell className="pl-4 md:pl-6 py-4 align-top">
+												<div className="flex flex-col gap-1.5">
+													<div className="font-semibold text-foreground group-hover:text-primary transition-colors">{record.memberName}</div>
+													<div>
+														<Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary break-words whitespace-normal text-left sm:max-w-[150px]">{record.membershipType}</Badge>
+													</div>
+													<div className="md:hidden flex gap-2 items-center mt-1">
+														<Badge variant="outline" className="text-muted-foreground scale-90 origin-left">{record.source}</Badge>
+														<Badge className="bg-green-500 hover:bg-green-600 scale-90 origin-left">{record.status}</Badge>
+													</div>
+												</div>
 											</TableCell>
-											<TableCell className="py-4 align-top">
-												<Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary">{record.membershipType}</Badge>
-											</TableCell>
-											<TableCell className="py-4 align-top">
+											<TableCell className="hidden md:table-cell py-4 align-top">
 												<Badge variant="outline" className="text-muted-foreground">{record.source}</Badge>
 											</TableCell>
-											<TableCell className="py-4 align-top pr-6">
+											<TableCell className="hidden md:table-cell py-4 align-top pr-4 md:pr-6 text-right">
 												<Badge className="bg-green-500 hover:bg-green-600">{record.status}</Badge>
+											</TableCell>
+											<TableCell className="py-4 align-top text-right pr-4 md:pr-6">
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button variant="ghost" className="h-8 w-8 p-0">
+															<span className="sr-only">Open menu</span>
+															<MoreHorizontal className="h-4 w-4" />
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent align="end">
+														<DropdownMenuLabel>Actions</DropdownMenuLabel>
+														<DropdownMenuItem className="cursor-pointer" onClick={() => console.log('View', record.id)}>
+															<Eye className="mr-2 h-4 w-4" />
+															View Details
+														</DropdownMenuItem>
+														<DropdownMenuSeparator />
+														<DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => console.log('Delete', record.id)}>
+															<Trash2 className="mr-2 h-4 w-4" />
+															Delete Record
+														</DropdownMenuItem>
+													</DropdownMenuContent>
+												</DropdownMenu>
 											</TableCell>
 										</TableRow>
 									))}

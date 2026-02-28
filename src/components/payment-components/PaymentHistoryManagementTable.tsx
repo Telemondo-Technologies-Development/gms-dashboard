@@ -114,6 +114,8 @@ function getInitials(name: string) {
   return name.slice(0, 2).toUpperCase()
 }
 
+import { PaymentHistorySummary } from './PaymentHistorySummary'
+
 export function PaymentHistoryTable() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [receiptOpen, setReceiptOpen] = useState(false)
@@ -122,7 +124,7 @@ export function PaymentHistoryTable() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [paymentToDelete, setPaymentToDelete] = useState<PaymentTableDTOParsed | null>(null)
 
-  const [pageSize, setPageSize] = useState(6)
+  const [pageSize, setPageSize] = useState(5)
   const [pageIndex, setPageIndex] = useState(0)
 
   const queryClient = useQueryClient()
@@ -269,7 +271,7 @@ export function PaymentHistoryTable() {
   }
 
   return (
-    <div className="space-y-6 h-full flex flex-col">
+    <div className="space-y-4 h-full flex flex-col">
       <form.Subscribe selector={(state) => state.values}>
         {(filters) => {
           // Compute filtered data inside render
@@ -290,10 +292,14 @@ export function PaymentHistoryTable() {
           const pageItems = filteredPayments.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
 
           return (
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-4 h-full">
+            <div className="flex flex-col gap-6">
+              <PaymentHistorySummary 
+                totals={currentTotals} 
+                transactionCount={filteredPayments.length} 
+              />
               {/* Main Table Card */}
-              <Card className="xl:col-span-3 flex flex-col h-full shadow-md border-muted/40">
-                <CardHeader className="pb-4">
+              <Card className="flex flex-col shadow-md border-muted/40 w-full">
+                <CardHeader className="">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-xl font-bold tracking-tight">Payment History</CardTitle>
@@ -307,10 +313,10 @@ export function PaymentHistoryTable() {
                 </div>
               </CardHeader>
 
-              <div className="flex-1 min-h-0 overflow-auto">
+              <div>
                 <CardContent className="p-0">
-                  <div className="px-6 py-4 border-b bg-muted/5 flex flex-col md:flex-row items-start md:items-center gap-3">
-                    <div className="relative flex-1 w-full max-w-sm">
+                  <div className="p-4 border-b bg-muted/5 flex flex-col xl:flex-row items-stretch xl:items-center gap-3">
+                    <div className="relative w-full xl:flex-1 xl:max-w-sm">
                       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
                       <form.Field name="query">
                         {(field) => (
@@ -321,13 +327,13 @@ export function PaymentHistoryTable() {
                               setPageIndex(0) 
                             }}
                             placeholder="Search by ID, member, or method..."
-                            className="pl-9 h-10 bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
+                            className="pl-9 h-10 bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0 w-full"
                           />
                         )}
                       </form.Field>
                     </div>
                     
-                    <div className="flex items-center gap-2 w-full md:w-auto">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
                       <form.Field name="status">
                         {(field) => (
                           <Select
@@ -337,7 +343,7 @@ export function PaymentHistoryTable() {
                               setPageIndex(0)
                             }}
                           >
-                            <SelectTrigger className="h-10 w-[140px] bg-background/50 border-muted-foreground/20">
+                            <SelectTrigger className="h-10 w-full sm:w-[140px] bg-background/50 border-muted-foreground/20">
                               <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -357,11 +363,13 @@ export function PaymentHistoryTable() {
                               <Button
                                 type="button"
                                 variant="outline"
-                                className={`justify-start text-left font-normal h-10 w-40 bg-background/50 border-muted-foreground/20 ${!field.state.value ? 'text-muted-foreground' : ''}`}
+                                className={`justify-start text-left font-normal h-10 w-full sm:w-40 bg-background/50 border-muted-foreground/20 ${!field.state.value ? 'text-muted-foreground' : ''}`}
                                 aria-label="From date"
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.state.value ? format(new Date(field.state.value), 'MMM d, yyyy') : <span>From Date</span>}
+                                <span className="truncate">
+                                  {field.state.value ? format(new Date(field.state.value), 'MMM d, yyyy') : <span>From Date</span>}
+                                </span>
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-2" align="start">
@@ -409,11 +417,13 @@ export function PaymentHistoryTable() {
                               <Button
                                 type="button"
                                 variant="outline"
-                                className={`justify-start text-left font-normal h-10 w-40 bg-background/50 border-muted-foreground/20 ${!field.state.value ? 'text-muted-foreground' : ''}`}
+                                className={`justify-start text-left font-normal h-10 w-full sm:w-40 bg-background/50 border-muted-foreground/20 ${!field.state.value ? 'text-muted-foreground' : ''}`}
                                 aria-label="To date"
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.state.value ? format(new Date(field.state.value), 'MMM d, yyyy') : <span>To Date</span>}
+                                <span className="truncate">
+                                  {field.state.value ? format(new Date(field.state.value), 'MMM d, yyyy') : <span>To Date</span>}
+                                </span>
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-2" align="start">
@@ -455,7 +465,7 @@ export function PaymentHistoryTable() {
                       </form.Field>
                     </div>
 
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div className="flex items-center gap-2 ml-auto w-full xl:w-auto mt-2 xl:mt-0 justify-end">
                       <Button
                         type="button"
                         variant="outline"
@@ -493,21 +503,21 @@ export function PaymentHistoryTable() {
                       </p>
                     </div>
                   ) : (
-                    <div className="relative w-full overflow-auto">
-                      <Table>
+                    <div className="relative w-full">
+                      <Table className="w-full table-fixed">
                         <TableHeader className="bg-muted/30">
                           <TableRow className="hover:bg-transparent border-b border-muted/60">
-                            <TableHead className="w-[30%] pl-6 ">Member</TableHead>
-                            <TableHead className="w-[20%]">Method</TableHead>
-                            <TableHead className="w-[20%] ">
+                            <TableHead className="w-[55%] md:w-[40%] lg:w-[25%] xl:w-[20%] pl-4 md:pl-6">Member</TableHead>
+                            <TableHead className="hidden lg:table-cell lg:w-[20%] xl:w-[20%]">Method</TableHead>
+                            <TableHead className="hidden md:table-cell md:w-[25%] lg:w-[20%] xl:w-[20%]">
                                <div className="flex items-center gap-1">
                                  Paid Date
                                  <ArrowUpDown className="h-3 w-3" />
                                </div>
                             </TableHead>
-                            <TableHead className="w-[15%] ">Amount</TableHead>
-                            <TableHead className="w-[15%] ">Status</TableHead>
-                            <TableHead className="w-[15%] pr-4">Actions</TableHead>
+                            <TableHead className="hidden xl:table-cell xl:w-[15%]">Amount</TableHead>
+                            <TableHead className="w-[25%] md:w-[20%] lg:w-[15%] xl:w-[10%]">Status</TableHead>
+                            <TableHead className="w-[20%] md:w-[15%] text-right pr-4 md:pr-6 whitespace-nowrap">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -525,34 +535,34 @@ export function PaymentHistoryTable() {
                                 className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
 
                               >
-                                <TableCell className="pl-6 py-4 align-top">
-                                  <div className="flex items-start gap-3">
-                                    <div className="flex flex-col gap-0.5">
-                                      <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                <TableCell className="pl-4 md:pl-6 py-4 align-top w-[55%] md:w-[40%] lg:w-[25%] xl:w-[20%]">
+                                  <div className="flex items-start gap-3 w-full min-w-0">
+                                    <div className="flex flex-col gap-0.5 w-full min-w-0">
+                                      <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate block">
                                         {membersLoading ? '...' : (memberName || 'Unknown Member')}
                                       </span>
-                                      <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                                         <span className="truncate max-w-[120px]">
-                                            Invoice #{p.invoiceId.slice(0, 8)}...
+                                      <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 w-full min-w-0">
+                                         <span className="truncate max-w-[100px] sm:max-w-[120px]">
+                                            Inv #{p.invoiceId.slice(0, 8)}...
                                          </span>
                                       </div>
                                     </div>
                                   </div>
                                 </TableCell>
                                 
-                                <TableCell className="py-4 align-top">
+                                <TableCell className="hidden lg:table-cell py-4 align-top lg:w-[20%] xl:w-[20%]">
                                   <div className="w-fit p-1 -ml-1 rounded-md hover:bg-muted transition-colors">
                                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
                                       <CreditCard className="h-3.5 w-3.5 opacity-70" />
-                                      <span>{methodsLoading ? '...' : (methodName || '—')}</span>
+                                      <span className="truncate max-w-[120px]">{methodsLoading ? '...' : (methodName || '—')}</span>
                                     </div>
-                                    <div className="pl-5 text-xs text-muted-foreground">
+                                    <div className="pl-5 text-xs text-muted-foreground truncate max-w-[120px]">
                                       {p.referenceNum ? `Ref: ${p.referenceNum}` : 'Ref: —'}
                                     </div>
                                   </div>
                                 </TableCell>
                                 
-                                <TableCell className="py-4 align-top">
+                                <TableCell className="hidden md:table-cell py-4 align-top md:w-[25%] lg:w-[20%] xl:w-[20%]">
                                    <div className="flex flex-col gap-0.5">
                                       {p.paidAt ? (
                                         <>
@@ -569,17 +579,22 @@ export function PaymentHistoryTable() {
                                    </div>
                                 </TableCell>
                                 
-                                <TableCell className="py-4 align-top">
+                                <TableCell className="hidden xl:table-cell py-4 align-top xl:w-[15%] text-right">
                                   <span className="font-semibold text-sm">
                                     {formatCurrency(p.amount, 'PHP')}
                                   </span>
                                 </TableCell>
                                 
-                                <TableCell className="py-4 align-top text-left">
-                                  {statusBadge(st)}
+                                <TableCell className="py-4 align-top text-left w-[25%] md:w-[20%] lg:w-[15%] xl:w-[10%]">
+                                  <div className="flex flex-col gap-1">
+                                    {statusBadge(st)}
+                                    <span className="xl:hidden font-semibold text-xs mt-1">
+                                      {formatCurrency(p.amount, 'PHP')}
+                                    </span>
+                                  </div>
                                 </TableCell>
 
-                                <TableCell className="py-4 align-top pr-6 text-right">
+                                <TableCell className="py-4 align-top text-right pr-4 md:pr-6 w-[20%] md:w-[15%]">
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button
@@ -642,8 +657,8 @@ export function PaymentHistoryTable() {
                 </CardContent>
               </div>
 
-              <div className="flex items-center justify-between px-2 py-4">
-                  <div className="flex-1 text-sm text-muted-foreground">
+              <div className="flex flex-col items-center gap-2 px-4 py-3 border-t bg-muted/5 sm:flex-row sm:justify-between">
+                  <div className="text-sm text-center text-muted-foreground sm:text-left">
                     Showing {Math.min(pageIndex * pageSize + 1, filteredPayments.length)} to {Math.min((pageIndex + 1) * pageSize, filteredPayments.length)} of {filteredPayments.length} entries
                   </div>
                   <div className="flex items-center gap-2">
@@ -671,55 +686,6 @@ export function PaymentHistoryTable() {
                 </div>
               </Card>
 
-              {/* Stats / Totals Card Side Panel - Integrated into component */}
-              <div className="space-y-6">
-                <Card className="shadow-md border-muted/40">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Financial Summary</CardTitle>
-                    <CardDescription>Totals for displayed records</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                     <div className="rounded-lg border bg-card p-4 flex flex-col gap-1">
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Revenue</span>
-                        <div className="text-2xl font-bold tracking-tight text-primary">
-                          {formatCurrency(currentTotals.paid + currentTotals.pending, 'PHP')}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                           <span className="text-green-500 font-medium">
-                              {filteredPayments.length} 
-                           </span>
-                           transactions
-                        </div>
-                     </div>
-                     
-                     <div className="space-y-3 pt-2">
-                        <div className="flex items-center justify-between gap-3 text-sm">
-                           <div className="flex items-center gap-2">
-                             <div className="h-2 w-2 rounded-full bg-green-500" />
-                             <span className="text-muted-foreground">Paid</span>
-                           </div>
-                           <span className="font-medium">{formatCurrency(currentTotals.paid, 'PHP')}</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3 text-sm">
-                           <div className="flex items-center gap-2">
-                             <div className="h-2 w-2 rounded-full bg-orange-500" />
-                             <span className="text-muted-foreground">Pending</span>
-                           </div>
-                           <span className="font-medium">{formatCurrency(currentTotals.pending, 'PHP')}</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3 text-sm">
-                           <div className="flex items-center gap-2">
-                             <div className="h-2 w-2 rounded-full bg-destructive" />
-                             <span className="text-muted-foreground">Failed</span>
-                           </div>
-                           <span className="font-medium">{formatCurrency(currentTotals.failed, 'PHP')}</span>
-                        </div>
-                     </div>
-                  </CardContent>
-                </Card>
-                
-                {/* Could add another card for filters summary or quick actions */}
-              </div>
             </div>
           )
         }}

@@ -217,7 +217,7 @@ export default function Aside() {
 			</aside>
 
 			{/* Mobile bottom nav */}
-			<nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 backdrop-blur md:hidden">
+			<nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 backdrop-blur md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
 				<div className="mx-auto flex max-w-md items-center justify-between px-4 py-2">
 					{mobilePrimary.map(({ href, icon: Icon, label }) => {
 						const isActive = currentPath === href
