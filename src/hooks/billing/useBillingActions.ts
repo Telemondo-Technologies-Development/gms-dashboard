@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { addDays } from 'date-fns'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { InvoiceApi } from '@/api/generated/apis/InvoiceApi'
 import { PaymentApi } from '@/api/generated/apis/PaymentApi'
@@ -103,4 +103,20 @@ export function useBillingActions() {
     ensureInvoiceForSubscription,
     createPaymentIfNeeded,
   }
+}
+
+/** Mutation hook to delete a payment and invalidate relevant queries. */
+export function useDeletePayment() {
+  const queryClient = useQueryClient()
+  const paymentApi  = getAuthenticatedApi(PaymentApi)
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await paymentApi.deletePayment({ id })
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [paymentQueryKeys.payments] })
+      void queryClient.invalidateQueries({ queryKey: [invoiceQueryKeys.invoices] })
+    },
+  })
 }
