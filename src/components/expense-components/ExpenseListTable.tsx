@@ -5,71 +5,43 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import type { ExpenseFormData } from '@/lib/expense-types'
+import { formatPesoStr, formatExpenseType } from '@/lib/expense/expense-utils'
+import type { LegacyExpenseRow } from '@/lib/expense/expense-types'
 
 interface ExpenseTableProps {
-  expenses: ExpenseFormData[]
+  expenses: LegacyExpenseRow[]
   searchQuery: string
   onSearchChange: (query: string) => void
   onAddClick: () => void
-  onRowClick: (expense: ExpenseFormData) => void
+  onRowClick: (expense: LegacyExpenseRow) => void
 }
 
-const formatAmount = (amount: string) =>
-  `₱${parseFloat(amount).toLocaleString('en-PH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`
-
-const formatExpenseType = (type: string) =>
-  type.replaceAll('-', ' ')
-
-export function ExpenseTable({
-  expenses,
-  searchQuery,
-  onSearchChange,
-  onAddClick,
-  onRowClick,
-}: ExpenseTableProps) {
-  const handleKeyDown = (e: React.KeyboardEvent, expense: ExpenseFormData) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      onRowClick(expense)
-    }
-  }
-
+export function ExpenseTable({ expenses, searchQuery, onSearchChange, onAddClick, onRowClick }: ExpenseTableProps) {
   return (
     <Card className="flex flex-col flex-1 min-h-0">
       <CardHeader className="flex-shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Expense Records</CardTitle>
-            <CardDescription className="mt-1">
-              View and manage all expense entries
-            </CardDescription>
+            <CardDescription className="mt-1">View and manage all expense entries</CardDescription>
           </div>
           <Button className="gap-2" onClick={onAddClick}>
-            <Plus className="h-4 w-4" />
-            New Expense
+            <Plus className="h-4 w-4" /> New Expense
           </Button>
         </div>
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col min-h-0">
-        {/* Search */}
-        <div className="flex-shrink-0 mb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search by type, name, or description..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+        <div className="flex-shrink-0 mb-4 relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search by type, name, or description..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-9"
+          />
         </div>
 
-        {/* Table or Empty State */}
         {expenses.length === 0 ? (
           <div className="flex-1 flex items-center justify-center rounded-lg border border-dashed">
             <div className="text-center py-12 space-y-3">
@@ -101,7 +73,7 @@ export function ExpenseTable({
                     tabIndex={0}
                     className="cursor-pointer"
                     onClick={() => onRowClick(expense)}
-                    onKeyDown={(e) => handleKeyDown(e, expense)}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onRowClick(expense)}
                   >
                     <TableCell className="pl-6">
                       <Badge variant="secondary" className="capitalize">
@@ -111,9 +83,7 @@ export function ExpenseTable({
                     <TableCell>
                       <div className="font-medium">{expense.name}</div>
                       {expense.description && (
-                        <div className="text-sm text-muted-foreground truncate max-w-md">
-                          {expense.description}
-                        </div>
+                        <div className="text-sm text-muted-foreground truncate max-w-md">{expense.description}</div>
                       )}
                     </TableCell>
                     <TableCell>
@@ -122,14 +92,11 @@ export function ExpenseTable({
                         {format(expense.date, 'MMM dd, yyyy')}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatAmount(expense.amount)}
-                    </TableCell>
+                    <TableCell className="text-right font-medium">{formatPesoStr(expense.amount)}</TableCell>
                     <TableCell className="text-center">
                       {expense.receipt ? (
                         <Badge variant="default" className="gap-1 bg-primary">
-                          <Receipt className="h-3 w-3" />
-                          Attached
+                          <Receipt className="h-3 w-3" /> Attached
                         </Badge>
                       ) : (
                         <Badge variant="secondary">None</Badge>
@@ -143,11 +110,9 @@ export function ExpenseTable({
         )}
 
         {expenses.length > 0 && (
-          <div className="flex-shrink-0 mt-4">
-            <p className="text-sm text-muted-foreground">
-              Showing {expenses.length} {expenses.length === 1 ? 'expense' : 'expenses'}
-            </p>
-          </div>
+          <p className="flex-shrink-0 mt-4 text-sm text-muted-foreground">
+            Showing {expenses.length} {expenses.length === 1 ? 'expense' : 'expenses'}
+          </p>
         )}
       </CardContent>
     </Card>
