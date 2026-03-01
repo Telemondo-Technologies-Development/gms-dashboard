@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useCurrentUser } from '@/hooks/users/useCurrentUser'
-import { useEmployeeDisplayName } from '@/hooks/users/useEmployeeDisplayName'
+import { useCurrentUser } from '@/hooks/users/useStaffCurrentUser'
+import { useEmployeeDisplayName } from '@/hooks/users/useStaffDisplayName'
 import { Bell, Search, User2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

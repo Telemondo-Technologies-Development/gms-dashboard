@@ -24,7 +24,7 @@ import type { MemberFormValues } from '@/types/membership/MembershipManagementSc
 import { AddBillingDialog } from '@/components/membership-components/MembershipBillForm'
 import { InlineAddSubscriptionForm } from '@/components/membership-components/MembershipAddSubscription'
 import { useAddMemberDialog } from '@/hooks/membership/useMembershipAdd'
-import { useEmployeeDisplayName } from '@/hooks/users/useEmployeeDisplayName'
+import { useEmployeeDisplayName } from '@/hooks/users/useStaffDisplayName'
 
 export function AddMemberDialog() {
   const [step, setStep] = useState<1 | 2>(1)

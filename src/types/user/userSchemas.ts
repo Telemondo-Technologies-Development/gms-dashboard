@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import type { EmployeeTableDTO } from '@/api/generated/models'
+
 
 export const apiErrorSchema = z.object({
   code: z.string().optional(),
@@ -117,3 +119,12 @@ export type CreateUserFormValues = z.infer<typeof createUserFormSchema>
 export type CreateUserFormInput = z.input<typeof createUserFormSchema>
 
 
+export interface EmployeeTabProps {
+  loadingEmployees: boolean
+  filteredEmployees: EmployeeTableDTO[]
+  normalizedSearch: string
+  onEdit: (employee: EmployeeTableDTO) => void
+  onDelete: (id: string) => void
+  onAddLogin: (employee: EmployeeTableDTO) => void
+  onAddPermission: (employee: EmployeeTableDTO) => void
+}

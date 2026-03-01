@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 import {
   Loader2,
@@ -38,20 +38,8 @@ import {
 // TabsContent removed — this component no longer relies on tabs
 import type { EmployeeTableDTO } from '@/api/generated/models'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import  type { EmployeeTabProps } from '@/types/user/userSchemas'
 
-export interface EmployeeTabProps {
-  loadingEmployees: boolean
-  filteredEmployees: EmployeeTableDTO[]
-  normalizedSearch: string
-  onEdit: (employee: EmployeeTableDTO) => void
-  onDelete: (id: string) => void
-  onAddLogin: (employee: EmployeeTableDTO) => void
-  onAddPermission: (employee: EmployeeTableDTO) => void
-}
-
-function getInitials(firstName: string, surname: string) {
-  return (firstName[0] + surname[0]).toUpperCase()
-}
 
 export function EmployeeTab({
   loadingEmployees,
@@ -64,6 +52,20 @@ export function EmployeeTab({
 }: EmployeeTabProps) {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeTableDTO | null>(null)
+  const [pageIndex, setPageIndex] = useState(0)
+  const PAGE_SIZE = 5
+
+  const pageCount = Math.max(1, Math.ceil(filteredEmployees.length / PAGE_SIZE))
+
+  const pageItems = useMemo(() => {
+    const start = pageIndex * PAGE_SIZE
+    return filteredEmployees.slice(start, start + PAGE_SIZE)
+  }, [filteredEmployees, pageIndex])
+
+  // Reset to first page whenever the filtered list changes (e.g. search)
+  useEffect(() => {
+    setPageIndex(0)
+  }, [filteredEmployees])
 
   return (
     <>
@@ -105,7 +107,7 @@ export function EmployeeTab({
                 </TableCell>
               </TableRow>
             ) : (
-              filteredEmployees.map((employee) => (
+              pageItems.map((employee) => (
                 <TableRow
                   key={employee.id}
                   className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
@@ -137,7 +139,7 @@ export function EmployeeTab({
                             <TooltipTrigger asChild>
                               <div className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-muted">
                                 <Mail className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                                <span className="truncate max-w-[150px]">{employee.user.email}</span>
+                                <span className="truncate max-w-37.5">{employee.user.email}</span>
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -264,6 +266,44 @@ export function EmployeeTab({
         description="Are you sure you want to delete this employee? This action cannot be undone."
         confirmText="Delete Employee"
       />
+
+      {filteredEmployees.length > 0 && (
+        <div className="flex flex-col items-center gap-2 px-6 py-3 border-t bg-muted/5 sm:flex-row sm:justify-between">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
+            Showing{' '}
+            {Math.min(pageIndex * PAGE_SIZE + 1, filteredEmployees.length)}
+            {' '}to{' '}
+            {Math.min((pageIndex + 1) * PAGE_SIZE, filteredEmployees.length)}
+            {' '}of {filteredEmployees.length}{' '}
+            {filteredEmployees.length === 1 ? 'employee' : 'employees'}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+              disabled={pageIndex <= 0}
+              className="h-8 px-3 text-xs"
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {pageIndex + 1} of {pageCount}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+              disabled={pageIndex >= pageCount - 1}
+              className="h-8 px-3 text-xs"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

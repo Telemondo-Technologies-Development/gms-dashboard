@@ -21,7 +21,7 @@ import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/Subscri
 import { AddBillingDialog } from './MembershipBillForm'
 import { InlineAddSubscriptionForm } from './MembershipAddSubscription'
 import { useMembershipDetailsDialog } from '@/hooks/membership/useMembershipDetailsDialog'
-import { useEmployeeDisplayName } from '@/hooks/users/useEmployeeDisplayName'
+import { useEmployeeDisplayName } from '@/hooks/users/useStaffDisplayName'
 
 export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberDetailsDialogProps) {
   const {
