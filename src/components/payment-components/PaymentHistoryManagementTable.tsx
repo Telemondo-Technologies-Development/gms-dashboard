@@ -1,6 +1,5 @@
-import { useMemo, useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { 
   AlertTriangle, 
@@ -10,10 +9,8 @@ import {
   Receipt, 
   Search, 
   XCircle, 
-  Filter, 
   Download, 
   CreditCard, 
-  User, 
   ArrowUpDown, 
   RefreshCw,
   Loader2,
@@ -23,30 +20,22 @@ import {
   Printer
 } from 'lucide-react'
 
-import { usePayments, usePayment } from '@/hooks/billing/usePayments'
-import { usePaymentMethods } from '@/hooks/billing/usePaymentMethods'
-import { useInvoices } from '@/hooks/billing/useInvoices'
-import { getAuthenticatedApi } from '@/lib/api-client'
+import { usePaymentHistoryLookups } from '@/hooks/billing/usePaymentHistoryLookups'
+import { useDeletePayment } from '@/hooks/billing/useBillingActions'
+import { useSelectedPayment } from '@/hooks/billing/useSelectedPayment'
 import { parseCalendarDay } from '@/lib/date-utils'
-import { MemberApi } from '@/api/generated/apis/MemberApi'
-import { PaymentApi } from '@/api/generated/apis/PaymentApi'
-import { apiResponseListMemberTableSchema } from '@/types/membership/MembershipManagementSchema'
-import type { MemberTableData } from '@/types/membership/MembershipManagementSchema'
-import {
-  paymentHistoryFiltersSchema,
-  type PaymentHistoryFilters,
-  type PaymentMethodTableDTOParsed,
-  type PaymentTableDTOParsed,
-  type InvoiceTableDTOParsed,
+import type {
+  PaymentHistoryFilters,
+  PaymentTableDTOParsed,
 } from '@/types/payment/paymentSchemas'
 
-import { PaymentDetailsDialog } from '@/components/payment-components/PaymentHistoryDialog'
+import { PaymentDetailsDialog } from '@/components/payment-components/PaymentHistoryDetailsDialog'
 import { ReceiptDialog } from '@/components/payment-components/PaymentHistoryReceiptDialog'
 import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -59,7 +48,6 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { invoiceQueryKeys, paymentQueryKeys } from '@/lib/QueryKeys'
 
 type DisplayStatus = 'paid' | 'failed' | 'pending'
 
@@ -100,45 +88,38 @@ function statusBadge(status: DisplayStatus) {
   }
 }
 
-function validateFilters(value: PaymentHistoryFilters): string | undefined {
-  const parsed = paymentHistoryFiltersSchema.safeParse(value)
-  if (parsed.success) return undefined
-  return parsed.error.issues[0]?.message ?? 'Invalid filters'
-}
-
-function getInitials(name: string) {
-  const parts = name.trim().split(' ')
-  if (parts.length > 1) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-  }
-  return name.slice(0, 2).toUpperCase()
-}
-
 import { PaymentHistorySummary } from './PaymentHistorySummary'
 
 export function PaymentHistoryTable() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [receiptOpen, setReceiptOpen] = useState(false)
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
-  
+
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [paymentToDelete, setPaymentToDelete] = useState<PaymentTableDTOParsed | null>(null)
 
-  const [pageSize, setPageSize] = useState(5)
+  const [pageSize] = useState(5)
   const [pageIndex, setPageIndex] = useState(0)
 
-  const queryClient = useQueryClient()
-  const deletePaymentMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const api = getAuthenticatedApi(PaymentApi)
-      await api.deletePayment({ id })
-    },
-    onSuccess: () => {
-      // Invalidate relevant queries
-      queryClient.invalidateQueries({ queryKey: [paymentQueryKeys.payments]})
-      queryClient.invalidateQueries({ queryKey: [invoiceQueryKeys.invoices] }) // Invoices might update status
-    },
-  })
+  const deletePaymentMutation = useDeletePayment()
+
+  const {
+    payments,
+    invoiceById,
+    paymentMethodById,
+    memberNameByActorId,
+    isLoading: paymentsLoading,
+    methodsLoading,
+    membersLoading,
+    paymentsError,
+    handleRefresh,
+  } = usePaymentHistoryLookups()
+
+  const {
+    selectedPayment,
+    isLoading: selectedPaymentLoading,
+    error: selectedPaymentError,
+  } = useSelectedPayment(selectedPaymentId, payments)
 
   const defaultValues: PaymentHistoryFilters = {
     query: '',
@@ -153,70 +134,6 @@ export function PaymentHistoryTable() {
       // Filters apply live
     },
   })
-
-  // Fetch data
-  const paymentsQuery = usePayments(0, 200)
-  const payments = paymentsQuery.data ?? []
-  const paymentsLoading = paymentsQuery.isLoading
-  const paymentsError = paymentsQuery.error
-
-  const methodsQuery = usePaymentMethods(0, 200)
-  const paymentMethods = methodsQuery.data ?? []
-  const methodsLoading = methodsQuery.isLoading
-
-  const invoicesQuery = useInvoices(0, 500)
-  const invoices = invoicesQuery.data ?? []
-  const invoicesLoading = invoicesQuery.isLoading
-  const invoicesError = invoicesQuery.error
-
-  // Memoized lookups
-  const invoiceById = useMemo(() => {
-    const map = new Map<string, InvoiceTableDTOParsed>()
-    for (const inv of invoices) map.set(inv.id, inv)
-    return map
-  }, [invoices])
-
-  const paymentMethodById = useMemo(() => {
-    const map = new Map<string, PaymentMethodTableDTOParsed>()
-    for (const method of paymentMethods) map.set(method.id, method)
-    return map
-  }, [paymentMethods])
-
-  // Single Member fetching logic - keeping inside component for now as in Route
-  const membersQuery = useQuery<MemberTableData[]>({
-    queryKey: ['payment-history-members'],
-    queryFn: async () => {
-      const api = getAuthenticatedApi(MemberApi)
-      const resp = await api.getAllMembers({ pageable: { page: 0, size: 1000 } })
-      const parsed = apiResponseListMemberTableSchema.parse(resp)
-      return parsed.data ?? []
-    },
-    staleTime: 60_000,
-  })
-
-  const members = membersQuery.data ?? []
-  const membersLoading = membersQuery.isLoading
-
-  const memberNameByActorId = useMemo(() => {
-    const map = new Map<string, string>()
-    for (const m of members) {
-      if (!m.actorId) continue
-      const fullName = [m.firstName, m.middleName, m.surname, m.suffix].filter(Boolean).join(' ')
-      map.set(m.actorId, fullName || 'Unknown')
-    }
-    return map
-  }, [members])
-
-  // Selected Payment Data
-  const paymentQuery = usePayment(selectedPaymentId)
-  const selectedPayment = useMemo(() => {
-    if (paymentQuery.data) return paymentQuery.data
-    if (!selectedPaymentId) return null
-    return payments.find((p) => p.id === selectedPaymentId) ?? null
-  }, [paymentQuery.data, payments, selectedPaymentId])
-
-  const selectedPaymentLoading = !!selectedPaymentId && paymentQuery.isLoading && !selectedPayment
-  const selectedPaymentError = paymentQuery.error instanceof Error ? paymentQuery.error.message : undefined
 
   // Filtering Logic
   const filterPayments = (filters: PaymentHistoryFilters) => {
@@ -243,23 +160,7 @@ export function PaymentHistoryTable() {
     })
   }
 
-  // Calculate Totals based on Filtered Data
-  const totals = useMemo(() => {
-    // We need to re-calculate totals based on *current filters*
-    // But hooks can't conditionaly run. We'll use the form state.
-    // Instead of subscribing inside render, we can just grab current values because useForm rerenders on change?
-    // TanStack Form's useForm doesn't automatically trigger re-render of component on value change unless subscribed.
-    // So we'll move the calculation inside the Subscribe block or use a state that updates on form change?
-    // Actually, let's keep it simple: we will render the totals INSIDE the Subscribe block where we have access to `filters`.
-    return { paid: 0, failed: 0, pending: 0 } // placeholder, actual calc in render
-  }, []) // We will calculate in render prop
-
-  const handleRefresh = useCallback(() => {
-    paymentsQuery.refetch()
-    methodsQuery.refetch()
-    invoicesQuery.refetch()
-    membersQuery.refetch()
-  }, [paymentsQuery, methodsQuery, invoicesQuery, membersQuery])
+  // Calculate totals from filtered data — done inline in form.Subscribe render
 
   if (paymentsError) {
     return (
@@ -343,7 +244,7 @@ export function PaymentHistoryTable() {
                               setPageIndex(0)
                             }}
                           >
-                            <SelectTrigger className="h-10 w-full sm:w-[140px] bg-background/50 border-muted-foreground/20">
+                            <SelectTrigger className="h-10 w-full sm:w-35 bg-background/50 border-muted-foreground/20">
                               <SelectValue placeholder="Status" />
                             </SelectTrigger>
                             <SelectContent>
@@ -487,8 +388,8 @@ export function PaymentHistoryTable() {
                     </div>
                   </div>
 
-                  {paymentsLoading || invoicesLoading ? (
-                    <div className="flex min-h-[300px] flex-col items-center justify-center gap-2 text-muted-foreground">
+                  {paymentsLoading ? (
+                    <div className="flex min-h-75 flex-col items-center justify-center gap-2 text-muted-foreground">
                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
                        <p className="text-sm">Loading payment history...</p>
                     </div>
@@ -542,7 +443,7 @@ export function PaymentHistoryTable() {
                                         {membersLoading ? '...' : (memberName || 'Unknown Member')}
                                       </span>
                                       <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 w-full min-w-0">
-                                         <span className="truncate max-w-[100px] sm:max-w-[120px]">
+                                         <span className="truncate max-w-25 sm:max-w-30">
                                             Inv #{p.invoiceId.slice(0, 8)}...
                                          </span>
                                       </div>
@@ -554,9 +455,9 @@ export function PaymentHistoryTable() {
                                   <div className="w-fit p-1 -ml-1 rounded-md hover:bg-muted transition-colors">
                                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
                                       <CreditCard className="h-3.5 w-3.5 opacity-70" />
-                                      <span className="truncate max-w-[120px]">{methodsLoading ? '...' : (methodName || '—')}</span>
+                                      <span className="truncate max-w-30">{methodsLoading ? '...' : (methodName || '—')}</span>
                                     </div>
-                                    <div className="pl-5 text-xs text-muted-foreground truncate max-w-[120px]">
+                                    <div className="pl-5 text-xs text-muted-foreground truncate max-w-30">
                                       {p.referenceNum ? `Ref: ${p.referenceNum}` : 'Ref: —'}
                                     </div>
                                   </div>

@@ -12,6 +12,7 @@
   export const paymentQueryKeys = {
     payments: 'payments',
     paymentMethods: 'payment-methods',
+    paymentHistoryMembers: 'payment-history-members',
 
   }
 
@@ -32,7 +33,7 @@
   }
 
   export const employeeQueryKeys = {
-    employee: 'employees',
+    employee: ['employees'] as const,
   }
 
   
