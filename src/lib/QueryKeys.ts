@@ -9,17 +9,10 @@ export const invoiceQueryKeys = {
   invoices: 'invoices',
 }
 
-<<<<<<< HEAD
-  export const paymentQueryKeys = {
-    payments: 'payments',
-    paymentMethods: 'payment-methods',
-    paymentHistoryMembers: 'payment-history-members',
-=======
 export const paymentQueryKeys = {
   payments: 'payments',
   paymentMethods: 'payment-methods',
 }
->>>>>>> 203bfe14efb6d9da5a65b2a78aa84d8b084df578
 
 export const subscriptionAvailedQueryKeys = {
   subscriptionAvailed: 'subscription-availed',
@@ -38,16 +31,9 @@ export const userQueryKeys = {
 }
 
 export const employeeQueryKeys = {
-  employee: 'employees',
+  employee: ['employees'] as const,
 }
 
-<<<<<<< HEAD
-  export const employeeQueryKeys = {
-    employee: ['employees'] as const,
-  }
-
-  
-=======
 export const expenseQueryKeys = {
   all:              ['expenses'],
   asset:            ['expenses', 'asset'],
@@ -57,4 +43,3 @@ export const expenseQueryKeys = {
   supplies:         ['expenses', 'supplies'],
   other:            ['expenses', 'other'],
 } as const
->>>>>>> 203bfe14efb6d9da5a65b2a78aa84d8b084df578

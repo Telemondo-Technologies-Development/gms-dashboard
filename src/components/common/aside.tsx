@@ -119,6 +119,7 @@ export default function Aside() {
 			items: [
 				{ label: "Staff", href: "/dashboard/admin/users", icon: IdCardLanyard },
 				{ label: "Roles & Access", href: "/dashboard/admin/access", icon: KeyRound },
+				{ label: "Overview", href: "/dashboard/admin/overview", icon: ChartCandlestick },
 				{ label: "Audit Log", href: "/dashboard/admin/audit", icon: Shield },
 				{ label: "Expenses", href: "/dashboard/admin/expense", icon: BanknoteArrowDown  },
 				{ label: "Analytics", href: "/dashboard/admin/analytics", icon: LineChart },
