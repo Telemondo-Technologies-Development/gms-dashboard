@@ -4,7 +4,7 @@ import { getAuthenticatedApi } from '@/lib/api-client'
 import { InvoiceApi } from '@/api/generated/apis'
 import { apiResponseListInvoiceTableDTOSchema } from '@/types/payment/paymentSchemas'
 import { invoiceQueryKeys } from '@/lib/QueryKeys'
-import { zodIssueSummary } from './billing.utils'
+import { zodIssueSummary } from './PaymentHistory.utils'
 
 /**
  * Hook to fetch all invoices with pagination

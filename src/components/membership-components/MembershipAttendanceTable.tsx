@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -20,6 +20,8 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 	const [searchInput, setSearchInput] = useState('')
 	const [submittedQuery, setSubmittedQuery] = useState('')
 	const [selectedDay, setSelectedDay] = useState('')
+	const [pageIndex, setPageIndex] = useState(0)
+	const PAGE_SIZE = 6
 
 	const attendanceQuery = useAttendance()
 
@@ -96,7 +98,11 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 	const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		setSubmittedQuery(searchInput.trim())
+		setPageIndex(0)
 	}
+
+	const pageCount = Math.ceil(filteredRows.length / PAGE_SIZE)
+	const pageItems = filteredRows.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE)
 
 	return (
 		<Card className="flex flex-col h-[88vh] shadow-md border-muted/40 w-full">
@@ -144,7 +150,10 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 								<Calendar
 									mode="single"
 									selected={selectedDay ? parseCalendarDay(selectedDay) ?? undefined : undefined}
-									onSelect={(date) => setSelectedDay(date ? format(date, 'yyyy-MM-dd') : '')}
+									onSelect={(date) => {
+										setSelectedDay(date ? format(date, 'yyyy-MM-dd') : '')
+										setPageIndex(0)
+									}}
 									initialFocus
 								/>
 								<div className="mt-2 flex items-center justify-end gap-2">
@@ -152,14 +161,20 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 										type="button"
 										variant="outline"
 										size="sm"
-										onClick={() => setSelectedDay('')}
+										onClick={() => {
+											setSelectedDay('')
+											setPageIndex(0)
+										}}
 									>
 										Clear
 									</Button>
 									<Button
 										type="button"
 										size="sm"
-										onClick={() => setSelectedDay(format(new Date(), 'yyyy-MM-dd'))}
+										onClick={() => {
+											setSelectedDay(format(new Date(), 'yyyy-MM-dd'))
+											setPageIndex(0)
+										}}
 									>
 										Today
 									</Button>
@@ -183,17 +198,17 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 						</div>
 					) : (
 						<div className="relative w-full overflow-auto">
-							<Table>
+							<Table className="w-full table-fixed">
 								<TableHeader className="bg-muted/30">
 									<TableRow className="hover:bg-transparent border-b border-muted/60">
-										<TableHead className="w-[50%] md:w-[65%] pl-4 md:pl-6">Member</TableHead>
-										<TableHead className="hidden md:table-cell md:w-[15%]">Source</TableHead>
-										<TableHead className="hidden md:table-cell md:w-[10%] pr-4 md:pr-6 text-right">Status</TableHead>
-										<TableHead className="w-[40%] md:w-[10%] pr-4 md:pr-6 text-right">Actions</TableHead>
+										<TableHead className="w-[60%] md:w-[45%] pl-4 md:pl-6">Member</TableHead>
+										<TableHead className="hidden md:table-cell md:w-[20%]">Source</TableHead>
+										<TableHead className="hidden md:table-cell md:w-[15%] pr-4 md:pr-6 text-right">Status</TableHead>
+										<TableHead className="w-[40%] md:w-[20%] pr-4 md:pr-6 text-right">Actions</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{filteredRows.map((record) => (
+									{pageItems.map((record) => (
 										<TableRow key={record.id} className="hover:bg-muted/40 transition-colors group border-b border-muted/40">
 											<TableCell className="pl-4 md:pl-6 py-4 align-top">
 												<div className="flex flex-col gap-1.5">
@@ -238,6 +253,41 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 										</TableRow>
 									))}
 								</TableBody>
+								{filteredRows.length > 0 && (
+									<TableFooter className="bg-muted/5">
+										<TableRow className="hover:bg-transparent">
+											<TableCell colSpan={4} className="p-0">
+												<div className="flex flex-col items-center gap-2 p-4 sm:flex-row sm:justify-between w-full h-full">
+													<div className="text-sm text-center text-muted-foreground sm:text-left">
+														Showing {Math.min(pageIndex * PAGE_SIZE + 1, filteredRows.length)} to {Math.min((pageIndex + 1) * PAGE_SIZE, filteredRows.length)} of {filteredRows.length} entries
+													</div>
+													<div className="flex items-center gap-2">
+														<Button
+															type="button"
+															variant="outline"
+															size="sm"
+															onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+															disabled={pageIndex <= 0}
+															className="h-8 px-3 text-xs"
+														>
+															Previous
+														</Button>
+														<Button
+															type="button"
+															variant="outline"
+															size="sm"
+															onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+															disabled={pageIndex >= Math.max(0, pageCount - 1)}
+															className="h-8 px-3 text-xs"
+														>
+															Next
+														</Button>
+													</div>
+												</div>
+											</TableCell>
+										</TableRow>
+									</TableFooter>
+								)}
 							</Table>
 						</div>
 					)}

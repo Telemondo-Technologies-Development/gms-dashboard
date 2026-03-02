@@ -4,7 +4,7 @@ import { getAuthenticatedApi } from '@/lib/api-client'
 import { PaymentApi } from '@/api/generated/apis'
 import { apiResponseListPaymentMethodTableDTOSchema } from '@/types/payment/paymentSchemas'
 import { paymentQueryKeys } from '@/lib/QueryKeys'
-import { zodIssueSummary } from './billing.utils'
+import { zodIssueSummary } from './PaymentHistory.utils'
 
 /**
  * Hook to fetch all payment methods

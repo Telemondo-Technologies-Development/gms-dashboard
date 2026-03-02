@@ -8,7 +8,7 @@ import {
   apiResponsePaymentTableDTOSchema,
 } from '@/types/payment/paymentSchemas'
 import { paymentQueryKeys } from '@/lib/QueryKeys'
-import { zodIssueSummary } from './billing.utils'
+import { zodIssueSummary } from './PaymentHistory.utils'
 
 /**
  * Hook to fetch all payments with pagination

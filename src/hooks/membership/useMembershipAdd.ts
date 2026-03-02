@@ -9,7 +9,7 @@ import { SubscriptionApi } from '@/api/generated/apis/SubscriptionApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAddMemberDialogData } from '@/hooks/membership/useMembershipDetails'
-import { useBillingActions } from '@/hooks/billing/useBillingActions'
+import { useBillingActions } from '@/hooks/billing/usePaymentHistoryBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 import {
   apiResponseMemberTableSchema,
@@ -18,7 +18,7 @@ import {
 } from '@/types/membership/MembershipManagementSchema'
 import type { MemberFormValues } from '@/types/membership/MembershipManagementSchema'
 import { useCreateSubscriptionPlan } from '@/hooks/membership/useMembershipAddSubscriptionPlan'
-import { useCreatePaymentMethod } from '@/hooks/billing/useAddPaymentMethod'
+import { useCreatePaymentMethod } from '@/hooks/billing/usePaymentHistoryAddMethods'
 import type { SubscriptionPlanFormState } from '@/types/membership/MembershipsubscriptionSchemas'
 
 interface UseAddMemberDialogResult {
