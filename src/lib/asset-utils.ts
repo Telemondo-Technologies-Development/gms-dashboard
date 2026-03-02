@@ -3,19 +3,47 @@
  * Shared utilities for asset tracking and management
  */
 
+import type { AssetTableDTO } from '@/api/generated/models/AssetTableDTO'
+
 export interface Asset {
   id: string
   name: string
   category: string
+  categoryId: string
   branch: string
+  branchId: string
   purchaseDate: Date
-  price: number
-  lifespan: number
+  price?: number
+  lifespan?: number
   status: string
   condition: string
   serialNumber?: string
   nextMaintenance?: Date
   notes?: string
+  manufacturedDate?: Date
+  endOfLife?: Date
+  objectIds: string[]
+}
+
+/**
+ * Convert AssetTableDTO from backend to frontend Asset type
+ */
+export function adaptAssetFromDTO(dto: AssetTableDTO): Asset {
+  return {
+    id: dto.id,
+    name: dto.name,
+    category: dto.assetCategoryId,
+    categoryId: dto.assetCategoryId,
+    branch: dto.branchId,
+    branchId: dto.branchId,
+    purchaseDate: dto.manufacturedDate || dto.createdAt,
+    status: 'Operational',
+    condition: 'Good',
+    notes: dto.remarks,
+    manufacturedDate: dto.manufacturedDate,
+    endOfLife: dto.endOfLife,
+    objectIds: dto.objectIds,
+  }
 }
 
 /**
@@ -33,6 +61,7 @@ export function getAssetAge(date: Date): number {
  * @returns True if asset is near end of life
  */
 export function isAssetNearEOL(asset: Asset): boolean {
+  if (!asset.lifespan) return false
   return getAssetAge(asset.purchaseDate) >= asset.lifespan * 0.8
 }
 
@@ -100,7 +129,7 @@ export function getAssetsNeedingAttention(assets: Asset[]): Asset[] {
  * @returns Total purchase value
  */
 export function calculateTotalAssetValue(assets: Asset[]): number {
-  return assets.reduce((sum, a) => sum + a.price, 0)
+  return assets.reduce((sum, a) => sum + (a.price || 0), 0)
 }
 
 /**

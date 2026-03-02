@@ -1,12 +1,21 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Search, Package, AlertTriangle, CheckCircle, Calendar, Clock, Wrench, MapPin } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Search, Package, AlertTriangle, CheckCircle, Clock, Wrench, MapPin, MoreHorizontal } from 'lucide-react'
 import { format } from 'date-fns'
 import {
-  type Asset,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  adaptAssetFromDTO,
   getAssetAge,
   isAssetNearEOL,
   assetNeedsMaintenance,
@@ -18,242 +27,295 @@ import {
 } from '@/lib/asset-utils'
 import { AddAssetDialog } from '@/components/asset-components/AddAssetDialog'
 import { AssetDetailsDialog } from '@/components/asset-components/AssetDetailsDialog'
-import { DeleteAssetDialog } from '@/components/asset-components/DeleteAssetDialog'
+import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm'
+import { useAssets } from '@/hooks/assets/useAssets'
+import { useDeleteAsset } from '@/hooks/assets/useDeleteAsset'
+import { useCurrentUser } from '@/hooks/users/useStaffCurrentUser'
+import { useAssetCategories } from '@/hooks/assets/useAssetCategories'
+import { useBranches } from '@/hooks/branch/useBranches'
+import type { AssetTable } from '@/types/asset/assetSchemas'
 
 export const Route = createFileRoute('/dashboard/marketing/asset')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const [assets, setAssets] = useState<Asset[]>([
-    {
-      id: '1',
-      name: 'Treadmill Pro X500',
-      category: 'Equipment',
-      branch: 'Matina Gym Fitness',
-      purchaseDate: new Date('2023-01-15'),
-      price: 85000,
-      lifespan: 60,
-      status: 'Operational',
-      condition: 'Good',
-      serialNumber: 'TRD-X500-2023-001',
-      nextMaintenance: new Date('2025-02-01'),
-      notes: 'Regular maintenance every 3 months',
-    },
-    {
-      id: '2',
-      name: 'Elliptical Trainer E200',
-      category: 'Equipment',
-      branch: 'Panacan Gym Fitness',
-      purchaseDate: new Date('2021-06-10'),
-      price: 65000,
-      lifespan: 48,
-      status: 'Needs Repair',
-      condition: 'Fair',
-      serialNumber: 'ELP-E200-2021-045',
-      nextMaintenance: new Date('2025-01-15'),
-      notes: 'Belt needs replacement',
-    },
-  ])
+  const { assets: assetDTOs, isLoading: assetsLoading, error } = useAssets()
+  const { categories, isLoading: categoriesLoading } = useAssetCategories()
+  const { branches, isLoading: branchesLoading } = useBranches()
+  const { identity } = useCurrentUser()
+  const deleteAsset = useDeleteAsset()
 
-  const [search, setSearch] = useState('')
-  const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const isLoading = assetsLoading || categoriesLoading || branchesLoading
 
-  const filtered = filterAssets(assets, search)
+  const assets = useMemo(() => {
+    return assetDTOs.map(dto => {
+      const category = categories.find(c => c.id === dto.assetCategoryId)
+      const branch = branches.find((b: any) => b.id === dto.branchId)
+      return adaptAssetFromDTO(dto, category?.name, branch?.name)
+    })
+  }, [assetDTOs, categories, branches])
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [addAssetDialogOpen, setAddAssetDialogOpen] = useState(false)
+  const [assetDetailsOpen, setAssetDetailsOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [selectedAsset, setSelectedAsset] = useState<AssetTable | null>(null)
+
+  const filteredAssets = filterAssets(assets, searchQuery)
   const needsAttention = getAssetsNeedingAttention(assets)
   const totalValue = calculateTotalAssetValue(assets)
   const operationalCount = getOperationalAssetsCount(assets)
 
-  const handleAddAsset = (newAsset: Omit<Asset, 'id'>) => {
-    setAssets((prev) => [{ id: crypto.randomUUID(), ...newAsset }, ...prev])
-  }
-
-  const handleUpdateAsset = (updatedAsset: Asset) => {
-    setAssets((prev) => prev.map((a) => (a.id === updatedAsset.id ? updatedAsset : a)))
-    setSelectedAsset(null)
-  }
-
-  const handleDeleteAsset = (assetId: string) => {
-    setAssets((prev) => prev.filter((a) => a.id !== assetId))
-    setSelectedAsset(null)
-    setDetailsDialogOpen(false)
-  }
-
-  const handleAssetClick = (asset: Asset) => {
-    setSelectedAsset(asset)
-    setDetailsDialogOpen(true)
+  const handleAssetClick = (assetDTO: AssetTable) => {
+    setSelectedAsset(assetDTO)
+    setAssetDetailsOpen(true)
   }
 
   const handleOpenDeleteDialog = () => {
-    setDetailsDialogOpen(false)
-    setDeleteDialogOpen(true)
+    setAssetDetailsOpen(false)
+    setDeleteConfirmOpen(true)
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Asset Tracking</h1>
+            <p className="text-muted-foreground">Monitor equipment, supplies, and maintenance schedules</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              <p>Failed to load assets. Please try again later.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Asset Tracking</h1>
-          <p className="text-muted-foreground">Monitor equipment, supplies, and maintenance schedules</p>
-        </div>
-        <AddAssetDialog
-          open={addDialogOpen}
-          onOpenChange={setAddDialogOpen}
-          onAddAsset={handleAddAsset}
-        />
-      </div>
+    <div className="space-y-6 w-full">
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{assets.length}</div>
-            <p className="text-xs text-muted-foreground">Across all branches</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₱{totalValue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Purchase value</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Needs Attention</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{needsAttention.length}</div>
-            <p className="text-xs text-muted-foreground">Repairs or maintenance</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Operational</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{operationalCount}</div>
-            <p className="text-xs text-muted-foreground">Ready to use</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
+      <Card className="flex flex-col shadow-md border-muted/40 max-h-[88vh]">
         <CardHeader>
-          <CardTitle>Assets Inventory</CardTitle>
-          <CardDescription>Track and manage all gym equipment and supplies</CardDescription>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div>
+              <CardTitle className="text-xl font-bold tracking-tight">Asset Tracking</CardTitle>
+              <CardDescription className="mt-1">
+                Manage your {assets.length} {assets.length === 1 ? 'asset' : 'assets'} and their maintenance schedules.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="default" className="px-3 py-1 text-sm">
+                Total: {assets.length}
+              </Badge>
+              <AddAssetDialog
+                open={addAssetDialogOpen}
+                onOpenChange={setAddAssetDialogOpen}
+                currentUserId={identity?.userId || identity?.actorId || ''}
+              />
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search assets..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
 
-          <div className="space-y-4">
-            {filtered.map((asset) => {
-              const age = getAssetAge(asset.purchaseDate)
-              const nearEOL = isAssetNearEOL(asset)
-              const maintenanceDue = assetNeedsMaintenance(asset)
+        <div>
+          <CardContent className="p-0">
+            <div className="p-4 border-b bg-muted/5 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+              <div className="relative w-full md:max-w-sm">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search assets..."
+                  className="pl-9 h-10 w-full bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
+                />
+              </div>
 
-              return (
-                <Card
-                  key={asset.id}
-                  className="p-4 cursor-pointer hover:bg-muted/50"
-                  onClick={() => handleAssetClick(asset)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold">{asset.name}</h3>
-                        <Badge variant={asset.status === 'Operational' ? 'default' : 'destructive'}>
-                          {asset.status}
-                        </Badge>
-                        <Badge variant="outline">{asset.category}</Badge>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {asset.branch}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(asset.purchaseDate, 'MMM yyyy')}
-                        </div>
-                        <div>
-                          Age: {age}/{asset.lifespan} months
-                        </div>
-                        <div>Condition: <span className={`font-medium ${getConditionColor(asset.condition)}`}>{asset.condition}</span></div>
-                      </div>
-                      {asset.serialNumber && (
-                        <div className="text-xs text-muted-foreground mt-1">SN: {asset.serialNumber}</div>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-1 ml-4">
-                      {asset.status === 'Needs Repair' && (
-                        <div className="flex items-center gap-1 text-xs text-red-600">
-                          <Wrench className="h-3 w-3" />
-                          Needs Repair
-                        </div>
-                      )}
-                      {nearEOL && (
-                        <div className="flex items-center gap-1 text-xs text-orange-600">
-                          <AlertTriangle className="h-3 w-3" />
-                          Near EOL
-                        </div>
-                      )}
-                      {maintenanceDue && (
-                        <div className="flex items-center gap-1 text-xs text-yellow-600">
-                          <Clock className="h-3 w-3" />
-                          Maintenance Due
-                        </div>
-                      )}
+              <div className="flex items-center gap-3 w-full md:w-auto md:ml-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 flex-1">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/30">
+                    <Package className="h-4 w-4 text-primary" />
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground">Total</span>
+                      <span className="text-sm font-semibold">{assets.length}</span>
                     </div>
                   </div>
-                  <div className="w-full bg-muted rounded-full h-1.5 mt-3">
-                    <div
-                      className={`h-1.5 rounded-full ${nearEOL ? 'bg-red-500' : 'bg-blue-500'}`}
-                      style={{ width: `${Math.min((age / asset.lifespan) * 100, 100)}%` }}
-                    />
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/30">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground">Active</span>
+                      <span className="text-sm font-semibold">{operationalCount}</span>
+                    </div>
                   </div>
-                </Card>
-              )
-            })}
-          </div>
-        </CardContent>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/30">
+                    <AlertTriangle className="h-4 w-4 text-orange-600" />
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground">Attention</span>
+                      <span className="text-sm font-semibold">{needsAttention.length}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/30">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground">Value</span>
+                      <span className="text-sm font-semibold">₱{(totalValue / 1000).toFixed(0)}k</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                  <Package className="h-6 w-6 text-muted-foreground animate-pulse" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Loading assets...</h3>
+                <p className="text-muted-foreground max-w-sm">Please wait while we fetch your asset data.</p>
+              </div>
+            ) : filteredAssets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                  <Package className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No assets found</h3>
+                <p className="text-muted-foreground max-w-sm mb-6">
+                  {searchQuery ? 'Try adjusting your search to find what you\'re looking for.' : 'Get started by adding your first asset to track.'}
+                </p>
+              </div>
+            ) : (
+              <div className="relative w-full">
+                <Table className="w-full table-fixed">
+                  <TableHeader className="bg-muted/30">
+                    <TableRow className="hover:bg-transparent border-b border-muted/60">
+                      <TableHead className="w-[35%] pl-4 md:pl-6">Asset</TableHead>
+                      <TableHead className="hidden lg:table-cell lg:w-[15%]">Category</TableHead>
+                      <TableHead className="hidden md:table-cell md:w-[15%]">Branch</TableHead>
+                      <TableHead className="hidden lg:table-cell lg:w-[12%]">Status</TableHead>
+                      <TableHead className="hidden lg:table-cell lg:w-[12%]">Condition</TableHead>
+                      <TableHead className="hidden md:table-cell md:w-[11%]">Age</TableHead>
+                      <TableHead className="w-[10%] text-right pr-4 md:pr-6">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                    {filteredAssets.map((asset) => {
+                      const age = getAssetAge(asset.purchaseDate)
+                      const nearEOL = isAssetNearEOL(asset)
+                      const maintenanceDue = assetNeedsMaintenance(asset)
+
+                      return (
+                        <TableRow 
+                          key={asset.id} 
+                          className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
+                          onClick={() => handleAssetClick(assetDTOs.find(a => a.id === asset.id)!)}
+                        >
+                          <TableCell className="pl-4 md:pl-6 py-4 align-top w-[35%]">
+                            <div className="flex items-start gap-3 w-full min-w-0">
+                              <div className="flex flex-col gap-0.5 w-full min-w-0">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 w-full min-w-0">
+                                  <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate w-full sm:max-w-[180px] lg:max-w-none">
+                                    {asset.name}
+                                  </span>
+                                  {asset.serialNumber && (
+                                    <Badge variant="outline" className="text-xs px-2 py-0 h-5 font-normal bg-muted/50 border-muted-foreground/20">
+                                      SN: {asset.serialNumber}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                  {asset.status === 'Needs Repair' && (
+                                    <Badge className="bg-red-500 hover:bg-red-600 text-xs px-2 py-0 h-5">
+                                      <Wrench className="h-3 w-3 mr-1" /> Repair
+                                    </Badge>
+                                  )}
+                                  {nearEOL && (
+                                    <Badge className="bg-orange-500 hover:bg-orange-600 text-xs px-2 py-0 h-5">
+                                      <AlertTriangle className="h-3 w-3 mr-1" /> Near EOL
+                                    </Badge>
+                                  )}
+                                  {maintenanceDue && (
+                                    <Badge className="bg-yellow-500 hover:bg-yellow-600 text-xs px-2 py-0 h-5">
+                                      <Clock className="h-3 w-3 mr-1" /> Maint. Due
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell py-4 align-top lg:w-[15%]">
+                            <Badge variant="outline" className="font-normal bg-background/50">
+                              {asset.category}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell py-4 align-top md:w-[15%]">
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <MapPin className="h-3.5 w-3.5" />
+                              <span className="text-sm">{asset.branch}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell py-4 align-top lg:w-[12%]">
+                            <Badge 
+                              variant={asset.status === 'Operational' ? 'default' : 'destructive'}
+                              className="font-normal"
+                            >
+                              {asset.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell py-4 align-top lg:w-[12%]">
+                            <div className="flex items-center gap-2">
+                              <div className={`h-2.5 w-2.5 rounded-full ${getConditionColor(asset.condition).replace('text-', 'bg-').replace('600', '500')}`} />
+                              <span className="text-sm text-muted-foreground">{asset.condition}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell py-4 align-top md:w-[11%]">
+                            <div className="text-sm text-muted-foreground">
+                              {age} months
+                              <div className="text-xs opacity-70">
+                                {format(asset.purchaseDate, 'MMM yyyy')}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right pr-4 md:pr-6 py-4 align-top w-[10%]">
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <span className="sr-only">View details</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </div>
       </Card>
 
       <AssetDetailsDialog
-        open={detailsDialogOpen}
-        onOpenChange={setDetailsDialogOpen}
+        open={assetDetailsOpen}
+        onOpenChange={setAssetDetailsOpen}
         asset={selectedAsset}
-        onUpdateAsset={handleUpdateAsset}
+        currentUserId={identity?.userId || identity?.actorId || ''}
         onDeleteAsset={handleOpenDeleteDialog}
       />
 
-      <DeleteAssetDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        asset={selectedAsset}
-        onConfirmDelete={handleDeleteAsset}
+      <DeleteAdminConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        onConfirm={async () => {
+          if (selectedAsset?.id) {
+            await deleteAsset.mutateAsync(selectedAsset.id)
+            setSelectedAsset(null)
+          }
+        }}
+        title={`Delete Asset: ${selectedAsset?.name}`}
+        description="Are you sure you want to delete this asset?"
+        confirmText="Delete Asset"
       />
     </div>
   )

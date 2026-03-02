@@ -151,6 +151,48 @@ function DashboardOverview() {
         </p>
       </div>
 
+      {/* Attention Required - Top Priority */}
+      {(expiringSoon > 0 || assetSummary.needsRepair > 0 || membersWithDues.length > 0) && (
+        <Card className="border-yellow-500/50 bg-yellow-50/50 dark:bg-yellow-950/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-500">
+              <AlertCircle className="h-5 w-5" />
+              Attention Required
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              {expiringSoon > 0 && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>
+                    {expiringSoon} membership{expiringSoon > 1 ? 's' : ''} expiring within 7 days
+                  </span>
+                </div>
+              )}
+              {assetSummary.needsRepair > 0 && (
+                <div className="flex items-center gap-2">
+                  <Wrench className="h-4 w-4" />
+                  <span>
+                    {assetSummary.needsRepair} asset{assetSummary.needsRepair > 1 ? 's' : ''} need
+                    repair
+                  </span>
+                </div>
+              )}
+              {membersWithDues.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  <span>
+                    {membersWithDues.length} member{membersWithDues.length > 1 ? 's have' : ' has'}{' '}
+                    outstanding dues
+                  </span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
@@ -316,47 +358,6 @@ function DashboardOverview() {
         </div>
       </div>
 
-      {/* Recent Alerts */}
-      {(expiringSoon > 0 || assetSummary.needsRepair > 0 || membersWithDues.length > 0) && (
-        <Card className="border-yellow-500/50 bg-yellow-50/50 dark:bg-yellow-950/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-500">
-              <AlertCircle className="h-5 w-5" />
-              Attention Required
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              {expiringSoon > 0 && (
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {expiringSoon} membership{expiringSoon > 1 ? 's' : ''} expiring within 7 days
-                  </span>
-                </div>
-              )}
-              {assetSummary.needsRepair > 0 && (
-                <div className="flex items-center gap-2">
-                  <Wrench className="h-4 w-4" />
-                  <span>
-                    {assetSummary.needsRepair} asset{assetSummary.needsRepair > 1 ? 's' : ''} need
-                    repair
-                  </span>
-                </div>
-              )}
-              {membersWithDues.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  <span>
-                    {membersWithDues.length} member{membersWithDues.length > 1 ? 's have' : ' has'}{' '}
-                    outstanding dues
-                  </span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
