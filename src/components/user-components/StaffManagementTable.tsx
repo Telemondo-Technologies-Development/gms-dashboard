@@ -25,6 +25,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from '@/components/ui/table'
 import {
   DropdownMenu,
@@ -250,6 +251,49 @@ export function EmployeeTab({
               ))
             )}
           </TableBody>
+          {filteredEmployees.length > 0 && (
+            <TableFooter className="bg-muted/5">
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={5} className="p-0">
+                  <div className="flex flex-col items-center gap-2 px-6 py-3 sm:flex-row sm:justify-between w-full h-full">
+                    <p className="text-sm text-muted-foreground text-center sm:text-left">
+                      Showing{' '}
+                      {Math.min(pageIndex * PAGE_SIZE + 1, filteredEmployees.length)}
+                      {' '}to{' '}
+                      {Math.min((pageIndex + 1) * PAGE_SIZE, filteredEmployees.length)}
+                      {' '}of {filteredEmployees.length}{' '}
+                      {filteredEmployees.length === 1 ? 'employee' : 'employees'}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+                        disabled={pageIndex <= 0}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Previous
+                      </Button>
+                      <span className="text-sm text-muted-foreground">
+                        Page {pageIndex + 1} of {pageCount}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+                        disabled={pageIndex >= pageCount - 1}
+                        className="h-8 px-3 text-xs"
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
         </Table>
       </div>
 
@@ -266,44 +310,6 @@ export function EmployeeTab({
         description="Are you sure you want to delete this employee? This action cannot be undone."
         confirmText="Delete Employee"
       />
-
-      {filteredEmployees.length > 0 && (
-        <div className="flex flex-col items-center gap-2 px-6 py-3 border-t bg-muted/5 sm:flex-row sm:justify-between">
-          <p className="text-sm text-muted-foreground text-center sm:text-left">
-            Showing{' '}
-            {Math.min(pageIndex * PAGE_SIZE + 1, filteredEmployees.length)}
-            {' '}to{' '}
-            {Math.min((pageIndex + 1) * PAGE_SIZE, filteredEmployees.length)}
-            {' '}of {filteredEmployees.length}{' '}
-            {filteredEmployees.length === 1 ? 'employee' : 'employees'}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-              disabled={pageIndex <= 0}
-              className="h-8 px-3 text-xs"
-            >
-              Previous
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {pageIndex + 1} of {pageCount}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
-              disabled={pageIndex >= pageCount - 1}
-              className="h-8 px-3 text-xs"
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      )}
     </>
   )
 }

@@ -18,7 +18,7 @@ import { AttendanceApi } from '@/api/generated/apis/AttendanceApi'
 import { AttendancePostDTOSourceEnum, AttendancePostDTOTypeEnum } from '@/api/generated/models/AttendancePostDTO'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 import type { MemberFormData } from '@/types/membership/MembershipManagementSchema'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -37,7 +37,6 @@ import {
 
 interface Props {
   onSelectMember: (m: MemberFormData) => void
-  pageSize?: number
 }
 
 function sortMembersByDateStack(members: MemberFormData[]): MemberFormData[] {
@@ -53,12 +52,13 @@ function sortMembersByDateStack(members: MemberFormData[]): MemberFormData[] {
   })
 }
 
-function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
+function MembersTable({ onSelectMember }: Props) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedDay, setSelectedDay] = useState('')
   const [pageIndex, setPageIndex] = useState(0)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [memberToDelete, setMemberToDelete] = useState<MemberFormData | null>(null)
+  const PAGE_SIZE = 5
 
   const { enrichedMembers, isFetching, error, refetchAll } = useMembersData()
   const session = useAuthSession()
@@ -178,14 +178,14 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
   }, [enrichedMembers, searchQuery, selectedDay])
 
   // Memoize pagination
-  const pageCount = Math.max(1, Math.ceil(filteredMembers.length / pageSize))
+  const pageCount = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE))
   const pageItems = useMemo(() => {
-    const start = pageIndex * pageSize
-    return filteredMembers.slice(start, start + pageSize)
-  }, [filteredMembers, pageIndex, pageSize])
+    const start = pageIndex * PAGE_SIZE
+    return filteredMembers.slice(start, start + PAGE_SIZE)
+  }, [filteredMembers, pageIndex, PAGE_SIZE])
 
   useEffect(() => {
-    if (pageIndex >= pageCount) {
+    if (pageIndex > 0 && pageIndex >= pageCount) {
       setPageIndex(pageCount - 1)
     }
   }, [pageCount, pageIndex])
@@ -320,16 +320,16 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
               </p>
             </div>
           ) : (
-            <div className="relative w-full">
+            <div className="relative w-full overflow-auto">
               <Table className="w-full table-fixed">
                 <TableHeader className="bg-muted/30">
                   <TableRow className="hover:bg-transparent border-b border-muted/60">
-                    <TableHead className="w-[70%] md:w-[45%] lg:w-[30%] pl-4 md:pl-6">Name</TableHead>
+                    <TableHead className="w-[60%] md:w-[45%] lg:w-[30%] pl-4 md:pl-6">Name</TableHead>
                     <TableHead className="hidden lg:table-cell lg:w-[25%]">Plan & Billing</TableHead>
                     <TableHead className="hidden md:table-cell lg:hidden md:w-[35%]">Subscription</TableHead>
                     <TableHead className="hidden lg:table-cell lg:w-[25%]">Subscription Period</TableHead>
                     <TableHead className="hidden lg:table-cell lg:w-[10%]">Status</TableHead>
-                    <TableHead className="w-[30%] md:w-[20%] lg:w-[10%] text-right pr-4 md:pr-6 whitespace-nowrap">Actions</TableHead>
+                    <TableHead className="w-[40%] md:w-[20%] lg:w-[10%] text-right pr-4 md:pr-6 whitespace-nowrap">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -342,7 +342,7 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
                         key={memberGroup.id}
                         className="hover:bg-muted/40 transition-colors group border-b border-muted/40"
                       >
-                        <TableCell className="pl-4 md:pl-6 py-4 align-top w-[70%] md:w-[45%] lg:w-[30%]">
+                        <TableCell className="pl-4 md:pl-6 py-4 align-top w-[60%] md:w-[45%] lg:w-[30%]">
                           <div className="flex items-start gap-3 w-full min-w-0">
                             <div className="flex flex-col gap-0.5 w-full min-w-0">
                           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 w-full min-w-0">
@@ -437,7 +437,7 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
                           {getMembershipStatusBadge(memberGroup.endDate)}
                         </TableCell>
 
-                        <TableCell className="py-4 align-top text-right pr-4 md:pr-6 w-[30%] md:w-[20%] lg:w-[10%]">
+                        <TableCell className="py-4 align-top text-right pr-4 md:pr-6 w-[40%] md:w-[20%] lg:w-[10%]">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
@@ -494,6 +494,41 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
                     )
                   })}
                 </TableBody>
+                {filteredMembers.length > 0 && (
+                  <TableFooter className="bg-muted/5">
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={6} className="p-0">
+                        <div className="flex flex-col items-center gap-2 p-4 sm:flex-row sm:justify-between w-full h-full text-foreground">
+                          <div className="text-sm text-center text-muted-foreground sm:text-left">
+                            Showing {Math.min(pageIndex * PAGE_SIZE + 1, filteredMembers.length)} to {Math.min((pageIndex + 1) * PAGE_SIZE, filteredMembers.length)} of {filteredMembers.length} entries
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+                              disabled={pageIndex <= 0}
+                              className="h-8 px-3 text-xs"
+                            >
+                              Previous
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+                              disabled={pageIndex >= pageCount - 1 || pageCount === 0}
+                              className="h-8 px-3 text-xs"
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  </TableFooter>
+                )}
               </Table>
             </div>
           )}
@@ -513,34 +548,6 @@ function MembersTable({ onSelectMember, pageSize = 5 }: Props) {
         description="Are you sure you want to delete this member?"
         confirmText="Delete Member"
       />
-
-      <div className="flex flex-col items-center gap-2 p-4 border-t bg-muted/5 sm:flex-row sm:justify-between">
-        <div className="text-sm text-center text-muted-foreground sm:text-left">
-          Showing {Math.min(pageIndex * pageSize + 1, filteredMembers.length)} to {Math.min((pageIndex + 1) * pageSize, filteredMembers.length)} of {filteredMembers.length} entries
-        </div>
-        <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-              disabled={pageIndex <= 0}
-              className="h-8 px-3 text-xs"
-            >
-              Previous
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
-              disabled={pageIndex >= pageCount - 1}
-              className="h-8 px-3 text-xs"
-            >
-              Next
-            </Button>
-          </div>
-        </div>
     </Card>
   )
 }

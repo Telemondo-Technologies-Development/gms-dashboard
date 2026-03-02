@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 
 import { usePaymentHistoryLookups } from '@/hooks/billing/usePaymentHistoryLookups'
-import { useDeletePayment } from '@/hooks/billing/useBillingActions'
+import { useDeletePayment } from '@/hooks/billing/usePaymentHistoryBillingActions'
 import { useSelectedPayment } from '@/hooks/billing/useSelectedPayment'
 import { parseCalendarDay } from '@/lib/date-utils'
 import type {
@@ -45,7 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
@@ -199,22 +199,23 @@ export function PaymentHistoryTable() {
                 transactionCount={filteredPayments.length} 
               />
               {/* Main Table Card */}
-              <Card className="flex flex-col shadow-md border-muted/40 w-full">
-                <CardHeader className="">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl font-bold tracking-tight">Payment History</CardTitle>
-                    <CardDescription className="mt-1">
-                      View and manage {filteredPayments.length} billing records, invoices, and transaction statuses.
-                    </CardDescription>
+              <Card className="flex flex-col shadow-md border-muted/40 w-full h-[700px]">
+                <CardHeader>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-xl font-bold tracking-tight">Payment History</CardTitle>
+                      <CardDescription className="mt-1">
+                        View and manage {filteredPayments.length} billing records, invoices, and transaction statuses.
+                      </CardDescription>
+                    </div>
+                    <Badge variant="default" className="w-fit px-3 py-1 text-sm">
+                      Total: {filteredPayments.length}
+                    </Badge>
                   </div>
-                  <Badge variant="default" className="px-3 py-1 text-sm">
-                    Total: {filteredPayments.length}
-                  </Badge>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <div>
+              {/* Updated wrapper: make content flex-1 but remove absolute heights so the card stretches cleanly */}
+              <div className="flex-1 min-h-0">
                 <CardContent className="p-0">
                   <div className="p-4 border-b bg-muted/5 flex flex-col xl:flex-row items-stretch xl:items-center gap-3">
                     <div className="relative w-full xl:flex-1 xl:max-w-sm">
@@ -366,7 +367,7 @@ export function PaymentHistoryTable() {
                       </form.Field>
                     </div>
 
-                    <div className="flex items-center gap-2 ml-auto w-full xl:w-auto mt-2 xl:mt-0 justify-end">
+                    <div className="flex items-center  ml-auto gap-2 w-full xl:w-auto xl:mt-0 justify-end ">
                       <Button
                         type="button"
                         variant="outline"
@@ -389,7 +390,7 @@ export function PaymentHistoryTable() {
                   </div>
 
                   {paymentsLoading ? (
-                    <div className="flex min-h-75 flex-col items-center justify-center gap-2 text-muted-foreground">
+                    <div className="flex min-h-55 flex-col items-center justify-center gap-2 text-muted-foreground">
                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
                        <p className="text-sm">Loading payment history...</p>
                     </div>
@@ -404,8 +405,8 @@ export function PaymentHistoryTable() {
                       </p>
                     </div>
                   ) : (
-                    <div className="relative w-full">
-                      <Table className="w-full table-fixed">
+                    <div className="relative w-full ">
+                      <Table className="w-full min-w-[700px] table-fixed">
                         <TableHeader className="bg-muted/30">
                           <TableRow className="hover:bg-transparent border-b border-muted/60">
                             <TableHead className="w-[55%] md:w-[40%] lg:w-[25%] xl:w-[20%] pl-4 md:pl-6">Member</TableHead>
@@ -552,39 +553,46 @@ export function PaymentHistoryTable() {
                             )
                           })}
                         </TableBody>
+                        {filteredPayments.length > 0 && (
+                          <TableFooter className="bg-muted/5">
+                            <TableRow className="hover:bg-transparent">
+                              <TableCell colSpan={6} className="p-0">
+                                <div className="flex flex-col items-center justify-center gap-2 px-3 py-2 sm:flex-row sm:justify-between w-full h-full">
+                                  <div className="text-sm text-center text-muted-foreground sm:text-left">
+                                    Showing {Math.min(pageIndex * pageSize + 1, filteredPayments.length)} to {Math.min((pageIndex + 1) * pageSize, filteredPayments.length)} of {filteredPayments.length} entries
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+                                      disabled={pageIndex <= 0}
+                                      className="h-8 px-3 text-xs"
+                                    >
+                                      Previous
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+                                      disabled={pageIndex >= Math.max(0, pageCount - 1)}
+                                      className="h-8 px-3 text-xs"
+                                    >
+                                      Next
+                                    </Button>
+                                  </div>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          </TableFooter>
+                        )}
                       </Table>
                     </div>
                   )}
                 </CardContent>
               </div>
-
-              <div className="flex flex-col items-center gap-2 px-4 py-3 border-t bg-muted/5 sm:flex-row sm:justify-between">
-                  <div className="text-sm text-center text-muted-foreground sm:text-left">
-                    Showing {Math.min(pageIndex * pageSize + 1, filteredPayments.length)} to {Math.min((pageIndex + 1) * pageSize, filteredPayments.length)} of {filteredPayments.length} entries
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
-                      disabled={pageIndex <= 0}
-                      className="h-8 px-3 text-xs"
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
-                      disabled={pageIndex >= pageCount - 1}
-                      className="h-8 px-3 text-xs"
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
               </Card>
 
             </div>
