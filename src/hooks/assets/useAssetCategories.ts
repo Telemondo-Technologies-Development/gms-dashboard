@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { AssetCategoryApi } from '@/api/generated/apis/AssetCategoryApi'
+import { apiConfiguration } from '@/api/config'
 
 const fetchAssetCategoriesFromApi = async () => {
-  const assetCategoryApi = new AssetCategoryApi()
+  const assetCategoryApi = new AssetCategoryApi(apiConfiguration)
   const response = await assetCategoryApi.getAllAssetCategories()
   return response.data || []
 }

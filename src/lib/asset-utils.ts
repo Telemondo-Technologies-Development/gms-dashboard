@@ -3,7 +3,7 @@
  * Shared utilities for asset tracking and management
  */
 
-import type { AssetTableDTO } from '@/api/generated/models/AssetTableDTO'
+import type { AssetTable } from '@/types/asset/assetSchemas'
 
 export interface Asset {
   id: string
@@ -26,22 +26,22 @@ export interface Asset {
 }
 
 /**
- * Convert AssetTableDTO from backend to frontend Asset type
+ * Convert AssetTable from backend to frontend Asset type
  */
-export function adaptAssetFromDTO(dto: AssetTableDTO): Asset {
+export function adaptAssetFromDTO(dto: AssetTable, categoryName?: string, branchName?: string): Asset {
   return {
     id: dto.id,
     name: dto.name,
-    category: dto.assetCategoryId,
+    category: categoryName || dto.assetCategoryName || dto.assetCategoryId,
     categoryId: dto.assetCategoryId,
-    branch: dto.branchId,
+    branch: branchName || dto.branchName || dto.branchId,
     branchId: dto.branchId,
-    purchaseDate: dto.manufacturedDate || dto.createdAt,
+    purchaseDate: dto.manufacturedDate ? new Date(dto.manufacturedDate) : (dto.createdAt ? new Date(dto.createdAt) : new Date()),
     status: 'Operational',
     condition: 'Good',
-    notes: dto.remarks,
-    manufacturedDate: dto.manufacturedDate,
-    endOfLife: dto.endOfLife,
+    notes: dto.remarks || undefined,
+    manufacturedDate: dto.manufacturedDate ? new Date(dto.manufacturedDate) : undefined,
+    endOfLife: dto.endOfLife ? new Date(dto.endOfLife) : undefined,
     objectIds: dto.objectIds,
   }
 }
