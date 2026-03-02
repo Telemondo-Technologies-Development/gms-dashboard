@@ -1,7 +1,7 @@
 ﻿import { useCallback, useMemo } from 'react'
 import { usePayments } from './usePayments'
 import { usePaymentMethods } from './usePaymentMethods'
-import { useInvoices } from './useInvoices'
+import { useInvoices } from './usePaymentHistoryInvoices'
 import { usePaymentHistoryMembers } from './usePaymentHistoryMembers'
 import type { PaymentMethodTableDTOParsed, InvoiceTableDTOParsed } from '@/types/payment/paymentSchemas'
 
