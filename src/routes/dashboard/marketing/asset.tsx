@@ -188,17 +188,17 @@ function RouteComponent() {
                 </p>
               </div>
             ) : (
-              <div className="relative w-full">
+              <div className="relative w-full overflow-auto max-h-[600px]">
                 <Table className="w-full table-fixed">
-                  <TableHeader className="bg-muted/30">
+                  <TableHeader className="bg-muted/30 sticky top-0 z-10">
                     <TableRow className="hover:bg-transparent border-b border-muted/60">
-                      <TableHead className="w-[35%] pl-4 md:pl-6">Asset</TableHead>
-                      <TableHead className="hidden lg:table-cell lg:w-[15%]">Category</TableHead>
-                      <TableHead className="hidden md:table-cell md:w-[15%]">Branch</TableHead>
-                      <TableHead className="hidden lg:table-cell lg:w-[12%]">Status</TableHead>
-                      <TableHead className="hidden lg:table-cell lg:w-[12%]">Condition</TableHead>
-                      <TableHead className="hidden md:table-cell md:w-[11%]">Age</TableHead>
-                      <TableHead className="w-[10%] text-right pr-4 md:pr-6">Actions</TableHead>
+                      <TableHead className="w-[35%] pl-4 md:pl-6 bg-muted/30">Asset</TableHead>
+                      <TableHead className="hidden lg:table-cell lg:w-[15%] bg-muted/30">Category</TableHead>
+                      <TableHead className="hidden md:table-cell md:w-[15%] bg-muted/30">Branch</TableHead>
+                      <TableHead className="hidden lg:table-cell lg:w-[12%] bg-muted/30">Status</TableHead>
+                      <TableHead className="hidden lg:table-cell lg:w-[12%] bg-muted/30">Condition</TableHead>
+                      <TableHead className="hidden md:table-cell md:w-[11%] bg-muted/30">Age</TableHead>
+                      <TableHead className="w-[10%] text-right pr-4 md:pr-6 bg-muted/30">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
