@@ -34,14 +34,14 @@ import { QuickActionCard } from '@/components/dashboard-components/QuickActionCa
 import { BranchPerformanceCard } from '@/components/dashboard-components/BranchPerformanceCard'
 
 export const Route = createFileRoute('/dashboard/admin/overview')({
-  component: DashboardOverview,
+  component: RouteComponent,
 })
 
-function DashboardOverview() {
+function RouteComponent() {
   const navigate = useNavigate()
 
   // Mock data - In production, this would come from API/state management
-  const [members] = useState<Member[]>([
+  const [membersData, setMembersData] = useState<Member[]>([
     {
       id: '1',
       name: 'John Doe',
@@ -77,7 +77,7 @@ function DashboardOverview() {
     },
   ])
 
-  const [assets] = useState<Asset[]>([
+  const [assetsData, setAssetsData] = useState<Asset[]>([
     {
       id: '1',
       name: 'Treadmill Pro X500',
@@ -104,7 +104,7 @@ function DashboardOverview() {
     },
   ])
 
-  const [expenses] = useState<Expense[]>([
+  const [expensesData, setExpensesData] = useState<Expense[]>([
     {
       id: '1',
       type: 'Salary',
@@ -131,15 +131,15 @@ function DashboardOverview() {
   const branches = ['Matina Gym Fitness', 'Panacan Gym Fitness']
 
   // Calculate metrics
-  const activeMembers = getActiveMembersCount(members)
-  const expiredMemberships = getExpiredMembershipsCount(members)
-  const expiringSoon = getExpiringSoonCount(members)
-  const currentRevenue = getCurrentMonthRevenue(members)
-  const outstandingDues = getOutstandingDues(members)
-  const assetSummary = getAssetStatusSummary(assets)
-  const currentExpenses = getCurrentMonthExpenses(expenses)
-  const branchMetrics = getAllBranchMetrics(branches, members, assets, expenses)
-  const membersWithDues = getMembersWithDues(members)
+  const activeMembersCount = getActiveMembersCount(membersData)
+  const expiredMembershipsCount = getExpiredMembershipsCount(membersData)
+  const expiringSoonCount = getExpiringSoonCount(membersData)
+  const currentMonthRevenue = getCurrentMonthRevenue(membersData)
+  const outstandingDues = getOutstandingDues(membersData)
+  const assetSummary = getAssetStatusSummary(assetsData)
+  const currentMonthExpenses = getCurrentMonthExpenses(expensesData)
+  const allBranchMetrics = getAllBranchMetrics(branches, membersData, assetsData, expensesData)
+  const membersWithDues = getMembersWithDues(membersData)
 
   return (
     <div className="space-y-6">
@@ -152,7 +152,7 @@ function DashboardOverview() {
       </div>
 
       {/* Attention Required - Top Priority */}
-      {(expiringSoon > 0 || assetSummary.needsRepair > 0 || membersWithDues.length > 0) && (
+      {(expiringSoonCount > 0 || assetSummary.needsRepair > 0 || membersWithDues.length > 0) && (
         <Card className="border-yellow-500/50 bg-yellow-50/50 dark:bg-yellow-950/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-500">
@@ -162,11 +162,11 @@ function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
-              {expiringSoon > 0 && (
+              {expiringSoonCount > 0 && (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    {expiringSoon} membership{expiringSoon > 1 ? 's' : ''} expiring within 7 days
+                    {expiringSoonCount} membership{expiringSoonCount > 1 ? 's' : ''} expiring within 7 days
                   </span>
                 </div>
               )}
@@ -197,7 +197,7 @@ function DashboardOverview() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Active Members"
-          value={activeMembers}
+          value={activeMembersCount}
           icon={Users}
           description="Currently enrolled"
           variant="success"
@@ -205,15 +205,15 @@ function DashboardOverview() {
         />
         <MetricCard
           title="Expired Memberships"
-          value={expiredMemberships}
+          value={expiredMembershipsCount}
           icon={UserX}
-          description={`${expiringSoon} expiring soon`}
+          description={`${expiringSoonCount} expiring soon`}
           variant="warning"
           onClick={() => navigate({ to: '/dashboard/marketing/membership' })}
         />
         <MetricCard
           title="Monthly Revenue"
-          value={formatCurrency(currentRevenue)}
+          value={formatCurrency(currentMonthRevenue)}
           icon={DollarSign}
           description="Current period"
           variant="success"
@@ -283,10 +283,10 @@ function DashboardOverview() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Total Expenses</span>
-                <span className="text-2xl font-bold">{formatCurrency(currentExpenses)}</span>
+                <span className="text-2xl font-bold">{formatCurrency(currentMonthExpenses)}</span>
               </div>
               <div className="space-y-2">
-                {expenses.slice(0, 3).map((expense) => (
+                {expensesData.slice(0, 3).map((expense) => (
                   <div key={expense.id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">{expense.type}</Badge>
@@ -301,10 +301,10 @@ function DashboardOverview() {
                   <span className="text-sm font-semibold">Net Profit</span>
                   <span
                     className={`text-lg font-bold ${
-                      currentRevenue - currentExpenses >= 0 ? 'text-green-600' : 'text-red-600'
+                      currentMonthRevenue - currentMonthExpenses >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    {formatCurrency(currentRevenue - currentExpenses)}
+                    {formatCurrency(currentMonthRevenue - currentMonthExpenses)}
                   </span>
                 </div>
               </div>
@@ -317,7 +317,7 @@ function DashboardOverview() {
       <div>
         <h2 className="text-xl font-semibold mb-4">Branch Performance</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {branchMetrics.map((metrics) => (
+          {allBranchMetrics.map((metrics) => (
             <BranchPerformanceCard
               key={metrics.name}
               metrics={metrics}
