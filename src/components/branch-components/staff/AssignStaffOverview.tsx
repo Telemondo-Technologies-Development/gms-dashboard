@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Building2, PlusCircle, Search, MapPin, Users } from 'lucide-react';
@@ -12,18 +12,36 @@ interface AssignStaffOverviewProps {
   defaultBranchId?: string;
 }
 
-export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({ branches }) => {
-  const [selectedBranchId, setSelectedBranchId] = useState<string>(branches[0]?.id || '');
+export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({ 
+  branches, 
+  defaultBranchId 
+}) => {
+  // 1. Corrected State Management
+  const [selectedBranchId, setSelectedBranchId] = useState(defaultBranchId || branches[0]?.id || '');
   const [branchSearch, setBranchSearch] = useState('');
 
-  const currentBranch = branches.find(b => b.id === selectedBranchId);
+  // 2. Sync state when user clicks "Assigned Staff" on a different branch card
+  useEffect(() => {
+    if (defaultBranchId) {
+      setSelectedBranchId(defaultBranchId);
+    }
+  }, [defaultBranchId]);
 
-  const filteredBranches = branches.filter(b => 
-    b.name.toLowerCase().includes(branchSearch.toLowerCase())
-  );
+  // 3. Logic for the Branch Switcher Search
+  const filteredBranches = useMemo(() => {
+    return branches.filter(branch => 
+      branch.name.toLowerCase().includes(branchSearch.toLowerCase())
+    );
+  }, [branches, branchSearch]);
+
+  // 4. Get current branch details for the info card
+  const currentBranch = useMemo(() => {
+    return branches.find(b => b.id === selectedBranchId);
+  }, [branches, selectedBranchId]);
 
   return (
     <div className="space-y-6">
+      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">Branch Deployments</h2>
@@ -41,6 +59,7 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({ branch
       </div>
 
       <div className="flex flex-col xl:flex-row gap-6">
+        {/* LEFT SIDE: The Main Staff View */}
         <div className="w-full xl:w-[67%]">
           <AssignedStaffView 
             branches={branches}
@@ -48,6 +67,8 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({ branch
             onBranchChange={setSelectedBranchId}
           />
         </div>
+
+        {/* RIGHT SIDE: Branch Switcher & Info */}
         <div className="w-full xl:w-[33%] space-y-6">
           <Card className="p-6 border-zinc-200 shadow-sm bg-white rounded-2xl h-fit">
             <div className="flex items-center justify-between mb-6">
@@ -94,15 +115,16 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({ branch
             </ScrollArea>
             
             <div className="grid grid-cols-1 gap-2 mt-6">
-              <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest gap-2">
+              <Button className="w-full h-12 bg-[#0062cc] hover:bg-[#0056b3] text-white rounded-xl font-bold text-xs uppercase tracking-widest gap-2">
                 <PlusCircle size={16} />
                 Assign New Personnel
               </Button>
             </div>
           </Card>
 
+          {/* Location Summary Card */}
           {currentBranch && (
-            <Card className="p-6 border-zinc-200 bg-white rounded-2xl shadow-sm border-l-4 border-l-zinc-900">
+            <Card className="p-6 border-zinc-200 bg-white rounded-2xl shadow-sm border-l-4 border-l-[#0062cc]">
                <h4 className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-3">Location Details</h4>
                <div className="space-y-4">
                  <div className="flex items-start gap-3">
@@ -111,7 +133,9 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({ branch
                  </div>
                  <div className="flex items-center gap-3">
                    <Users className="h-4 w-4 text-zinc-400 shrink-0" />
-                   <p className="text-xs font-bold text-zinc-700 uppercase">Operational: <span className="text-emerald-600">Active</span></p>
+                   <p className="text-xs font-bold text-zinc-700 uppercase">
+                     Operational: <span className="text-emerald-600">{currentBranch.status}</span>
+                   </p>
                  </div>
                </div>
             </Card>

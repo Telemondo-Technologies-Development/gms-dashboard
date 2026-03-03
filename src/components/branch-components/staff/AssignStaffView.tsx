@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Loader2, UserMinus, Building2, MoreHorizontal, UserCheck, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Search, Loader2, UserMinus, Building2, MoreHorizontal, UserCheck, RefreshCw } from 'lucide-react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 import { useEmployees } from "@/hooks/users/useStaffEmployees";
 
@@ -25,17 +25,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-interface Branch {
-  id: string;
-  name: string;
-}
 
 interface AssignedStaffViewProps {
-  branches: Branch[];
+  branches: any[];
   currentBranchId: string;
-  onBranchChange: (branchId: string) => void;
-  
+  onBranchChange: (id: string) => void;
 }
+
+// Removed redundant declaration of AssignedStaffView
 
 export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
   branches,
