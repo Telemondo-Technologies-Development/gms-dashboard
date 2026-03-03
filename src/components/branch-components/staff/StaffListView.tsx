@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useMemo, useState } from 'react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
@@ -60,18 +59,11 @@ export function StaffListView({ branchId, branchName, onRedirect }: ListViewProp
         <div className="mt-2">
           <div className="border border-zinc-200 rounded-lg p-3 bg-white shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <button 
-                type="button"
-                onClick={onRedirect}
-                className="group flex flex-col items-start hover:opacity-80 transition-all text-left"
-              >
-                <span className="text-sm font-bold text-zinc-900 group-hover:text-blue-600 uppercase">
+              <div className="flex flex-col items-start text-left">
+                <span className="text-sm font-bold text-zinc-900 uppercase">
                   Assigned Staff ({branchPersonnel?.length ?? 0})
                 </span>
-                <span className="text-[10px] text-zinc-400 font-semibold group-hover:text-blue-500">
-                  Switch to Details View →
-                </span>
-              </button>
+              </div>
             </div>
 
             {isLoading ? (
@@ -108,16 +100,6 @@ export function StaffListView({ branchId, branchName, onRedirect }: ListViewProp
               </div>
             )}
           </div>
-        </div>
-
-        <div className="flex justify-end pt-2">
-          <Button
-            type="button"
-            className="bg-blue-600 hover:bg-blue-700 px-10 h-11 text-white font-medium"
-            onClick={onRedirect}
-          >
-            Manage Staff
-          </Button>
         </div>
       </div>
     </div>
