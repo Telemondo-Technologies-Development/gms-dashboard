@@ -2,8 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { Search, Loader2, UserMinus, Building2, MoreHorizontal, UserCheck, RefreshCw } from 'lucide-react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 import { useEmployees } from "@/hooks/users/useStaffEmployees";
-
-// UI Components
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -32,7 +30,6 @@ interface AssignedStaffViewProps {
   onBranchChange: (id: string) => void;
 }
 
-// Removed redundant declaration of AssignedStaffView
 
 export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
   branches,

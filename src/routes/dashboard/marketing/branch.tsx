@@ -50,7 +50,6 @@ function RouteComponent() {
     setDialogState((prev) => ({ ...prev, [dialog]: value }));
   };
 
-  // 3. API Handlers
   const handleAddBranch = async (branch: BranchFormData) => {
     const currentTimestamp = new Date().toISOString();
     const newBranch = {
@@ -173,6 +172,7 @@ function RouteComponent() {
   : null;
 
 function handleUpdateStaff(newStaff: StaffMember[]): void {
+  console.log('Updated staff:', newStaff); 
   refetch();
 }
   return (

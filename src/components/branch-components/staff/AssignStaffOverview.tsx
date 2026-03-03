@@ -16,32 +16,27 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
   branches, 
   defaultBranchId 
 }) => {
-  // 1. Corrected State Management
   const [selectedBranchId, setSelectedBranchId] = useState(defaultBranchId || branches[0]?.id || '');
   const [branchSearch, setBranchSearch] = useState('');
 
-  // 2. Sync state when user clicks "Assigned Staff" on a different branch card
   useEffect(() => {
     if (defaultBranchId) {
       setSelectedBranchId(defaultBranchId);
     }
   }, [defaultBranchId]);
 
-  // 3. Logic for the Branch Switcher Search
   const filteredBranches = useMemo(() => {
     return branches.filter(branch => 
       branch.name.toLowerCase().includes(branchSearch.toLowerCase())
     );
   }, [branches, branchSearch]);
 
-  // 4. Get current branch details for the info card
   const currentBranch = useMemo(() => {
     return branches.find(b => b.id === selectedBranchId);
   }, [branches, selectedBranchId]);
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">Branch Deployments</h2>
@@ -59,7 +54,6 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
       </div>
 
       <div className="flex flex-col xl:flex-row gap-6">
-        {/* LEFT SIDE: The Main Staff View */}
         <div className="w-full xl:w-[67%]">
           <AssignedStaffView 
             branches={branches}
@@ -67,8 +61,6 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
             onBranchChange={setSelectedBranchId}
           />
         </div>
-
-        {/* RIGHT SIDE: Branch Switcher & Info */}
         <div className="w-full xl:w-[33%] space-y-6">
           <Card className="p-6 border-zinc-200 shadow-sm bg-white rounded-2xl h-fit">
             <div className="flex items-center justify-between mb-6">
@@ -121,8 +113,6 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
               </Button>
             </div>
           </Card>
-
-          {/* Location Summary Card */}
           {currentBranch && (
             <Card className="p-6 border-zinc-200 bg-white rounded-2xl shadow-sm border-l-4 border-l-[#0062cc]">
                <h4 className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-3">Location Details</h4>

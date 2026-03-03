@@ -10,7 +10,7 @@ interface ListViewProps {
   onRedirect: () => void;
 }
 
-export function StaffListView({ branchId, branchName, onRedirect }: ListViewProps) {
+export function StaffListView({ branchId, branchName}: ListViewProps) {
   const [localSearch, setLocalSearch] = useState('');
   const { data: branchPersonnel, isLoading: loadingBP } = useBranchPersonnel(branchId);
   const { data: employeesResponse, isLoading: loadingEmp } = useEmployees();
