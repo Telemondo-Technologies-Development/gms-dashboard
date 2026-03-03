@@ -6,16 +6,15 @@ import { BranchDetailsDialog } from '@/components/branch-components/branch/Branc
 import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
 import { MapDialog } from '@/components/branch-components/branch/MapDialog';
 import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
-import { MultiBranchOverview } from '@/components/branch-components/branch/MultiBranchOverview';
 import { BranchList } from '@/components/branch-components/branch/BranchList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { AssignStaffOverview } from '@/components/branch-components/staff/AssignStaffOverview';
 import { useBranches } from '@/hooks/branch/useBranches';
 import { useAuthSession } from '@/lib/auth/auth-session';
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
 });
-
 
 interface Branch {
   id: string;
@@ -33,9 +32,8 @@ interface Branch {
 
 function RouteComponent() {
   const { actorId } = useAuthSession(); 
-
   const { branches, refetch, isLoading } = useBranches();
-
+  const [activeTab, setActiveTab] = useState('branches');
   const [dialogState, setDialogState] = useState({
     detailsOpen: false,
     staffDialogOpen: false,
@@ -52,7 +50,6 @@ function RouteComponent() {
     setDialogState((prev) => ({ ...prev, [dialog]: value }));
   };
 
-  // 3. API Handlers
   const handleAddBranch = async (branch: BranchFormData) => {
     const currentTimestamp = new Date().toISOString();
     const newBranch = {
@@ -171,20 +168,13 @@ function RouteComponent() {
   };
 
   const selectedBranch: Branch | null = selectedBranchId
-    ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
-    : null;
+  ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
+  : null;
 
-  if (selectedBranch && selectedBranch.status === 'INACTIVE') {
-    selectedBranch.status = 'ACTIVE'; 
-  } else if (selectedBranch && selectedBranch.status === 'INACTIVE') {
-    selectedBranch.status = 'INACTIVE'; 
-  }
-
-  function handleUpdateStaff(newStaff: StaffMember[]): void {
-    console.log("Updating staff for branch:", activeBranchForStaff?.name, newStaff);
-    refetch();
-  }
-
+function handleUpdateStaff(newStaff: StaffMember[]): void {
+  console.log('Updated staff:', newStaff); 
+  refetch();
+}
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -192,10 +182,10 @@ function RouteComponent() {
         <AddBranchDialog onAddBranch={handleAddBranch} />
       </div> 
 
-      <Tabs defaultValue='branches'>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-10 flex space-x-6">
           <TabsTrigger value="branches">Branches</TabsTrigger>
-          <TabsTrigger value="multiBranchDashboard">Multi-Branch Overview</TabsTrigger>
+          <TabsTrigger value="staff">Staff Details</TabsTrigger>
         </TabsList>
 
         <TabsContent value="branches">
@@ -208,7 +198,10 @@ function RouteComponent() {
               onToggleDialog={toggleDialog}
               onSetMapBranch={setMapBranch}
               onSetBranchToRemove={setBranchToRemove}
-              onSetActiveBranchForStaff={setActiveBranchForStaff}
+              onSetActiveBranchForStaff={(branch) => {
+                setActiveBranchForStaff(branch); 
+                setActiveTab('staff');          
+              }}
             />
           ) : (
             <div className="p-8 border rounded-md text-center text-muted-foreground">
@@ -217,11 +210,15 @@ function RouteComponent() {
           )}
         </TabsContent>
 
-        <TabsContent value="multiBranchDashboard">
-          <MultiBranchOverview branches={branches} />
+        <TabsContent value="staff">
+          <AssignStaffOverview 
+            branches={branches} 
+            defaultBranchId={activeBranchForStaff?.id} 
+          />
         </TabsContent>
       </Tabs>
   
+
       <BranchDetailsDialog
         open={dialogState.detailsOpen}
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}

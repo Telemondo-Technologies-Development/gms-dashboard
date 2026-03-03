@@ -11,5 +11,7 @@ export const useBranchPersonnel = (branchId: string) => {
       const response = await branchPersonnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 100 } });
       return response.data?.filter(personnel => personnel.branchId === branchId) || [];
     },
+    staleTime: 5 * 60 * 1000, 
+    gcTime: 10 * 60 * 1000, 
   });
 };

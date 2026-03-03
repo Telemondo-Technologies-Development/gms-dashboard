@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { StaffListView } from './StaffListView';
-import { StaffAddView } from './StaffAddView';
-import { StaffDetailsView } from './StaffDetailsView';
 
 
 
@@ -65,39 +63,9 @@ export function AssignStaffDialog({
           <StaffListView
             branchId={branchId}
             branchName={branchName}
-            staff={staff}
-            onAddClick={() => setView('add')}
-            onSelect={(member: StaffMember) => {
-              setSelectedMember(member);
-              setView('details');
+            onRedirect={() => {
+              console.log('Redirect triggered');
             }}
-          />
-        )}
-
-        {view === 'add' && (
-          <StaffAddView
-            open={open}
-            onClose={() => {
-              onOpenChange(false);
-              handleBack();
-            }}
-            onSave={(newMember: StaffMember) => {
-              onUpdateStaff([...staff, newMember]);
-              setView('list');
-            }}
-            onBack={handleBack}
-          />
-        )}
-
-        {view === 'details' && selectedMember && (
-          <StaffDetailsView
-            member={selectedMember}
-            onBack={handleBack}
-            onRemove={(id: string) => {
-              onUpdateStaff(staff.filter((member) => member.id !== id));
-              handleBack();
-            }}
-            onRoleChange={handleRoleChange} 
           />
         )}
       </DialogContent>

@@ -26,6 +26,7 @@ import { Route as DashboardAdminTrackingRouteImport } from './routes/dashboard/a
 import { Route as DashboardAdminOverviewRouteImport } from './routes/dashboard/admin/overview'
 import { Route as DashboardAdminExpenseRouteImport } from './routes/dashboard/admin/expense'
 import { Route as DashboardAdminAnalyticsRouteImport } from './routes/dashboard/admin/analytics'
+import { Route as DashboardMarketingBranchBranchIdAssignRouteImport } from './routes/dashboard/marketing/branch/$branchId/assign'
 
 const PostRoute = PostRouteImport.update({
   id: '/post',
@@ -115,6 +116,12 @@ const DashboardAdminAnalyticsRoute = DashboardAdminAnalyticsRouteImport.update({
   path: '/admin/analytics',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardMarketingBranchBranchIdAssignRoute =
+  DashboardMarketingBranchBranchIdAssignRouteImport.update({
+    id: '/$branchId/assign',
+    path: '/$branchId/assign',
+    getParentRoute: () => DashboardMarketingBranchRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -132,8 +139,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/asset': typeof DashboardMarketingAssetRoute
-  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRoute
+  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRouteWithChildren
   '/dashboard/marketing/membership': typeof DashboardMarketingMembershipRoute
+  '/dashboard/marketing/branch/$branchId/assign': typeof DashboardMarketingBranchBranchIdAssignRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -150,8 +158,9 @@ export interface FileRoutesByTo {
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/asset': typeof DashboardMarketingAssetRoute
-  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRoute
+  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRouteWithChildren
   '/dashboard/marketing/membership': typeof DashboardMarketingMembershipRoute
+  '/dashboard/marketing/branch/$branchId/assign': typeof DashboardMarketingBranchBranchIdAssignRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -170,8 +179,9 @@ export interface FileRoutesById {
   '/dashboard/admin/users': typeof DashboardAdminUsersRoute
   '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
   '/dashboard/marketing/asset': typeof DashboardMarketingAssetRoute
-  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRoute
+  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRouteWithChildren
   '/dashboard/marketing/membership': typeof DashboardMarketingMembershipRoute
+  '/dashboard/marketing/branch/$branchId/assign': typeof DashboardMarketingBranchBranchIdAssignRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/dashboard/marketing/asset'
     | '/dashboard/marketing/branch'
     | '/dashboard/marketing/membership'
+    | '/dashboard/marketing/branch/$branchId/assign'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/dashboard/marketing/asset'
     | '/dashboard/marketing/branch'
     | '/dashboard/marketing/membership'
+    | '/dashboard/marketing/branch/$branchId/assign'
   id:
     | '__root__'
     | '/'
@@ -230,6 +242,7 @@ export interface FileRouteTypes {
     | '/dashboard/marketing/asset'
     | '/dashboard/marketing/branch'
     | '/dashboard/marketing/membership'
+    | '/dashboard/marketing/branch/$branchId/assign'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -361,8 +374,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAdminAnalyticsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/marketing/branch/$branchId/assign': {
+      id: '/dashboard/marketing/branch/$branchId/assign'
+      path: '/$branchId/assign'
+      fullPath: '/dashboard/marketing/branch/$branchId/assign'
+      preLoaderRoute: typeof DashboardMarketingBranchBranchIdAssignRouteImport
+      parentRoute: typeof DashboardMarketingBranchRoute
+    }
   }
 }
+
+interface DashboardMarketingBranchRouteChildren {
+  DashboardMarketingBranchBranchIdAssignRoute: typeof DashboardMarketingBranchBranchIdAssignRoute
+}
+
+const DashboardMarketingBranchRouteChildren: DashboardMarketingBranchRouteChildren =
+  {
+    DashboardMarketingBranchBranchIdAssignRoute:
+      DashboardMarketingBranchBranchIdAssignRoute,
+  }
+
+const DashboardMarketingBranchRouteWithChildren =
+  DashboardMarketingBranchRoute._addFileChildren(
+    DashboardMarketingBranchRouteChildren,
+  )
 
 interface DashboardRouteRouteChildren {
   DashboardNavigationRoute: typeof DashboardNavigationRoute
@@ -375,7 +410,7 @@ interface DashboardRouteRouteChildren {
   DashboardAdminUsersRoute: typeof DashboardAdminUsersRoute
   DashboardBillingPaymentHistoryRoute: typeof DashboardBillingPaymentHistoryRoute
   DashboardMarketingAssetRoute: typeof DashboardMarketingAssetRoute
-  DashboardMarketingBranchRoute: typeof DashboardMarketingBranchRoute
+  DashboardMarketingBranchRoute: typeof DashboardMarketingBranchRouteWithChildren
   DashboardMarketingMembershipRoute: typeof DashboardMarketingMembershipRoute
 }
 
@@ -390,7 +425,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardAdminUsersRoute: DashboardAdminUsersRoute,
   DashboardBillingPaymentHistoryRoute: DashboardBillingPaymentHistoryRoute,
   DashboardMarketingAssetRoute: DashboardMarketingAssetRoute,
-  DashboardMarketingBranchRoute: DashboardMarketingBranchRoute,
+  DashboardMarketingBranchRoute: DashboardMarketingBranchRouteWithChildren,
   DashboardMarketingMembershipRoute: DashboardMarketingMembershipRoute,
 }
 

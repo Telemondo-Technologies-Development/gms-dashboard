@@ -1,118 +1,43 @@
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { useEmployees } from '@/hooks/users/useStaffEmployees';
 import { useMemo, useState } from 'react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
-import { useBranchEmployees } from '@/hooks/Staff/useBranchEmployees';
-import { useAuthSession } from '@/lib/auth/auth-session';
-import { useAssignBranchPersonnel } from '@/hooks/Staff/useAssignBranchPersonnel';
-import { useUpdateBranchPersonnel } from '@/hooks/Staff/useUpdateBranchPersonnel';
-import { useDeleteBranchPersonnel } from '@/hooks/Staff/useDeleteBranchPersonnel';
-import { useAllBranchPersonnel } from '@/hooks/Staff/useAllBranchPersonnel';
-import type { BranchPersonnelPutDTOStatusEnum } from '@/api/generated/models/BranchPersonnelPutDTO';
+import { useEmployees } from "@/hooks/users/useStaffEmployees"; 
+import { Search } from 'lucide-react';
 
 interface ListViewProps {
   branchId: string;
   branchName: string;
-  staff: any[];
-  onAddClick: () => void;
-  onSelect: (member: any) => void;
+  onRedirect: () => void;
 }
 
-export function StaffListView({ branchId, branchName }: ListViewProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<any | null>(null);
+export function StaffListView({ branchId, branchName}: ListViewProps) {
+  const [localSearch, setLocalSearch] = useState('');
+  const { data: branchPersonnel, isLoading: loadingBP } = useBranchPersonnel(branchId);
+  const { data: employeesResponse, isLoading: loadingEmp } = useEmployees();
+  const isLoading = loadingBP || loadingEmp;
 
-  const { data: employees } = useEmployees();
-  const { data: branchPersonnel, isLoading: loadingBranchPersonnel } = useBranchPersonnel(branchId);
-  const { data: branchEmployees, isLoading: loadingEmployees } = useBranchEmployees(branchId);
-  const { data: allPersonnel } = useAllBranchPersonnel();
+  const actorNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    const employeeList = (employeesResponse as any)?.data ?? employeesResponse ?? [];
 
-  const { actorId: currentActorId } = useAuthSession();
-
-  const assign = useAssignBranchPersonnel();
-  const update = useUpdateBranchPersonnel();
-  const remove = useDeleteBranchPersonnel();
-
-  const STATUS_OPTIONS: BranchPersonnelPutDTOStatusEnum[] = [
-    'ACTIVE',
-    'MOVED',
-    'TERMINATED',
-    'RESIGNED',
-    'UNDECIDED',
-  ];
-
-  const loadingAssigned = loadingBranchPersonnel || loadingEmployees;
-
-  const actorNameById = useMemo(() => {
-    return new Map(
-      (branchEmployees ?? []).map((e) => {
-        const mid = e.employee?.middleName ? ` ${e.employee.middleName}` : '';
-        const suf = e.employee?.suffix ? ` ${e.employee.suffix}` : '';
-        const fullName = `${e.employee?.firstName ?? ''}${mid} ${e.employee?.surname ?? ''}${suf}`.trim();
-        return [e.actorId, fullName] as const;
-      })
-    );
-  }, [branchEmployees]);
-
-  const filteredEmployees = useMemo(() => {
-    if (!searchTerm.trim() || !isSearching) return [];
-    return (employees ?? [])
-      .filter((employee) => {
-        const name = `${employee.firstName} ${employee.surname}`.toLowerCase();
-        return name.includes(searchTerm.toLowerCase());
-      })
-      .slice(0, 5);
-  }, [searchTerm, employees, isSearching]);
-
-  const actorIdToAssign = selectedEmployee?.actorId ?? selectedEmployee?.id ?? '';
-  const defaultPersonnelRoleId =
-    (branchPersonnel ?? []).find((personnel) => personnel.status === 'ACTIVE')?.personnelRoleId ??
-    branchPersonnel?.[0]?.personnelRoleId ??
-    '';
-
-  const alreadyAssigned = useMemo(() => {
-    if (!actorIdToAssign) return false;
-    return (branchPersonnel ?? []).some((p) => p.actorId === actorIdToAssign);
-  }, [branchPersonnel, actorIdToAssign]);
-
-  const handleAssign = async () => {
-    if (!actorIdToAssign || !currentActorId || !branchId) return;
-
-    // Find existing ACTIVE assignment anywhere
-    const existingActive = (allPersonnel ?? []).find(
-      (p) => p.actorId === actorIdToAssign && p.status === 'ACTIVE'
-    );
-
-    // Already ACTIVE in THIS branch → do nothing
-    if (existingActive && existingActive.branchId === branchId) return;
-
-    // ACTIVE in ANOTHER branch → mark old as MOVED first
-    if (existingActive && existingActive.branchId !== branchId) {
-      await update.mutateAsync({
-        id: existingActive.id,
-        actorId: existingActive.actorId,
-        branchId: existingActive.branchId,
-        personnelRoleId: existingActive.personnelRoleId,
-        updatedById: currentActorId,
-        status: 'MOVED',
-      });
-    }
-
-    // Create new ACTIVE assignment in this branch
-    await assign.mutateAsync({
-      actorId: actorIdToAssign,
-      branchId,
-      createdById: currentActorId,
-      personnelRoleId: existingActive?.personnelRoleId ?? defaultPersonnelRoleId,
-      status: 'ACTIVE',
+    employeeList.forEach((emp: any) => {
+      const mid = emp.middleName ? ` ${emp.middleName}` : '';
+      const suf = emp.suffix ? ` ${emp.suffix}` : '';
+      const fullName = `${emp.firstName ?? ''}${mid} ${emp.surname ?? ''}${suf}`.trim();
+      map.set(emp.actorId, fullName);
     });
+    return map;
+  }, [employeesResponse]);
 
-    setSearchTerm('');
-    setSelectedEmployee(null);
-  };
+  const filteredPersonnel = useMemo(() => {
+    const personnel = branchPersonnel ?? [];
+    if (!localSearch.trim()) return personnel;
+
+    return personnel.filter((p) => {
+      const name = actorNameMap.get(p.actorId)?.toLowerCase() || '';
+      return name.includes(localSearch.toLowerCase());
+    });
+  }, [branchPersonnel, actorNameMap, localSearch]);
 
   return (
     <div className="flex flex-col h-full max-h-[70vh]">
@@ -120,107 +45,54 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
         <h2 className="text-xl font-bold tracking-tight text-zinc-900">Staff: {branchName}</h2>
       </div>
 
-      <div className="p-6 space-y-6">
-        <div className="space-y-2 relative">
-          <Label htmlFor="searchEmployee">Search Employee</Label>
-          <Input
-            id="searchEmployee"
-            placeholder="Search Employee to Assign..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setIsSearching(true);
-              setSelectedEmployee(null);
-            }}
-            onFocus={() => {
-              if (searchTerm.length > 0) setIsSearching(true);
-            }}
-            onBlur={() => {
-              setTimeout(() => setIsSearching(false), 200);
-            }}
-            className="w-full bg-transparent outline-none text-zinc-900 placeholder-zinc-400 border border-zinc-200 rounded-lg px-4"
+      <div className="p-6 space-y-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Input 
+            placeholder="Filter assigned staff..." 
+            className="pl-9 bg-zinc-50/50"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
           />
-
-          {isSearching && filteredEmployees.length > 0 && (
-            <div className="absolute z-50 w-full top-[70px] bg-popover border rounded-md shadow-lg max-h-40 overflow-y-auto">
-              {filteredEmployees.map((employee) => (
-                <div
-                  key={employee.id}
-                  className="px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    setSelectedEmployee(employee);
-                    setSearchTerm(`${employee.firstName} ${employee.surname}`);
-                    setIsSearching(false);
-                  }}
-                >
-                  {employee.firstName} {employee.surname}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
-        <div className="mt-4">
-          <div className="border border-zinc-200 rounded-lg p-3">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-semibold text-zinc-900">Assigned Personnel</p>
-              <p className="text-xs text-zinc-500">{(branchPersonnel ?? []).length} total</p>
+        <div className="mt-2">
+          <div className="border border-zinc-200 rounded-lg p-3 bg-white shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col items-start text-left">
+                <span className="text-sm font-bold text-zinc-900 uppercase">
+                  Assigned Staff ({branchPersonnel?.length ?? 0})
+                </span>
+              </div>
             </div>
 
-            {loadingAssigned ? (
-              <div className="text-center text-sm text-zinc-400 italic py-4">Loading personnel...</div>
-            ) : (branchPersonnel ?? []).length === 0 ? (
-              <div className="text-center text-sm text-zinc-500 py-4">No Personnel Available.</div>
+            {isLoading ? (
+              <div className="text-center text-sm text-zinc-400 italic py-10 flex flex-col items-center gap-2">
+                Loading assigned personnel...
+              </div>
+            ) : filteredPersonnel.length === 0 ? (
+              <div className="text-center text-sm text-zinc-500 py-10 border-2 border-dashed rounded-md bg-zinc-50/30">
+                {localSearch ? "No staff matches your search." : "No staff assigned yet."}
+              </div>
             ) : (
-              <div className="space-y-2 max-h-[260px] overflow-y-auto">
-                {(branchPersonnel ?? []).map((personnel) => {
-                  const displayName =
-                    actorNameById.get(personnel.actorId) ??
-                    (personnel.actorId
-                      ? `${personnel.actorId.slice(0, 8)}...${personnel.actorId.slice(-4)}`
-                      : 'Unknown');
+              <div className="space-y-2 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar">
+                {filteredPersonnel.map((personnel) => {
+                  const fullName = actorNameMap.get(personnel.actorId);
+                  const displayName = fullName && fullName !== "" 
+                    ? fullName 
+                    : `ID: ${personnel.actorId.slice(0, 8)}`;
 
                   return (
                     <div
                       key={personnel.id}
-                      className="flex items-center justify-between gap-3 p-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200"
+                      className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 border border-transparent hover:border-zinc-200 transition-all"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-zinc-900 truncate">{displayName}</p>
-                        <p className="text-xs text-zinc-500">{personnel.status}</p>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <select
-                          className="border border-zinc-200 rounded-md px-2 py-1 text-xs bg-white"
-                          value={personnel.status}
-                          onChange={(e) => {
-                            update.mutate({
-                              id: personnel.id,
-                              actorId: personnel.actorId,
-                              branchId,
-                              personnelRoleId: personnel.personnelRoleId,
-                              updatedById: currentActorId || '',
-                              status: e.target.value as BranchPersonnelPutDTOStatusEnum,
-                            });
-                          }}
-                        >
-                          {STATUS_OPTIONS.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="h-8 px-3 text-xs"
-                          onClick={() => remove.mutate({ id: personnel.id, branchId })}
-                        >
-                          Remove
-                        </Button>
+                        <p className="text-sm font-semibold text-zinc-800 truncate">{displayName}</p>
+                        <div className="flex items-center gap-2">
+                          <span className={`h-1.5 w-1.5 rounded-full ${personnel.status === 'ACTIVE' ? 'bg-green-500' : 'bg-zinc-300'}`} />
+                          <p className="text-[10px] text-zinc-500 uppercase tracking-widest">{personnel.status}</p>
+                        </div>
                       </div>
                     </div>
                   );
@@ -228,28 +100,6 @@ export function StaffListView({ branchId, branchName }: ListViewProps) {
               </div>
             )}
           </div>
-        </div>
-
-        <div className="flex justify-end mt-6">
-          <Button
-            type="button"
-            variant="default"
-            className="bg-blue-600 hover:bg-blue-700 px-6 py-2"
-            disabled={
-              !selectedEmployee ||
-              alreadyAssigned ||
-              assign.isPending ||
-              update.isPending ||
-              !currentActorId ||
-              !branchId ||
-              !defaultPersonnelRoleId
-            }
-            onClick={() => {
-              void handleAssign();
-            }}
-          >
-            {alreadyAssigned ? 'Already Assigned' : assign.isPending || update.isPending ? 'Assigning...' : 'Assign'}
-          </Button>
         </div>
       </div>
     </div>
