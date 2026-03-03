@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, useCallback, memo, useEffect } from 'react'
+import { useMemo, useState, useCallback, memo, useEffect } from 'react'
 import { format } from 'date-fns'
 import { Search, Calendar as CalendarIcon, RefreshCw, Loader2, User, Mail, CreditCard, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -321,15 +321,14 @@ function MembersTable({ onSelectMember }: Props) {
             </div>
           ) : (
             <div className="relative w-full overflow-auto">
-              <Table className="w-full table-fixed">
+              <Table>
                 <TableHeader className="bg-muted/30">
                   <TableRow className="hover:bg-transparent border-b border-muted/60">
-                    <TableHead className="w-[60%] md:w-[45%] lg:w-[30%] pl-4 md:pl-6">Name</TableHead>
-                    <TableHead className="hidden lg:table-cell lg:w-[25%]">Plan & Billing</TableHead>
-                    <TableHead className="hidden md:table-cell lg:hidden md:w-[35%]">Subscription</TableHead>
-                    <TableHead className="hidden lg:table-cell lg:w-[25%]">Subscription Period</TableHead>
-                    <TableHead className="hidden lg:table-cell lg:w-[10%]">Status</TableHead>
-                    <TableHead className="w-[40%] md:w-[20%] lg:w-[10%] text-right pr-4 md:pr-6 whitespace-nowrap">Actions</TableHead>
+                    <TableHead className="w-[30%] pl-6">Name</TableHead>
+                    <TableHead className="w-[25%]">Plan & Billing</TableHead>
+                    <TableHead className="w-[20%]">Subscription Period</TableHead>
+                    <TableHead className="w-[15%]">Status</TableHead>
+                    <TableHead className="w-[10%] pr-6 text-right whitespace-nowrap">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -342,15 +341,12 @@ function MembersTable({ onSelectMember }: Props) {
                         key={memberGroup.id}
                         className="hover:bg-muted/40 transition-colors group border-b border-muted/40"
                       >
-                        <TableCell className="pl-4 md:pl-6 py-4 align-top w-[60%] md:w-[45%] lg:w-[30%]">
+                        <TableCell className="pl-6 py-4 align-top">
                           <div className="flex items-start gap-3 w-full min-w-0">
                             <div className="flex flex-col gap-0.5 w-full min-w-0">
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 w-full min-w-0">
-                                <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate w-full sm:max-w-[180px] lg:max-w-none">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 w-full min-w-0">
+                                <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate w-full lg:max-w-none">
                                   {memberGroup.members[0]?.name || 'Unknown Member'}
-                                </span>
-                                <span className="lg:hidden w-fit transform origin-left scale-90 sm:scale-100 flex-shrink-0">
-                                  {getMembershipStatusBadge(memberGroup.endDate)}
                                 </span>
                               </div>
                               {/* Contact Info Tooltip */}
@@ -373,7 +369,7 @@ function MembersTable({ onSelectMember }: Props) {
                           </div>
                         </TableCell>
 
-                        <TableCell className="hidden lg:table-cell py-4 align-top w-[25%]">
+                        <TableCell className="py-4 align-top">
                           <div className="flex flex-col gap-1.5">
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary">
@@ -390,7 +386,7 @@ function MembersTable({ onSelectMember }: Props) {
                               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                 <CreditCard className="h-3.5 w-3.5 opacity-70" />
                                 <span>
-                                  {memberGroup.billingAmount ? `₱${memberGroup.billingAmount}` : '—'}
+                                  {memberGroup.billingAmount ? `?${memberGroup.billingAmount}` : '�'}
                                   {memberGroup.billingCycle ? ` / ${memberGroup.billingCycle}` : ''}
                                 </span>
                               </div>
@@ -398,24 +394,9 @@ function MembersTable({ onSelectMember }: Props) {
                           </div>
                         </TableCell>
 
-                        <TableCell className="hidden md:table-cell lg:hidden py-4 align-top w-[35%]">
-                          <div className="flex flex-col gap-1 text-sm pt-1">
-                            <div className="flex items-center gap-2">
-                              <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground/70" />
-                              <span className="font-medium">
-                                {memberGroup.startDate ? format(new Date(memberGroup.startDate), 'MMM d, yyyy') : 'N/A'}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <RefreshCw className="h-3.5 w-3.5 opacity-50" />
-                              <span>
-                                {memberGroup.endDate ? format(new Date(memberGroup.endDate), 'MMM d, yyyy') : 'No Expiry'}
-                              </span>
-                            </div>
-                          </div>
-                        </TableCell>
 
-                        <TableCell className="hidden lg:table-cell py-4 align-top w-[25%]">
+
+                        <TableCell className="py-4 align-top">
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2 text-sm">
                               <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground/70" />
@@ -433,11 +414,11 @@ function MembersTable({ onSelectMember }: Props) {
                           </div>
                         </TableCell>
 
-                        <TableCell className="hidden lg:table-cell py-4 align-top text-left pr-4 md:pr-6 w-[10%]">
+                        <TableCell className="py-4 align-top text-left">
                           {getMembershipStatusBadge(memberGroup.endDate)}
                         </TableCell>
 
-                        <TableCell className="py-4 align-top text-right pr-4 md:pr-6 w-[40%] md:w-[20%] lg:w-[10%]">
+                        <TableCell className="py-4 align-top text-right pr-6">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
@@ -450,7 +431,7 @@ function MembersTable({ onSelectMember }: Props) {
                                 <div className="px-2 py-1.5 space-y-1 text-xs text-muted-foreground lg:hidden">
                                   <p>Plan: {memberGroup.membershipType || 'Standard'}</p>
                                   <p>
-                                    Billing: {memberGroup.billingAmount ? `₱${memberGroup.billingAmount}` : '—'}
+                                    Billing: {memberGroup.billingAmount ? `?${memberGroup.billingAmount}` : '�'}
                                     {memberGroup.billingCycle ? ` / ${memberGroup.billingCycle}` : ''}
                                   </p>
                                   <p>Start: {memberGroup.startDate ? format(new Date(memberGroup.startDate), 'MMM d, yyyy') : 'N/A'}</p>
@@ -496,8 +477,8 @@ function MembersTable({ onSelectMember }: Props) {
                 </TableBody>
                 {filteredMembers.length > 0 && (
                   <TableFooter className="bg-muted/5">
-                    <TableRow className="hover:bg-transparent">
-                      <TableCell colSpan={6} className="p-0">
+                    <TableRow className="hover:bg-transparent border-t-0">
+                      <TableCell colSpan={5} className="p-0">
                         <div className="flex flex-col items-center gap-2 p-4 sm:flex-row sm:justify-between w-full h-full text-foreground">
                           <div className="text-sm text-center text-muted-foreground sm:text-left">
                             Showing {Math.min(pageIndex * PAGE_SIZE + 1, filteredMembers.length)} to {Math.min((pageIndex + 1) * PAGE_SIZE, filteredMembers.length)} of {filteredMembers.length} entries
@@ -553,3 +534,4 @@ function MembersTable({ onSelectMember }: Props) {
 }
 
 export default memo(MembersTable)
+

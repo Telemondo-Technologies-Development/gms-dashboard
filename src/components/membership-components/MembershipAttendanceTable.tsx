@@ -105,7 +105,7 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 	const pageItems = filteredRows.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE)
 
 	return (
-		<Card className="flex flex-col h-[88vh] shadow-md border-muted/40 w-full">
+		<Card className="flex flex-col shadow-md border-muted/40 w-full">
 			<CardHeader>
 				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 					<div>
@@ -198,37 +198,33 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 						</div>
 					) : (
 						<div className="relative w-full overflow-auto">
-							<Table className="w-full table-fixed">
+							<Table>
 								<TableHeader className="bg-muted/30">
 									<TableRow className="hover:bg-transparent border-b border-muted/60">
-										<TableHead className="w-[60%] md:w-[45%] pl-4 md:pl-6">Member</TableHead>
-										<TableHead className="hidden md:table-cell md:w-[20%]">Source</TableHead>
-										<TableHead className="hidden md:table-cell md:w-[15%] pr-4 md:pr-6 text-right">Status</TableHead>
-										<TableHead className="w-[40%] md:w-[20%] pr-4 md:pr-6 text-right">Actions</TableHead>
+										<TableHead className="w-[40%] pl-6">Member</TableHead>
+										<TableHead className="w-[25%]">Source</TableHead>
+										<TableHead className="w-[20%] text-right">Status</TableHead>
+										<TableHead className="w-[15%] pr-6 text-right">Actions</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
 									{pageItems.map((record) => (
 										<TableRow key={record.id} className="hover:bg-muted/40 transition-colors group border-b border-muted/40">
-											<TableCell className="pl-4 md:pl-6 py-4 align-top">
+											<TableCell className="pl-6 py-4 align-top">
 												<div className="flex flex-col gap-1.5">
 													<div className="font-semibold text-foreground group-hover:text-primary transition-colors">{record.memberName}</div>
 													<div>
 														<Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary break-words whitespace-normal text-left sm:max-w-[150px]">{record.membershipType}</Badge>
 													</div>
-													<div className="md:hidden flex gap-2 items-center mt-1">
-														<Badge variant="outline" className="text-muted-foreground scale-90 origin-left">{record.source}</Badge>
-														<Badge className="bg-green-500 hover:bg-green-600 scale-90 origin-left">{record.status}</Badge>
-													</div>
 												</div>
 											</TableCell>
-											<TableCell className="hidden md:table-cell py-4 align-top">
+											<TableCell className="py-4 align-top">
 												<Badge variant="outline" className="text-muted-foreground">{record.source}</Badge>
 											</TableCell>
-											<TableCell className="hidden md:table-cell py-4 align-top pr-4 md:pr-6 text-right">
+											<TableCell className="py-4 align-top text-right">
 												<Badge className="bg-green-500 hover:bg-green-600">{record.status}</Badge>
 											</TableCell>
-											<TableCell className="py-4 align-top text-right pr-4 md:pr-6">
+											<TableCell className="py-4 align-top text-right pr-6">
 												<DropdownMenu>
 													<DropdownMenuTrigger asChild>
 														<Button variant="ghost" className="h-8 w-8 p-0">

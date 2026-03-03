@@ -199,7 +199,7 @@ export function PaymentHistoryTable() {
                 transactionCount={filteredPayments.length} 
               />
               {/* Main Table Card */}
-              <Card className="flex flex-col shadow-md border-muted/40 w-full h-[700px]">
+              <Card className="flex flex-col shadow-md border-muted/40 w-full ">
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -405,21 +405,21 @@ export function PaymentHistoryTable() {
                       </p>
                     </div>
                   ) : (
-                    <div className="relative w-full ">
-                      <Table className="w-full min-w-[700px] table-fixed">
+                    <div className="relative w-full overflow-auto">
+                      <Table>
                         <TableHeader className="bg-muted/30">
                           <TableRow className="hover:bg-transparent border-b border-muted/60">
-                            <TableHead className="w-[55%] md:w-[40%] lg:w-[25%] xl:w-[20%] pl-4 md:pl-6">Member</TableHead>
-                            <TableHead className="hidden lg:table-cell lg:w-[20%] xl:w-[20%]">Method</TableHead>
-                            <TableHead className="hidden md:table-cell md:w-[25%] lg:w-[20%] xl:w-[20%]">
+                            <TableHead className="w-[20%] pl-6">Member</TableHead>
+                            <TableHead className="w-[20%]">Method</TableHead>
+                            <TableHead className="w-[15%]">
                                <div className="flex items-center gap-1">
                                  Paid Date
                                  <ArrowUpDown className="h-3 w-3" />
                                </div>
                             </TableHead>
-                            <TableHead className="hidden xl:table-cell xl:w-[15%]">Amount</TableHead>
-                            <TableHead className="w-[25%] md:w-[20%] lg:w-[15%] xl:w-[10%]">Status</TableHead>
-                            <TableHead className="w-[20%] md:w-[15%] text-right pr-4 md:pr-6 whitespace-nowrap">Actions</TableHead>
+                            <TableHead className="w-[15%] text-right">Amount</TableHead>
+                            <TableHead className="w-[20%] text-center">Status</TableHead>
+                            <TableHead className="w-[10%] text-right pr-6 whitespace-nowrap">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -437,7 +437,7 @@ export function PaymentHistoryTable() {
                                 className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
 
                               >
-                                <TableCell className="pl-4 md:pl-6 py-4 align-top w-[55%] md:w-[40%] lg:w-[25%] xl:w-[20%]">
+                                <TableCell className="pl-6 py-4 align-top">
                                   <div className="flex items-start gap-3 w-full min-w-0">
                                     <div className="flex flex-col gap-0.5 w-full min-w-0">
                                       <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate block">
@@ -452,7 +452,7 @@ export function PaymentHistoryTable() {
                                   </div>
                                 </TableCell>
                                 
-                                <TableCell className="hidden lg:table-cell py-4 align-top lg:w-[20%] xl:w-[20%]">
+                                <TableCell className="py-4 align-top">
                                   <div className="w-fit p-1 -ml-1 rounded-md hover:bg-muted transition-colors">
                                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
                                       <CreditCard className="h-3.5 w-3.5 opacity-70" />
@@ -464,7 +464,7 @@ export function PaymentHistoryTable() {
                                   </div>
                                 </TableCell>
                                 
-                                <TableCell className="hidden md:table-cell py-4 align-top md:w-[25%] lg:w-[20%] xl:w-[20%]">
+                                <TableCell className="py-4 align-top">
                                    <div className="flex flex-col gap-0.5">
                                       {p.paidAt ? (
                                         <>
@@ -481,22 +481,19 @@ export function PaymentHistoryTable() {
                                    </div>
                                 </TableCell>
                                 
-                                <TableCell className="hidden xl:table-cell py-4 align-top xl:w-[15%] text-right">
+                                <TableCell className="py-4 align-top text-right">
                                   <span className="font-semibold text-sm">
                                     {formatCurrency(p.amount, 'PHP')}
                                   </span>
                                 </TableCell>
                                 
-                                <TableCell className="py-4 align-top text-left w-[25%] md:w-[20%] lg:w-[15%] xl:w-[10%]">
-                                  <div className="flex flex-col gap-1">
+                                <TableCell className="py-4 align-top">
+                                  <div className="flex flex-col items-center justify-center">
                                     {statusBadge(st)}
-                                    <span className="xl:hidden font-semibold text-xs mt-1">
-                                      {formatCurrency(p.amount, 'PHP')}
-                                    </span>
                                   </div>
                                 </TableCell>
 
-                                <TableCell className="py-4 align-top text-right pr-4 md:pr-6 w-[20%] md:w-[15%]">
+                                <TableCell className="py-4 align-top text-right pr-6">
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button
