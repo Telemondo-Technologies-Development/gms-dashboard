@@ -19,7 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 export default function MembershipAddAttendance({ members }: MembershipAddAttendanceProps) {
 	const [searchInput, setSearchInput] = useState('')
 	const [submittedQuery, setSubmittedQuery] = useState('')
-	const [selectedDay, setSelectedDay] = useState('')
+	const [selectedDay, setSelectedDay] = useState(() => format(new Date(), 'yyyy-MM-dd'))
 	const [pageIndex, setPageIndex] = useState(0)
 	const PAGE_SIZE = 6
 
@@ -79,7 +79,12 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 			)
 
 		if (!selectedDay) {
-			return sortAttendanceRowsByDateStack(searchedRows)
+			const today = toStartOfDay(new Date())
+			const todayRows = searchedRows.filter((record) => {
+				if (!record.attendanceDate) return false
+				return toStartOfDay(record.attendanceDate).getTime() === today.getTime()
+			})
+			return sortAttendanceRowsByDateStack(todayRows)
 		}
 
 		const targetDay = parseCalendarDay(selectedDay)
@@ -150,6 +155,7 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 								<Calendar
 									mode="single"
 									selected={selectedDay ? parseCalendarDay(selectedDay) ?? undefined : undefined}
+									disabled={{ after: new Date() }}
 									onSelect={(date) => {
 										setSelectedDay(date ? format(date, 'yyyy-MM-dd') : '')
 										setPageIndex(0)
@@ -159,17 +165,7 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 								<div className="mt-2 flex items-center justify-end gap-2">
 									<Button
 										type="button"
-										variant="outline"
-										size="sm"
-										onClick={() => {
-											setSelectedDay('')
-											setPageIndex(0)
-										}}
-									>
-										Clear
-									</Button>
-									<Button
-										type="button"
+										variant="default"
 										size="sm"
 										onClick={() => {
 											setSelectedDay(format(new Date(), 'yyyy-MM-dd'))
@@ -201,10 +197,12 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 							<Table>
 								<TableHeader className="bg-muted/30">
 									<TableRow className="hover:bg-transparent border-b border-muted/60">
-										<TableHead className="w-[40%] pl-6">Member</TableHead>
-										<TableHead className="w-[25%]">Source</TableHead>
-										<TableHead className="w-[20%] text-right">Status</TableHead>
-										<TableHead className="w-[15%] pr-6 text-right">Actions</TableHead>
+										<TableHead className="w-[28%] pl-6">Member</TableHead>
+										<TableHead className="w-[16%]">Date</TableHead>
+										<TableHead className="w-[14%]">Time</TableHead>
+										<TableHead className="w-[16%]">Source</TableHead>
+										<TableHead className="w-[14%] text-right">Status</TableHead>
+										<TableHead className="w-[12%] pr-6 text-right">Actions</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -214,9 +212,19 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 												<div className="flex flex-col gap-1.5">
 													<div className="font-semibold text-foreground group-hover:text-primary transition-colors">{record.memberName}</div>
 													<div>
-														<Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary break-words whitespace-normal text-left sm:max-w-[150px]">{record.membershipType}</Badge>
+														<Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary wrap-break-word whitespace-normal text-left sm:max-w-37.5">{record.membershipType}</Badge>
 													</div>
 												</div>
+											</TableCell>
+											<TableCell className="py-4 align-top">
+												<span className="text-sm text-muted-foreground">
+													{record.attendanceDate ? format(record.attendanceDate, 'MMM d, yyyy') : '—'}
+												</span>
+											</TableCell>
+											<TableCell className="py-4 align-top">
+												<span className="text-sm font-medium">
+													{record.attendanceDate ? format(record.attendanceDate, 'hh:mm a') : '—'}
+												</span>
 											</TableCell>
 											<TableCell className="py-4 align-top">
 												<Badge variant="outline" className="text-muted-foreground">{record.source}</Badge>
@@ -252,7 +260,7 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 								{filteredRows.length > 0 && (
 									<TableFooter className="bg-muted/5">
 										<TableRow className="hover:bg-transparent">
-											<TableCell colSpan={4} className="p-0">
+											<TableCell colSpan={6} className="p-0">
 												<div className="flex flex-col items-center gap-2 p-4 sm:flex-row sm:justify-between w-full h-full">
 													<div className="text-sm text-center text-muted-foreground sm:text-left">
 														Showing {Math.min(pageIndex * PAGE_SIZE + 1, filteredRows.length)} to {Math.min((pageIndex + 1) * PAGE_SIZE, filteredRows.length)} of {filteredRows.length} entries

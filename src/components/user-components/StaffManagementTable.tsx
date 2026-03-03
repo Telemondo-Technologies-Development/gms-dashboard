@@ -134,17 +134,17 @@ export function EmployeeTab({
 
                   <TableCell className="py-4 align-top">
                     <div className="flex flex-col gap-1.5 text-sm">
-                      {employee.user?.email ? (
+                      {employee.username ? (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-muted">
                                 <Mail className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                                <span className="truncate max-w-37.5">{employee.user.email}</span>
+                                <span className="truncate max-w-37.5">{employee.username}</span>
                               </div>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>{employee.user.email}</p>
+                              <p>{employee.username}</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -167,7 +167,7 @@ export function EmployeeTab({
                   <TableCell className="py-4 align-top">
                     <div className="flex flex-col items-start gap-2">
                       <div className="flex items-center gap-1.5">
-                        {employee.user ? (
+                        {employee.userId ? (
                            <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800 border-green-200">
                              <ShieldCheck className="h-3 w-3" />
                              Has Login

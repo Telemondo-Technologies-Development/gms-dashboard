@@ -1,8 +1,9 @@
 import { z } from 'zod'
 
-export const memberStatusSchema = z.enum(['IN', 'OUT', 'UNDECIDED'])
+export const memberStatusSchema = z.enum(['UNDECIDED', 'ACTIVE', 'DEACTIVATED'])
 
 export const attendanceSourceSchema = z.enum(['MANUAL', 'QR', 'FACE', 'FINGERPRINT'])
+export const attendanceTypeSchema = z.enum(['IN', 'OUT', 'UNDECIDED'])
 
 export const subscriptionStatusSchema = z.enum(['ACTIVE', 'CANCELED', 'DONE'])
 
@@ -31,7 +32,7 @@ export interface MemberInfo {
   middleName: string | null
   surname: string
   suffix: string | null
-  status: 'IN' | 'OUT' | 'UNDECIDED' | null
+  status: 'UNDECIDED' | 'ACTIVE' | 'DEACTIVATED' | null
   name: string
   email: string | null
   phone: string | null
@@ -105,7 +106,7 @@ export type MemberFormValues = {
   surname: string
   suffix: string
   profilePictureId: string
-  status: 'IN' | 'OUT' | 'UNDECIDED'
+  status: 'UNDECIDED' | 'ACTIVE' | 'DEACTIVATED'
 }
 
 // API response schemas
@@ -149,8 +150,9 @@ export const attendanceTableDataSchema = z.object({
   branchId: z.string().uuid().nullable().default(null),
   createdById: z.string().uuid().nullable().default(null),
   id: z.string().uuid(),
+  recordedAt: z.coerce.date(),
   source: attendanceSourceSchema,
-  type: memberStatusSchema,
+  type: attendanceTypeSchema,
   updatedById: z.string().uuid().nullable().default(null),
 })
 

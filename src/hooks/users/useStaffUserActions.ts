@@ -1,7 +1,7 @@
 ﻿import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getAuthenticatedApi } from '@/lib/api-client'
-import { UserApi } from '@/api/generated/apis'
+import { UserApi, AccessControlApi } from '@/api/generated/apis'
 import { ResponseError } from '@/api/generated/runtime'
 import { readAuthSession } from '@/lib/auth/auth-session'
 import type { CreateUserFormValues } from '@/types/user/userSchemas'
@@ -13,6 +13,63 @@ import { userQueryKeys } from './useStaffUsers'
 export function useUserActions() {
   const queryClient = useQueryClient()
   const userApi = getAuthenticatedApi(UserApi)
+  const accessControlApi = getAuthenticatedApi(AccessControlApi)
+
+  const isUuid = (value: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+
+  const extractRoleIds = (payload: unknown): string[] => {
+    if (!payload || typeof payload !== 'object') return []
+
+    const data = (payload as { data?: unknown }).data
+    if (!Array.isArray(data)) return []
+
+    return data
+      .map((item) => {
+        if (!item || typeof item !== 'object') return null
+        const id = (item as { id?: unknown }).id
+        return typeof id === 'string' ? id : null
+      })
+      .filter((id): id is string => Boolean(id && isUuid(id)))
+  }
+
+  const fetchRoleIds = async (): Promise<string[]> => {
+    try {
+      const response = await accessControlApi.getAllRoles({
+        pageable: { page: 0, size: 1000 },
+      })
+      if (response.success) {
+        const ids = extractRoleIds(response)
+        if (ids.length > 0) return ids
+      }
+    } catch {
+      // fall through to raw fetch fallback
+    }
+
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+    const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
+    const token = readAuthSession().token
+
+    try {
+      const response = await fetch(`${base}/api/role?page=0&size=1000`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: 'include',
+      })
+
+      if (!response.ok) return []
+
+      const json = (await response.json().catch(() => null)) as unknown
+      return extractRoleIds(json)
+    } catch {
+      return []
+    }
+
+    return []
+  }
 
   const fetchUsersRaw = async (): Promise<Array<{ id?: string; email?: string; username?: string }>> => {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
@@ -81,6 +138,11 @@ export function useUserActions() {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
     const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
     const token = readAuthSession().token
+    const roleIds = await fetchRoleIds()
+
+    if (roleIds.length === 0) {
+      throw new Error('Unable to create login: no assignable roles were returned by the server.')
+    }
 
     const response = await fetch(`${base}/api/user`, {
       method: 'POST',
@@ -92,7 +154,7 @@ export function useUserActions() {
       body: JSON.stringify({
         username: values.username.trim(),
         password: values.password,
-        roles: [],
+        roles: roleIds,
       }),
     })
 
@@ -104,11 +166,17 @@ export function useUserActions() {
   }
 
   const createUserByEmailCompat = async (values: CreateUserFormValues) => {
+    const roleIds = await fetchRoleIds()
+
+    if (roleIds.length === 0) {
+      throw new Error('Unable to create login: no assignable roles were returned by the server.')
+    }
+
     return userApi.createUser({
       userPostDTO: {
-        email: values.username.trim(),
+        username: values.username.trim(),
         password: values.password,
-        roles: [],
+        roles: roleIds,
       },
     })
   }
@@ -148,7 +216,7 @@ export function useUserActions() {
             try {
               const parsed: unknown = JSON.parse(text)
               if (parsed && typeof parsed === 'object') {
-                const obj = parsed as { message?: unknown; errors?: unknown }
+                const obj = parsed as { message?: unknown; errors?: unknown; error?: unknown; detail?: unknown }
                 if (typeof obj.message === 'string' && obj.message.trim()) {
                   message = obj.message
                 } else if (Array.isArray(obj.errors) && obj.errors.length > 0) {
@@ -159,6 +227,10 @@ export function useUserActions() {
                       message = desc
                     }
                   }
+                } else if (typeof obj.error === 'string' && obj.error.trim()) {
+                  message = obj.error
+                } else if (typeof obj.detail === 'string' && obj.detail.trim()) {
+                  message = obj.detail
                 }
               }
             } catch {

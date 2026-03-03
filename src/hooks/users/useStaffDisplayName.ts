@@ -45,14 +45,13 @@ export function useEmployeeDisplayName(input: EmployeeLookupInput): UseEmployeeD
         (item) =>
           item.actorId === id ||
           item.id === id ||
-          item.user?.id === id ||
-          item.user?.actorId === id,
+          item.userId === id,
       )
       if (matchedById) return matchedById
     }
 
     if (normalizedEmail) {
-      const matchedByEmail = employees.find((item) => item.user?.email?.trim().toLowerCase() === normalizedEmail)
+      const matchedByEmail = employees.find((item) => item.username?.trim().toLowerCase() === normalizedEmail)
       if (matchedByEmail) return matchedByEmail
     }
 
@@ -68,7 +67,7 @@ export function useEmployeeDisplayName(input: EmployeeLookupInput): UseEmployeeD
       .trim()
 
     if (fullName) return fullName
-    return employee.user?.email?.trim() || null
+    return employee.username?.trim() || null
   }, [employee])
 
   return {

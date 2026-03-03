@@ -43,7 +43,8 @@ interface UseAddMemberDialogResult {
   currentUserQuery: ReturnType<typeof useAddMemberDialogData>['currentUserQuery']
   currentUserEmail: string
   subscriptionsQuery: ReturnType<typeof useAddMemberDialogData>['subscriptionsQuery']
-  createMemberMutation: UseMutationResult<unknown, Error, MemberFormValues, unknown>
+  createMemberMutation: UseMutationResult<unknown, Error, { values: MemberFormValues; skipBilling: boolean }, unknown>
+  submitMemberOnly: () => Promise<void>
   
   // New props for inline creation
   newSubscriptionForm: {
@@ -109,7 +110,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
     surname: '',
     suffix: '',
     profilePictureId: '',
-    status: 'IN',
+    status: 'ACTIVE',
   }
 
   const selectedSubscription = useMemo(
@@ -136,7 +137,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
   }, [selectedSubscription])
 
   const createMemberMutation = useMutation({
-    mutationFn: async (values: MemberFormValues) => {
+    mutationFn: async ({ values, skipBilling }: { values: MemberFormValues; skipBilling: boolean }) => {
       const createdById = values.createdById.trim()
       if (!createdById) {
         throw new Error('Missing actor id for the current user. Please log in again or ask admin to create an actor record.')
@@ -182,17 +183,17 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
         }
       }
 
-      if (!subscriptionIdToUse) {
+      if (!skipBilling && !subscriptionIdToUse) {
         throw new Error('Please select a subscription plan.')
       }
 
-      if (!startDate) {
+      if (!skipBilling && !startDate) {
         throw new Error('Please select a start date.')
       }
 
       // Handle new payment method creation if needed
       let paymentMethodToUse = paymentMethodId
-      if (paymentMethodToUse === 'new_payment_method') {
+      if (!skipBilling && paymentMethodToUse === 'new_payment_method') {
         try {
           if (!createPaymentMethod.name) throw new Error('Payment method name is required')
           const newMethod = await createPaymentMethod.handleSubmit()
@@ -266,6 +267,10 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
 
       const member = envelope.data
 
+      if (skipBilling) {
+        return member
+      }
+
       let memberActorId = member.actorId
       if (!memberActorId) {
         for (let attempt = 0; attempt < 3; attempt++) {
@@ -291,10 +296,10 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
             actorId: effectiveMemberActorId,
             branchId,
             createdById,
-            startDate,
+            startDate: startDate!,
             endDate,
             status: 'ACTIVE',
-            subscriptionId: subscriptionIdToUse,
+            subscriptionId: subscriptionIdToUse!,
           },
         })
         if (!subEnvelope.success || !subEnvelope.data) {
@@ -314,14 +319,19 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
         }
         
         if (createdMemberSubscriptionId && subscriptionAvailedIdToUse) {
-          const dueDate = startDate ?? new Date()
+          const effectiveStartDate = startDate!
+          const intervals = selectedSubscription?.intervals ?? 'MONTHLY'
+          const intervalCount = selectedSubscription?.intervalCount ?? 1
+
           createdInvoiceId = await ensureInvoiceForSubscription({
             actorId: effectiveMemberActorId,
             branchId,
             createdById,
             memberSubscriptionId: createdMemberSubscriptionId,
             subscriptionAvailedId: subscriptionAvailedIdToUse,
-            dueDate,
+            startDate: effectiveStartDate,
+            intervals,
+            intervalCount,
             gracePeriodDays: gracePeriod,
             subtotal: amountToCharge,
           })
@@ -337,6 +347,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
           invoiceId: createdInvoiceId,
           createdById,
           amount: selectedSubscription?.amount ?? 0,
+          subtotal: selectedSubscription?.amount ?? 0,
           paidAt: new Date(),
           referenceNum: paymentReferenceNum,
         })
@@ -364,7 +375,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
       }
 
       try {
-        await createMemberMutation.mutateAsync(value)
+        await createMemberMutation.mutateAsync({ values: value, skipBilling: false })
         setOpen(false)
         form.reset()
         setStartDate(undefined)
@@ -379,6 +390,41 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
       }
     },
   })
+
+  const submitMemberOnly = async () => {
+    setSubmitError(null)
+
+    const values = form.state.values
+    if (!values.createdById.trim()) {
+      setSubmitError('Current user actor id is missing. Cannot create member.')
+      return
+    }
+
+    if (!values.firstName.trim()) {
+      setSubmitError('First name is required.')
+      return
+    }
+
+    if (!values.surname.trim()) {
+      setSubmitError('Surname is required.')
+      return
+    }
+
+    try {
+      await createMemberMutation.mutateAsync({ values, skipBilling: true })
+      setOpen(false)
+      form.reset()
+      setStartDate(undefined)
+      setEndDate(undefined)
+      setSelectedSubscriptionId('')
+      setPaymentMethodId('')
+      setPaymentReferenceNum('')
+      setMembershipDetails('')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to create member.'
+      setSubmitError(message)
+    }
+  }
 
   useEffect(() => {
     if (!resolvedActorId) return
@@ -411,6 +457,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
     currentUserEmail,
     subscriptionsQuery,
     createMemberMutation,
+    submitMemberOnly,
     newSubscriptionForm: {
       state: createSubscriptionPlan.formState,
       setState: createSubscriptionPlan.setFormState,

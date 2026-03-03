@@ -1,5 +1,4 @@
 import { useCallback } from 'react'
-import { addDays } from 'date-fns'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { InvoiceApi } from '@/api/generated/apis/InvoiceApi'
@@ -9,6 +8,7 @@ import { invoiceQueryKeys, paymentQueryKeys } from '@/lib/QueryKeys'
 import { apiResponseListInvoiceTableDTOSchema, apiResponseListPaymentMethodTableDTOSchema } from '@/types/payment/paymentSchemas'
 import type { PaymentMethodTableDTOParsed } from '@/types/payment/paymentSchemas'
 import type { EnsureInvoiceInput, CreatePaymentIfNeededInput } from '@/types/payment/paymentSchemas'
+import { calculateNextDueDate, resolvePaymentStatus } from '@/lib/billing-utils'
 
 
 
@@ -31,15 +31,21 @@ export function useBillingActions() {
         return existingInvoice.id
       }
 
+      // Due date = startDate + 1 billing cycle (e.g. +1 week for WEEKLY x1)
+      // This is when the member owes their NEXT payment.
+      const dueDate = calculateNextDueDate(input.startDate, input.intervals, input.intervalCount)
+
+      // gracePeriodDate is informational only — not sent to the API (not in InvoicePostDTO).
+      // You can store it client-side for display if needed:
+      // const gracePeriodDate = addDays(dueDate, input.gracePeriodDays)
+
       const createInvoiceResp = await invoiceApi.createInvoice({
         invoicePostDTO: {
           actorId: input.actorId,
           createdById: input.createdById,
-          dueDate: input.dueDate,
-          gracePeriodDate: addDays(input.dueDate, input.gracePeriodDays),
+          dueDate,
           memberSubscriptionId: input.memberSubscriptionId,
           status: 'ISSUED',
-          subtotal: input.subtotal,
           systemGenerated: true,
         },
       })
@@ -80,6 +86,9 @@ export function useBillingActions() {
         throw new Error('Reference number is required for non-cash payments.')
       }
 
+      // Determine correct payment status based on amount paid vs invoice subtotal
+      const paymentStatus = resolvePaymentStatus(input.amount, input.subtotal ?? input.amount)
+
       await paymentApi.createPayment({
         paymentPostDTO: {
           amount: input.amount,
@@ -88,7 +97,7 @@ export function useBillingActions() {
           paidAt: input.paidAt ?? new Date(),
           paymentMethodId: input.paymentMethodId,
           referenceNum,
-          status: 'IN',
+          status: paymentStatus,
         },
       })
 

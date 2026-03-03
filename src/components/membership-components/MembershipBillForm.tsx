@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { paymentQueryKeys } from '@/lib/QueryKeys'
 import { apiResponseListPaymentMethodTableDTOSchema, type PaymentMethodTableDTOParsed } from '@/types/payment/paymentSchemas'
+import { formatBillingCycle } from '@/lib/billing-utils'
 
 export interface AddBillingDialogProps {
   selectedSubscription: SubscriptionAvailedTableDTO | null | undefined
@@ -83,7 +84,7 @@ export function AddBillingDialog({
       </div>
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="paymentMethod">Mode of Payment * </Label>
+          <Label htmlFor="paymentMethod">Mode of Payment <span className="text-red-500">*</span>  </Label>
           <Select
             value={paymentMethodId}
             disabled={disabled}
@@ -169,7 +170,7 @@ export function AddBillingDialog({
 
           {requiresReference && (
             <div className="space-y-2">
-              <Label htmlFor="paymentReferenceNum">Reference Number *</Label>
+              <Label htmlFor="paymentReferenceNum">Reference Number <span className="text-red-500">*</span></Label>
               <Input
                 id="paymentReferenceNum"
                 value={paymentReferenceNum}
@@ -199,7 +200,7 @@ export function AddBillingDialog({
             <span className="text-muted-foreground">Billing cycle</span>
             <span className="font-medium">
               {selectedSubscription
-                ? `${selectedSubscription.intervalCount} ${selectedSubscription.intervals}`
+                ? formatBillingCycle(selectedSubscription.intervalCount, selectedSubscription.intervals)
                 : '—'}
             </span>
           </div>

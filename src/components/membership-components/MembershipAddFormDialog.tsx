@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -52,6 +51,7 @@ export function AddMemberDialog() {
     currentUserEmail,
     subscriptionsQuery,
     createMemberMutation,
+    submitMemberOnly,
     newSubscriptionForm,
     newPaymentMethodForm,
   } = useAddMemberDialog()
@@ -113,7 +113,7 @@ export function AddMemberDialog() {
                     >
                       {(field) => (
                         <div className="space-y-2">
-                          <Label htmlFor={field.name}>First name *</Label>
+                          <Label htmlFor={field.name}>First name <span className="text-red-500">*</span></Label>
                           <Input
                             id={field.name}
                             value={field.state.value}
@@ -138,7 +138,7 @@ export function AddMemberDialog() {
                     >
                       {(field) => (
                         <div className="space-y-2">
-                          <Label htmlFor={field.name}>Surname *</Label>
+                          <Label htmlFor={field.name}>Surname <span className="text-red-500">*</span></Label>
                           <Input
                             id={field.name}
                             value={field.state.value}
@@ -196,8 +196,8 @@ export function AddMemberDialog() {
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="IN">IN</SelectItem>
-                            <SelectItem value="OUT">OUT</SelectItem>
+                            <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                            <SelectItem value="DEACTIVATED">DEACTIVATED</SelectItem>
                             <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
                           </SelectContent>
                         </Select>
@@ -224,7 +224,7 @@ export function AddMemberDialog() {
                     ) : (
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="subscription">Subscription Plan *</Label>
+                          <Label htmlFor="subscription">Subscription Plan <span className="text-red-500">*</span></Label>
                           <Select value={selectedSubscriptionId} onValueChange={setSelectedSubscriptionId}>
                             <SelectTrigger id="subscription">
                               <SelectValue placeholder="Select Plan" />
@@ -244,7 +244,7 @@ export function AddMemberDialog() {
 
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           <div className="space-y-2">
-                            <Label>Start Date</Label>
+                            <Label>Start Date <span className="text-red-500">*</span></Label>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button
@@ -349,34 +349,44 @@ export function AddMemberDialog() {
                 <Label>User: {(currentUserQuery.isLoading || isCreatorNameLoading) ? 'Loading…' : (createdByName || currentUserEmail || '—')}</Label> 
               </div>
               <div className="flex gap-2">
-                <DialogClose asChild>
-                  <Button type="button" variant="outline" disabled={createMemberMutation.isPending}>
-                    Cancel
-                  </Button>
-                </DialogClose>
                 {step === 1 ? (
-                  <form.Subscribe
-                    selector={(state) => {
-                      const firstName = state.values.firstName.trim()
-                      const surname = state.values.surname.trim()
-                      return !(firstName && surname)
-                    }}
-                  >
-                    {(isNextDisabled) => (
-                      <Button
-                        type="button"
-                        onClick={() => setStep(2)}
-                        disabled={isNextDisabled}
-                      >
-                        Next: Billing
-                      </Button>
-                    )}
-                  </form.Subscribe>
+                  <div className="flex flex-col items-end gap-2">
+                    <form.Subscribe
+                      selector={(state) => {
+                        const firstName = state.values.firstName.trim()
+                        const surname = state.values.surname.trim()
+                        return !(firstName && surname)
+                      }}
+                    >
+                      {(isNextDisabled) => (
+                        <>
+                          <Button
+                            type="button"
+                            onClick={() => setStep(2)}
+                            disabled={isNextDisabled || createMemberMutation.isPending}
+                          >
+                            Next: Billing
+                          </Button>
+
+                        </>
+                      )}
+                    </form.Subscribe>
+                  </div>
                 ) : (
                   <>
                     <Button type="button" variant="outline" onClick={() => setStep(1)} disabled={createMemberMutation.isPending}>
                       Back
                     </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              void submitMemberOnly()
+                            }}
+                            disabled={createMemberMutation.isPending}
+                          >
+                            Skip 
+                          </Button>
                     <form.Subscribe
                       selector={(state) =>
                         !state.values.createdById.trim() ||

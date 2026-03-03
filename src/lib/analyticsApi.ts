@@ -97,7 +97,9 @@ function transform(
     if (m.id && m.name) methodNameMap[m.id] = m.name
   }
 
-  let successfulPayments = payments.filter(p => p.status === 'IN')
+  let successfulPayments = payments.filter(
+    (p) => p.status === 'FULL' || p.status === 'PARTIAL',
+  )
 
   if (filters.startDate) {
     const start = new Date(filters.startDate)

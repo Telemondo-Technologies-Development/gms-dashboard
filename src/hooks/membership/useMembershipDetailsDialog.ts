@@ -217,7 +217,7 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
           const branchId = memberSubscriptionQuery.data?.branchId ?? selectedBranchId
 
           if (memberSubscriptionId && selectedSubscription && createdById && branchId) {
-            const dueDate = startDate ?? new Date()
+            const effectiveStartDate = startDate ?? new Date()
             const actorId = memberActorId ?? memberGroup.id
 
             ensuredInvoiceId = await ensureInvoiceForSubscription({
@@ -226,7 +226,9 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
               createdById,
               memberSubscriptionId,
               subscriptionAvailedId: selectedSubscriptionId,
-              dueDate,
+              startDate: effectiveStartDate,
+              intervals: selectedSubscription.intervals,
+              intervalCount: selectedSubscription.intervalCount,
               gracePeriodDays: selectedSubscription.gracePeriodDays ?? 0,
               subtotal: selectedSubscription.amount,
             })
@@ -257,6 +259,7 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
             invoiceId: ensuredInvoiceId,
             createdById,
             amount: selectedSubscription.amount,
+            subtotal: selectedSubscription.amount,
             paidAt: new Date(),
             referenceNum: paymentReferenceNum,
           })

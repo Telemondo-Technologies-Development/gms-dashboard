@@ -124,8 +124,8 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                                   <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="IN">IN</SelectItem>
-                                  <SelectItem value="OUT">OUT</SelectItem>
+                                  <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                                  <SelectItem value="DEACTIVATED">DEACTIVATED</SelectItem>
                                   <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
                                 </SelectContent>
                               </Select>

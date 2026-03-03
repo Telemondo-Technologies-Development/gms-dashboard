@@ -113,7 +113,7 @@ export function PaymentDetailsDialog({
   const [editError, setEditError] = useState<string | null>(null)
   const [amountInput, setAmountInput] = useState('')
   const [methodId, setMethodId] = useState('')
-  const [statusValue, setStatusValue] = useState<PaymentTableDTOParsed['status']>('IN')
+  const [statusValue, setStatusValue] = useState<PaymentTableDTOParsed['status']>('PENDING')
   const [paidAtInput, setPaidAtInput] = useState('')
   const [failureReason, setFailureReason] = useState('')
 

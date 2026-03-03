@@ -103,6 +103,7 @@ function MembersTable({ onSelectMember }: Props) {
           actorId,
           branchId: selectedBranchId,
           createdById,
+          recordedAt: new Date(),
           source: AttendancePostDTOSourceEnum.Manual,
           type: AttendancePostDTOTypeEnum.In,
         },
@@ -356,7 +357,7 @@ function MembersTable({ onSelectMember }: Props) {
                                     <TooltipTrigger asChild>
                                       <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit max-w-full p-1 -ml-1 rounded-md hover:bg-muted">
                                         <Mail className="h-3 w-3 shrink-0" />
-                                        <span className="truncate flex-1 max-w-[140px] sm:max-w-[200px] md:max-w-xs">{mainMember.email}</span>
+                                        <span className="truncate flex-1 max-w-35 sm:max-w-50 md:max-w-xs">{mainMember.email}</span>
                                       </div>
                                     </TooltipTrigger>
                                     <TooltipContent>

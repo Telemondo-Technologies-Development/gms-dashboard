@@ -17,7 +17,7 @@ export function useEmployeeSearch(employees: EmployeeTableDTO[] | undefined) {
     if (!normalizedSearch) return list
     return list.filter((employee) => {
       const name = `${employee.firstName} ${employee.surname}`.toLowerCase()
-      const email = employee.user?.email?.toLowerCase() ?? ''
+      const email = employee.username?.toLowerCase() ?? ''
       const contact = employee.contactNo?.toLowerCase() ?? ''
       const status = employee.status?.toLowerCase() ?? ''
       return (

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-
+import type { BillingInterval } from '@/lib/billing-utils'
 
 export interface EnsureInvoiceInput {
   actorId: string
@@ -7,8 +7,14 @@ export interface EnsureInvoiceInput {
   createdById: string
   memberSubscriptionId: string
   subscriptionAvailedId: string
-  dueDate: Date
+  /** Enrollment start date — used to derive the first invoice due date */
+  startDate: Date
+  /** Billing interval unit from the subscription (DAILY/WEEKLY/MONTHLY/YEARLY) */
+  intervals: BillingInterval
+  /** How many interval units make one billing cycle (e.g. 2 for bi-weekly) */
+  intervalCount: number
   gracePeriodDays: number
+  /** Subscription amount — used to determine payment status on first payment */
   subtotal: number
 }
 
@@ -17,6 +23,8 @@ export interface CreatePaymentIfNeededInput {
   invoiceId: string | undefined
   createdById: string
   amount: number
+  /** Full invoice subtotal — used to derive FULL/PARTIAL/PENDING status */
+  subtotal?: number
   paidAt?: Date
 	referenceNum?: string
 }
@@ -39,7 +47,7 @@ export const pageMetadataSchema = z.object({
 
 export type PageMetadata = z.infer<typeof pageMetadataSchema>
 
-export const paymentStatusSchema = z.enum(['IN', 'OUT', 'UNDECIDED'])
+export const paymentStatusSchema = z.enum(['FULL', 'PARTIAL', 'PENDING', 'MISSED', 'CANCELLED', 'WAITING', 'FAILED'])
 export type PaymentStatus = z.infer<typeof paymentStatusSchema>
 
 export const paymentTableDTOSchema = z.object({
@@ -142,7 +150,7 @@ export const paymentHistoryFiltersSchema = z
 export type PaymentHistoryFilters = z.infer<typeof paymentHistoryFiltersSchema>
 
 // Invoice schemas for linking payments to invoices
-export const invoiceStatusSchema = z.enum(['DRAFT', 'ISSUED', 'PAID', 'OVERDUE'])
+export const invoiceStatusSchema = z.enum(['DRAFT', 'PENDING', 'ISSUED', 'PAID', 'PARTIAL', 'DUE', 'OVERDUE'])
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
 
 const coerceDate = z.preprocess((value) => {
