@@ -1,16 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAuthenticatedApi } from '@/lib/api-client';
 import { BranchApi } from '@/api/generated/apis';
-
 export type BranchEmployeeItem = {
   actorId: string;
-  employee: {
-    firstName: string;
-    middleName?: string;
-    surname: string;
-    suffix?: string;
-    id: string;
-  };
+  employeeContactNo: string;
+  employeeFirstName: string;
+  employeeId: string;
+  employeeMiddleName?: string;
+  employeeSuffix?: string;
+  employeeSurname: string;
+  personnelRoleDescription: string;
+  personnelRoleId: string;
+  personnelRoleName: string;
 };
 
 const branchApi = getAuthenticatedApi(BranchApi);
@@ -21,7 +22,9 @@ export const useBranchEmployees = (branchId: string) => {
     enabled: !!branchId,
     queryFn: async () => {
       const res = await branchApi.getBranchEmployees({ id: branchId } as any);
-      return (res as any)?.data?.employees ?? (res as any)?.data?.data?.employees ?? [];
+      const data = (res as any)?.data ?? []; 
+      
+      return Array.isArray(data) ? data : [];
     },
   });
 };

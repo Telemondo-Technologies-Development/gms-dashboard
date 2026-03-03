@@ -63,6 +63,9 @@ export function AssignStaffDialog({
           <StaffListView
             branchId={branchId}
             branchName={branchName}
+            onRedirect={() => {
+              console.log('Redirect triggered');
+            }}
           />
         )}
       </DialogContent>
