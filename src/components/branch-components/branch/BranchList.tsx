@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { MapPin, MoreVertical } from 'lucide-react';
+import { MapPin, MoreVertical, Users } from 'lucide-react'; // Added Users icon for better UI
 
 interface Branch {
   id: string;
@@ -59,9 +59,8 @@ export const BranchList: React.FC<BranchListProps> = ({
                 <h3 className="text-lg font-semibold mt-3 text-black">{branch.name}</h3>
                 <div className="flex items-center gap-1 mt-1 text-muted-foreground">
                   <MapPin size={14} />
-                  <a
-                    href="#"
-                    className="text-sm text-blue-500 underline"
+                  <button
+                    className="text-sm text-blue-500 hover:underline text-left"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -70,43 +69,46 @@ export const BranchList: React.FC<BranchListProps> = ({
                     }}
                   >
                     {branch.address}
-                  </a>
+                  </button>
                 </div>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="text-muted-foreground hover:text-black transition-colors"
+                    className="p-2 -mr-2 text-muted-foreground hover:text-black transition-colors rounded-full hover:bg-zinc-100"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreVertical size={20} />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
+                <DropdownMenuContent align="end">
                   <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
                     onClick={(e) => {
                       e.stopPropagation();
                       onSetBranchToRemove(branch);
                       onToggleDialog('confirmDialogOpen', true);
                     }}
                   >
-                    Remove
+                    Remove Branch
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
 
             <div className="mt-6 flex justify-end">
-              <span
-                className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-black transition-all border-b border-transparent hover:border-black pb-0.5 cursor-pointer"
+              <button
+                className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#0062cc] hover:text-[#0056b3] transition-all group"
                 onClick={(e) => {
                   e.stopPropagation();
+                  // 1. This sends the branch data to the parent
+                  // 2. The parent's handler switches the tab to "staff"
                   onSetActiveBranchForStaff(branch);
-                  onToggleDialog('staffDialogOpen', true);
                 }}
               >
-                Assigned Staff
-              </span>
+                <Users size={14} className="group-hover:scale-110 transition-transform" />
+                <span>Assigned Staff</span>
+              </button>
             </div>
           </Card>
         ))}

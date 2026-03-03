@@ -8,14 +8,13 @@ import { MapDialog } from '@/components/branch-components/branch/MapDialog';
 import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
 import { BranchList } from '@/components/branch-components/branch/BranchList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { AssignStaffOverview } from '@/components/branch-components/branch/AssignStaffOverview';
+import { AssignStaffOverview } from '@/components/branch-components/staff/AssignStaffOverview';
 import { useBranches } from '@/hooks/branch/useBranches';
 import { useAuthSession } from '@/lib/auth/auth-session';
 
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
 });
-
 
 interface Branch {
   id: string;
@@ -33,8 +32,10 @@ interface Branch {
 
 function RouteComponent() {
   const { actorId } = useAuthSession(); 
-
   const { branches, refetch, isLoading } = useBranches();
+
+  // Controlled tab state
+  const [activeTab, setActiveTab] = useState('branches');
 
   const [dialogState, setDialogState] = useState({
     detailsOpen: false,
@@ -171,20 +172,12 @@ function RouteComponent() {
   };
 
   const selectedBranch: Branch | null = selectedBranchId
-    ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
-    : null;
+  ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
+  : null;
 
-  if (selectedBranch && selectedBranch.status === 'INACTIVE') {
-    selectedBranch.status = 'ACTIVE'; 
-  } else if (selectedBranch && selectedBranch.status === 'INACTIVE') {
-    selectedBranch.status = 'INACTIVE'; 
-  }
-
-  function handleUpdateStaff(newStaff: StaffMember[]): void {
-    console.log("Updating staff for branch:", activeBranchForStaff?.name, newStaff);
-    refetch();
-  }
-
+function handleUpdateStaff(newStaff: StaffMember[]): void {
+  refetch();
+}
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -192,10 +185,10 @@ function RouteComponent() {
         <AddBranchDialog onAddBranch={handleAddBranch} />
       </div> 
 
-      <Tabs defaultValue='branches'>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-10 flex space-x-6">
           <TabsTrigger value="branches">Branches</TabsTrigger>
-          <TabsTrigger value="AssignStaffOverview">StaffDetails</TabsTrigger>
+          <TabsTrigger value="staff">Staff Details</TabsTrigger>
         </TabsList>
 
         <TabsContent value="branches">
@@ -208,7 +201,11 @@ function RouteComponent() {
               onToggleDialog={toggleDialog}
               onSetMapBranch={setMapBranch}
               onSetBranchToRemove={setBranchToRemove}
-              onSetActiveBranchForStaff={setActiveBranchForStaff}
+              // This is the "Redirect" logic:
+              onSetActiveBranchForStaff={(branch) => {
+                setActiveBranchForStaff(branch); // Stores the clicked branch info
+                setActiveTab('staff');           // Switches the UI to the Overview tab
+              }}
             />
           ) : (
             <div className="p-8 border rounded-md text-center text-muted-foreground">
@@ -217,12 +214,17 @@ function RouteComponent() {
           )}
         </TabsContent>
 
-        <TabsContent value="AssignStaffOverview">
-          <AssignStaffOverview branches={branches} />
+        <TabsContent value="staff">
+          {/* Passing the ID ensures AssignStaffOverview opens the correct branch */}
+          <AssignStaffOverview 
+            branches={branches} 
+            defaultBranchId={activeBranchForStaff?.id} 
+          />
         </TabsContent>
       </Tabs>
   
-      <BranchDetailsDialog
+{/* Branch Details, Map, and Delete Dialogs remain here */}
+<BranchDetailsDialog
         open={dialogState.detailsOpen}
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}
         branch={selectedBranch ? { 
@@ -245,7 +247,7 @@ function RouteComponent() {
         onUpdateStaff={handleUpdateStaff}
       />
   
-      <MapDialog
+  <MapDialog
         open={dialogState.mapDialogOpen}
         onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
         latitude={mapBranch?.latitude || '0'} 
