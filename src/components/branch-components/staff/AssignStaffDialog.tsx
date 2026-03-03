@@ -63,12 +63,6 @@ export function AssignStaffDialog({
           <StaffListView
             branchId={branchId}
             branchName={branchName}
-            staff={staff}
-            onAddClick={() => setView('add')}
-            onSelect={(member: StaffMember) => {
-              setSelectedMember(member);
-              setView('details');
-            }}
           />
         )}
       </DialogContent>

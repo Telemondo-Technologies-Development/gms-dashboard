@@ -3,25 +3,12 @@ import { useMemo } from 'react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 import { useBranchEmployees } from '@/hooks/Staff/useBranchEmployees';
 
-interface StaffMember {
-  id: string;
-  name: string;
-  role: 'Manager' | 'Staff';
-  email: string;
-  phone: string;
-  address: string;
-  birthday: string;
-}
-
 interface ListViewProps {
   branchId: string;
   branchName: string;
-  staff: StaffMember[];
-  onAddClick: () => void;
-  onSelect: (member: StaffMember) => void;
 }
 
-export function StaffListView({ branchId, branchName, staff, onAddClick, onSelect }: ListViewProps) {
+export function StaffListView({ branchId, branchName }: ListViewProps) {
   const { data: branchPersonnel, isLoading: loadingBranchPersonnel } = useBranchPersonnel(branchId);
   const { data: branchEmployees, isLoading: loadingEmployees } = useBranchEmployees(branchId);
 
@@ -68,8 +55,7 @@ export function StaffListView({ branchId, branchName, staff, onAddClick, onSelec
                   return (
                     <div
                       key={personnel.id}
-                      className="flex items-center justify-between gap-3 p-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200 cursor-pointer"
-                      onClick={() => onSelect({ id: personnel.id, name: displayName, role: 'Staff', email: '', phone: '', address: '', birthday: '' })}
+                      className="flex items-center justify-between gap-3 p-2 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200"
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-zinc-900 truncate">{displayName}</p>
@@ -88,7 +74,6 @@ export function StaffListView({ branchId, branchName, staff, onAddClick, onSelec
             variant="default"
             className="bg-blue-600 hover:bg-blue-700 px-6 py-2"
             onClick={() => {
-              onAddClick();
             }}
           >
             Manage
