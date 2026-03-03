@@ -33,10 +33,7 @@ interface Branch {
 function RouteComponent() {
   const { actorId } = useAuthSession(); 
   const { branches, refetch, isLoading } = useBranches();
-
-  // Controlled tab state
   const [activeTab, setActiveTab] = useState('branches');
-
   const [dialogState, setDialogState] = useState({
     detailsOpen: false,
     staffDialogOpen: false,
@@ -201,10 +198,9 @@ function handleUpdateStaff(newStaff: StaffMember[]): void {
               onToggleDialog={toggleDialog}
               onSetMapBranch={setMapBranch}
               onSetBranchToRemove={setBranchToRemove}
-              // This is the "Redirect" logic:
               onSetActiveBranchForStaff={(branch) => {
-                setActiveBranchForStaff(branch); // Stores the clicked branch info
-                setActiveTab('staff');           // Switches the UI to the Overview tab
+                setActiveBranchForStaff(branch); 
+                setActiveTab('staff');          
               }}
             />
           ) : (
@@ -215,7 +211,6 @@ function handleUpdateStaff(newStaff: StaffMember[]): void {
         </TabsContent>
 
         <TabsContent value="staff">
-          {/* Passing the ID ensures AssignStaffOverview opens the correct branch */}
           <AssignStaffOverview 
             branches={branches} 
             defaultBranchId={activeBranchForStaff?.id} 
@@ -223,8 +218,8 @@ function handleUpdateStaff(newStaff: StaffMember[]): void {
         </TabsContent>
       </Tabs>
   
-{/* Branch Details, Map, and Delete Dialogs remain here */}
-<BranchDetailsDialog
+
+      <BranchDetailsDialog
         open={dialogState.detailsOpen}
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}
         branch={selectedBranch ? { 
@@ -247,7 +242,7 @@ function handleUpdateStaff(newStaff: StaffMember[]): void {
         onUpdateStaff={handleUpdateStaff}
       />
   
-  <MapDialog
+      <MapDialog
         open={dialogState.mapDialogOpen}
         onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
         latitude={mapBranch?.latitude || '0'} 

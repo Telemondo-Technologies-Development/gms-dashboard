@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { MapPin, MoreVertical, Users } from 'lucide-react'; // Added Users icon for better UI
+import { MapPin, MoreVertical, Users } from 'lucide-react'; 
 
 interface Branch {
   id: string;
@@ -101,8 +101,6 @@ export const BranchList: React.FC<BranchListProps> = ({
                 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#0062cc] hover:text-[#0056b3] transition-all group"
                 onClick={(e) => {
                   e.stopPropagation();
-                  // 1. This sends the branch data to the parent
-                  // 2. The parent's handler switches the tab to "staff"
                   onSetActiveBranchForStaff(branch);
                 }}
               >
