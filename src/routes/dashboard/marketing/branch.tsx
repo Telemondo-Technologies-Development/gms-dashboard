@@ -6,9 +6,9 @@ import { BranchDetailsDialog } from '@/components/branch-components/branch/Branc
 import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
 import { MapDialog } from '@/components/branch-components/branch/MapDialog';
 import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
-import { MultiBranchOverview } from '@/components/branch-components/branch/MultiBranchOverview';
 import { BranchList } from '@/components/branch-components/branch/BranchList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { AssignStaffOverview } from '@/components/branch-components/branch/AssignStaffOverview';
 import { useBranches } from '@/hooks/branch/useBranches';
 import { useAuthSession } from '@/lib/auth/auth-session';
 
@@ -195,7 +195,7 @@ function RouteComponent() {
       <Tabs defaultValue='branches'>
         <TabsList className="mb-10 flex space-x-6">
           <TabsTrigger value="branches">Branches</TabsTrigger>
-          <TabsTrigger value="multiBranchDashboard">Multi-Branch Overview</TabsTrigger>
+          <TabsTrigger value="AssignStaffOverview">StaffDetails</TabsTrigger>
         </TabsList>
 
         <TabsContent value="branches">
@@ -217,8 +217,8 @@ function RouteComponent() {
           )}
         </TabsContent>
 
-        <TabsContent value="multiBranchDashboard">
-          <MultiBranchOverview branches={branches} />
+        <TabsContent value="AssignStaffOverview">
+          <AssignStaffOverview branches={branches} />
         </TabsContent>
       </Tabs>
   
