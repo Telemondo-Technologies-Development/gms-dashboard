@@ -892,6 +892,153 @@
         ]
       }
     },
+    "/api/branch-summary": {
+      "get": {
+        "operationId": "getAllBranchSummary",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "month",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBranchSummaryTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Branch Summary",
+        "tags": [
+          "Branch Summary"
+        ]
+      },
+      "put": {
+        "operationId": "updateBranchSummary",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update Branch Summary",
+        "tags": [
+          "Branch Summary"
+        ]
+      }
+    },
+    "/api/branch-summary/last-update": {
+      "get": {
+        "operationId": "getBranchSummary_1",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInstant"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get the time for the last Branch Summary Update",
+        "tags": [
+          "Branch Summary"
+        ]
+      }
+    },
+    "/api/branch-summary/{id}": {
+      "get": {
+        "operationId": "getBranchSummary",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "month",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBranchSummaryTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get Branch Summary by Branch id",
+        "tags": [
+          "Branch Summary"
+        ]
+      }
+    },
     "/api/branch/personnel": {
       "get": {
         "operationId": "getAllBranchPersonnel",
@@ -6395,6 +6542,38 @@
           "timestamp"
         ]
       },
+      "ApiResponseInstant": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseInvoiceTableDTO": {
         "type": "object",
         "properties": {
@@ -6671,6 +6850,40 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BranchPersonnelTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListBranchSummaryTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchSummaryTableDTO"
             }
           },
           "errors": {
@@ -9027,6 +9240,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "source": {
             "type": "string",
             "enum": [
@@ -9049,6 +9266,7 @@
           "actorId",
           "branchId",
           "createdById",
+          "recordedAt",
           "source",
           "type"
         ]
@@ -9057,6 +9275,10 @@
         "type": "object",
         "description": "Format for Attendance update",
         "properties": {
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "source": {
             "type": "string",
             "enum": [
@@ -9080,6 +9302,7 @@
           }
         },
         "required": [
+          "recordedAt",
           "source",
           "type",
           "updatedById"
@@ -9105,6 +9328,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
           "source": {
             "type": "string",
             "enum": [
@@ -9129,6 +9356,7 @@
         },
         "required": [
           "id",
+          "recordedAt",
           "source",
           "type"
         ]
@@ -9483,6 +9711,57 @@
           "updatedById"
         ]
       },
+      "BranchSummaryTableDTO": {
+        "type": "object",
+        "description": "Format for Branch Summary read",
+        "properties": {
+          "avgExpense": {
+            "type": "number"
+          },
+          "avgInvoice": {
+            "type": "number"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchName": {
+            "type": "string"
+          },
+          "netProfit": {
+            "type": "number"
+          },
+          "reportMonth": {
+            "type": "string",
+            "format": "date"
+          },
+          "reportQuarter": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reportYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalExpenses": {
+            "type": "number"
+          },
+          "totalRevenue": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "avgExpense",
+          "avgInvoice",
+          "branchId",
+          "netProfit",
+          "reportMonth",
+          "reportQuarter",
+          "reportYear",
+          "totalExpenses",
+          "totalRevenue"
+        ]
+      },
       "BranchTableDTO": {
         "type": "object",
         "description": "Format for Branch read",
@@ -9537,6 +9816,22 @@
           "name",
           "status",
           "updatedAt"
+        ]
+      },
+      "BranchesBriefDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ]
       },
       "EmployeeInBranchDTO": {
@@ -9686,6 +9981,12 @@
             "type": "string",
             "format": "uuid"
           },
+          "branches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchesBriefDTO"
+            }
+          },
           "contactNo": {
             "type": "string"
           },
@@ -9713,11 +10014,16 @@
           "surname": {
             "type": "string"
           },
-          "user": {
-            "$ref": "#/components/schemas/UserTableDTO"
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
           }
         },
         "required": [
+          "branches",
           "contactNo",
           "firstName",
           "id",
@@ -9741,10 +10047,6 @@
             "type": "string",
             "format": "date-time"
           },
-          "gracePeriodDate": {
-            "type": "string",
-            "format": "date-time"
-          },
           "memberSubscriptionId": {
             "type": "string",
             "format": "uuid"
@@ -9753,13 +10055,13 @@
             "type": "string",
             "enum": [
               "DRAFT",
+              "PENDING",
               "ISSUED",
               "PAID",
+              "PARTIAL",
+              "DUE",
               "OVERDUE"
             ]
-          },
-          "subtotal": {
-            "type": "number"
           },
           "systemGenerated": {
             "type": "boolean"
@@ -9768,11 +10070,8 @@
         "required": [
           "actorId",
           "createdById",
-          "dueDate",
-          "gracePeriodDate",
           "memberSubscriptionId",
-          "status",
-          "subtotal"
+          "status"
         ]
       },
       "InvoicePutDTO": {
@@ -9791,8 +10090,11 @@
             "type": "string",
             "enum": [
               "DRAFT",
+              "PENDING",
               "ISSUED",
               "PAID",
+              "PARTIAL",
+              "DUE",
               "OVERDUE"
             ]
           },
@@ -9852,8 +10154,11 @@
             "type": "string",
             "enum": [
               "DRAFT",
+              "PENDING",
               "ISSUED",
               "PAID",
+              "PARTIAL",
+              "DUE",
               "OVERDUE"
             ]
           },
@@ -9965,9 +10270,9 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
-              "UNDECIDED"
+              "UNDECIDED",
+              "ACTIVE",
+              "DEACTIVATED"
             ]
           },
           "suffix": {
@@ -10166,9 +10471,9 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
-              "UNDECIDED"
+              "UNDECIDED",
+              "ACTIVE",
+              "DEACTIVATED"
             ]
           },
           "suffix": {
@@ -10398,12 +10703,19 @@
           "middleName": {
             "type": "string"
           },
+          "profilePictureId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "profilePictureUrl": {
+            "type": "string"
+          },
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
-              "UNDECIDED"
+              "UNDECIDED",
+              "ACTIVE",
+              "DEACTIVATED"
             ]
           },
           "suffix": {
@@ -10442,6 +10754,7 @@
         "required": [
           "firstName",
           "id",
+          "profilePictureUrl",
           "status",
           "surname"
         ]
@@ -10776,9 +11089,13 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
-              "UNDECIDED"
+              "FULL",
+              "PARTIAL",
+              "PENDING",
+              "MISSED",
+              "CANCELLED",
+              "WAITING",
+              "FAILED"
             ]
           }
         },
@@ -10813,9 +11130,13 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
-              "UNDECIDED"
+              "FULL",
+              "PARTIAL",
+              "PENDING",
+              "MISSED",
+              "CANCELLED",
+              "WAITING",
+              "FAILED"
             ]
           },
           "updatedById": {
@@ -10866,9 +11187,13 @@
           "status": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
-              "UNDECIDED"
+              "FULL",
+              "PARTIAL",
+              "PENDING",
+              "MISSED",
+              "CANCELLED",
+              "WAITING",
+              "FAILED"
             ]
           },
           "updatedById": {
@@ -11205,9 +11530,9 @@
           "actorStatus": {
             "type": "string",
             "enum": [
-              "IN",
-              "OUT",
-              "UNDECIDED"
+              "UNDECIDED",
+              "ACTIVE",
+              "DEACTIVATED"
             ]
           },
           "actorSurname": {
@@ -12499,9 +12824,6 @@
       "UserPostDTO": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string"
-          },
           "password": {
             "type": "string",
             "maxLength": 64,
@@ -12513,31 +12835,34 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "username": {
+            "type": "string"
           }
         },
         "required": [
-          "email",
           "password",
-          "roles"
+          "roles",
+          "username"
         ]
       },
       "UserPutDTO": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string"
-          },
           "roles": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
             }
+          },
+          "username": {
+            "type": "string"
           }
         },
         "required": [
-          "email",
-          "roles"
+          "roles",
+          "username"
         ]
       },
       "UserRoleBriefDTO": {
@@ -12567,9 +12892,6 @@
             "type": "string",
             "format": "date-time"
           },
-          "email": {
-            "type": "string"
-          },
           "id": {
             "type": "string",
             "format": "uuid"
@@ -12583,14 +12905,17 @@
             "items": {
               "$ref": "#/components/schemas/UserRoleBriefDTO"
             }
+          },
+          "username": {
+            "type": "string"
           }
         },
         "required": [
           "createdAt",
-          "email",
           "id",
           "updatedAt",
-          "userRoles"
+          "userRoles",
+          "username"
         ]
       },
       "UtilityExpenseCreateDTO": {

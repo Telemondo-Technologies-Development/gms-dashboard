@@ -24,12 +24,6 @@ export interface UserPostDTO {
      * @type {string}
      * @memberof UserPostDTO
      */
-    email: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserPostDTO
-     */
     password: string;
     /**
      * 
@@ -37,15 +31,21 @@ export interface UserPostDTO {
      * @memberof UserPostDTO
      */
     roles: Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserPostDTO
+     */
+    username: string;
 }
 
 /**
  * Check if a given object implements the UserPostDTO interface.
  */
 export function instanceOfUserPostDTO(value: object): value is UserPostDTO {
-    if (!('email' in value) || value['email'] === undefined) return false;
     if (!('password' in value) || value['password'] === undefined) return false;
     if (!('roles' in value) || value['roles'] === undefined) return false;
+    if (!('username' in value) || value['username'] === undefined) return false;
     return true;
 }
 
@@ -59,9 +59,9 @@ export function UserPostDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean
     }
     return {
         
-        'email': json['email'],
         'password': json['password'],
         'roles': json['roles'],
+        'username': json['username'],
     };
 }
 
@@ -76,9 +76,9 @@ export function UserPostDTOToJSONTyped(value?: UserPostDTO | null, ignoreDiscrim
 
     return {
         
-        'email': value['email'],
         'password': value['password'],
         'roles': value['roles'],
+        'username': value['username'],
     };
 }
 

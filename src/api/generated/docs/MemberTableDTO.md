@@ -16,6 +16,8 @@ Name | Type
 `firstName` | string
 `id` | string
 `middleName` | string
+`profilePictureId` | string
+`profilePictureUrl` | string
 `status` | string
 `suffix` | string
 `surname` | string
@@ -41,6 +43,8 @@ const example = {
   "firstName": null,
   "id": null,
   "middleName": null,
+  "profilePictureId": null,
+  "profilePictureUrl": null,
   "status": null,
   "suffix": null,
   "surname": null,

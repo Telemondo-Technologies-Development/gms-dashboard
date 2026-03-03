@@ -45,6 +45,12 @@ export interface AttendanceTableDTO {
     id: string;
     /**
      * 
+     * @type {Date}
+     * @memberof AttendanceTableDTO
+     */
+    recordedAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AttendanceTableDTO
      */
@@ -91,6 +97,7 @@ export type AttendanceTableDTOTypeEnum = typeof AttendanceTableDTOTypeEnum[keyof
  */
 export function instanceOfAttendanceTableDTO(value: object): value is AttendanceTableDTO {
     if (!('id' in value) || value['id'] === undefined) return false;
+    if (!('recordedAt' in value) || value['recordedAt'] === undefined) return false;
     if (!('source' in value) || value['source'] === undefined) return false;
     if (!('type' in value) || value['type'] === undefined) return false;
     return true;
@@ -110,6 +117,7 @@ export function AttendanceTableDTOFromJSONTyped(json: any, ignoreDiscriminator: 
         'branchId': json['branchId'] == null ? undefined : json['branchId'],
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'id': json['id'],
+        'recordedAt': (new Date(json['recordedAt'])),
         'source': json['source'],
         'type': json['type'],
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
@@ -131,6 +139,7 @@ export function AttendanceTableDTOToJSONTyped(value?: AttendanceTableDTO | null,
         'branchId': value['branchId'],
         'createdById': value['createdById'],
         'id': value['id'],
+        'recordedAt': value['recordedAt'].toISOString(),
         'source': value['source'],
         'type': value['type'],
         'updatedById': value['updatedById'],

@@ -36,13 +36,7 @@ export interface InvoicePostDTO {
      * @type {Date}
      * @memberof InvoicePostDTO
      */
-    dueDate: Date;
-    /**
-     * 
-     * @type {Date}
-     * @memberof InvoicePostDTO
-     */
-    gracePeriodDate: Date;
+    dueDate?: Date;
     /**
      * 
      * @type {string}
@@ -57,12 +51,6 @@ export interface InvoicePostDTO {
     status: InvoicePostDTOStatusEnum;
     /**
      * 
-     * @type {number}
-     * @memberof InvoicePostDTO
-     */
-    subtotal: number;
-    /**
-     * 
      * @type {boolean}
      * @memberof InvoicePostDTO
      */
@@ -75,8 +63,11 @@ export interface InvoicePostDTO {
  */
 export const InvoicePostDTOStatusEnum = {
     Draft: 'DRAFT',
+    Pending: 'PENDING',
     Issued: 'ISSUED',
     Paid: 'PAID',
+    Partial: 'PARTIAL',
+    Due: 'DUE',
     Overdue: 'OVERDUE'
 } as const;
 export type InvoicePostDTOStatusEnum = typeof InvoicePostDTOStatusEnum[keyof typeof InvoicePostDTOStatusEnum];
@@ -88,11 +79,8 @@ export type InvoicePostDTOStatusEnum = typeof InvoicePostDTOStatusEnum[keyof typ
 export function instanceOfInvoicePostDTO(value: object): value is InvoicePostDTO {
     if (!('actorId' in value) || value['actorId'] === undefined) return false;
     if (!('createdById' in value) || value['createdById'] === undefined) return false;
-    if (!('dueDate' in value) || value['dueDate'] === undefined) return false;
-    if (!('gracePeriodDate' in value) || value['gracePeriodDate'] === undefined) return false;
     if (!('memberSubscriptionId' in value) || value['memberSubscriptionId'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
-    if (!('subtotal' in value) || value['subtotal'] === undefined) return false;
     return true;
 }
 
@@ -108,11 +96,9 @@ export function InvoicePostDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'actorId': json['actorId'],
         'createdById': json['createdById'],
-        'dueDate': (new Date(json['dueDate'])),
-        'gracePeriodDate': (new Date(json['gracePeriodDate'])),
+        'dueDate': json['dueDate'] == null ? undefined : (new Date(json['dueDate'])),
         'memberSubscriptionId': json['memberSubscriptionId'],
         'status': json['status'],
-        'subtotal': json['subtotal'],
         'systemGenerated': json['systemGenerated'] == null ? undefined : json['systemGenerated'],
     };
 }
@@ -130,11 +116,9 @@ export function InvoicePostDTOToJSONTyped(value?: InvoicePostDTO | null, ignoreD
         
         'actorId': value['actorId'],
         'createdById': value['createdById'],
-        'dueDate': value['dueDate'].toISOString(),
-        'gracePeriodDate': value['gracePeriodDate'].toISOString(),
+        'dueDate': value['dueDate'] == null ? value['dueDate'] : value['dueDate'].toISOString(),
         'memberSubscriptionId': value['memberSubscriptionId'],
         'status': value['status'],
-        'subtotal': value['subtotal'],
         'systemGenerated': value['systemGenerated'],
     };
 }

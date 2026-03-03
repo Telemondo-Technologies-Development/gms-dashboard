@@ -8,10 +8,10 @@ Name | Type
 ------------ | -------------
 `actorId` | string
 `createdAt` | Date
-`email` | string
 `id` | string
 `updatedAt` | Date
 `userRoles` | [Array&lt;UserRoleBriefDTO&gt;](UserRoleBriefDTO.md)
+`username` | string
 
 ## Example
 
@@ -22,10 +22,10 @@ import type { UserTableDTO } from ''
 const example = {
   "actorId": null,
   "createdAt": null,
-  "email": null,
   "id": null,
   "updatedAt": null,
   "userRoles": null,
+  "username": null,
 } satisfies UserTableDTO
 
 console.log(example)

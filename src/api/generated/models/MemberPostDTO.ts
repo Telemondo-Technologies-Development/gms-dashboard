@@ -68,9 +68,9 @@ export interface MemberPostDTO {
  * @export
  */
 export const MemberPostDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
-    Undecided: 'UNDECIDED'
+    Undecided: 'UNDECIDED',
+    Active: 'ACTIVE',
+    Deactivated: 'DEACTIVATED'
 } as const;
 export type MemberPostDTOStatusEnum = typeof MemberPostDTOStatusEnum[keyof typeof MemberPostDTOStatusEnum];
 

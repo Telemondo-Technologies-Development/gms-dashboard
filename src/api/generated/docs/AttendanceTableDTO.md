@@ -11,6 +11,7 @@ Name | Type
 `branchId` | string
 `createdById` | string
 `id` | string
+`recordedAt` | Date
 `source` | string
 `type` | string
 `updatedById` | string
@@ -26,6 +27,7 @@ const example = {
   "branchId": null,
   "createdById": null,
   "id": null,
+  "recordedAt": null,
   "source": null,
   "type": null,
   "updatedById": null,

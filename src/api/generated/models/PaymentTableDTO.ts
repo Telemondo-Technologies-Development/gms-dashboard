@@ -86,9 +86,13 @@ export interface PaymentTableDTO {
  * @export
  */
 export const PaymentTableDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
-    Undecided: 'UNDECIDED'
+    Full: 'FULL',
+    Partial: 'PARTIAL',
+    Pending: 'PENDING',
+    Missed: 'MISSED',
+    Cancelled: 'CANCELLED',
+    Waiting: 'WAITING',
+    Failed: 'FAILED'
 } as const;
 export type PaymentTableDTOStatusEnum = typeof PaymentTableDTOStatusEnum[keyof typeof PaymentTableDTOStatusEnum];
 

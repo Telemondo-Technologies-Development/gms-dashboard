@@ -21,6 +21,12 @@ import { mapValues } from '../runtime';
 export interface AttendancePutDTO {
     /**
      * 
+     * @type {Date}
+     * @memberof AttendancePutDTO
+     */
+    recordedAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AttendancePutDTO
      */
@@ -66,6 +72,7 @@ export type AttendancePutDTOTypeEnum = typeof AttendancePutDTOTypeEnum[keyof typ
  * Check if a given object implements the AttendancePutDTO interface.
  */
 export function instanceOfAttendancePutDTO(value: object): value is AttendancePutDTO {
+    if (!('recordedAt' in value) || value['recordedAt'] === undefined) return false;
     if (!('source' in value) || value['source'] === undefined) return false;
     if (!('type' in value) || value['type'] === undefined) return false;
     if (!('updatedById' in value) || value['updatedById'] === undefined) return false;
@@ -82,6 +89,7 @@ export function AttendancePutDTOFromJSONTyped(json: any, ignoreDiscriminator: bo
     }
     return {
         
+        'recordedAt': (new Date(json['recordedAt'])),
         'source': json['source'],
         'type': json['type'],
         'updatedById': json['updatedById'],
@@ -99,6 +107,7 @@ export function AttendancePutDTOToJSONTyped(value?: AttendancePutDTO | null, ign
 
     return {
         
+        'recordedAt': value['recordedAt'].toISOString(),
         'source': value['source'],
         'type': value['type'],
         'updatedById': value['updatedById'],

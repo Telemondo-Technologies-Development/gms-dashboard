@@ -44,12 +44,6 @@ export interface UserTableDTO {
      * @type {string}
      * @memberof UserTableDTO
      */
-    email: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserTableDTO
-     */
     id: string;
     /**
      * 
@@ -63,6 +57,12 @@ export interface UserTableDTO {
      * @memberof UserTableDTO
      */
     userRoles: Array<UserRoleBriefDTO>;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserTableDTO
+     */
+    username: string;
 }
 
 /**
@@ -70,10 +70,10 @@ export interface UserTableDTO {
  */
 export function instanceOfUserTableDTO(value: object): value is UserTableDTO {
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
-    if (!('email' in value) || value['email'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     if (!('userRoles' in value) || value['userRoles'] === undefined) return false;
+    if (!('username' in value) || value['username'] === undefined) return false;
     return true;
 }
 
@@ -89,10 +89,10 @@ export function UserTableDTOFromJSONTyped(json: any, ignoreDiscriminator: boolea
         
         'actorId': json['actorId'] == null ? undefined : json['actorId'],
         'createdAt': (new Date(json['createdAt'])),
-        'email': json['email'],
         'id': json['id'],
         'updatedAt': (new Date(json['updatedAt'])),
         'userRoles': ((json['userRoles'] as Array<any>).map(UserRoleBriefDTOFromJSON)),
+        'username': json['username'],
     };
 }
 
@@ -109,10 +109,10 @@ export function UserTableDTOToJSONTyped(value?: UserTableDTO | null, ignoreDiscr
         
         'actorId': value['actorId'],
         'createdAt': value['createdAt'].toISOString(),
-        'email': value['email'],
         'id': value['id'],
         'updatedAt': value['updatedAt'].toISOString(),
         'userRoles': ((value['userRoles'] as Array<any>).map(UserRoleBriefDTOToJSON)),
+        'username': value['username'],
     };
 }
 

@@ -10,6 +10,7 @@ Name | Type
 `actorId` | string
 `branchId` | string
 `createdById` | string
+`recordedAt` | Date
 `source` | string
 `type` | string
 
@@ -23,6 +24,7 @@ const example = {
   "actorId": null,
   "branchId": null,
   "createdById": null,
+  "recordedAt": null,
   "source": null,
   "type": null,
 } satisfies AttendancePostDTO

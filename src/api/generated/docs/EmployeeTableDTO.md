@@ -8,6 +8,7 @@ Format for Employee read
 Name | Type
 ------------ | -------------
 `actorId` | string
+`branches` | [Array&lt;BranchesBriefDTO&gt;](BranchesBriefDTO.md)
 `contactNo` | string
 `firstName` | string
 `id` | string
@@ -15,7 +16,8 @@ Name | Type
 `status` | string
 `suffix` | string
 `surname` | string
-`user` | [UserTableDTO](UserTableDTO.md)
+`userId` | string
+`username` | string
 
 ## Example
 
@@ -25,6 +27,7 @@ import type { EmployeeTableDTO } from ''
 // TODO: Update the object below with actual values
 const example = {
   "actorId": null,
+  "branches": null,
   "contactNo": null,
   "firstName": null,
   "id": null,
@@ -32,7 +35,8 @@ const example = {
   "status": null,
   "suffix": null,
   "surname": null,
-  "user": null,
+  "userId": null,
+  "username": null,
 } satisfies EmployeeTableDTO
 
 console.log(example)

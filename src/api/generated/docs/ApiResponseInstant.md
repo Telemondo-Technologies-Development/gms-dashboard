@@ -1,26 +1,32 @@
 
-# UserPostDTO
+# ApiResponseInstant
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`password` | string
-`roles` | Array&lt;string&gt;
-`username` | string
+`data` | Date
+`errors` | [Array&lt;ApiError&gt;](ApiError.md)
+`message` | string
+`meta` | [PageMetadata](PageMetadata.md)
+`success` | boolean
+`timestamp` | number
 
 ## Example
 
 ```typescript
-import type { UserPostDTO } from ''
+import type { ApiResponseInstant } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "password": null,
-  "roles": null,
-  "username": null,
-} satisfies UserPostDTO
+  "data": null,
+  "errors": null,
+  "message": null,
+  "meta": null,
+  "success": null,
+  "timestamp": null,
+} satisfies ApiResponseInstant
 
 console.log(example)
 
@@ -29,7 +35,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as UserPostDTO
+const exampleParsed = JSON.parse(exampleJSON) as ApiResponseInstant
 console.log(exampleParsed)
 ```
 

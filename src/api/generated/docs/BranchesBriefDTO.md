@@ -1,26 +1,24 @@
 
-# UserPostDTO
+# BranchesBriefDTO
 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`password` | string
-`roles` | Array&lt;string&gt;
-`username` | string
+`id` | string
+`name` | string
 
 ## Example
 
 ```typescript
-import type { UserPostDTO } from ''
+import type { BranchesBriefDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "password": null,
-  "roles": null,
-  "username": null,
-} satisfies UserPostDTO
+  "id": null,
+  "name": null,
+} satisfies BranchesBriefDTO
 
 console.log(example)
 
@@ -29,7 +27,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as UserPostDTO
+const exampleParsed = JSON.parse(exampleJSON) as BranchesBriefDTO
 console.log(exampleParsed)
 ```
 

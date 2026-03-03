@@ -13,13 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
-import type { UserTableDTO } from './UserTableDTO';
+import type { BranchesBriefDTO } from './BranchesBriefDTO';
 import {
-    UserTableDTOFromJSON,
-    UserTableDTOFromJSONTyped,
-    UserTableDTOToJSON,
-    UserTableDTOToJSONTyped,
-} from './UserTableDTO';
+    BranchesBriefDTOFromJSON,
+    BranchesBriefDTOFromJSONTyped,
+    BranchesBriefDTOToJSON,
+    BranchesBriefDTOToJSONTyped,
+} from './BranchesBriefDTO';
 
 /**
  * Format for Employee read
@@ -33,6 +33,12 @@ export interface EmployeeTableDTO {
      * @memberof EmployeeTableDTO
      */
     actorId?: string;
+    /**
+     * 
+     * @type {Array<BranchesBriefDTO>}
+     * @memberof EmployeeTableDTO
+     */
+    branches: Array<BranchesBriefDTO>;
     /**
      * 
      * @type {string}
@@ -77,10 +83,16 @@ export interface EmployeeTableDTO {
     surname: string;
     /**
      * 
-     * @type {UserTableDTO}
+     * @type {string}
      * @memberof EmployeeTableDTO
      */
-    user?: UserTableDTO;
+    userId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof EmployeeTableDTO
+     */
+    username?: string;
 }
 
 
@@ -99,6 +111,7 @@ export type EmployeeTableDTOStatusEnum = typeof EmployeeTableDTOStatusEnum[keyof
  * Check if a given object implements the EmployeeTableDTO interface.
  */
 export function instanceOfEmployeeTableDTO(value: object): value is EmployeeTableDTO {
+    if (!('branches' in value) || value['branches'] === undefined) return false;
     if (!('contactNo' in value) || value['contactNo'] === undefined) return false;
     if (!('firstName' in value) || value['firstName'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
@@ -118,6 +131,7 @@ export function EmployeeTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bo
     return {
         
         'actorId': json['actorId'] == null ? undefined : json['actorId'],
+        'branches': ((json['branches'] as Array<any>).map(BranchesBriefDTOFromJSON)),
         'contactNo': json['contactNo'],
         'firstName': json['firstName'],
         'id': json['id'],
@@ -125,7 +139,8 @@ export function EmployeeTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bo
         'status': json['status'],
         'suffix': json['suffix'] == null ? undefined : json['suffix'],
         'surname': json['surname'],
-        'user': json['user'] == null ? undefined : UserTableDTOFromJSON(json['user']),
+        'userId': json['userId'] == null ? undefined : json['userId'],
+        'username': json['username'] == null ? undefined : json['username'],
     };
 }
 
@@ -141,6 +156,7 @@ export function EmployeeTableDTOToJSONTyped(value?: EmployeeTableDTO | null, ign
     return {
         
         'actorId': value['actorId'],
+        'branches': ((value['branches'] as Array<any>).map(BranchesBriefDTOToJSON)),
         'contactNo': value['contactNo'],
         'firstName': value['firstName'],
         'id': value['id'],
@@ -148,7 +164,8 @@ export function EmployeeTableDTOToJSONTyped(value?: EmployeeTableDTO | null, ign
         'status': value['status'],
         'suffix': value['suffix'],
         'surname': value['surname'],
-        'user': UserTableDTOToJSON(value['user']),
+        'userId': value['userId'],
+        'username': value['username'],
     };
 }
 

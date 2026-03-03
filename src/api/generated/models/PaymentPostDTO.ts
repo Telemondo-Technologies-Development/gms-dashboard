@@ -74,9 +74,13 @@ export interface PaymentPostDTO {
  * @export
  */
 export const PaymentPostDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
-    Undecided: 'UNDECIDED'
+    Full: 'FULL',
+    Partial: 'PARTIAL',
+    Pending: 'PENDING',
+    Missed: 'MISSED',
+    Cancelled: 'CANCELLED',
+    Waiting: 'WAITING',
+    Failed: 'FAILED'
 } as const;
 export type PaymentPostDTOStatusEnum = typeof PaymentPostDTOStatusEnum[keyof typeof PaymentPostDTOStatusEnum];
 

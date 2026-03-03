@@ -111,8 +111,11 @@ export interface InvoiceTableDTO {
  */
 export const InvoiceTableDTOStatusEnum = {
     Draft: 'DRAFT',
+    Pending: 'PENDING',
     Issued: 'ISSUED',
     Paid: 'PAID',
+    Partial: 'PARTIAL',
+    Due: 'DUE',
     Overdue: 'OVERDUE'
 } as const;
 export type InvoiceTableDTOStatusEnum = typeof InvoiceTableDTOStatusEnum[keyof typeof InvoiceTableDTOStatusEnum];

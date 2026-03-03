@@ -68,9 +68,9 @@ export interface MemberPutDTO {
  * @export
  */
 export const MemberPutDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
-    Undecided: 'UNDECIDED'
+    Undecided: 'UNDECIDED',
+    Active: 'ACTIVE',
+    Deactivated: 'DEACTIVATED'
 } as const;
 export type MemberPutDTOStatusEnum = typeof MemberPutDTOStatusEnum[keyof typeof MemberPutDTOStatusEnum];
 

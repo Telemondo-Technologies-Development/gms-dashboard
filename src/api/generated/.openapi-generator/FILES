@@ -10,6 +10,7 @@ apis/BillingCycleApi.ts
 apis/BranchApi.ts
 apis/BranchPersonnelApi.ts
 apis/BranchPersonnelRolesApi.ts
+apis/BranchSummaryApi.ts
 apis/EmployeeApi.ts
 apis/InvoiceApi.ts
 apis/MaintenanceScheduleApi.ts
@@ -44,6 +45,7 @@ docs/ApiResponseBillingCycleTableDTO.md
 docs/ApiResponseBranchPersonnelTableDTO.md
 docs/ApiResponseBranchTableDTO.md
 docs/ApiResponseEmployeeTableDTO.md
+docs/ApiResponseInstant.md
 docs/ApiResponseInvoiceTableDTO.md
 docs/ApiResponseListAssetCategoryTableDTO.md
 docs/ApiResponseListAssetExpenseReadDTO.md
@@ -53,6 +55,7 @@ docs/ApiResponseListAssetTableDTO.md
 docs/ApiResponseListAttendanceTableDTO.md
 docs/ApiResponseListBillingCycleTableDTO.md
 docs/ApiResponseListBranchPersonnelTableDTO.md
+docs/ApiResponseListBranchSummaryTableDTO.md
 docs/ApiResponseListBranchTableDTO.md
 docs/ApiResponseListEmployeeInBranchDTO.md
 docs/ApiResponseListEmployeeTableDTO.md
@@ -143,7 +146,10 @@ docs/BranchPersonnelRolesApi.md
 docs/BranchPersonnelTableDTO.md
 docs/BranchPostDTO.md
 docs/BranchPutDTO.md
+docs/BranchSummaryApi.md
+docs/BranchSummaryTableDTO.md
 docs/BranchTableDTO.md
+docs/BranchesBriefDTO.md
 docs/EmployeeApi.md
 docs/EmployeeInBranchDTO.md
 docs/EmployeePostDTO.md
@@ -257,6 +263,7 @@ models/ApiResponseBillingCycleTableDTO.ts
 models/ApiResponseBranchPersonnelTableDTO.ts
 models/ApiResponseBranchTableDTO.ts
 models/ApiResponseEmployeeTableDTO.ts
+models/ApiResponseInstant.ts
 models/ApiResponseInvoiceTableDTO.ts
 models/ApiResponseListAssetCategoryTableDTO.ts
 models/ApiResponseListAssetExpenseReadDTO.ts
@@ -266,6 +273,7 @@ models/ApiResponseListAssetTableDTO.ts
 models/ApiResponseListAttendanceTableDTO.ts
 models/ApiResponseListBillingCycleTableDTO.ts
 models/ApiResponseListBranchPersonnelTableDTO.ts
+models/ApiResponseListBranchSummaryTableDTO.ts
 models/ApiResponseListBranchTableDTO.ts
 models/ApiResponseListEmployeeInBranchDTO.ts
 models/ApiResponseListEmployeeTableDTO.ts
@@ -345,7 +353,9 @@ models/BranchPersonnelPutDTO.ts
 models/BranchPersonnelTableDTO.ts
 models/BranchPostDTO.ts
 models/BranchPutDTO.ts
+models/BranchSummaryTableDTO.ts
 models/BranchTableDTO.ts
+models/BranchesBriefDTO.ts
 models/EmployeeInBranchDTO.ts
 models/EmployeePostDTO.ts
 models/EmployeePutDTO.ts

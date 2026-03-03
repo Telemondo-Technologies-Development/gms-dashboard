@@ -7,6 +7,7 @@ Format for Attendance update
 
 Name | Type
 ------------ | -------------
+`recordedAt` | Date
 `source` | string
 `type` | string
 `updatedById` | string
@@ -18,6 +19,7 @@ import type { AttendancePutDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "recordedAt": null,
   "source": null,
   "type": null,
   "updatedById": null,

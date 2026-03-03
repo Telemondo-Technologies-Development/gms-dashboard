@@ -176,9 +176,9 @@ export interface ReportTableDTO {
  * @export
  */
 export const ReportTableDTOActorStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
-    Undecided: 'UNDECIDED'
+    Undecided: 'UNDECIDED',
+    Active: 'ACTIVE',
+    Deactivated: 'DEACTIVATED'
 } as const;
 export type ReportTableDTOActorStatusEnum = typeof ReportTableDTOActorStatusEnum[keyof typeof ReportTableDTOActorStatusEnum];
 

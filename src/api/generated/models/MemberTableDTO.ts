@@ -78,6 +78,18 @@ export interface MemberTableDTO {
      * @type {string}
      * @memberof MemberTableDTO
      */
+    profilePictureId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
+    profilePictureUrl: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof MemberTableDTO
+     */
     status: MemberTableDTOStatusEnum;
     /**
      * 
@@ -143,9 +155,9 @@ export type MemberTableDTOCreatedByTypeEnum = typeof MemberTableDTOCreatedByType
  * @export
  */
 export const MemberTableDTOStatusEnum = {
-    In: 'IN',
-    Out: 'OUT',
-    Undecided: 'UNDECIDED'
+    Undecided: 'UNDECIDED',
+    Active: 'ACTIVE',
+    Deactivated: 'DEACTIVATED'
 } as const;
 export type MemberTableDTOStatusEnum = typeof MemberTableDTOStatusEnum[keyof typeof MemberTableDTOStatusEnum];
 
@@ -171,6 +183,7 @@ export type MemberTableDTOUpdatedByTypeEnum = typeof MemberTableDTOUpdatedByType
 export function instanceOfMemberTableDTO(value: object): value is MemberTableDTO {
     if (!('firstName' in value) || value['firstName'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
+    if (!('profilePictureUrl' in value) || value['profilePictureUrl'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
     if (!('surname' in value) || value['surname'] === undefined) return false;
     return true;
@@ -195,6 +208,8 @@ export function MemberTableDTOFromJSONTyped(json: any, ignoreDiscriminator: bool
         'firstName': json['firstName'],
         'id': json['id'],
         'middleName': json['middleName'] == null ? undefined : json['middleName'],
+        'profilePictureId': json['profilePictureId'] == null ? undefined : json['profilePictureId'],
+        'profilePictureUrl': json['profilePictureUrl'],
         'status': json['status'],
         'suffix': json['suffix'] == null ? undefined : json['suffix'],
         'surname': json['surname'],
@@ -226,6 +241,8 @@ export function MemberTableDTOToJSONTyped(value?: MemberTableDTO | null, ignoreD
         'firstName': value['firstName'],
         'id': value['id'],
         'middleName': value['middleName'],
+        'profilePictureId': value['profilePictureId'],
+        'profilePictureUrl': value['profilePictureUrl'],
         'status': value['status'],
         'suffix': value['suffix'],
         'surname': value['surname'],

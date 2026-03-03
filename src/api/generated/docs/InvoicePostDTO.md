@@ -10,10 +10,8 @@ Name | Type
 `actorId` | string
 `createdById` | string
 `dueDate` | Date
-`gracePeriodDate` | Date
 `memberSubscriptionId` | string
 `status` | string
-`subtotal` | number
 `systemGenerated` | boolean
 
 ## Example
@@ -26,10 +24,8 @@ const example = {
   "actorId": null,
   "createdById": null,
   "dueDate": null,
-  "gracePeriodDate": null,
   "memberSubscriptionId": null,
   "status": null,
-  "subtotal": null,
   "systemGenerated": null,
 } satisfies InvoicePostDTO
 

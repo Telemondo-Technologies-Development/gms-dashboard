@@ -57,8 +57,11 @@ export interface InvoicePutDTO {
  */
 export const InvoicePutDTOStatusEnum = {
     Draft: 'DRAFT',
+    Pending: 'PENDING',
     Issued: 'ISSUED',
     Paid: 'PAID',
+    Partial: 'PARTIAL',
+    Due: 'DUE',
     Overdue: 'OVERDUE'
 } as const;
 export type InvoicePutDTOStatusEnum = typeof InvoicePutDTOStatusEnum[keyof typeof InvoicePutDTOStatusEnum];

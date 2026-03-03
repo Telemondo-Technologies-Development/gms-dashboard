@@ -39,6 +39,12 @@ export interface AttendancePostDTO {
     createdById: string;
     /**
      * 
+     * @type {Date}
+     * @memberof AttendancePostDTO
+     */
+    recordedAt: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AttendancePostDTO
      */
@@ -81,6 +87,7 @@ export function instanceOfAttendancePostDTO(value: object): value is AttendanceP
     if (!('actorId' in value) || value['actorId'] === undefined) return false;
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
     if (!('createdById' in value) || value['createdById'] === undefined) return false;
+    if (!('recordedAt' in value) || value['recordedAt'] === undefined) return false;
     if (!('source' in value) || value['source'] === undefined) return false;
     if (!('type' in value) || value['type'] === undefined) return false;
     return true;
@@ -99,6 +106,7 @@ export function AttendancePostDTOFromJSONTyped(json: any, ignoreDiscriminator: b
         'actorId': json['actorId'],
         'branchId': json['branchId'],
         'createdById': json['createdById'],
+        'recordedAt': (new Date(json['recordedAt'])),
         'source': json['source'],
         'type': json['type'],
     };
@@ -118,6 +126,7 @@ export function AttendancePostDTOToJSONTyped(value?: AttendancePostDTO | null, i
         'actorId': value['actorId'],
         'branchId': value['branchId'],
         'createdById': value['createdById'],
+        'recordedAt': value['recordedAt'].toISOString(),
         'source': value['source'],
         'type': value['type'],
     };
