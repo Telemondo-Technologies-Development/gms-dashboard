@@ -1,11 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { format } from 'date-fns'
-import { Search, User, Calendar as CalendarIcon, Eye, Trash2, MoreHorizontal } from 'lucide-react'
+import { Search, User, Calendar as CalendarIcon, Trash2, MoreHorizontal } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import type { AttendanceTableRow, MembershipAddAttendanceProps } from '@/types/membership/MembershipManagementSchema'
 import { useAttendance } from '@/hooks/membership/useMembershipAttendance'
-import { getAttendanceRecordDate, sortAttendanceRowsByDateStack } from '@/types/membership/MembershipAttendanceSchema'
+import { sortAttendanceRowsByDateStack } from '@/types/membership/MembershipAttendanceSchema'
 import { parseCalendarDay, toStartOfDay } from '@/lib/date-utils'
+import { getAuthenticatedApi } from '@/lib/api-client'
+import { AttendanceApi } from '@/api/generated/apis/AttendanceApi'
+import { memberQueryKeys } from '@/lib/QueryKeys'
+import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
@@ -17,13 +23,38 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 
 
 export default function MembershipAddAttendance({ members }: MembershipAddAttendanceProps) {
-	const [searchInput, setSearchInput] = useState('')
-	const [submittedQuery, setSubmittedQuery] = useState('')
+	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedDay, setSelectedDay] = useState(() => format(new Date(), 'yyyy-MM-dd'))
 	const [pageIndex, setPageIndex] = useState(0)
+	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+	const [recordToDelete, setRecordToDelete] = useState<AttendanceTableRow | null>(null)
 	const PAGE_SIZE = 6
 
 	const attendanceQuery = useAttendance()
+	const queryClient = useQueryClient()
+
+	const deleteAttendanceMutation = useMutation({
+		mutationFn: async (id: string) => {
+			const api = getAuthenticatedApi(AttendanceApi)
+			const response = await api.deleteAttendance({ id })
+			if (!response.success) {
+				throw new Error(response.message ?? 'Failed to delete attendance record.')
+			}
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: [memberQueryKeys.attendances] })
+			toast.success('Attendance record deleted.')
+			setRecordToDelete(null)
+		},
+		onError: (error) => {
+			toast.error(error instanceof Error ? error.message : 'Failed to delete attendance record.')
+		},
+	})
+
+	const handleDeleteClick = useCallback((record: AttendanceTableRow) => {
+		setRecordToDelete(record)
+		setDeleteConfirmOpen(true)
+	}, [])
 
 	const memberByActorId = useMemo(() => {
 		const map = new Map<string, { name: string; membershipType: string }>()
@@ -40,19 +71,11 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 
 	const attendedRows = useMemo<AttendanceTableRow[]>(() => {
 		const records = (attendanceQuery.data ?? []).filter((record) => record.type === 'IN')
-		const uniqueByActorId = new Map<string, (typeof records)[number]>()
 
-		for (const record of records) {
-			const key = record.actorId ?? record.id
-			if (!uniqueByActorId.has(key)) {
-				uniqueByActorId.set(key, record)
-			}
-		}
-
-		return Array.from(uniqueByActorId.values()).map((record) => {
+		return records.map((record) => {
 			const actorId = record.actorId ?? ''
 			const member = memberByActorId.get(actorId)
-			const attendanceDate = getAttendanceRecordDate(record)
+			const recordedAt = record.recordedAt instanceof Date ? record.recordedAt : null
 
 			return {
 				id: record.id,
@@ -61,21 +84,22 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 				membershipType: member?.membershipType ?? 'Member',
 				source: record.source,
 				status: record.type,
-				attendanceDate,
+				recordedAt,
+				attendanceDate: recordedAt,
 			}
 		})
 	}, [attendanceQuery.data, memberByActorId])
 
 	const filteredRows = useMemo(() => {
-		const searchedRows = !submittedQuery
+		const searchedRows = !searchQuery
 			? attendedRows
 			: attendedRows.filter(
 				(record) =>
-					record.memberName.toLowerCase().includes(submittedQuery.toLowerCase()) ||
-					record.membershipType.toLowerCase().includes(submittedQuery.toLowerCase()) ||
-					record.actorId.toLowerCase().includes(submittedQuery.toLowerCase()) ||
-					record.source.toLowerCase().includes(submittedQuery.toLowerCase()) ||
-					record.status.toLowerCase().includes(submittedQuery.toLowerCase()),
+					record.memberName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+					record.membershipType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+					record.actorId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+					record.source.toLowerCase().includes(searchQuery.toLowerCase()) ||
+					record.status.toLowerCase().includes(searchQuery.toLowerCase()),
 			)
 
 		if (!selectedDay) {
@@ -98,13 +122,7 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 		})
 
 		return sortAttendanceRowsByDateStack(dayRows)
-	}, [attendedRows, selectedDay, submittedQuery])
-
-	const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault()
-		setSubmittedQuery(searchInput.trim())
-		setPageIndex(0)
-	}
+	}, [attendedRows, selectedDay, searchQuery])
 
 	const pageCount = Math.ceil(filteredRows.length / PAGE_SIZE)
 	const pageItems = filteredRows.slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE)
@@ -127,16 +145,18 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 			<div className="flex-1 min-h-0 overflow-auto">
 				<CardContent className="p-0">
 					<div className="p-4 border-b bg-muted/5 flex flex-col md:flex-row items-stretch md:items-center gap-3">
-						<form className="relative w-full md:max-w-sm" onSubmit={handleSearchSubmit}>
-							<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
-							<Input
-								placeholder="Search attended member..."
-								value={searchInput}
-								onChange={(event) => setSearchInput(event.target.value)}
-								className="pl-9 h-10 w-full bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
-							/>
-							<button type="submit" className="hidden">Search</button>
-						</form>
+					<div className="relative w-full md:max-w-sm">
+						<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-focus-within:text-foreground" />
+						<Input
+							placeholder="Search attended member..."
+							value={searchQuery}
+							onChange={(event) => {
+								setSearchQuery(event.target.value)
+								setPageIndex(0)
+							}}
+							className="pl-9 h-10 w-full bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-offset-0"
+						/>
+					</div>
 						<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto md:ml-auto">
 							<Popover>
 								<PopoverTrigger asChild>
@@ -198,8 +218,7 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 								<TableHeader className="bg-muted/30">
 									<TableRow className="hover:bg-transparent border-b border-muted/60">
 										<TableHead className="w-[28%] pl-6">Member</TableHead>
-										<TableHead className="w-[16%]">Date</TableHead>
-										<TableHead className="w-[14%]">Time</TableHead>
+										<TableHead className="w-[16%]">Date & Time</TableHead>
 										<TableHead className="w-[16%]">Source</TableHead>
 										<TableHead className="w-[14%] text-right">Status</TableHead>
 										<TableHead className="w-[12%] pr-6 text-right">Actions</TableHead>
@@ -216,16 +235,15 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 													</div>
 												</div>
 											</TableCell>
-											<TableCell className="py-4 align-top">
+											<TableCell className="py-4 align-top flex flex-col gap-1">
 												<span className="text-sm text-muted-foreground">
 													{record.attendanceDate ? format(record.attendanceDate, 'MMM d, yyyy') : '—'}
 												</span>
-											</TableCell>
-											<TableCell className="py-4 align-top">
 												<span className="text-sm font-medium">
 													{record.attendanceDate ? format(record.attendanceDate, 'hh:mm a') : '—'}
 												</span>
 											</TableCell>
+
 											<TableCell className="py-4 align-top">
 												<Badge variant="outline" className="text-muted-foreground">{record.source}</Badge>
 											</TableCell>
@@ -242,12 +260,12 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 													</DropdownMenuTrigger>
 													<DropdownMenuContent align="end">
 														<DropdownMenuLabel>Actions</DropdownMenuLabel>
-														<DropdownMenuItem className="cursor-pointer" onClick={() => console.log('View', record.id)}>
-															<Eye className="mr-2 h-4 w-4" />
-															View Details
-														</DropdownMenuItem>
 														<DropdownMenuSeparator />
-														<DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => console.log('Delete', record.id)}>
+														<DropdownMenuItem
+															className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+															disabled={deleteAttendanceMutation.isPending}
+															onClick={() => handleDeleteClick(record)}
+														>
 															<Trash2 className="mr-2 h-4 w-4" />
 															Delete Record
 														</DropdownMenuItem>
@@ -304,7 +322,21 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 					)}
 				</CardContent>
 			</div>
-		</Card>
+
+		<DeleteAdminConfirmDialog
+			open={deleteConfirmOpen}
+			onOpenChange={setDeleteConfirmOpen}
+			onConfirm={async () => {
+				if (recordToDelete?.id) {
+					await deleteAttendanceMutation.mutateAsync(recordToDelete.id)
+				}
+			}}
+			title={`Delete Attendance: ${recordToDelete?.memberName ?? ''}`}
+			description={`Are you sure you want to delete the attendance record for ${recordToDelete?.memberName ?? 'this member'}${
+				recordToDelete?.recordedAt ? ` recorded at ${format(recordToDelete.recordedAt, 'MMM d, yyyy hh:mm a')}` : ''
+			}?`}
+			confirmText="Delete Record"
+		/>
+	</Card>
 	)
 }
-

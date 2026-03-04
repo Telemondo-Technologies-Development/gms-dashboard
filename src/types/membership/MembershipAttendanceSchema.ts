@@ -5,6 +5,7 @@ import { parseDateInput } from '@/lib/date-utils'
 
 const attendanceDateCandidateSchema = z
   .object({
+    recordedAt: z.unknown().optional(),
     createdAt: z.unknown().optional(),
     updatedAt: z.unknown().optional(),
     timestamp: z.unknown().optional(),
@@ -20,6 +21,7 @@ export function getAttendanceRecordDate(value: unknown): Date | null {
   }
 
   const candidate =
+    parsed.data.recordedAt ??
     parsed.data.createdAt ??
     parsed.data.updatedAt ??
     parsed.data.timestamp ??
