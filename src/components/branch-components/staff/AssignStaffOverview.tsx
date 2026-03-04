@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { AssignedStaffView } from './AssignStaffView';
+import { AssignPersonnelDialog } from './AssignPersonnelDialog'; 
 
 interface AssignStaffOverviewProps {
   branches: any[];
@@ -16,6 +17,7 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
   branches, 
   defaultBranchId 
 }) => {
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [selectedBranchId, setSelectedBranchId] = useState(defaultBranchId || branches[0]?.id || '');
   const [branchSearch, setBranchSearch] = useState('');
 
@@ -61,6 +63,7 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
             onBranchChange={setSelectedBranchId}
           />
         </div>
+
         <div className="w-full xl:w-[33%] space-y-6">
           <Card className="p-6 border-zinc-200 shadow-sm bg-white rounded-2xl h-fit">
             <div className="flex items-center justify-between mb-6">
@@ -70,9 +73,9 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
             
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
-              <Input 
+              <input 
                 placeholder="Find location..." 
-                className="pl-9 h-11 text-xs bg-zinc-50 border-zinc-100 rounded-xl"
+                className="flex h-11 w-full rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2 text-xs pl-9 outline-none focus:ring-1 focus:ring-zinc-200"
                 value={branchSearch}
                 onChange={(e) => setBranchSearch(e.target.value)}
               />
@@ -107,12 +110,16 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
             </ScrollArea>
             
             <div className="grid grid-cols-1 gap-2 mt-6">
-              <Button className="w-full h-12 bg-[#0062cc] hover:bg-[#0056b3] text-white rounded-xl font-bold text-xs uppercase tracking-widest gap-2">
+              <Button 
+                onClick={() => setIsAssignDialogOpen(true)}
+                className="w-full h-12 bg-[#0062cc] hover:bg-[#0056b3] text-white rounded-xl font-bold text-xs uppercase tracking-widest gap-2"
+              >
                 <PlusCircle size={16} />
                 Assign New Personnel
               </Button>
             </div>
           </Card>
+
           {currentBranch && (
             <Card className="p-6 border-zinc-200 bg-white rounded-2xl shadow-sm border-l-4 border-l-[#0062cc]">
                <h4 className="text-[10px] font-black uppercase text-zinc-400 tracking-widest mb-3">Location Details</h4>
@@ -124,7 +131,7 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
                  <div className="flex items-center gap-3">
                    <Users className="h-4 w-4 text-zinc-400 shrink-0" />
                    <p className="text-xs font-bold text-zinc-700 uppercase">
-                     Operational: <span className="text-emerald-600">{currentBranch.status}</span>
+                     Operational: <span className="text-emerald-600 font-black">{currentBranch.status}</span>
                    </p>
                  </div>
                </div>
@@ -132,6 +139,14 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
           )}
         </div>
       </div>
+      <AssignPersonnelDialog 
+        open={isAssignDialogOpen} 
+        onOpenChange={setIsAssignDialogOpen}
+        branches={branches}
+        onSuccess={() => {
+          setIsAssignDialogOpen(false);
+        }}
+      />
     </div>
   );
 };

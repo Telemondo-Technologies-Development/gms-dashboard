@@ -124,8 +124,6 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
               </Button>
           </div>
         </div>
-
-        {/* Table Section */}
         <div className="relative w-full overflow-auto">
           <Table className="w-full table-fixed">
             <TableHeader className="bg-muted/30">
