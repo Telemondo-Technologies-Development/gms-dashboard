@@ -2,10 +2,12 @@ import { useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { AttendanceApi } from '@/api/generated/apis/AttendanceApi'
-import type { AttendanceTableDTO } from '@/api/generated/models/AttendanceTableDTO'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 import { getAuthenticatedApi } from '@/lib/api-client'
-import { apiResponseListAttendanceTableSchema } from '@/types/membership/MembershipManagementSchema'
+import {
+  apiResponseListAttendanceTableSchema,
+  type AttendanceTableData,
+} from '@/types/membership/MembershipManagementSchema'
 
 export function useAttendance(enabled = true) {
   const attendanceApi = getAuthenticatedApi(AttendanceApi)
@@ -27,10 +29,10 @@ export function useAttendance(enabled = true) {
       throw new Error(parsed.data.message ?? 'Failed to fetch attendance records.')
     }
 
-    return parsed.data.data as AttendanceTableDTO[]
+    return parsed.data.data
   }, [attendanceApi])
 
-  return useQuery<AttendanceTableDTO[]>({
+  return useQuery<AttendanceTableData[]>({
     queryKey: [memberQueryKeys.attendances],
     enabled,
     queryFn,

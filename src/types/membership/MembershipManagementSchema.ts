@@ -276,5 +276,6 @@ export interface AttendanceTableRow {
   membershipType: string
   source: string
   status: string
+  recordedAt?: Date | null
   attendanceDate?: Date | null
 }

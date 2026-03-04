@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 
 import { useMembersData } from '@/hooks/membership/useMembership'
 import { useAttendanceEligibility } from '@/hooks/membership/useMembershipAttendanceEligibility'
+import { useAttendance } from '@/hooks/membership/useMembershipAttendance'
 import { parseCalendarDay, toStartOfDay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import { AddMemberDialog } from '@/components/membership-components/MembershipAddFormDialog'
@@ -61,10 +62,59 @@ function MembersTable({ onSelectMember }: Props) {
   const PAGE_SIZE = 5
 
   const { enrichedMembers, isFetching, error, refetchAll } = useMembersData()
+  const attendanceQuery = useAttendance()
   const session = useAuthSession()
   const selectedBranchId = useSelectedBranchId()
   const queryClient = useQueryClient()
   const { getAttendanceEligibility } = useAttendanceEligibility()
+
+  const todayAttendedActorIds = useMemo(() => {
+    const today = toStartOfDay(new Date()).getTime()
+    const ids = new Set<string>()
+
+    for (const record of attendanceQuery.data ?? []) {
+      if (record.type !== 'IN' || !record.actorId || !record.recordedAt) continue
+      const recordedDay = toStartOfDay(new Date(record.recordedAt)).getTime()
+      if (recordedDay === today) {
+        ids.add(record.actorId)
+      }
+    }
+
+    return ids
+  }, [attendanceQuery.data])
+
+  // Derive membership status from subscription dates — single source of truth
+  // used by both the badge renderer and the attendance eligibility gate
+  const getMembershipStatus = useCallback((startDate: Date | undefined, endDate: Date | undefined) => {
+    if (!startDate) return 'INACTIVE' as const
+
+    const today = new Date()
+    if (!endDate) {
+      return startDate <= today ? ('ONGOING' as const) : ('PENDING' as const)
+    }
+
+    const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    if (daysUntilExpiry < 0) return 'EXPIRED' as const
+    if (daysUntilExpiry <= 3) return 'EXPIRING_SOON' as const
+    if (daysUntilExpiry <= 7) return 'ENDING_SOON' as const
+    return 'ACTIVE' as const
+  }, [])
+
+  const getEffectiveAttendanceEligibility = useCallback(
+    (memberGroup: MemberFormData) => {
+      // Uses the proven toStartOfDay-normalised eligibility hook as the primary gate
+      const base = getAttendanceEligibility(memberGroup)
+      if (!base.isEligible) return base
+
+      // Secondary gate: already attended today
+      if (memberGroup.actorId && todayAttendedActorIds.has(memberGroup.actorId)) {
+        return { isEligible: false, reason: 'Attendance already recorded for this member today.' }
+      }
+
+      return base
+    },
+    [getAttendanceEligibility, todayAttendedActorIds],
+  )
 
   const deleteMemberMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -78,7 +128,7 @@ function MembersTable({ onSelectMember }: Props) {
 
   const addAttendanceMutation = useMutation({
     mutationFn: async (memberGroup: MemberFormData) => {
-      const eligibility = getAttendanceEligibility(memberGroup)
+      const eligibility = getEffectiveAttendanceEligibility(memberGroup)
       if (!eligibility.isEligible) {
         throw new Error(eligibility.reason ?? 'Cannot add attendance for this member.')
       }
@@ -108,7 +158,11 @@ function MembersTable({ onSelectMember }: Props) {
           type: AttendancePostDTOTypeEnum.In,
         },
       })
-      console.log(response.success)
+
+      const firstApiError = response.errors?.[0]?.description?.trim()
+      if (firstApiError) {
+        throw new Error(firstApiError)
+      }
 
       if (!response.success) {
         throw new Error(response.message ?? 'Failed to add attendance.')
@@ -191,22 +245,21 @@ function MembersTable({ onSelectMember }: Props) {
     }
   }, [pageCount, pageIndex])
 
-  // Memoize badge function
-  const getMembershipStatusBadge = useCallback((endDate: Date | undefined) => {
-    if (!endDate) return <Badge variant="destructive">Expired</Badge>
-
-    const today = new Date()
-    const daysUntilExpiry = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-
-    if (daysUntilExpiry < 0) {
-      return <Badge variant="destructive">Expired</Badge>
-    } else if (daysUntilExpiry <= 3) {
-      return <Badge className="bg-red-500 hover:bg-red-600">Expiring Soon</Badge>
-    } else if (daysUntilExpiry <= 7) {
-      return <Badge className="bg-orange-500 hover:bg-orange-600">Ending Soon</Badge>
+  // No subscription at all → Inactive
+  // startDate only (no endDate) → Active continuous billing, no expiry
+  // startDate + endDate → time-bounded; check expiry window
+  const getMembershipStatusBadge = useCallback((startDate: Date | undefined, endDate: Date | undefined) => {
+    const status = getMembershipStatus(startDate, endDate)
+    switch (status) {
+      case 'INACTIVE':  return <Badge variant="destructive" className="">Inactive</Badge>
+      case 'PENDING':   return <Badge variant="secondary" className="text-muted-foreground">Pending</Badge>
+      case 'ONGOING':   return <Badge className="bg-blue-500 hover:bg-blue-600">Active (Ongoing)</Badge>
+      case 'ACTIVE':    return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>
+      case 'ENDING_SOON':   return <Badge className="bg-orange-500 hover:bg-orange-600">Ending Soon</Badge>
+      case 'EXPIRING_SOON': return <Badge className="bg-red-500 hover:bg-red-600">Expiring Soon</Badge>
+      case 'EXPIRED':   return <Badge variant="destructive">Expired</Badge>
     }
-    return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>
-  }, [])
+  }, [getMembershipStatus])
 
   return (
     <Card className="flex flex-col shadow-md border-muted/40 max-h-[88vh]">
@@ -335,7 +388,7 @@ function MembersTable({ onSelectMember }: Props) {
                 <TableBody>
                   {pageItems.map((memberGroup) => {
                     const mainMember = memberGroup.members[0]
-                    const attendanceEligibility = getAttendanceEligibility(memberGroup)
+                    const attendanceEligibility = getEffectiveAttendanceEligibility(memberGroup)
                     
                     return (
                       <TableRow
@@ -387,7 +440,7 @@ function MembersTable({ onSelectMember }: Props) {
                               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                 <CreditCard className="h-3.5 w-3.5 opacity-70" />
                                 <span>
-                                  {memberGroup.billingAmount ? `?${memberGroup.billingAmount}` : '�'}
+                                  {memberGroup.billingAmount ? `${memberGroup.billingAmount}` : '�'}
                                   {memberGroup.billingCycle ? ` / ${memberGroup.billingCycle}` : ''}
                                 </span>
                               </div>
@@ -416,7 +469,7 @@ function MembersTable({ onSelectMember }: Props) {
                         </TableCell>
 
                         <TableCell className="py-4 align-top text-left">
-                          {getMembershipStatusBadge(memberGroup.endDate)}
+                          {getMembershipStatusBadge(memberGroup.startDate, memberGroup.endDate)}
                         </TableCell>
 
                         <TableCell className="py-4 align-top text-right pr-6">

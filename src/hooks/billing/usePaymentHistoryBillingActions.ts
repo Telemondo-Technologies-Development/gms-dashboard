@@ -31,21 +31,22 @@ export function useBillingActions() {
         return existingInvoice.id
       }
 
-      // Due date = startDate + 1 billing cycle (e.g. +1 week for WEEKLY x1)
-      // This is when the member owes their NEXT payment.
+      // Due date = startDate + 1 billing cycle (e.g. +1 month for MONTHLY x1).
+      // For ongoing subscriptions (no endDate) this is still calculated the same way —
+      // the member simply renews indefinitely each billing cycle.
       const dueDate = calculateNextDueDate(input.startDate, input.intervals, input.intervalCount)
 
-      // gracePeriodDate is informational only — not sent to the API (not in InvoicePostDTO).
-      // You can store it client-side for display if needed:
-      // const gracePeriodDate = addDays(dueDate, input.gracePeriodDays)
+      // gracePeriodDate is computed server-side from dueDate + gracePeriodDays.
+      // We do not send it in the POST — the backend derives and stores it.
 
+      // Use DRAFT as the initial status; backend can transition to ISSUED/PENDING.
       const createInvoiceResp = await invoiceApi.createInvoice({
         invoicePostDTO: {
           actorId: input.actorId,
           createdById: input.createdById,
           dueDate,
           memberSubscriptionId: input.memberSubscriptionId,
-          status: 'ISSUED',
+          status: 'DRAFT',
           systemGenerated: true,
         },
       })

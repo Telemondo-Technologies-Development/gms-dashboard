@@ -9,6 +9,8 @@ export interface EnsureInvoiceInput {
   subscriptionAvailedId: string
   /** Enrollment start date — used to derive the first invoice due date */
   startDate: Date
+  /** Optional end date — undefined means ongoing (continuous billing, no expiry) */
+  endDate?: Date
   /** Billing interval unit from the subscription (DAILY/WEEKLY/MONTHLY/YEARLY) */
   intervals: BillingInterval
   /** How many interval units make one billing cycle (e.g. 2 for bi-weekly) */
@@ -163,8 +165,9 @@ export const invoiceTableDTOSchema = z.object({
 	actorId: z.string().optional(),
 	branchId: z.string().optional(),
 	createdById: z.string(),
-	dueDate: coerceDate,
-	gracePeriodDate: coerceDate,
+	// dueDate and gracePeriodDate are server-computed; they can be null for ongoing subscriptions
+	dueDate: coerceDate.nullable(),
+	gracePeriodDate: coerceDate.nullable(),
 	id: z.string(),
 	issuedAt: coerceDate,
 	memberSubscriptionId: z.string().optional(),
