@@ -253,8 +253,7 @@ function MembersTable({ onSelectMember }: Props) {
     switch (status) {
       case 'INACTIVE':  return <Badge variant="destructive" className="">Inactive</Badge>
       case 'PENDING':   return <Badge variant="secondary" className="text-muted-foreground">Pending</Badge>
-      case 'ONGOING':   return <Badge className="bg-blue-500 hover:bg-blue-600">Active (Ongoing)</Badge>
-      case 'ACTIVE':    return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>
+      case 'ACTIVE': case 'ONGOING' :  return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>
       case 'ENDING_SOON':   return <Badge className="bg-orange-500 hover:bg-orange-600">Ending Soon</Badge>
       case 'EXPIRING_SOON': return <Badge className="bg-red-500 hover:bg-red-600">Expiring Soon</Badge>
       case 'EXPIRED':   return <Badge variant="destructive">Expired</Badge>
