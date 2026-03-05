@@ -1,3 +1,10 @@
+// Mirrors types/membership/memberSchemas.ts:
+// domain/API types, UI form state, and dialog prop types all live here.
+
+// ---------------------------------------------------------------------------
+// Domain / API types — discriminated union consumed by useExpenses hooks
+// ---------------------------------------------------------------------------
+
 interface ExpenseFormBase {
   id: string
   actorId: string
@@ -5,6 +12,7 @@ interface ExpenseFormBase {
   branch: string
   amount: string
   paidAt: Date
+  remarks?: string
   receipt: File | null
   objectIds?: Set<string>
 }
@@ -50,13 +58,15 @@ export type ExpenseFormData =
   | SuppliesExpenseFormData
   | OtherExpenseFormData
 
-
+// Distributed Omit — preserves the discriminated union after removing fields.
 type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never
 
 export type ExpenseCreateForm = DistributiveOmit<ExpenseFormData, 'id' | 'receipt'>
 export type ExpenseUpdateForm = DistributiveOmit<ExpenseFormData, 'receipt'>
 
-
+// ---------------------------------------------------------------------------
+// Legacy flat row — consumed by chart and table components
+// ---------------------------------------------------------------------------
 export interface LegacyExpenseRow {
   id: string
   type: string
@@ -71,19 +81,22 @@ export interface LegacyExpenseRow {
   salaryType?: string
 }
 
-
+// ---------------------------------------------------------------------------
+// UI form state — mirrors MemberFormValues / MemberFormData in memberSchemas.ts.
+// Used by useExpenseForm and useExpenseEdit hooks.
+// ---------------------------------------------------------------------------
 
 export interface AddExpenseFormData {
   type: string
   name: string
   amount: string
   branch: string
-
-  paymentMethod: string
-  category: string
+  remarks: string
   description: string
-  salaryType: string
-
+  /** ID from PaymentMethodTableDTO — resolved to a display name inline in the component */
+  paymentMethod: string
+  // type-specific optional fields
+  salaryType?: string
   assetId?: string
   assetMaintenanceId?: string
   utilityTypeId?: string
@@ -96,10 +109,10 @@ export const DEFAULT_ADD_FORM: AddExpenseFormData = {
   type: '',
   name: '',
   amount: '',
-  branch: '',           
-  paymentMethod: '',
-  category: 'operational',
+  branch: '',           // populated at runtime from BRANCHES[0]
+  remarks: '',
   description: '',
+  paymentMethod: '',
   salaryType: '',
 }
 
@@ -108,7 +121,9 @@ export interface EditExpenseFormData {
   name: string
   amount: string
   branch: string
+
   paymentMethod: string
+  remarks: string
   description: string
   salaryType: string
 }
@@ -119,6 +134,7 @@ export const DEFAULT_EDIT_FORM: EditExpenseFormData = {
   amount: '',
   branch: '',
   paymentMethod: '',
+  remarks: '',
   description: '',
   salaryType: '',
 }

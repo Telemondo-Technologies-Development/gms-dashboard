@@ -8,7 +8,7 @@ import { BRANCHES } from '@/lib/expense/expense-constants'
 
 export type { AddExpenseFormData }
 
-// Explicit return-type interfaces
+// ── useExpenseForm (Add dialog) ───────────────────────────────────────────────
 
 export interface UseExpenseFormResult {
   formData: AddExpenseFormData
@@ -20,77 +20,83 @@ export interface UseExpenseFormResult {
   resetForm: () => void
 }
 
-export interface UseExpenseEditResult {
-  // Individual fields
-  type: string;          setType: (v: string) => void
-  name: string;          setName: (v: string) => void
-  amount: string;        setAmount: (v: string) => void
-  branch: string;        setBranch: (v: string) => void
-  paymentMethod: string; setPaymentMethod: (v: string) => void
-  description: string;   setDescription: (v: string) => void
-  salaryType: string;    setSalaryType: (v: string) => void
-  date: Date | undefined; setDate: (v: Date | undefined) => void
-  receipt: File | null;   setReceipt: (v: File | null) => void
-  loadExpense: (row: LegacyExpenseRow) => void
-}
-
-// useExpenseForm - state for the Add Expense dialog
-export function useExpenseForm(): UseExpenseFormResult {
+export function useExpenseForm(activeBranch = ''): UseExpenseFormResult {
+  const initialBranch = activeBranch || BRANCHES[0] || ''
   const [formData, setFormData] = useState<AddExpenseFormData>({
     ...DEFAULT_ADD_FORM,
-    branch: BRANCHES[0] ?? '',
+    branch: initialBranch,
   })
-  const [date, setDate]       = useState<Date | undefined>(new Date())
+  const [date,    setDate]    = useState<Date | undefined>(new Date())
   const [receipt, setReceipt] = useState<File | null>(null)
 
+  // Keep branch in sync when activeBranch changes (e.g. branch selector)
+  // Only update if the branch actually changed to avoid re-render loops
+  useEffect(() => {
+    if (activeBranch) {
+      setFormData((prev) =>
+        prev.branch === activeBranch ? prev : { ...prev, branch: activeBranch },
+      )
+    }
+  }, [activeBranch])
+
   const resetForm = useCallback(() => {
-    setFormData({ ...DEFAULT_ADD_FORM, branch: BRANCHES[0] ?? '' })
+    setFormData({ ...DEFAULT_ADD_FORM, branch: activeBranch || BRANCHES[0] || '' })
     setDate(new Date())
     setReceipt(null)
-  }, [])
+  }, [activeBranch])
 
   return { formData, setFormData, date, setDate, receipt, setReceipt, resetForm }
 }
 
+// ── useExpenseEdit (Details/Edit dialog) ──────────────────────────────────────
+// Same shape as useExpenseForm so both dialogs accept identical props.
+
+export interface UseExpenseEditResult {
+  formData: AddExpenseFormData
+  setFormData: React.Dispatch<React.SetStateAction<AddExpenseFormData>>
+  date: Date | undefined
+  setDate: (v: Date | undefined) => void
+  receipt: File | null
+  setReceipt: (v: File | null) => void
+  loadExpense: (row: LegacyExpenseRow) => void
+}
 
 export function useExpenseEdit(expense: LegacyExpenseRow | null): UseExpenseEditResult {
-  const [type,          setType]          = useState('')
-  const [name,          setName]          = useState('')
-  const [amount,        setAmount]        = useState('')
-  const [branch,        setBranch]        = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('')
-  const [description,   setDescription]  = useState('')
-  const [salaryType,    setSalaryType]    = useState('')
-  const [date,          setDate]          = useState<Date | undefined>(undefined)
-  const [receipt,       setReceipt]       = useState<File | null>(null)
+  const [formData, setFormData] = useState<AddExpenseFormData>({
+    ...DEFAULT_ADD_FORM,
+    branch: BRANCHES[0] ?? '',
+  })
+  const [date,    setDate]    = useState<Date | undefined>(undefined)
+  const [receipt, setReceipt] = useState<File | null>(null)
 
   const loadExpense = useCallback((row: LegacyExpenseRow) => {
-    setType(row.type)
-    setName(row.name)
-    setAmount(row.amount)
-    setBranch(row.branch)
-    setPaymentMethod(row.paymentMethod)
-    setDescription(row.description)
-    setSalaryType(row.salaryType ?? '')
+    setFormData((prev) => ({
+      ...prev,
+      type:          row.type,
+      branch:        row.branch,
+      amount:        row.amount,
+      paymentMethod: row.paymentMethod ?? '',
+      salaryType:    row.salaryType    ?? '',
+      remarks:       row.description   ?? '',
+      // clear type-specific fields so stale values don't carry over
+      assetId:            undefined,
+      assetMaintenanceId: undefined,
+      utilityTypeId:      undefined,
+      meter:              undefined,
+      suppliesLogId:      undefined,
+      otherExpenseTypeId: undefined,
+    }))
     setDate(row.date)
     setReceipt(row.receipt)
   }, [])
 
-
+  // Use expense.id as the dep — toLegacyRow creates a new object every render
+  // so depending on `expense` directly would fire the effect on every render
+  const expenseId = expense?.id ?? null
   useEffect(() => {
     if (expense) loadExpense(expense)
-  }, [expense, loadExpense])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expenseId, loadExpense])
 
-  return {
-    type, setType,
-    name, setName,
-    amount, setAmount,
-    branch, setBranch,
-    paymentMethod, setPaymentMethod,
-    description, setDescription,
-    salaryType, setSalaryType,
-    date, setDate,
-    receipt, setReceipt,
-    loadExpense,
-  }
+  return { formData, setFormData, date, setDate, receipt, setReceipt, loadExpense }
 }

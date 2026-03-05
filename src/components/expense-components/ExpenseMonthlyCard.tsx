@@ -20,7 +20,7 @@ export function MonthlySpendingChart({ expenses, branch }: MonthlySpendingChartP
     }
 
     expenses
-      .filter((e) => e.branch === branch)
+      .filter((e) => branch === 'all' || e.branch === branch)
       .forEach((e) => {
         const key = new Date(e.date).toLocaleString('en-US', { month: 'short', year: 'numeric' })
         if (key in map) map[key] += parseFloat(e.amount)

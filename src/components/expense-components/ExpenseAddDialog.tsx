@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,17 +46,43 @@ interface AddExpenseDialogProps {
   isPending?: boolean
 }
 
-// Per-type linked-record pickers
-function AssetPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+// ── Searchable pickers ────────────────────────────────────────────────────────
+
+function SearchableAssetPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const { data = [], isLoading } = useAssetOptions(true)
+  const [search, setSearch] = useState('')
   if (isLoading) return <Skeleton className="h-9 w-full" />
+  const filtered = data.filter((a) =>
+    a.label.toLowerCase().includes(search.toLowerCase()) ||
+    a.id.toLowerCase().includes(search.toLowerCase())
+  )
+  const selected = data.find((a) => a.id === value)
   return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger><SelectValue placeholder="Select asset" /></SelectTrigger>
-      <SelectContent>
-        {data.map((a) => <SelectItem key={a.id} value={a.id}>{a.label}</SelectItem>)}
-      </SelectContent>
-    </Select>
+    <div className="space-y-2">
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger><SelectValue placeholder="Select asset" /></SelectTrigger>
+        <SelectContent>
+          <div className="px-2 pb-1 pt-0.5">
+            <Input
+              placeholder="Search assets..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-8 text-sm"
+              onKeyDown={(e) => e.stopPropagation()}
+            />
+          </div>
+          {filtered.length === 0 && (
+            <div className="px-2 py-3 text-sm text-muted-foreground text-center">No assets found</div>
+          )}
+          {filtered.map((a) => (
+            <SelectItem key={a.id} value={a.id}>{a.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {selected && (
+        <p className="text-xs text-muted-foreground font-mono">ID: {selected.id}</p>
+      )}
+    </div>
   )
 }
 
@@ -86,7 +112,8 @@ function SuppliesLogPicker({ value, onChange }: { value: string; onChange: (v: s
   )
 }
 
-// Type-specific extra fields
+// ── Type-specific extra fields ────────────────────────────────────────────────
+
 function TypeExtraFields({
   type, formData, set,
 }: {
@@ -99,7 +126,7 @@ function TypeExtraFields({
       return (
         <div className="space-y-2">
           <Label>Asset *</Label>
-          <AssetPicker
+          <SearchableAssetPicker
             value={formData.assetId ?? ''}
             onChange={(v) => set({ assetId: v })}
           />
@@ -180,7 +207,8 @@ function TypeExtraFields({
   }
 }
 
-// Main dialog
+// ── Main dialog ───────────────────────────────────────────────────────────────
+
 export function AddExpenseDialog({
   open, onOpenChange,
   formData, setFormData,
@@ -193,30 +221,18 @@ export function AddExpenseDialog({
   const set = (patch: Partial<AddExpenseFormData>) =>
     setFormData((prev) => ({ ...prev, ...patch }))
 
-  // Validation helpers
   const isFormValid = useMemo(() => {
-    if (!date || !formData.type || !formData.amount || !formData.branch) {
-      return false
-    }
-    
-    // Type-specific validation
+    if (!date || !formData.type || !formData.amount || !formData.branch) return false
     switch (formData.type) {
-      case 'asset':
-        return !!formData.assetId
-      case 'asset-maintenance':
-        return !!formData.assetMaintenanceId
-      case 'salary':
-        return true // salaryType has default
-      case 'utility':
-        return !!formData.utilityTypeId && !!formData.meter
-      case 'supplies':
-        return !!formData.suppliesLogId
-      case 'other':
-        return !!formData.otherExpenseTypeId
-      default:
-        return false
+      case 'asset':             return !!formData.assetId
+      case 'asset-maintenance': return !!formData.assetMaintenanceId
+      case 'salary':            return true
+      case 'utility':           return !!formData.utilityTypeId && !!formData.meter
+      case 'supplies':          return !!formData.suppliesLogId
+      case 'other':             return !!formData.otherExpenseTypeId
+      default:                  return false
     }
-  }, [date, formData, date])
+  }, [date, formData])
 
   const branchOptions = useMemo(
     () => branches.map((b) => ({ value: b, label: b })),
@@ -239,20 +255,17 @@ export function AddExpenseDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[95vh] overflow-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[95vh] flex flex-col p-0 gap-0">
+        {/* Sticky header */}
+        <DialogHeader className="px-6 py-4 border-b flex-shrink-0">
           <DialogTitle>Add New Expense</DialogTitle>
           <DialogDescription>
             Record a new expense entry with receipt and payment details.
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            onSubmit()
-          }}
-        >
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Expense Information */}
@@ -260,15 +273,13 @@ export function AddExpenseDialog({
               <CardHeader><CardTitle className="text-base">Expense Information</CardTitle></CardHeader>
               <CardContent className="space-y-4">
 
-                {/* Expense type */}
                 <div className="space-y-2">
                   <Label>Expense Type *</Label>
                   <Select
                     value={formData.type}
                     onValueChange={(v) => set({
                       type: v,
-                      
-                      name: '', 
+                      name: '',
                       assetId: undefined,
                       assetMaintenanceId: undefined,
                       salaryType: v === 'salary' ? (formData.salaryType || '') : '',
@@ -281,21 +292,16 @@ export function AddExpenseDialog({
                     <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                     <SelectContent>
                       {EXPENSE_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>
-                          {t.label}
-                        </SelectItem>
+                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* Type-specific fields */}
                 {formData.type && (
                   <TypeExtraFields type={formData.type} formData={formData} set={set} />
                 )}
 
-
-                {/* Date + Amount */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Date *</Label>
@@ -315,18 +321,16 @@ export function AddExpenseDialog({
                   </div>
                 </div>
 
-                {/* Description */}
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>Remarks / Description</Label>
                   <Textarea
                     placeholder="Additional notes or details..."
-                    value={formData.description}
-                    onChange={(e) => set({ description: e.target.value })}
+                    value={formData.remarks ?? ''}
+                    onChange={(e) => set({ remarks: e.target.value })}
                     rows={3}
                   />
                 </div>
 
-                {/* Receipt */}
                 <div className="space-y-2">
                   <Label>Receipt / Document</Label>
                   <ReceiptUpload id="add-receipt" receipt={receipt} onFileChange={setReceipt} />
@@ -375,21 +379,22 @@ export function AddExpenseDialog({
               </CardContent>
             </Card>
           </div>
+        </div>
 
-          <DialogFooter className="flex items-center justify-end gap-2 mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => { onCancel(); onOpenChange(false) }}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
-            <Button type="button" onClick={onSubmit} disabled={isPending || !isFormValid}>
-              {isPending ? 'Creating…' : 'Create Expense'}
-            </Button>
-          </DialogFooter>
-        </form>
+        {/* Sticky footer */}
+        <DialogFooter className="px-6 py-4 border-t flex-shrink-0 flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => { onCancel(); onOpenChange(false) }}
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+          <Button type="button" onClick={onSubmit} disabled={isPending || !isFormValid}>
+            {isPending ? 'Creating…' : 'Create Expense'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
