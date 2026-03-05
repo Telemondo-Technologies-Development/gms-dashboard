@@ -161,15 +161,15 @@ export default function Tracking() {
           ) : (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-zinc-50/50">
-                  <TableRow className="hover:bg-transparent border-zinc-100">
-                    <TableHead className="px-8 text-[10px] font-black uppercase text-zinc-400 tracking-widest">Full Name</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Primary Branch</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">Status</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase text-zinc-400 tracking-widest text-center">Incidents</TableHead>
-                    <TableHead className="text-[10px] font-black uppercase text-zinc-400 tracking-widest text-right px-8">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
+              <TableHeader className="bg-muted/30 sticky top-0 z-10">
+                <TableRow className="hover:bg-transparent border-b border-muted/60">
+                  <TableHead className="pl-8 w-[30%] bg-muted/30">Full Name</TableHead>
+                  <TableHead className="w-[20%] bg-muted/30">Primary Branch</TableHead>
+                  <TableHead className="w-[15%] bg-muted/30">Status</TableHead>
+                  <TableHead className="w-[15%] text-center bg-muted/30">Incidents</TableHead>
+                  <TableHead className="pr-8 w-[20%] text-right bg-muted/30">Action</TableHead>
+                </TableRow>
+              </TableHeader>
                 <TableBody>
                   {filteredCustomers.map((customer) => (
                     <TableRow
