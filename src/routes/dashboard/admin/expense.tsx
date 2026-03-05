@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MonthlySpendingChart } from '@/components/expense-components/ExpenseMonthlyCard'
 import { AnnualSpendingChart }  from '@/components/expense-components/ExpenseAnnualCard'
 import { ExpenseTable }         from '@/components/expense-components/ExpenseListTable'
@@ -23,7 +22,8 @@ interface BranchDTO { id?: string; name?: string }
 
 function ExpenseRoute() {
   const [searchQuery,  setSearchQuery]  = useState('')
-  const [activeBranch, setActiveBranch] = useState('')
+  // 'all' means all branches; otherwise a specific branch name
+  const [activeBranch, setActiveBranch] = useState('all')
   const [addOpen,      setAddOpen]      = useState(false)
   const [detailsOpen,  setDetailsOpen]  = useState(false)
   const [deleteOpen,   setDeleteOpen]   = useState(false)
@@ -41,45 +41,51 @@ function ExpenseRoute() {
   const branchDTOs  = useMemo(() => (branches ?? []) as BranchDTO[], [branches])
   const branchNames = useMemo(() => branchDTOs.map((b) => b.name ?? '').filter(Boolean), [branchDTOs])
 
+  // Default to first branch on initial load only — don't override if user picks 'All Branches'
+  const [branchInitialized, setBranchInitialized] = useState(false)
   useEffect(() => {
-    if (!activeBranch && branchNames.length > 0) setActiveBranch(branchNames[0])
-  }, [branchNames, activeBranch])
+    if (!branchInitialized && branchNames.length > 0) {
+      setActiveBranch(branchNames[0])
+      setBranchInitialized(true)
+    }
+  }, [branchNames, branchInitialized])
 
-  const addForm = useExpenseForm()
-  useEffect(() => {
-    if (activeBranch) addForm.setFormData((prev) => ({ ...prev, branch: activeBranch }))
-  }, [activeBranch]) 
+  const addForm = useExpenseForm(activeBranch === 'all' ? (branchNames[0] ?? '') : activeBranch)
 
   const selectedExpense = useMemo(
     () => selectedId ? (expenses ?? []).find((e) => e.id === selectedId) ?? null : null,
     [selectedId, expenses],
   )
-  const editForm = useExpenseEdit(selectedExpense ? toLegacyRow(selectedExpense) : null)
+  const selectedLegacyRow = useMemo(
+    () => selectedExpense ? toLegacyRow(selectedExpense) : null,
+    [selectedExpense],
+  )
+  const editForm = useExpenseEdit(selectedLegacyRow)
 
   const legacyRows = useMemo(() => (expenses ?? []).map(toLegacyRow), [expenses])
 
-  const filteredRows = useMemo(() => {
-    const q = searchQuery.toLowerCase()
-    return legacyRows.filter(
-      (row) => row.branch === activeBranch &&
-        (row.name.toLowerCase().includes(q) ||
-         row.type.toLowerCase().includes(q) ||
-         row.description.toLowerCase().includes(q)),
-    )
-  }, [legacyRows, activeBranch, searchQuery])
+  // Charts show the selected branch, or all rows combined when 'all'
+  const chartRows = useMemo(
+    () => activeBranch === 'all'
+      ? legacyRows
+      : legacyRows.filter((r) => r.branch === activeBranch),
+    [legacyRows, activeBranch],
+  )
+
 
   const totalSpend = useMemo(
-    () => (expenses ?? [])
-      .filter((e) => e.branch === activeBranch)
-      .reduce((sum, e) => sum + parseFloat(e.amount || '0'), 0),
-    [expenses, activeBranch],
+    () => chartRows.reduce((sum, e) => sum + parseFloat(e.amount || '0'), 0),
+    [chartRows],
   )
+
+  const displayBranchLabel = activeBranch === 'all' ? 'All Branches' : activeBranch
 
   const {
     handleAddSubmit, handleSaveExpense, handleDeleteExpense,
     handleRowClick, handleCancelEdit,
   } = useExpenseHandlers({
-    actorId, branchDTOs, selectedExpense, activeBranch,
+    actorId, branchDTOs, selectedExpense,
+    activeBranch: activeBranch === 'all' ? (branchNames[0] ?? '') : activeBranch,
     addForm, editForm,
     createExpense, updateExpense, deleteExpense,
     setAddOpen, setDetailsOpen, setDeleteOpen, setSelectedId, setIsEditing,
@@ -88,29 +94,21 @@ function ExpenseRoute() {
   return (
     <div className="h-[calc(100vh-4rem)] flex flex-col p-6 gap-4">
 
-      {/* Header */}
-      <div className="flex items-center justify-between flex-shrink-0">
-        <div className="space-y-0.5">
-          <h1 className="text-2xl font-semibold">Expense Management</h1>
-          {branchesLoading || expensesLoading ? (
-            <Skeleton className="h-4 w-48" />
-          ) : branchesError ? (
-            <p className="text-sm text-destructive">{(branchesError as Error)?.message ?? 'Failed to load branches.'}</p>
-          ) : expensesError ? (
-            <p className="text-sm text-destructive">Failed to load expenses.</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Total spend for {activeBranch}:{' '}
-              <span className="font-medium text-foreground">{formatPeso(totalSpend)}</span>
-            </p>
-          )}
-        </div>
-        <Select value={activeBranch} onValueChange={setActiveBranch} disabled={branchesLoading || !!branchesError}>
-          <SelectTrigger className="w-48"><SelectValue placeholder="Select branch" /></SelectTrigger>
-          <SelectContent>
-            {branchNames.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
-          </SelectContent>
-        </Select>
+      {/* Header — no branch selector here anymore, it lives in the table */}
+      <div className="flex-shrink-0 space-y-0.5">
+        <h1 className="text-2xl font-semibold">Expense Management</h1>
+        {branchesLoading || expensesLoading ? (
+          <Skeleton className="h-4 w-48" />
+        ) : branchesError ? (
+          <p className="text-sm text-destructive">{(branchesError as Error)?.message ?? 'Failed to load branches.'}</p>
+        ) : expensesError ? (
+          <p className="text-sm text-destructive">Failed to load expenses.</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Total spend for {displayBranchLabel}:{' '}
+            <span className="font-medium text-foreground">{formatPeso(totalSpend)}</span>
+          </p>
+        )}
       </div>
 
       {/* Charts + Table */}
@@ -119,19 +117,22 @@ function ExpenseRoute() {
           <Card className="flex flex-col flex-1 min-h-0">
             <CardHeader className="flex-shrink-0 pb-3"><CardTitle className="text-base">Monthly Spending</CardTitle></CardHeader>
             <CardContent className="flex-1 min-h-0 pb-4">
-              <MonthlySpendingChart expenses={filteredRows} branch={activeBranch} />
+              <MonthlySpendingChart expenses={chartRows} branch={activeBranch} />
             </CardContent>
           </Card>
           <Card className="flex flex-col flex-1 min-h-0">
             <CardHeader className="flex-shrink-0 pb-3"><CardTitle className="text-base">Annual Spending</CardTitle></CardHeader>
             <CardContent className="flex-1 min-h-0 pb-4">
-              <AnnualSpendingChart expenses={filteredRows} branch={activeBranch} />
+              <AnnualSpendingChart expenses={chartRows} branch={activeBranch} />
             </CardContent>
           </Card>
         </div>
         <div className="lg:col-span-2 flex flex-col min-h-0">
           <ExpenseTable
-            expenses={filteredRows}
+            expenses={legacyRows}
+            branches={branchNames}
+            selectedBranch={activeBranch}
+            onBranchChange={setActiveBranch}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onAddClick={() => setAddOpen(true)}
@@ -154,15 +155,9 @@ function ExpenseRoute() {
         open={detailsOpen && !deleteOpen}
         onOpenChange={(open) => { setDetailsOpen(open); if (!open) { setSelectedId(null); setIsEditing(false) } }}
         isEditing={isEditing} setIsEditing={setIsEditing}
-        type={editForm.type}             setType={editForm.setType}
-        name={editForm.name}             setName={editForm.setName}
-        date={editForm.date}             setDate={editForm.setDate}
-        amount={editForm.amount}         setAmount={editForm.setAmount}
-        branch={editForm.branch}         setBranch={editForm.setBranch}
-        paymentMethod={editForm.paymentMethod} setPaymentMethod={editForm.setPaymentMethod}
-        description={editForm.description}     setDescription={editForm.setDescription}
-        receipt={editForm.receipt}       setReceipt={editForm.setReceipt}
-        salaryType={editForm.salaryType} setSalaryType={editForm.setSalaryType}
+        formData={editForm.formData} setFormData={editForm.setFormData}
+        date={editForm.date}         setDate={editForm.setDate}
+        receipt={editForm.receipt}   setReceipt={editForm.setReceipt}
         onSubmit={handleSaveExpense} onDelete={() => setDeleteOpen(true)} onCancel={handleCancelEdit}
         branches={branchNames}
       />

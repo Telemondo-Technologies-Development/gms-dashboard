@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react'
 import type { LegacyExpenseRow } from '@/lib/expense/expense-types'
 import { SpendingChart } from '@/components/expense-components/ExpenseSpendingChart'
@@ -20,7 +19,7 @@ export function AnnualSpendingChart({ expenses, branch }: AnnualSpendingChartPro
     }
 
     expenses
-      .filter((e) => e.branch === branch)
+      .filter((e) => branch === 'all' || e.branch === branch)
       .forEach((e) => {
         const year = String(new Date(e.date).getFullYear())
         if (year in map) map[year] += parseFloat(e.amount)
