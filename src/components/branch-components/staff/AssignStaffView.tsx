@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Loader2, UserMinus, Building2, MoreHorizontal, UserCheck, RefreshCw } from 'lucide-react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 import { useEmployees } from "@/hooks/users/useStaffEmployees";
+import type { BranchPersonnelTableDTO } from '@/api/generated/models';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -23,13 +24,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+function cn(...classes: (string | boolean | undefined | null)[]): string {
+  return classes.filter(Boolean).join(' ');
+}
+
+interface StaffWithName extends BranchPersonnelTableDTO {
+  fullName: string;
+}
 
 interface AssignedStaffViewProps {
   branches: any[];
   currentBranchId: string;
   onBranchChange: (id: string) => void;
 }
-
 
 export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
   branches,
@@ -43,27 +50,38 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
 
   const actorNameMap = useMemo(() => {
     const map = new Map<string, string>();
-    const employeeList = (employeesResponse as any)?.data ?? employeesResponse ?? [];
+    
+    // Defensive check for array location
+    const employeeList = Array.isArray(employeesResponse) 
+      ? employeesResponse 
+      : (employeesResponse as any)?.data ?? [];
+
     employeeList.forEach((emp: any) => {
-      const fullName = `${emp.firstName ?? ''} ${emp.surname ?? ''}`.trim();
-      map.set(emp.actorId, fullName || 'Unnamed Employee');
+      if (emp.actorId) {
+        const fullName = `${emp.firstName ?? ''} ${emp.surname ?? ''}`.trim();
+        map.set(emp.actorId, fullName || 'Unnamed Employee');
+      }
     });
     return map;
   }, [employeesResponse]);
 
   const filteredStaff = useMemo(() => {
-    const personnel = branchPersonnel ?? [];
-    return personnel
-      .map((p: any) => ({
-        ...p,
-        fullName: actorNameMap.get(p.actorId) || `ID: ${p.actorId.slice(0, 8)}`,
-      }))
-      .filter((p) => p.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [branchPersonnel, actorNameMap, searchQuery]);
+    const personnelList = Array.isArray(branchPersonnel) 
+      ? branchPersonnel 
+      : (branchPersonnel as any)?.data ?? [];
 
-  function cn(...classes: (string | boolean | undefined | null)[]): string {
-    return classes.filter(Boolean).join(' ');
-  }
+    return personnelList
+      .map((p: BranchPersonnelTableDTO) => {
+        const nameFromMap = actorNameMap.get(p.actorId);
+        return {
+          ...p,
+          fullName: nameFromMap || `Staff (${p.actorId?.slice(0, 8) || 'Unknown'})`,
+        } as StaffWithName;
+      })
+      .filter((p: StaffWithName) => 
+        p.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+  }, [branchPersonnel, actorNameMap, searchQuery]);
 
   return (
     <Card className="flex flex-col shadow-md border-muted/40 max-h-[88vh]">
@@ -81,7 +99,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
             variant="default" 
             className="px-3 py-1 text-sm bg-[#0062cc] hover:bg-[#0056b3] text-white border-none rounded-full"
           >
-            Total: {branchPersonnel?.length ?? 0}
+            Total: {filteredStaff.length}
           </Badge>
         </div>
       </CardHeader>
@@ -124,6 +142,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
               </Button>
           </div>
         </div>
+
         <div className="relative w-full overflow-auto">
           <Table className="w-full table-fixed">
             <TableHeader className="bg-muted/30">
@@ -152,8 +171,8 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredStaff.map((staff) => (
-                  <TableRow key={staff.id} className="hover:bg-muted/40 transition-colors group border-b border-muted/40">
+                filteredStaff.map((staff: StaffWithName) => (
+                  <TableRow key={staff.id || staff.actorId} className="hover:bg-muted/40 transition-colors group border-b border-muted/40">
                     <TableCell className="pl-4 md:pl-6 py-4 align-top">
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
@@ -167,7 +186,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
 
                     <TableCell className="hidden md:table-cell py-4 align-top">
                       <span className="text-sm font-mono text-muted-foreground">
-                        {staff.actorId.slice(0, 12)}...
+                        {staff.actorId ? `${staff.actorId.slice(0, 12)}...` : 'N/A'}
                       </span>
                     </TableCell>
 
@@ -176,7 +195,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                         "font-semibold uppercase text-[10px] tracking-tighter",
                         staff.status === 'ACTIVE' ? "bg-green-500 hover:bg-green-600" : "bg-zinc-400"
                       )}>
-                        {staff.status}
+                        {staff.status || 'UNKNOWN'}
                       </Badge>
                     </TableCell>
 
@@ -208,7 +227,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                   <TableCell colSpan={4} className="p-0">
                     <div className="flex items-center justify-between p-4 w-full h-full text-foreground">
                        <div className="text-sm text-muted-foreground">
-                          Showing {filteredStaff.length} assigned personnel
+                         Showing {filteredStaff.length} assigned personnel
                        </div>
                        <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Previous</Button>

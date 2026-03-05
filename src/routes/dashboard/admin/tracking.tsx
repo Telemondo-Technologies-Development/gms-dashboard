@@ -2,19 +2,14 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
 import { Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-
-// UI Components
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-
-// Custom Components
 import AddReportDialog from '@/components/tracking-components/AddReportDialog';
 import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal';
 
-// Hooks
 import { useReports } from '@/hooks/Tracking/useReports';
 import { useReportTypes } from '@/hooks/Tracking/useReportTypes';
 
@@ -36,17 +31,10 @@ export default function Tracking() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // 1. Fetch Reports data
   const { reports, isLoading: reportsLoading, isError: reportsError } = useReports();
-  
-  // 2. Fetch Report Types (Classifications) using our new hook
+
   const { data: reportTypes, isLoading: typesLoading } = useReportTypes();
-
-  // Combined loading state
   const isLoading = reportsLoading || typesLoading;
-
-  // 3. Create a lookup map for Report Type IDs to Names
   const typeMap = useMemo(() => {
     const map: Record<string, string> = {};
     reportTypes?.forEach((t) => {
@@ -55,7 +43,6 @@ export default function Tracking() {
     return map;
   }, [reportTypes]);
 
-  // 4. Group reports by Personnel/Customer (Actor)
   const groupedCustomers = useMemo(() => {
     if (!reports) return [];
 
@@ -79,7 +66,6 @@ export default function Tracking() {
       customer.reports.push({
         id: report.id,
         date: report.occurredAt,
-        // Map the ID to the Human Readable Name using our typeMap
         type: typeMap[report.reportTypeId] || "General Incident", 
         description: report.description,
         filer: `${report.createdByFirstName ?? ''} ${report.createdBySurname ?? ''}`.trim(),
@@ -91,7 +77,6 @@ export default function Tracking() {
     return Array.from(customerMap.values());
   }, [reports, typeMap]); 
 
-  // 5. Filter the grouped list based on search query
   const filteredCustomers = useMemo(() => {
     return groupedCustomers.filter((customer) =>
       customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -115,14 +100,12 @@ export default function Tracking() {
   };
 
   const handleRefresh = () => {
-    // Invalidate both keys to ensure data stays in sync
     queryClient.invalidateQueries({ queryKey: ['reports'] });
     queryClient.invalidateQueries({ queryKey: ['reportTypes'] });
   };
 
   return (
     <div className="space-y-6 p-4 md:p-8 max-w-[1600px] mx-auto">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">Incident Tracking</h2>
@@ -140,8 +123,6 @@ export default function Tracking() {
           <AddReportDialog onSuccess={handleRefresh} />
         </div>
       </div>
-
-      {/* Main Table Card */}
       <Card className="border-none shadow-xl shadow-zinc-200/50 rounded-3xl overflow-hidden bg-white">
         <CardHeader className="border-b border-zinc-50 px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -234,7 +215,6 @@ export default function Tracking() {
         </CardContent>
       </Card>
 
-      {/* Detail Modal */}
       {activeCustomerData && (
         <IncidentReportsModal
           customer={activeCustomerData}

@@ -4,17 +4,16 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, User, FileText, Paperclip, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Align these interfaces with what Tracking.tsx actually sends
 interface Report {
   date: string;
-  type: string; // This is the "name" from your ReportTypeTableDTO
+  type: string; 
   description: string;
   filer: string;
   attachments: string[];
 }
 
 interface Customer {
-  id: string; // Added to match GroupedCustomer
+  id: string; 
   name: string;
   reports: Report[];
 }
@@ -26,13 +25,12 @@ interface IncidentReportsModalProps {
 }
 
 export default function IncidentReportsModal({ customer, open, onClose }: IncidentReportsModalProps) {
-  
-  // Refined color logic for dynamic report types
+
   const getTypeColor = (type: string) => {
     const t = type.toLowerCase();
     if (t.includes('positive') || t.includes('commendation') || t.includes('award')) return 'bg-emerald-500';
     if (t.includes('negative') || t.includes('incident') || t.includes('violation') || t.includes('late')) return 'bg-rose-500';
-    return 'bg-blue-500'; // Default for Neutral/General
+    return 'bg-blue-500'; 
   };
 
   return (
@@ -57,7 +55,7 @@ export default function IncidentReportsModal({ customer, open, onClose }: Incide
               <p className="text-sm font-bold uppercase tracking-widest opacity-40">No reports filed yet</p>
             </div>
           ) : (
-            // Sort reports by date (newest first) before mapping
+
             [...customer.reports]
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
               .map((report, index) => (
