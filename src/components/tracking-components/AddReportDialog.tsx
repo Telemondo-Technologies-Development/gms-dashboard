@@ -28,9 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useMembersData } from '@/hooks/membership/useMembership';
 import { useBranches } from '@/hooks/branch/useBranches';
 import { useReports } from '@/hooks/Tracking/useReports';
-import { useQuery } from '@tanstack/react-query';
-import { ReportTypeApi } from '@/api/generated/apis/ReportTypeApi';
-import { Configuration } from '@/api/generated/runtime';
+import { useReportTypes } from '@/hooks/Tracking/useReportTypes';
 import * as z from 'zod';
 
 const reportFormSchema = z.object({
@@ -52,19 +50,17 @@ export default function AddReportDialog({ onSuccess }: AddReportDialogProps) {
   const { enrichedMembers } = useMembersData();
   const { branches, isLoading: branchesLoading } = useBranches();
   const { createReport, isCreating } = useReports();
+
+  const { data: reportTypes, isLoading: isLoadingTypes } = useReportTypes();
+
   const [nameSearch, setNameSearch] = useState('');
   const [isSearchingMembers, setIsSearchingMembers] = useState(false);
   const [dateInput, setDateInput] = useState('');
   const [month, setMonth] = useState<Date | undefined>(undefined);
+
   const form = useForm<ReportFormValues>({
     resolver: zodResolver(reportFormSchema),
     defaultValues: { actorId: '', branchId: '', reportTypeId: '', description: '' },
-  });
-
-  const reportTypeApi = useMemo(() => new ReportTypeApi(new Configuration({ basePath: import.meta.env.VITE_API_BASE_URL })), []);
-  const { data: remoteReportTypes, isLoading: isLoadingTypes } = useQuery({
-    queryKey: ['report-types-list'],
-    queryFn: () => reportTypeApi.getAll({ pageable: { page: 0, size: 100 } }),
   });
 
   const filteredMembers = useMemo(() => {
@@ -165,7 +161,6 @@ export default function AddReportDialog({ onSuccess }: AddReportDialogProps) {
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="reportTypeId"
@@ -175,12 +170,14 @@ export default function AddReportDialog({ onSuccess }: AddReportDialogProps) {
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger disabled={isLoadingTypes}>
-                              <SelectValue placeholder="Select type" />
+                              <SelectValue placeholder={isLoadingTypes ? "Loading..." : "Select type"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {remoteReportTypes?.data?.map((type: any) => (
-                              <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
+                            {reportTypes?.map((type) => (
+                              <SelectItem key={type.id} value={type.id}>
+                                {type.name}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -189,7 +186,6 @@ export default function AddReportDialog({ onSuccess }: AddReportDialogProps) {
                     )}
                   />
                 </div>
-
                 <FormField
                   control={form.control}
                   name="occurredAt"
