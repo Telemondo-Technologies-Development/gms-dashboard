@@ -57,7 +57,10 @@ export function AddMemberDialog() {
   } = useAddMemberDialog()
 
   const creatorId = form.state.values.createdById.trim()
-  const { displayName: createdByName, isLoading: isCreatorNameLoading } = useEmployeeDisplayName(creatorId)
+  const { displayName: createdByName, isLoading: isCreatorNameLoading } = useEmployeeDisplayName({
+    ids: [creatorId],
+    email: currentUserEmail ?? '',
+  })
 
   useEffect(() => {
     if (!open) {
@@ -113,7 +116,7 @@ export function AddMemberDialog() {
                     >
                       {(field) => (
                         <div className="space-y-2">
-                          <Label htmlFor={field.name}>First name <span className="text-red-500">*</span></Label>
+                          <Label htmlFor={field.name}>First name <span className="text-destructive">*</span></Label>
                           <Input
                             id={field.name}
                             value={field.state.value}
@@ -138,7 +141,7 @@ export function AddMemberDialog() {
                     >
                       {(field) => (
                         <div className="space-y-2">
-                          <Label htmlFor={field.name}>Surname <span className="text-red-500">*</span></Label>
+                          <Label htmlFor={field.name}>Surname <span className="text-destructive">*</span></Label>
                           <Input
                             id={field.name}
                             value={field.state.value}
@@ -224,7 +227,7 @@ export function AddMemberDialog() {
                     ) : (
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="subscription">Subscription Plan <span className="text-red-500">*</span></Label>
+                          <Label htmlFor="subscription">Subscription Plan <span className="text-destructive">*</span></Label>
                           <Select value={selectedSubscriptionId} onValueChange={setSelectedSubscriptionId}>
                             <SelectTrigger id="subscription">
                               <SelectValue placeholder="Select Plan" />
@@ -244,7 +247,7 @@ export function AddMemberDialog() {
 
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           <div className="space-y-2">
-                            <Label>Start Date <span className="text-red-500">*</span></Label>
+                            <Label>Start Date <span className="text-destructive">*</span></Label>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button

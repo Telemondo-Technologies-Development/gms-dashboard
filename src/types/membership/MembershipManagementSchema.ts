@@ -51,6 +51,8 @@ export interface MemberFormData {
   paymentMethod: string
   membershipDetails: string
   documents: File[]
+  /** Full name of the staff/admin who recorded this member, sourced inline from the API DTO */
+  recorderName: string | null
 }
 
 export interface MemberDetailsDialogProps {
@@ -87,6 +89,9 @@ export type MemberPutDto = z.infer<typeof memberPutDtoSchema>
 export const memberTableDataSchema = z.object({
   actorId: z.string().uuid().nullable().default(null),
   createdById: z.string().uuid().nullable().default(null),
+  createdByFirstName: z.string().nullable().optional(),
+  createdBySurname: z.string().nullable().optional(),
+  createdByEmail: z.string().nullable().optional(),
   firstName: z.string(),
   id: z.string().uuid(),
   middleName: z.string().nullable().default(null),

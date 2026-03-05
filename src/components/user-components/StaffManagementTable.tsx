@@ -12,8 +12,14 @@ import {
   Pencil,
   UserPlus,
   ShieldPlus,
-  Trash2
+  Trash2,
+  Building2,
+  Tag,
 } from 'lucide-react'
+
+import { useQuery } from '@tanstack/react-query'
+import { getAuthenticatedApi } from '@/lib/api-client'
+import { BranchPersonnelApi, BranchPersonnelRolesApi } from '@/api/generated/apis'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -41,6 +47,9 @@ import type { EmployeeTableDTO } from '@/api/generated/models'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import  type { EmployeeTabProps } from '@/types/user/userSchemas'
 
+const personnelApi = getAuthenticatedApi(BranchPersonnelApi)
+const personnelRolesApi = getAuthenticatedApi(BranchPersonnelRolesApi)
+
 
 export function EmployeeTab({
   loadingEmployees,
@@ -55,6 +64,36 @@ export function EmployeeTab({
   const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeTableDTO | null>(null)
   const [pageIndex, setPageIndex] = useState(0)
   const PAGE_SIZE = 5
+
+  // Fetch all branch personnel → actorId → personnelRoleId map
+  const { data: allPersonnel } = useQuery({
+    queryKey: ['branch-personnel-all'],
+    queryFn: () => personnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } }).then((r) => r.data ?? []),
+    staleTime: 60_000,
+  })
+
+  // Fetch all personnel roles → id → name map
+  const { data: allRoles } = useQuery({
+    queryKey: ['personnel-roles-all'],
+    queryFn: () => personnelRolesApi.getAllPersonnelRoles({ pageable: { page: 0, size: 200 } }).then((r) => r.data ?? []),
+    staleTime: 5 * 60_000,
+  })
+
+  const roleById = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const r of allRoles ?? []) map.set(r.id, r.name)
+    return map
+  }, [allRoles])
+
+  const roleByActorId = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const p of allPersonnel ?? []) {
+      if (!p.actorId || !p.personnelRoleId) continue
+      const roleName = roleById.get(p.personnelRoleId)
+      if (roleName) map.set(p.actorId, roleName)
+    }
+    return map
+  }, [allPersonnel, roleById])
 
   const pageCount = Math.max(1, Math.ceil(filteredEmployees.length / PAGE_SIZE))
 
@@ -74,17 +113,18 @@ export function EmployeeTab({
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b border-muted/60">
-              <TableHead className="w-[30%] pl-6">Employee</TableHead>
-              <TableHead className="w-[25%] ">Contact Details</TableHead>
-              <TableHead className="w-[20%]">Role & Access</TableHead>
-              <TableHead className="w-[15%] ">Status</TableHead>
-              <TableHead className="w-[10%] pl-20">Actions</TableHead>
+              <TableHead className="w-[25%] pl-6">Employee</TableHead>
+              <TableHead className="w-[20%]">Contact Details</TableHead>
+              <TableHead className="w-[20%]">Branch</TableHead>
+              <TableHead className="w-[15%]">Role & Access</TableHead>
+              <TableHead className="w-[10%]">Status</TableHead>
+              <TableHead className="w-[10%] text-right pr-6">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loadingEmployees ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" /> 
                     <span>Loading employees...</span>
@@ -93,7 +133,7 @@ export function EmployeeTab({
               </TableRow>
             ) : filteredEmployees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center">
+                <TableCell colSpan={6} className="h-32 text-center">
                   <div className="flex flex-col items-center justify-center py-16 text-center px-4">
                     <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
                       <User className="h-6 w-6 text-muted-foreground" />
@@ -164,22 +204,43 @@ export function EmployeeTab({
                     </div>
                   </TableCell>
                   
+                  {/* Branch column */}
+                  <TableCell className="py-4 align-top">
+                    <div className="flex flex-col gap-1">
+                      {employee.branches.length > 0 ? (
+                        employee.branches.map((branch) => (
+                          <div key={branch.id} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Building2 className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                            <span className="truncate max-w-36">{branch.name}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-xs text-muted-foreground/60 italic">No branch assigned</span>
+                      )}
+                    </div>
+                  </TableCell>
+
+                  {/* Role & Access column */}
                   <TableCell className="py-4 align-top">
                     <div className="flex flex-col items-start gap-2">
-                      <div className="flex items-center gap-1.5">
-                        {employee.userId ? (
-                           <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800 border-green-200">
-                             <ShieldCheck className="h-3 w-3" />
-                             Has Login
-                           </Badge>
-                        ) : (
-                           <Badge variant="outline" className="gap-1 bg-muted text-muted-foreground hover:bg-muted-foreground/10 border-muted-foreground/20">
-                             No Login
-                           </Badge>
-                        )}
-                      </div>
-                      
-                      {/* Placeholder for future role display if available in DTO */}
+                      {employee.actorId && roleByActorId.get(employee.actorId) ? (
+                        <div className="flex items-center gap-1.5 text-sm">
+                          <Tag className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                          <span className="font-medium text-foreground">{roleByActorId.get(employee.actorId)}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/60 italic">No role</span>
+                      )}
+                      {employee.userId ? (
+                        <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-700 hover:bg-green-500/20 hover:text-green-800 border-green-200">
+                          <ShieldCheck className="h-3 w-3" />
+                          Has Login
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="gap-1 bg-muted text-muted-foreground hover:bg-muted-foreground/10 border-muted-foreground/20">
+                          No Login
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
                   
@@ -254,7 +315,7 @@ export function EmployeeTab({
           {filteredEmployees.length > 0 && (
             <TableFooter className="bg-muted/5">
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={5} className="p-0">
+                <TableCell colSpan={6} className="p-0">
                   <div className="flex flex-col items-center gap-2 px-6 py-3 sm:flex-row sm:justify-between w-full h-full">
                     <p className="text-sm text-muted-foreground text-center sm:text-left">
                       Showing{' '}

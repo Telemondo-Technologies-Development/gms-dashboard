@@ -120,9 +120,12 @@ export function useMembersData() {
       const totalPaid = relatedInvoices.filter((i) => i.status === 'PAID').reduce((sum, i) => sum + (i.total ?? 0), 0)
       const totalUnpaid = totalInvoiced - totalPaid
 
+      const recorderName = [m.createdByFirstName, m.createdBySurname].filter(Boolean).join(' ').trim() || null
+
       return {
         id: m.id,
         actorId: m.actorId ?? null,
+        recorderName,
         members: [
           {
             id: m.id,
