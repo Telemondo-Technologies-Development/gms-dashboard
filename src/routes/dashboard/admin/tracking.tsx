@@ -1,17 +1,22 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
 import { Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ReportTypeApi } from '@/api/generated/apis/ReportTypeApi';
-import { Configuration } from '@/api/generated/runtime';
+import { useQueryClient } from '@tanstack/react-query';
+
+// UI Components
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+
+// Custom Components
 import AddReportDialog from '@/components/tracking-components/AddReportDialog';
 import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal';
+
+// Hooks
 import { useReports } from '@/hooks/Tracking/useReports';
+import { useReportTypes } from '@/hooks/Tracking/useReportTypes';
 
 export const Route = createFileRoute('/dashboard/admin/tracking')({
   component: Tracking,
@@ -31,22 +36,26 @@ export default function Tracking() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { reports, isLoading, isError } = useReports();
-  const reportTypeApi = useMemo(() => new ReportTypeApi(new Configuration({ basePath: import.meta.env.VITE_API_BASE_URL })), []);
-  
-  const { data: remoteReportTypes } = useQuery({
-    queryKey: ['report-types-list'],
-    queryFn: () => reportTypeApi.getAll({ pageable: { page: 0, size: 100 } }),
-  });
 
+  // 1. Fetch Reports data
+  const { reports, isLoading: reportsLoading, isError: reportsError } = useReports();
+  
+  // 2. Fetch Report Types (Classifications) using our new hook
+  const { data: reportTypes, isLoading: typesLoading } = useReportTypes();
+
+  // Combined loading state
+  const isLoading = reportsLoading || typesLoading;
+
+  // 3. Create a lookup map for Report Type IDs to Names
   const typeMap = useMemo(() => {
     const map: Record<string, string> = {};
-    remoteReportTypes?.data?.forEach((t: any) => {
+    reportTypes?.forEach((t) => {
       map[t.id] = t.name;
     });
     return map;
-  }, [remoteReportTypes]);
+  }, [reportTypes]);
 
+  // 4. Group reports by Personnel/Customer (Actor)
   const groupedCustomers = useMemo(() => {
     if (!reports) return [];
 
@@ -58,7 +67,7 @@ export default function Tracking() {
       if (!customerMap.has(actorKey)) {
         customerMap.set(actorKey, {
           id: report.actorId,
-          name: `${report.actorFirstname} ${report.actorSurname}`,
+          name: `${report.actorFirstname ?? ''} ${report.actorSurname ?? ''}`.trim() || 'Unknown Personnel',
           branch: report.branchName || 'No Branch',
           status: report.actorStatus || 'IN',
           reportCount: 0,
@@ -70,9 +79,10 @@ export default function Tracking() {
       customer.reports.push({
         id: report.id,
         date: report.occurredAt,
+        // Map the ID to the Human Readable Name using our typeMap
         type: typeMap[report.reportTypeId] || "General Incident", 
         description: report.description,
-        filer: `${report.createdByFirstName} ${report.createdBySurname}`,
+        filer: `${report.createdByFirstName ?? ''} ${report.createdBySurname ?? ''}`.trim(),
         attachments: report.objectIds || [], 
       });
       customer.reportCount = customer.reports.length;
@@ -81,6 +91,7 @@ export default function Tracking() {
     return Array.from(customerMap.values());
   }, [reports, typeMap]); 
 
+  // 5. Filter the grouped list based on search query
   const filteredCustomers = useMemo(() => {
     return groupedCustomers.filter((customer) =>
       customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -104,12 +115,14 @@ export default function Tracking() {
   };
 
   const handleRefresh = () => {
+    // Invalidate both keys to ensure data stays in sync
     queryClient.invalidateQueries({ queryKey: ['reports'] });
-    queryClient.invalidateQueries({ queryKey: ['report-types-list'] });
+    queryClient.invalidateQueries({ queryKey: ['reportTypes'] });
   };
 
   return (
     <div className="space-y-6 p-4 md:p-8 max-w-[1600px] mx-auto">
+      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">Incident Tracking</h2>
@@ -128,6 +141,7 @@ export default function Tracking() {
         </div>
       </div>
 
+      {/* Main Table Card */}
       <Card className="border-none shadow-xl shadow-zinc-200/50 rounded-3xl overflow-hidden bg-white">
         <CardHeader className="border-b border-zinc-50 px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -153,7 +167,7 @@ export default function Tracking() {
               <Loader2 className="h-10 w-10 animate-spin text-[#0062cc]" />
               <p className="text-zinc-400 font-bold text-xs uppercase tracking-widest">Loading records...</p>
             </div>
-          ) : isError ? (
+          ) : reportsError ? (
             <div className="flex flex-col items-center justify-center py-24 text-red-500 gap-2">
               <AlertCircle size={32} />
               <p className="font-bold uppercase text-xs tracking-widest">Failed to load reports</p>
@@ -161,44 +175,58 @@ export default function Tracking() {
           ) : (
             <div className="overflow-x-auto">
               <Table>
-              <TableHeader className="bg-muted/30 sticky top-0 z-10">
-                <TableRow className="hover:bg-transparent border-b border-muted/60">
-                  <TableHead className="pl-8 w-[30%] bg-muted/30">Full Name</TableHead>
-                  <TableHead className="w-[20%] bg-muted/30">Primary Branch</TableHead>
-                  <TableHead className="w-[15%] bg-muted/30">Status</TableHead>
-                  <TableHead className="w-[15%] text-center bg-muted/30">Incidents</TableHead>
-                  <TableHead className="pr-8 w-[20%] text-right bg-muted/30">Action</TableHead>
-                </TableRow>
-              </TableHeader>
+                <TableHeader className="bg-muted/30 sticky top-0 z-10">
+                  <TableRow className="hover:bg-transparent border-b border-muted/60">
+                    <TableHead className="pl-8 w-[30%] bg-muted/30">Full Name</TableHead>
+                    <TableHead className="w-[20%] bg-muted/30">Primary Branch</TableHead>
+                    <TableHead className="w-[15%] bg-muted/30">Status</TableHead>
+                    <TableHead className="w-[15%] text-center bg-muted/30">Incidents</TableHead>
+                    <TableHead className="pr-8 w-[20%] text-right bg-muted/30">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
                 <TableBody>
-                  {filteredCustomers.map((customer) => (
-                    <TableRow
-                      key={customer.id}
-                      className="group cursor-pointer hover:bg-zinc-50/80 border-zinc-50 transition-colors"
-                      onClick={() => handleOpenModal(customer)}
-                    >
-                      <TableCell className="px-8 py-5">
-                        <p className="font-bold text-zinc-900 group-hover:text-[#0062cc] transition-colors">{customer.name}</p>
-                        <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-tighter">{customer.id.split('-')[0]}</p>
-                      </TableCell>
-                      <TableCell className="font-medium text-zinc-600">{customer.branch}</TableCell>
-                      <TableCell>
-                        <Badge className={`rounded-lg px-2 py-0.5 text-[10px] font-black uppercase tracking-tight border-none ${
-                          customer.status === 'IN' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
-                        }`}>
-                          {customer.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-zinc-100 text-zinc-900 text-xs font-black">
-                          {customer.reportCount}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right px-8">
-                        <Button variant="ghost" className="h-8 text-[10px] font-black uppercase text-[#0062cc]">View History</Button>
+                  {filteredCustomers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-20 text-zinc-400">
+                        No incident records found matching your search.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    filteredCustomers.map((customer) => (
+                      <TableRow
+                        key={customer.id}
+                        className="group cursor-pointer hover:bg-zinc-50/80 border-zinc-50 transition-colors"
+                        onClick={() => handleOpenModal(customer)}
+                      >
+                        <TableCell className="px-8 py-5">
+                          <p className="font-bold text-zinc-900 group-hover:text-[#0062cc] transition-colors">
+                            {customer.name}
+                          </p>
+                          <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-tighter">
+                            {customer.id.replace('0x', '').slice(0, 8)}
+                          </p>
+                        </TableCell>
+                        <TableCell className="font-medium text-zinc-600">{customer.branch}</TableCell>
+                        <TableCell>
+                          <Badge className={`rounded-lg px-2 py-0.5 text-[10px] font-black uppercase tracking-tight border-none ${
+                            customer.status === 'IN' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                          }`}>
+                            {customer.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-zinc-100 text-zinc-900 text-xs font-black">
+                            {customer.reportCount}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right px-8">
+                          <Button variant="ghost" className="h-8 text-[10px] font-black uppercase text-[#0062cc]">
+                            View History
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -206,6 +234,7 @@ export default function Tracking() {
         </CardContent>
       </Card>
 
+      {/* Detail Modal */}
       {activeCustomerData && (
         <IncidentReportsModal
           customer={activeCustomerData}
