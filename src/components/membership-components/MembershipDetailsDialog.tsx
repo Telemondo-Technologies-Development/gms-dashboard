@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, Unlock } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -21,7 +22,7 @@ import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/Subscri
 import { AddBillingDialog } from './MembershipBillForm'
 import { InlineAddSubscriptionForm } from './MembershipAddSubscription'
 import { useMembershipDetailsDialog } from '@/hooks/membership/useMembershipDetailsDialog'
-import { useEmployeeDisplayName } from '@/hooks/users/useStaffDisplayName'
+import { EditAdminConfirmDialog } from '@/components/common/EditAdminConfirm'
 
 export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberDetailsDialogProps) {
   const {
@@ -53,8 +54,14 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
     onClose: () => onOpenChange(false),
   })
 
-  const operatorId = resolvedActorId?.trim() ?? ''
-  const { displayName: operatorName, isLoading: isOperatorLoading } = useEmployeeDisplayName(operatorId)
+  const [editUnlocked, setEditUnlocked] = useState(false)
+  const [showEditConfirm, setShowEditConfirm] = useState(false)
+
+  // Staff can request admin unlock; once confirmed the form becomes editable
+  const canEdit = canEditBilling || editUnlocked
+
+  // Use the recorder name embedded in the member record (createdByFirstName + createdBySurname from API)
+  const recorderName = memberGroup?.recorderName ?? null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -137,9 +144,25 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
 
                 <div className="space-y-4 border-t pt-4">
                   <h3 className="text-lg font-medium leading-none tracking-tight">Subscription Details</h3>
-                      {!canEditBilling ? (
-                        <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
-                          Billing details are locked because this member has an active subscription. Only admins can edit billing.
+                      {!canEdit ? (
+                        <div className="flex items-center justify-between gap-3 rounded-md border bg-muted/40 p-3">
+                          <p className="text-xs text-muted-foreground">
+                            Billing details are locked because this member has an active subscription. Admin confirmation is required to edit.
+                          </p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="shrink-0 gap-1.5"
+                            onClick={() => setShowEditConfirm(true)}
+                          >
+                            <Unlock className="h-3.5 w-3.5" />
+                            Unlock Edit
+                          </Button>
+                        </div>
+                      ) : editUnlocked ? (
+                        <div className="rounded-md border border-yellow-400 bg-yellow-50 p-3 text-xs text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300">
+                          Edit access granted via admin confirmation. Changes will be saved when you click &ldquo;Save changes&rdquo;.
                         </div>
                       ) : null}
                       {subscriptionsQuery.isLoading ? (
@@ -163,7 +186,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                             <Select
                               value={selectedSubscriptionId}
                               onValueChange={setSelectedSubscriptionId}
-                              disabled={!canEditBilling}
+                              disabled={!canEdit}
                             >
                               <SelectTrigger id="subscription">
                                 <SelectValue placeholder="Select subscription plan" />
@@ -174,7 +197,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                                     {sub.name} - PHP {sub.amount.toFixed(2)}
                                   </SelectItem>
                                 ))}
-                                {canEditBilling && (
+                                {canEdit && (
                                   <SelectItem value="new_subscription" className="text-primary font-medium">
                                     + Add New Subscription
                                   </SelectItem>
@@ -182,7 +205,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                               </SelectContent>
                             </Select>
 
-                            {canEditBilling && selectedSubscriptionId === 'new_subscription' && (
+                            {canEdit && selectedSubscriptionId === 'new_subscription' && (
                               <>
                                 <InlineAddSubscriptionForm
                                   formState={createSubscriptionPlan.formState}
@@ -230,7 +253,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                                   'w-full justify-start text-left font-normal',
                                   !startDate && 'text-muted-foreground',
                                 )}
-                                disabled={!canEditBilling}
+                                disabled={!canEdit}
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
                                 {startDate ? format(startDate, 'PPP') : 'Pick a date'}
@@ -253,7 +276,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                                   'w-full justify-start text-left font-normal',
                                   !endDate && 'text-muted-foreground',
                                 )}
-                                disabled={!canEditBilling}
+                                disabled={!canEdit}
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
                                 {endDate ? format(endDate, 'PPP') : 'Pick a date'}
@@ -274,7 +297,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                           value={membershipDetails}
                           onChange={(event) => setMembershipDetails(event.target.value)}
                           rows={3}
-                          disabled={!canEditBilling}
+                          disabled={!canEdit}
                         />
                       </div>
                 </div>
@@ -290,7 +313,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                   paymentReferenceNum={paymentReferenceNum}
                   onPaymentReferenceNumChange={setPaymentReferenceNum}
                   totalCost={totalCost}
-                  disabled={!canEditBilling}
+                  disabled={!canEdit}
                   createdById={resolvedActorId ?? null}
                   newPaymentMethodForm={{
                     name: createPaymentMethod.name,
@@ -309,9 +332,21 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
 
           <div className="shrink-0 flex items-center justify-between gap-2 border-t bg-background px-6 py-4">
             <div className="text-sm text-muted-foreground">
-              <Label>User: {isOperatorLoading ? 'Loading…' : (operatorName ?? '—')}</Label> 
+              <Label>Recorded by: {recorderName ?? '—'}</Label>
             </div>
             <div className="flex items-center gap-2">
+            {!canEdit && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setShowEditConfirm(true)}
+              >
+                <Unlock className="h-3.5 w-3.5" />
+                Unlock Edit
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -320,13 +355,24 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
             >
               Close
             </Button>
-            <Button type="submit" disabled={!memberGroup || updateSubscriptionMutation.isPending}>
+            <Button type="submit" disabled={!memberGroup || !canEdit || updateSubscriptionMutation.isPending}>
               {updateSubscriptionMutation.isPending ? 'Saving...' : 'Save changes'}
             </Button>
             </div>
           </div>
         </form>
       </DialogContent>
+
+      <EditAdminConfirmDialog
+        open={showEditConfirm}
+        onOpenChange={setShowEditConfirm}
+        title="Unlock Edit Access"
+        description="This member has an active subscription. Enter your admin password to unlock editing for this session."
+        confirmText="Unlock & Edit"
+        onConfirm={() => {
+          setEditUnlocked(true)
+        }}
+      />
     </Dialog>
   )
 }

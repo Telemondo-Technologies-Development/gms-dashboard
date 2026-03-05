@@ -428,11 +428,7 @@ function MembersTable({ onSelectMember }: Props) {
                               <Badge variant="outline" className="font-medium border-primary/20 bg-primary/5 text-primary">
                                 {memberGroup.membershipType || 'Standard'}
                               </Badge>
-                              {memberGroup.membershipDuration && (
-                                <span className="text-xs text-muted-foreground font-medium px-1.5 py-0.5 rounded-sm bg-muted">
-                                  {memberGroup.membershipDuration}
-                                </span>
-                              )}
+
                             </div>
 
                             {(memberGroup.billingAmount || memberGroup.billingCycle) && (
