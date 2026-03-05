@@ -1,11 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Check } from "lucide-react";
 import { useEmployees } from "@/hooks/users/useStaffEmployees";
+
+const PRESET_ROLES = [
+  "Branch Manager",
+  "Head Coach",
+  "Fitness Instructor",
+  "Front Desk / Reception",
+];
 
 interface AssignPersonnelDialogProps {
   open: boolean;
@@ -21,7 +28,10 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
   const [selectedBranchId, setSelectedBranchId] = useState("");
   const [role, setRole] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [staffSearch, setStaffSearch] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionRef = useRef<HTMLDivElement>(null);
 
   const availableStaff = useMemo(() => {
     const list = (employeesResponse as any)?.data ?? employeesResponse ?? [];
@@ -34,6 +44,22 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
         staff.name.toLowerCase().includes(staffSearch.toLowerCase())
       );
   }, [employeesResponse, staffSearch]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectStaff = (staff: any) => {
+    setSelectedStaffId(staff.id);
+    setStaffSearch(staff.name);
+    setShowSuggestions(false);
+  };
 
   const handleSave = async () => {
     if (!selectedStaffId || !selectedBranchId || !role) return;
@@ -54,85 +80,92 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {/* Modal Container: Standard rounded-lg corners */}
-      <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-hidden p-0 border border-slate-200 shadow-xl rounded-lg bg-white">
+      {/* Changed overflow-hidden to overflow-visible to prevent dropdown clipping */}
+      <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-visible p-0 border border-slate-200 shadow-xl rounded-lg bg-white">
         
-        {/* Header: Clean font, no breadcrumbs/all-caps as per Asset modal */}
         <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b border-slate-50">
-          <DialogTitle className="text-xl font-bold text-slate-900">
-            Deploy Personnel
-          </DialogTitle>
+          <DialogTitle className="text-xl font-bold text-slate-900">Deploy Personnel</DialogTitle>
           <DialogDescription className="text-slate-900 text-[13px] mt-1">
             Assign staff members to specific branches and define their functional roles.
           </DialogDescription>
         </DialogHeader>
         
-        {/* Body: Proportional spacing and standard input rounding */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+        {/* Container set to overflow-visible so dropdowns aren't trapped */}
+        <div className="flex-1 overflow-visible px-6 py-6 space-y-5">
           
-          <div className="space-y-1.5">
-            <Label className="text-[13px] font-semibold text-slate-700">
-              Select Staff Member *
-            </Label>
-            <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
-              <SelectTrigger className="h-10 rounded-md border-slate-200 bg-white focus:ring-1 focus:ring-blue-500 text-slate-900">
-                <SelectValue placeholder={loadingEmployees ? "Loading staff..." : "Choose personnel"} />
-              </SelectTrigger>
-              <SelectContent className="rounded-md shadow-lg border-slate-200">
-                <div className="flex items-center px-3 py-2 border-b border-slate-100">
-                  <Search className="h-4 w-4 text-slate-400 mr-2" />
-                  <Input 
-                    placeholder="Search by name..." 
-                    className="h-8 border-none bg-transparent text-sm focus-visible:ring-0 px-0 shadow-none"
-                    value={staffSearch}
-                    onChange={(e) => setStaffSearch(e.target.value)}
-                  />
-                </div>
-                <div className="max-h-[200px] overflow-y-auto p-1">
-                  {availableStaff.length > 0 ? (
-                    availableStaff.map((staff: any) => (
-                      <SelectItem key={staff.id} value={staff.id} className="rounded-sm py-2 text-sm text-slate-700">
-                        {staff.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <div className="py-4 text-center text-xs text-slate-400 font-medium italic">
-                      No matching staff found
+          {/* STAFF AUTOCOMPLETE */}
+          <div className="space-y-1.5 relative z-50" ref={suggestionRef}>
+            <Label className="text-[13px] font-semibold text-slate-700">Select Staff Member *</Label>
+            <div className="relative">
+              <Input 
+                placeholder="Type name to search staff..."
+                className="h-10 pr-10 rounded-md border-slate-200 bg-white"
+                value={staffSearch}
+                onChange={(e) => {
+                  setStaffSearch(e.target.value);
+                  setSelectedStaffId(""); 
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+              />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            </div>
+
+            {showSuggestions && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-[180px] overflow-y-auto">
+                {availableStaff.length > 0 ? (
+                  availableStaff.map((staff: any) => (
+                    <div
+                      key={staff.id}
+                      className="flex items-center justify-between px-3 py-2 text-sm cursor-pointer hover:bg-slate-50 text-slate-700"
+                      onClick={() => handleSelectStaff(staff)}
+                    >
+                      <span>{staff.name}</span>
+                      {selectedStaffId === staff.id && <Check className="h-4 w-4 text-blue-600" />}
                     </div>
-                  )}
-                </div>
+                  ))
+                ) : (
+                  <div className="px-3 py-4 text-center text-xs text-slate-400 italic">No staff found</div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ROLE DROPDOWN - Forced to open at bottom */}
+          <div className="space-y-1.5 relative z-40">
+            <Label className="text-[13px] font-semibold text-slate-700">Functional Role *</Label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger className="h-10 rounded-md border-slate-200 bg-white">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent 
+                position="popper" 
+                sideOffset={4} 
+                className="w-[var(--radix-select-trigger-width)] max-h-[200px]"
+              >
+                {PRESET_ROLES.map((r) => (
+                  <SelectItem key={r} value={r} className="cursor-pointer">
+                    {r}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-[13px] font-semibold text-slate-700">
-              Functional Role (Designation) *
-            </Label>
-            <Input 
-              placeholder="e.g. Branch Manager" 
-              className="h-10 rounded-md border-slate-200 focus:ring-1 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-[13px] font-semibold text-slate-700">
-              Target Branch Location *
-            </Label>
+          {/* BRANCH DROPDOWN - Forced to open at bottom */}
+          <div className="space-y-1.5 relative z-30">
+            <Label className="text-[13px] font-semibold text-slate-700">Target Branch Location *</Label>
             <Select value={selectedBranchId} onValueChange={setSelectedBranchId}>
-              <SelectTrigger className="h-10 rounded-md border-slate-200 bg-white focus:ring-1 focus:ring-blue-500 text-slate-900">
+              <SelectTrigger className="h-10 rounded-md border-slate-200 bg-white">
                 <SelectValue placeholder="Select destination branch" />
               </SelectTrigger>
-              {/* Add position="popper" and sideOffset={4} here */}
               <SelectContent 
                 position="popper" 
                 sideOffset={4} 
-                className="rounded-md border-slate-200 p-1 w-[var(--radix-select-trigger-width)] max-h-[var(--radix-select-content-available-height)]"
+                className="w-[var(--radix-select-trigger-width)] max-h-[200px]"
               >
                 {branches.map((branch) => (
-                  <SelectItem key={branch.id} value={branch.id} className="rounded-sm py-2 text-sm">
+                  <SelectItem key={branch.id} value={branch.id} className="cursor-pointer">
                     {branch.name}
                   </SelectItem>
                 ))}
@@ -141,23 +174,14 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
           </div>
         </div>
 
-        {/* Footer: Compact height and standard button weight */}
-        <DialogFooter className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-2 bg-slate-50/30">
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-            className="rounded-md px-4 h-9 text-sm font-medium border-slate-200 text-slate-600 hover:bg-slate-50"
-          >
-            Cancel
-          </Button>
+        <DialogFooter className="px-6 py-4 border-t border-slate-100 bg-slate-50/30 shrink-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="h-9">Cancel</Button>
           <Button 
             onClick={handleSave}
             disabled={!selectedStaffId || !selectedBranchId || !role || isSubmitting}
-            className="bg-[#0052cc] hover:bg-[#0041a3] text-white h-9 rounded-md px-4 text-sm font-semibold shadow-sm transition-all active:scale-95"
+            className="bg-[#0052cc] hover:bg-[#0041a3] text-white h-9"
           >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : "Confirm Deployment"}
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm Deployment"}
           </Button>
         </DialogFooter>
       </DialogContent>
