@@ -62,7 +62,7 @@ export function CreateEmployeeLoginDialog({
     staleTime: 5 * 60 * 1000,
   })
 
-  const roles = rolesDat a ?? []
+  const roles = rolesData ?? []
 
   const form = useForm<CreateUserFormInput>({
     resolver: zodResolver(createUserFormSchema),
