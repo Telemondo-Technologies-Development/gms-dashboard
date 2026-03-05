@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { Loader2, ShieldCheck } from 'lucide-react'
 
 import {
   Dialog,
@@ -21,8 +22,12 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 import { createUserFormSchema } from '@/types/user/userSchemas'
 import type { CreateUserFormInput, CreateUserFormValues } from '@/types/user/userSchemas'
+import { AccessControlApi } from '@/api/generated/apis'
+import { getAuthenticatedApi } from '@/lib/api-client'
 
 interface CreateEmployeeLoginDialogProps {
   open: boolean
@@ -41,11 +46,30 @@ export function CreateEmployeeLoginDialog({
   isSubmitting,
   errorMessage,
 }: CreateEmployeeLoginDialogProps) {
+  const accessControlApi = getAuthenticatedApi(AccessControlApi)
+
+  const { data: rolesData, isLoading: rolesLoading } = useQuery({
+    queryKey: ['auth-roles'],
+    queryFn: async () => {
+      const response = await accessControlApi.getAllRoles({
+        pageable: { page: 0, size: 1000 },
+      })
+      if (response.success && Array.isArray(response.data)) {
+        return response.data as Array<{ id: string; name: string; description?: string }>
+      }
+      return []
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const roles = rolesDat a ?? []
+
   const form = useForm<CreateUserFormInput>({
     resolver: zodResolver(createUserFormSchema),
     defaultValues: {
       username: '',
       password: '',
+      roleIds: [],
     },
   })
 
@@ -93,6 +117,64 @@ export function CreateEmployeeLoginDialog({
                   <FormControl>
                     <Input type="password" placeholder="At least 8 characters" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Role selection */}
+            <FormField
+              control={form.control}
+              name="roleIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                    Assign Roles
+                  </FormLabel>
+                  {rolesLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Loading roles…
+                    </div>
+                  ) : roles.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-2">No roles available.</p>
+                  ) : (
+                    <div className="rounded-md border divide-y">
+                      {roles.map((role) => {
+                        const checked = (field.value as string[]).includes(role.id)
+                        return (
+                          <label
+                            key={role.id}
+                            className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-muted/50 transition-colors"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(isChecked) => {
+                                const current = field.value as string[]
+                                field.onChange(
+                                  isChecked
+                                    ? [...current, role.id]
+                                    : current.filter((id) => id !== role.id),
+                                )
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">{role.name}</span>
+                                {checked && (
+                                  <Badge variant="secondary" className="text-xs">Selected</Badge>
+                                )}
+                              </div>
+                              {role.description ? (
+                                <p className="text-xs text-muted-foreground truncate">{role.description}</p>
+                              ) : null}
+                            </div>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

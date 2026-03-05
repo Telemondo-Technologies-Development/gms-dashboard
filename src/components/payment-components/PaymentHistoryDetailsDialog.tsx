@@ -5,7 +5,7 @@ import {
   Clock,
   XCircle,
   Printer,
-  Calendar,
+  Calendar as CalendarIcon,
   CreditCard,
   FileText,
   User,
@@ -21,8 +21,10 @@ import { useEmployeeDisplayName } from '@/hooks/users/useStaffDisplayName'
 import { invoiceQueryKeys, paymentQueryKeys } from '@/lib/QueryKeys'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
@@ -114,7 +116,7 @@ export function PaymentDetailsDialog({
   const [amountInput, setAmountInput] = useState('')
   const [methodId, setMethodId] = useState('')
   const [statusValue, setStatusValue] = useState<PaymentTableDTOParsed['status']>('PENDING')
-  const [paidAtInput, setPaidAtInput] = useState('')
+  const [paidAt, setPaidAt] = useState<Date | undefined>(undefined)
   const [failureReason, setFailureReason] = useState('')
 
   const paymentMethodOptions = useMemo(
@@ -133,7 +135,7 @@ export function PaymentDetailsDialog({
     setAmountInput(payment.amount.toString())
     setMethodId(payment.paymentMethodId)
     setStatusValue(payment.status)
-    setPaidAtInput(toDateTimeLocalValue(payment.paidAt))
+    setPaidAt(payment.paidAt ?? undefined)
     setFailureReason(payment.failureReason ?? '')
     setEditError(null)
     setIsEditing(false)
@@ -152,10 +154,7 @@ export function PaymentDetailsDialog({
         throw new Error('Payment method is required.')
       }
 
-      const paidAt = paidAtInput ? new Date(paidAtInput) : undefined
-      if (paidAtInput && Number.isNaN(paidAt?.getTime())) {
-        throw new Error('Paid date is invalid.')
-      }
+      const paidAtDate = paidAt instanceof Date && !Number.isNaN(paidAt.getTime()) ? paidAt : undefined
 
       const paymentApi = getAuthenticatedApi(PaymentApi)
       const response = await paymentApi.updatePayment({
@@ -165,7 +164,7 @@ export function PaymentDetailsDialog({
           paymentMethodId: methodId,
           status: statusValue,
           updatedById: session.actorId,
-          paidAt,
+          paidAt: paidAtDate,
           failureReason: failureReason.trim() || undefined,
         },
       })
@@ -297,20 +296,57 @@ export function PaymentDetailsDialog({
                                   <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="IN">IN</SelectItem>
-                                  <SelectItem value="OUT">OUT</SelectItem>
-                                  <SelectItem value="UNDECIDED">UNDECIDED</SelectItem>
+                                  <SelectItem value="FULL">Full</SelectItem>
+                                  <SelectItem value="PARTIAL">Partial</SelectItem>
+                                  <SelectItem value="PENDING">Pending</SelectItem>
+                                  <SelectItem value="MISSED">Missed</SelectItem>
+                                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                                  <SelectItem value="WAITING">Waiting</SelectItem>
+                                  <SelectItem value="FAILED">Failed</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
 
                             <div className="space-y-2">
                               <Label className="text-xs text-muted-foreground uppercase tracking-wider">Paid Date</Label>
-                              <Input
-                                type="datetime-local"
-                                value={paidAtInput}
-                                onChange={(event) => setPaidAtInput(event.target.value)}
-                              />
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full justify-start text-left font-normal"
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                                    {paidAt ? format(paidAt, 'MMM d, yyyy h:mm a') : <span className="text-muted-foreground">Pick a date</span>}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-2" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={paidAt}
+                                    onSelect={(date) => setPaidAt(date ?? undefined)}
+                                    disabled={{ after: new Date() }}
+                                    initialFocus
+                                  />
+                                  <div className="mt-2 flex items-center justify-end gap-2 border-t pt-2">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setPaidAt(undefined)}
+                                    >
+                                      Clear
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      onClick={() => setPaidAt(new Date())}
+                                    >
+                                      Today
+                                    </Button>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
                             </div>
 
                             <div className="space-y-2">
@@ -338,7 +374,7 @@ export function PaymentDetailsDialog({
                             <div>
                               <p className="text-xs text-muted-foreground uppercase tracking-wider">Paid Date</p>
                               <p className="font-medium text-sm mt-0.5 flex items-center gap-2">
-                                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
                                 {payment.paidAt ? format(new Date(payment.paidAt), 'MMM d, yyyy h:mm a') : '—'}
                               </p>
                             </div>
@@ -399,9 +435,4 @@ export function PaymentDetailsDialog({
       </DialogContent>
     </Dialog>
   )
-}
-
-function toDateTimeLocalValue(value: Date | null): string {
-  if (!value) return ''
-  return format(new Date(value), "yyyy-MM-dd'T'HH:mm")
 }

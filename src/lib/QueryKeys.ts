@@ -32,6 +32,7 @@ export const userQueryKeys = {
 
 export const employeeQueryKeys = {
   employee: ['employees'] as const,
+  staff : ['employees', 'staff'] as const,
 }
 
 export const expenseQueryKeys = {
