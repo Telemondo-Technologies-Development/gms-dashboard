@@ -1,6 +1,6 @@
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { ArrowDown, ArrowUp, Users } from 'lucide-react'
-import type { AnalyticsData } from '@/lib/analytics-data'
+import type { AnalyticsData } from '@/lib/analytics/analytics-data'
 import {
   ChartContainer,
   ChartTooltip,
