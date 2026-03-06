@@ -11,6 +11,7 @@ apis/BranchApi.ts
 apis/BranchPersonnelApi.ts
 apis/BranchPersonnelRolesApi.ts
 apis/BranchSummaryApi.ts
+apis/BrandApi.ts
 apis/EmployeeApi.ts
 apis/InvoiceApi.ts
 apis/MaintenanceScheduleApi.ts
@@ -44,6 +45,7 @@ docs/ApiResponseAttendanceTableDTO.md
 docs/ApiResponseBillingCycleTableDTO.md
 docs/ApiResponseBranchPersonnelTableDTO.md
 docs/ApiResponseBranchTableDTO.md
+docs/ApiResponseBrandTableDTO.md
 docs/ApiResponseEmployeeTableDTO.md
 docs/ApiResponseInstant.md
 docs/ApiResponseInvoiceTableDTO.md
@@ -57,6 +59,7 @@ docs/ApiResponseListBillingCycleTableDTO.md
 docs/ApiResponseListBranchPersonnelTableDTO.md
 docs/ApiResponseListBranchSummaryTableDTO.md
 docs/ApiResponseListBranchTableDTO.md
+docs/ApiResponseListBrandTableDTO.md
 docs/ApiResponseListEmployeeInBranchDTO.md
 docs/ApiResponseListEmployeeTableDTO.md
 docs/ApiResponseListInvoiceTableDTO.md
@@ -150,6 +153,10 @@ docs/BranchSummaryApi.md
 docs/BranchSummaryTableDTO.md
 docs/BranchTableDTO.md
 docs/BranchesBriefDTO.md
+docs/BrandApi.md
+docs/BrandPostDTO.md
+docs/BrandPutDTO.md
+docs/BrandTableDTO.md
 docs/EmployeeApi.md
 docs/EmployeeInBranchDTO.md
 docs/EmployeePostDTO.md
@@ -262,6 +269,7 @@ models/ApiResponseAttendanceTableDTO.ts
 models/ApiResponseBillingCycleTableDTO.ts
 models/ApiResponseBranchPersonnelTableDTO.ts
 models/ApiResponseBranchTableDTO.ts
+models/ApiResponseBrandTableDTO.ts
 models/ApiResponseEmployeeTableDTO.ts
 models/ApiResponseInstant.ts
 models/ApiResponseInvoiceTableDTO.ts
@@ -275,6 +283,7 @@ models/ApiResponseListBillingCycleTableDTO.ts
 models/ApiResponseListBranchPersonnelTableDTO.ts
 models/ApiResponseListBranchSummaryTableDTO.ts
 models/ApiResponseListBranchTableDTO.ts
+models/ApiResponseListBrandTableDTO.ts
 models/ApiResponseListEmployeeInBranchDTO.ts
 models/ApiResponseListEmployeeTableDTO.ts
 models/ApiResponseListInvoiceTableDTO.ts
@@ -356,6 +365,9 @@ models/BranchPutDTO.ts
 models/BranchSummaryTableDTO.ts
 models/BranchTableDTO.ts
 models/BranchesBriefDTO.ts
+models/BrandPostDTO.ts
+models/BrandPutDTO.ts
+models/BrandTableDTO.ts
 models/EmployeeInBranchDTO.ts
 models/EmployeePostDTO.ts
 models/EmployeePutDTO.ts

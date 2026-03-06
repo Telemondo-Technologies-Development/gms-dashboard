@@ -7,15 +7,19 @@ Format for Asset create
 
 Name | Type
 ------------ | -------------
+`acquisitionDate` | Date
 `assetCategoryId` | string
 `branchId` | string
+`brandIds` | Array&lt;string&gt;
 `createdById` | string
 `endOfLife` | Date
-`isDateRangeValid` | boolean
+`isAcquisitionDateValid` | boolean
+`isEndOfLifeValid` | boolean
 `manufacturedDate` | Date
 `name` | string
 `objectIds` | Array&lt;string&gt;
 `remarks` | string
+`status` | string
 
 ## Example
 
@@ -24,15 +28,19 @@ import type { AssetPostDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
+  "acquisitionDate": null,
   "assetCategoryId": null,
   "branchId": null,
+  "brandIds": null,
   "createdById": null,
   "endOfLife": null,
-  "isDateRangeValid": null,
+  "isAcquisitionDateValid": null,
+  "isEndOfLifeValid": null,
   "manufacturedDate": null,
   "name": null,
   "objectIds": null,
   "remarks": null,
+  "status": null,
 } satisfies AssetPostDTO
 
 console.log(example)

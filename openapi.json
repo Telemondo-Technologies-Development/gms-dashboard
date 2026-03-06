@@ -71,6 +71,168 @@
         ]
       }
     },
+    "/api/asset/brand": {
+      "get": {
+        "operationId": "getAllBrands",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pageable",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListBrandTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get all Brands",
+        "tags": [
+          "Brand"
+        ]
+      },
+      "post": {
+        "operationId": "createBrand",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandPostDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBrandTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Create a Brand Category",
+        "tags": [
+          "Brand"
+        ]
+      }
+    },
+    "/api/asset/brand/{id}": {
+      "delete": {
+        "operationId": "deleteBrand",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUnit"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Delete a Brand by id",
+        "tags": [
+          "Brand"
+        ]
+      },
+      "get": {
+        "operationId": "getBrand",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBrandTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Get a Brand by id",
+        "tags": [
+          "Brand"
+        ]
+      },
+      "put": {
+        "operationId": "updateBrand",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrandPutDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBrandTableDTO"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Update a Brand by id",
+        "tags": [
+          "Brand"
+        ]
+      }
+    },
     "/api/asset/category": {
       "get": {
         "operationId": "getAllAssetCategories",
@@ -5081,6 +5243,45 @@
         ]
       }
     },
+    "/api/storage/upload/brand/logo": {
+      "post": {
+        "operationId": "uploadBrandLogo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseObjectStorage"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "(private)",
+        "tags": [
+          "Object Storage"
+        ]
+      }
+    },
     "/api/storage/upload/expense/receipt": {
       "post": {
         "operationId": "uploadExpenseReceipt",
@@ -6511,6 +6712,37 @@
           "timestamp"
         ]
       },
+      "ApiResponseBrandTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/BrandTableDTO"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
       "ApiResponseEmployeeTableDTO": {
         "type": "object",
         "properties": {
@@ -6918,6 +7150,40 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BranchTableDTO"
+            }
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PageMetadata"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "success",
+          "timestamp"
+        ]
+      },
+      "ApiResponseListBrandTableDTO": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BrandTableDTO"
             }
           },
           "errors": {
@@ -9064,6 +9330,10 @@
         "type": "object",
         "description": "Format for Asset create",
         "properties": {
+          "acquisitionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "assetCategoryId": {
             "type": "string",
             "format": "uuid"
@@ -9071,6 +9341,13 @@
           "branchId": {
             "type": "string",
             "format": "uuid"
+          },
+          "brandIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           "createdById": {
             "type": "string",
@@ -9080,7 +9357,10 @@
             "type": "string",
             "format": "date-time"
           },
-          "isDateRangeValid": {
+          "isAcquisitionDateValid": {
+            "type": "boolean"
+          },
+          "isEndOfLifeValid": {
             "type": "boolean"
           },
           "manufacturedDate": {
@@ -9099,21 +9379,36 @@
           },
           "remarks": {
             "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPERATIONAL",
+              "DOWN",
+              "DECOMMISSIONED"
+            ]
           }
         },
         "required": [
           "assetCategoryId",
           "branchId",
+          "brandIds",
           "createdById",
-          "isDateRangeValid",
+          "isAcquisitionDateValid",
+          "isEndOfLifeValid",
           "name",
-          "objectIds"
+          "objectIds",
+          "status"
         ]
       },
       "AssetPutDTO": {
         "type": "object",
         "description": "Format for Asset update",
         "properties": {
+          "acquisitionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "assetCategoryId": {
             "type": "string",
             "format": "uuid"
@@ -9122,11 +9417,21 @@
             "type": "string",
             "format": "uuid"
           },
+          "brandIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           "endOfLife": {
             "type": "string",
             "format": "date-time"
           },
-          "isDateRangeValid": {
+          "isAcquisitionDateValid": {
+            "type": "boolean"
+          },
+          "isEndOfLifeValid": {
             "type": "boolean"
           },
           "manufacturedDate": {
@@ -9145,6 +9450,14 @@
           },
           "remarks": {
             "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPERATIONAL",
+              "DOWN",
+              "DECOMMISSIONED"
+            ]
           },
           "updatedById": {
             "type": "string",
@@ -9154,9 +9467,12 @@
         "required": [
           "assetCategoryId",
           "branchId",
-          "isDateRangeValid",
+          "brandIds",
+          "isAcquisitionDateValid",
+          "isEndOfLifeValid",
           "name",
           "objectIds",
+          "status",
           "updatedById"
         ]
       },
@@ -9164,6 +9480,10 @@
         "type": "object",
         "description": "Format for Asset read",
         "properties": {
+          "acquisitionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
           "assetCategoryId": {
             "type": "string",
             "format": "uuid"
@@ -9171,6 +9491,13 @@
           "branchId": {
             "type": "string",
             "format": "uuid"
+          },
+          "brandIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           "createdAt": {
             "type": "string",
@@ -9205,6 +9532,14 @@
           "remarks": {
             "type": "string"
           },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPERATIONAL",
+              "DOWN",
+              "DECOMMISSIONED"
+            ]
+          },
           "updatedAt": {
             "type": "string",
             "format": "date-time"
@@ -9217,10 +9552,12 @@
         "required": [
           "assetCategoryId",
           "branchId",
+          "brandIds",
           "createdAt",
           "id",
           "name",
           "objectIds",
+          "status",
           "updatedAt"
         ]
       },
@@ -9832,6 +10169,99 @@
         "required": [
           "id",
           "name"
+        ]
+      },
+      "BrandPostDTO": {
+        "type": "object",
+        "description": "Format for Brand create",
+        "properties": {
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "createdById",
+          "name",
+          "objectIds"
+        ]
+      },
+      "BrandPutDTO": {
+        "type": "object",
+        "description": "Format for Brand update",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "objectIds",
+          "updatedById"
+        ]
+      },
+      "BrandTableDTO": {
+        "type": "object",
+        "description": "Format for Brand read",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdById": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedById": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "createdAt",
+          "id",
+          "name",
+          "objectIds",
+          "updatedAt"
         ]
       },
       "EmployeeInBranchDTO": {

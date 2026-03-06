@@ -43,6 +43,10 @@ export interface UploadAssetDocumentRequest {
     uploadBranchLogoRequest?: UploadBranchLogoRequest;
 }
 
+export interface UploadBrandLogoRequest {
+    uploadBranchLogoRequest?: UploadBranchLogoRequest;
+}
+
 export interface UploadExpenseReceiptRequest {
     category: string;
     uploadBranchLogoRequest?: UploadBranchLogoRequest;
@@ -182,6 +186,38 @@ export class ObjectStorageApi extends runtime.BaseAPI {
      */
     async uploadAssetDocument(requestParameters: UploadAssetDocumentRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseObjectStorage> {
         const response = await this.uploadAssetDocumentRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * (private)
+     */
+    async uploadBrandLogoRaw(requestParameters: UploadBrandLogoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ApiResponseObjectStorage>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+
+        let urlPath = `/api/storage/upload/brand/logo`;
+
+        const response = await this.request({
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UploadBranchLogoRequestToJSON(requestParameters['uploadBranchLogoRequest']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ApiResponseObjectStorageFromJSON(jsonValue));
+    }
+
+    /**
+     * (private)
+     */
+    async uploadBrandLogo(requestParameters: UploadBrandLogoRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ApiResponseObjectStorage> {
+        const response = await this.uploadBrandLogoRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

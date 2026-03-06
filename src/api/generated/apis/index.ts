@@ -13,6 +13,7 @@ export * from './BranchApi';
 export * from './BranchPersonnelApi';
 export * from './BranchPersonnelRolesApi';
 export * from './BranchSummaryApi';
+export * from './BrandApi';
 export * from './EmployeeApi';
 export * from './InvoiceApi';
 export * from './MaintenanceScheduleApi';

@@ -1,51 +1,35 @@
 
-# AssetTableDTO
+# BrandTableDTO
 
-Format for Asset read
+Format for Brand read
 
 ## Properties
 
 Name | Type
 ------------ | -------------
-`acquisitionDate` | Date
-`assetCategoryId` | string
-`branchId` | string
-`brandIds` | Array&lt;string&gt;
 `createdAt` | Date
 `createdById` | string
-`endOfLife` | Date
 `id` | string
-`manufacturedDate` | Date
 `name` | string
 `objectIds` | Array&lt;string&gt;
-`remarks` | string
-`status` | string
 `updatedAt` | Date
 `updatedById` | string
 
 ## Example
 
 ```typescript
-import type { AssetTableDTO } from ''
+import type { BrandTableDTO } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "acquisitionDate": null,
-  "assetCategoryId": null,
-  "branchId": null,
-  "brandIds": null,
   "createdAt": null,
   "createdById": null,
-  "endOfLife": null,
   "id": null,
-  "manufacturedDate": null,
   "name": null,
   "objectIds": null,
-  "remarks": null,
-  "status": null,
   "updatedAt": null,
   "updatedById": null,
-} satisfies AssetTableDTO
+} satisfies BrandTableDTO
 
 console.log(example)
 
@@ -54,7 +38,7 @@ const exampleJSON: string = JSON.stringify(example)
 console.log(exampleJSON)
 
 // Parse the JSON string back to an object
-const exampleParsed = JSON.parse(exampleJSON) as AssetTableDTO
+const exampleParsed = JSON.parse(exampleJSON) as BrandTableDTO
 console.log(exampleParsed)
 ```
 
