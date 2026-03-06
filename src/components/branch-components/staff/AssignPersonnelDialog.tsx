@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,6 @@ interface AssignPersonnelDialogProps {
 
 export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess }: AssignPersonnelDialogProps) {
   const { data: employeesResponse, isLoading: loadingEmployees } = useEmployees();
-  
 
   const [selectedStaffId, setSelectedStaffId] = useState("");
   const [selectedBranchId, setSelectedBranchId] = useState("");
@@ -26,16 +25,11 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
 
   const availableStaff = useMemo(() => {
     const list = (employeesResponse as any)?.data ?? employeesResponse ?? [];
-    
     return list
-      .map((emp: any) => {
-        const mid = emp.middleName ? ` ${emp.middleName}` : '';
-        const suf = emp.suffix ? ` ${emp.suffix}` : '';
-        return {
-          id: emp.actorId,
-          name: `${emp.firstName ?? ''}${mid} ${emp.surname ?? ''}${suf}`.trim() || 'Unnamed Employee',
-        };
-      })
+      .map((emp: any) => ({
+        id: emp.actorId,
+        name: `${emp.firstName ?? ''} ${emp.surname ?? ''}`.trim() || 'Unnamed Employee',
+      }))
       .filter((staff: any) => 
         staff.name.toLowerCase().includes(staffSearch.toLowerCase())
       );
@@ -43,7 +37,6 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
 
   const handleSave = async () => {
     if (!selectedStaffId || !selectedBranchId || !role) return;
-    
     setIsSubmitting(true);
     try { 
       onSuccess();
@@ -51,6 +44,7 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
       setSelectedBranchId("");
       setRole("");
       setStaffSearch("");
+      onOpenChange(false);
     } catch (error) {
       console.error("Assignment failed", error);
     } finally {
@@ -60,28 +54,36 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-black uppercase tracking-tight text-zinc-900">
+      {/* Modal Container: Standard rounded-lg corners */}
+      <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-hidden p-0 border border-slate-200 shadow-xl rounded-lg bg-white">
+        
+        {/* Header: Clean font, no breadcrumbs/all-caps as per Asset modal */}
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b border-slate-50">
+          <DialogTitle className="text-xl font-bold text-slate-900">
             Deploy Personnel
           </DialogTitle>
+          <DialogDescription className="text-slate-900 text-[13px] mt-1">
+            Assign staff members to specific branches and define their functional roles.
+          </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-5 py-4">
-          <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">
-              Select Staff Member
+        {/* Body: Proportional spacing and standard input rounding */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+          
+          <div className="space-y-1.5">
+            <Label className="text-[13px] font-semibold text-slate-700">
+              Select Staff Member *
             </Label>
             <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
-              <SelectTrigger className="h-12 rounded-xl bg-zinc-50 border-zinc-100 focus:ring-[#0062cc]">
-                <SelectValue placeholder={loadingEmployees ? "Loading staff..." : "Select personnel"} />
+              <SelectTrigger className="h-10 rounded-md border-slate-200 bg-white focus:ring-1 focus:ring-blue-500 text-slate-900">
+                <SelectValue placeholder={loadingEmployees ? "Loading staff..." : "Choose personnel"} />
               </SelectTrigger>
-              <SelectContent className="rounded-xl shadow-xl border-zinc-100">
-                <div className="flex items-center px-3 pb-2 pt-1 border-b border-zinc-50">
-                  <Search className="h-3.5 w-3.5 text-zinc-400 mr-2" />
+              <SelectContent className="rounded-md shadow-lg border-slate-200">
+                <div className="flex items-center px-3 py-2 border-b border-slate-100">
+                  <Search className="h-4 w-4 text-slate-400 mr-2" />
                   <Input 
                     placeholder="Search by name..." 
-                    className="h-8 border-none bg-transparent text-xs focus-visible:ring-0 px-0 shadow-none"
+                    className="h-8 border-none bg-transparent text-sm focus-visible:ring-0 px-0 shadow-none"
                     value={staffSearch}
                     onChange={(e) => setStaffSearch(e.target.value)}
                   />
@@ -89,12 +91,12 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
                 <div className="max-h-[200px] overflow-y-auto p-1">
                   {availableStaff.length > 0 ? (
                     availableStaff.map((staff: any) => (
-                      <SelectItem key={staff.id} value={staff.id} className="rounded-lg py-2.5 text-sm">
+                      <SelectItem key={staff.id} value={staff.id} className="rounded-sm py-2 text-sm text-slate-700">
                         {staff.name}
                       </SelectItem>
                     ))
                   ) : (
-                    <div className="py-6 text-center text-xs text-zinc-500 italic">
+                    <div className="py-4 text-center text-xs text-slate-400 font-medium italic">
                       No matching staff found
                     </div>
                   )}
@@ -103,29 +105,34 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">
-              Functional Role (Designation)
+          <div className="space-y-1.5">
+            <Label className="text-[13px] font-semibold text-slate-700">
+              Functional Role (Designation) *
             </Label>
             <Input 
-              placeholder="e.g. Branch Manager, Coach" 
-              className="h-12 rounded-xl bg-zinc-50 border-zinc-100 focus:ring-[#0062cc]"
+              placeholder="e.g. Branch Manager" 
+              className="h-10 rounded-md border-slate-200 focus:ring-1 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
               value={role}
               onChange={(e) => setRole(e.target.value)}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest">
-              Target Branch Location
+          <div className="space-y-1.5">
+            <Label className="text-[13px] font-semibold text-slate-700">
+              Target Branch Location *
             </Label>
             <Select value={selectedBranchId} onValueChange={setSelectedBranchId}>
-              <SelectTrigger className="h-12 rounded-xl bg-zinc-50 border-zinc-100 focus:ring-[#0062cc]">
+              <SelectTrigger className="h-10 rounded-md border-slate-200 bg-white focus:ring-1 focus:ring-blue-500 text-slate-900">
                 <SelectValue placeholder="Select destination branch" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              {/* Add position="popper" and sideOffset={4} here */}
+              <SelectContent 
+                position="popper" 
+                sideOffset={4} 
+                className="rounded-md border-slate-200 p-1 w-[var(--radix-select-trigger-width)] max-h-[var(--radix-select-content-available-height)]"
+              >
                 {branches.map((branch) => (
-                  <SelectItem key={branch.id} value={branch.id} className="rounded-lg py-2.5 text-sm">
+                  <SelectItem key={branch.id} value={branch.id} className="rounded-sm py-2 text-sm">
                     {branch.name}
                   </SelectItem>
                 ))}
@@ -134,22 +141,23 @@ export function AssignPersonnelDialog({ open, onOpenChange, branches, onSuccess 
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        {/* Footer: Compact height and standard button weight */}
+        <DialogFooter className="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-2 bg-slate-50/30">
           <Button 
-            variant="ghost" 
+            variant="outline" 
             onClick={() => onOpenChange(false)}
-            className="rounded-xl font-bold uppercase text-[10px] tracking-widest text-zinc-500 hover:bg-zinc-50"
+            className="rounded-md px-4 h-9 text-sm font-medium border-slate-200 text-slate-600 hover:bg-slate-50"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSave}
             disabled={!selectedStaffId || !selectedBranchId || !role || isSubmitting}
-            className="bg-[#0062cc] hover:bg-[#0056b3] text-white rounded-xl px-8 font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-blue-100 transition-all"
+            className="bg-[#0052cc] hover:bg-[#0041a3] text-white h-9 rounded-md px-4 text-sm font-semibold shadow-sm transition-all active:scale-95"
           >
             {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : "Confirm Assignment"}
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : "Confirm Deployment"}
           </Button>
         </DialogFooter>
       </DialogContent>

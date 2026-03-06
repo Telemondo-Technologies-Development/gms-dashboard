@@ -28,6 +28,18 @@ import type {
 } from '@/types/expense/expenseSchemas'
 import { expenseQueryKeys } from '@/lib/QueryKeys'
 import { getPageableApi, DUMMY_PAGEABLE } from '@/lib/expense/expense-api-client'
+import {
+  SAMPLE_SALARY_EXPENSE,
+  SAMPLE_ASSET_EXPENSE,
+  SAMPLE_ASSET_MAINTENANCE_EXPENSE,
+  SAMPLE_UTILITY_EXPENSE,
+  SAMPLE_SUPPLIES_EXPENSE,
+  SAMPLE_OTHER_EXPENSE,
+} from '@/lib/expense/expense-sample-data'
+
+// Set to true to use local sample data instead of hitting the API.
+// Flip back to false (or remove) before committing.
+const USE_SAMPLE_DATA = true
 
 export interface UseAllExpensesResult {
   expenses: ExpenseFormData[]
@@ -96,6 +108,7 @@ function useAssetExpenses() {
     staleTime: 60_000,
     retry: false,
     queryFn: async () => {
+      if (USE_SAMPLE_DATA) return [SAMPLE_ASSET_EXPENSE]
       try {
         return extractList(
           (await getPageableApi(AssetExpenseApi).getAllAssetExpense({ pageable: DUMMY_PAGEABLE })).data,
@@ -114,6 +127,7 @@ function useAssetMaintenanceExpenses() {
     staleTime: 60_000,
     retry: false,
     queryFn: async () => {
+      if (USE_SAMPLE_DATA) return [SAMPLE_ASSET_MAINTENANCE_EXPENSE]
       try {
         return extractList(
           (await getPageableApi(AssetMaintenanceExpenseApi).getAllAssetMaintenanceExpense({ pageable: DUMMY_PAGEABLE })).data,
@@ -132,6 +146,7 @@ function useSalaryExpenses() {
     staleTime: 60_000,
     retry: false,
     queryFn: async () => {
+      if (USE_SAMPLE_DATA) return [SAMPLE_SALARY_EXPENSE]
       try {
         return extractList(
           (await getPageableApi(SalaryExpenseApi).getAllSalaryExpense({ pageable: DUMMY_PAGEABLE })).data,
@@ -150,6 +165,7 @@ function useUtilityExpenses() {
     staleTime: 60_000,
     retry: false,
     queryFn: async () => {
+      if (USE_SAMPLE_DATA) return [SAMPLE_UTILITY_EXPENSE]
       try {
         return extractList(
           (await getPageableApi(UtilityExpenseApi).getAllUtilityExpense({ pageable: DUMMY_PAGEABLE })).data,
@@ -168,6 +184,7 @@ function useSuppliesExpenses() {
     staleTime: 60_000,
     retry: false,
     queryFn: async () => {
+      if (USE_SAMPLE_DATA) return [SAMPLE_SUPPLIES_EXPENSE]
       try {
         return extractList(
           (await getPageableApi(SuppliesExpenseApi).getAllSuppliesExpense({ pageable: DUMMY_PAGEABLE })).data,
@@ -186,6 +203,7 @@ function useOtherExpenses() {
     staleTime: 60_000,
     retry: false,
     queryFn: async () => {
+      if (USE_SAMPLE_DATA) return [SAMPLE_OTHER_EXPENSE]
       try {
         return extractList(
           (await getPageableApi(OtherExpenseApi).getAllOtherExpense({ pageable: DUMMY_PAGEABLE })).data,
@@ -231,12 +249,17 @@ export function useCreateExpense() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (form: ExpenseCreateForm): Promise<unknown> => {
+      if (USE_SAMPLE_DATA) {
+        console.debug('[useCreateExpense] sample mode — skipping API call', form)
+        return Promise.resolve()
+      }
       console.debug('[useCreateExpense] submitting form:', form)
       const base = {
         actorId:  form.actorId,
         branchId: form.branchId,
         amount:   parseFloat(form.amount),
         paidAt:   toDate(form.paidAt),
+        remarks:  (form as any).remarks || undefined,
       }
       switch (form.type) {
         case 'asset':
@@ -288,7 +311,21 @@ export function useCreateExpense() {
         }
       }
     },
-    onSuccess: (_, v) => qc.invalidateQueries({ queryKey: typeToQueryKey(v.type) }),
+    onSuccess: (_, v) => {
+      if (USE_SAMPLE_DATA) {
+        // In sample mode the query never re-fetches, so push the new entry into
+        // the cache directly so it appears in the table immediately.
+        const queryKey = typeToQueryKey(v.type)
+        const newEntry = {
+          ...v,
+          id: `sample-${v.type}-${Date.now()}`,
+          receipt: null,
+        } as ExpenseFormData
+        qc.setQueryData<ExpenseFormData[]>(queryKey, (prev) => [...(prev ?? []), newEntry])
+      } else {
+        qc.invalidateQueries({ queryKey: typeToQueryKey(v.type) })
+      }
+    },
     onError: (err, vars) => {
       console.error('[useCreateExpense] mutation failed for:', vars, err)
     },
@@ -300,11 +337,16 @@ export function useUpdateExpense() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (form: ExpenseUpdateForm): Promise<unknown> => {
+      if (USE_SAMPLE_DATA) {
+        console.debug('[useUpdateExpense] sample mode — skipping API call', form)
+        return Promise.resolve()
+      }
       const base = {
         actorId:  form.actorId,
         branchId: form.branchId,
         amount:   parseFloat(form.amount),
         paidAt:   toDate(form.paidAt),
+        remarks:  (form as any).remarks || undefined,
       }
       switch (form.type) {
         case 'asset':
@@ -362,7 +404,17 @@ export function useUpdateExpense() {
         }
       }
     },
-    onSuccess: (_, v) => qc.invalidateQueries({ queryKey: typeToQueryKey(v.type) }),
+    onSuccess: (_, v) => {
+      if (USE_SAMPLE_DATA) {
+        // Replace the matching entry in the cache with the updated values.
+        const queryKey = typeToQueryKey(v.type)
+        qc.setQueryData<ExpenseFormData[]>(queryKey, (prev) =>
+          (prev ?? []).map((e) => e.id === v.id ? ({ ...e, ...v, receipt: e.receipt }) as ExpenseFormData : e)
+        )
+      } else {
+        qc.invalidateQueries({ queryKey: typeToQueryKey(v.type) })
+      }
+    },
   })
 }
 
@@ -370,16 +422,30 @@ export function useUpdateExpense() {
 export function useDeleteExpense() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, type }: { id: string; type: string }) => {
+    mutationFn: async ({ id, type }: { id: string; type: string }): Promise<void> => {
+      if (USE_SAMPLE_DATA) {
+        console.debug('[useDeleteExpense] sample mode — skipping API call', { id, type })
+        return
+      }
       switch (type) {
-        case 'asset':             return getAuthenticatedApi(AssetExpenseApi).deleteAssetExpense({ id })
-        case 'asset-maintenance': return getAuthenticatedApi(AssetMaintenanceExpenseApi).deleteAssetMaintenanceExpense({ id })
-        case 'salary':            return getAuthenticatedApi(SalaryExpenseApi).deleteSalaryExpense({ id })
-        case 'utility':           return getAuthenticatedApi(UtilityExpenseApi).deleteUtilityExpense({ id })
-        case 'supplies':          return getAuthenticatedApi(SuppliesExpenseApi).deleteSuppliesExpense({ id })
-        default:                  return getAuthenticatedApi(OtherExpenseApi).deleteOtherExpense({ id })
+        case 'asset':             await getAuthenticatedApi(AssetExpenseApi).deleteAssetExpense({ id }); break
+        case 'asset-maintenance': await getAuthenticatedApi(AssetMaintenanceExpenseApi).deleteAssetMaintenanceExpense({ id }); break
+        case 'salary':            await getAuthenticatedApi(SalaryExpenseApi).deleteSalaryExpense({ id }); break
+        case 'utility':           await getAuthenticatedApi(UtilityExpenseApi).deleteUtilityExpense({ id }); break
+        case 'supplies':          await getAuthenticatedApi(SuppliesExpenseApi).deleteSuppliesExpense({ id }); break
+        default:                  await getAuthenticatedApi(OtherExpenseApi).deleteOtherExpense({ id })
       }
     },
-    onSuccess: (_, v) => qc.invalidateQueries({ queryKey: typeToQueryKey(v.type) }),
+    onSuccess: (_, v) => {
+      if (USE_SAMPLE_DATA) {
+        // Remove the deleted entry from the cache directly.
+        const queryKey = typeToQueryKey(v.type)
+        qc.setQueryData<ExpenseFormData[]>(queryKey, (prev) =>
+          (prev ?? []).filter((e) => e.id !== v.id)
+        )
+      } else {
+        qc.invalidateQueries({ queryKey: typeToQueryKey(v.type) })
+      }
+    },
   })
 }

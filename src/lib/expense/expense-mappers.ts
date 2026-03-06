@@ -108,7 +108,7 @@ export function toLegacyRow(e: ExpenseFormData): LegacyExpenseRow {
     branch:        (e as any).branch,
     paymentMethod: '',              // not stored on expense API entities
     category:      'operational',
-    description:   '',
+    description:   (e as any).remarks ?? '',
     receipt:       (e as any).receipt ?? null,
     salaryType,
   }
