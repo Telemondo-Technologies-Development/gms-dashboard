@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import type { BranchFormData, StaffMember } from '@/components/branch-components/branch/AddBranchDialog';
+import type { BranchFormData } from '@/components/branch-components/branch/AddBranchDialog';
 import { BranchDetailsDialog } from '@/components/branch-components/branch/BranchDetailsDialog';
 import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
 import { MapDialog } from '@/components/branch-components/branch/MapDialog';
@@ -130,7 +130,7 @@ function RouteComponent() {
     ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
     : null;
 
-  function handleUpdateStaff(newStaff: StaffMember[]): void {
+  function handleUpdateStaff(): void {
     refetch();
   }
 
