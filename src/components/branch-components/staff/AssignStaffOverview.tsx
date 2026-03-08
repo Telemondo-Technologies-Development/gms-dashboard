@@ -56,9 +56,7 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
       <div className="flex flex-col xl:flex-row gap-6 items-stretch">
         <div className="w-full xl:w-[65%]">
           <AssignedStaffView 
-            branches={branches}
             currentBranchId={selectedBranchId}
-            onBranchChange={setSelectedBranchId}
           />
         </div>
         <div className="w-full xl:w-[35%]">

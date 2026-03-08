@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Loader2, UserMinus, MoreHorizontal, UserCheck, RefreshCw } from 'lucide-react';
-import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
-import { useEmployees } from "@/hooks/users/useStaffEmployees";
-import type { BranchPersonnelTableDTO } from '@/api/generated/models';
+import { Search, Loader2, UserMinus, MoreHorizontal, UserCheck, RefreshCw, Briefcase } from 'lucide-react';
+// 1. Switch to the specialized hook
+import { useBranchEmployees, type BranchEmployeeItem } from '@/hooks/Staff/useBranchEmployees'; 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -21,56 +20,28 @@ function cn(...classes: (string | boolean | undefined | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-interface StaffWithName extends BranchPersonnelTableDTO {
-  fullName: string;
-}
-
 interface AssignedStaffViewProps {
-  branches: any[];
   currentBranchId: string;
-  onBranchChange: (id: string) => void;
 }
 
 export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
   currentBranchId,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: branchPersonnel, isLoading: loadingBP, refetch } = useBranchPersonnel(currentBranchId);
-  const { data: employeesResponse, isLoading: loadingEmp } = useEmployees();
-  const isLoading = loadingBP || loadingEmp;
 
-  const actorNameMap = useMemo(() => {
-    const map = new Map<string, string>();
-    const employeeList = Array.isArray(employeesResponse) 
-      ? employeesResponse 
-      : (employeesResponse as any)?.data ?? [];
+  // 2. Use the hook that provides professional IDs and names directly
+  const { data: branchEmployees, isLoading, refetch } = useBranchEmployees(currentBranchId);
 
-    employeeList.forEach((emp: any) => {
-      if (emp.actorId) {
-        const fullName = `${emp.firstName ?? ''} ${emp.surname ?? ''}`.trim();
-        map.set(emp.actorId, fullName || 'Unnamed Employee');
-      }
-    });
-    return map;
-  }, [employeesResponse]);
-
+  // 3. Simplified filtering logic
   const filteredStaff = useMemo(() => {
-    const personnelList = Array.isArray(branchPersonnel) 
-      ? branchPersonnel 
-      : (branchPersonnel as any)?.data ?? [];
+    const list = branchEmployees ?? [];
+    if (!searchQuery) return list;
 
-    return personnelList
-      .map((p: BranchPersonnelTableDTO) => {
-        const nameFromMap = actorNameMap.get(p.actorId);
-        return {
-          ...p,
-          fullName: nameFromMap || `Staff (${p.actorId?.slice(0, 8) || 'Unknown'})`,
-        } as StaffWithName;
-      })
-      .filter((p: StaffWithName) => 
-        p.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-  }, [branchPersonnel, actorNameMap, searchQuery]);
+    return list.filter((emp) => {
+      const fullSearchString = `${emp.employeeFirstName} ${emp.employeeSurname} ${emp.employeeId}`.toLowerCase();
+      return fullSearchString.includes(searchQuery.toLowerCase());
+    });
+  }, [branchEmployees, searchQuery]);
 
   return (
     <Card className="flex flex-col shadow-md border-muted/40 h-[650px] overflow-hidden">
@@ -100,7 +71,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by staff name..."
+              placeholder="Search by name or Employee ID..."
               className="pl-9 h-10 w-full bg-background/50 border-muted-foreground/20 focus-visible:ring-1"
             />
           </div>
@@ -121,9 +92,9 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
           <Table className="w-full table-fixed">
             <TableHeader className="sticky top-0 z-10 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[50%] md:w-[40%] pl-4 md:pl-6">Staff Name</TableHead>
-                <TableHead className="hidden md:table-cell w-[25%]">Employee ID</TableHead>
-                <TableHead className="w-[15%]">Status</TableHead>
+                <TableHead className="w-[40%] pl-4 md:pl-6">Staff Member</TableHead>
+                <TableHead className="w-[25%]">Employee ID</TableHead>
+                <TableHead className="w-[20%]">Role</TableHead>
                 <TableHead className="w-[15%] text-right pr-4 md:pr-6">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -141,36 +112,37 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
               ) : filteredStaff.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
-                    No staff found for this branch or search criteria.
+                    No staff found for this branch.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredStaff.map((staff: StaffWithName) => (
-                  <TableRow key={staff.id || staff.actorId} className="hover:bg-muted/40 transition-colors group border-b border-muted/40">
-                    <TableCell className="pl-4 md:pl-6 py-4 align-top">
+                filteredStaff.map((staff: BranchEmployeeItem) => (
+                  <TableRow key={staff.actorId} className="hover:bg-muted/40 transition-colors group border-b border-muted/40">
+                    <TableCell className="pl-4 md:pl-6 py-4">
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                          {staff.fullName}
+                          {/* Use professional names directly */}
+                          {staff.employeeFirstName} {staff.employeeSurname}
                         </span>
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
-                           <UserCheck className="h-3 w-3" /> Assigned Personnel
+                           <UserCheck className="h-3 w-3" /> {staff.employeeContactNo || 'No Contact'}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell py-4 align-top">
-                      <span className="text-sm font-mono text-muted-foreground">
-                        {staff.actorId ? `${staff.actorId.slice(0, 12)}...` : 'N/A'}
+                    <TableCell className="py-4">
+                      {/* 4. Display the professional ID instead of the UUID */}
+                      <span className="text-sm font-semibold text-primary/80">
+                        {staff.employeeId}
                       </span>
                     </TableCell>
-                    <TableCell className="py-4 align-top">
-                      <Badge className={cn(
-                        "font-semibold uppercase text-[10px] tracking-tighter",
-                        staff.status === 'ACTIVE' ? "bg-green-500 hover:bg-green-600" : "bg-zinc-400"
-                      )}>
-                        {staff.status || 'UNKNOWN'}
+                    <TableCell className="py-4">
+                      {/* 5. Display the actual role name (e.g., Manager) */}
+                      <Badge variant="outline" className="font-medium bg-muted/50">
+                        <Briefcase className="mr-1 h-3 w-3" />
+                        {staff.personnelRoleName}
                       </Badge>
                     </TableCell>
-                    <TableCell className="py-4 align-top text-right pr-4 md:pr-6">
+                    <TableCell className="py-4 text-right pr-4 md:pr-6">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -180,7 +152,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Staff Options</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
+                          <DropdownMenuItem className="text-destructive cursor-pointer">
                             <UserMinus className="mr-2 h-4 w-4" />
                             Unassign Staff
                           </DropdownMenuItem>
@@ -193,20 +165,6 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
             </TableBody>
           </Table>
         </div>
-
-        {filteredStaff.length > 0 && (
-          <div className="shrink-0 border-t bg-muted/5">
-            <div className="flex items-center justify-between p-4 text-foreground">
-              <div className="text-sm text-muted-foreground">
-                Showing {filteredStaff.length} assigned personnel
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Previous</Button>
-                <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Next</Button>
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
