@@ -12,7 +12,7 @@ export function useUpdateAsset() {
   const mutation = useMutation({
     mutationFn: async ({ id, formData }: { id: string; formData: AssetPutFormValues }) => {
       const assetData = assetPutFormToDTO(formData)
-      const response = await assetApi.updateAsset({ id, assetPutDTO: assetData as AssetPutDTO })
+      const response = await assetApi.updateAsset({ id, assetPutDTO: assetData as unknown as AssetPutDTO })
       return parseAssetResponse(response)
     },
     onSuccess: (data) => {

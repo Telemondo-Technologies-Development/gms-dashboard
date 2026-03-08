@@ -427,12 +427,17 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
   }
 
   useEffect(() => {
-    if (!resolvedActorId) return
-    const current = form.state.values.createdById
-    if (current !== resolvedActorId) {
+    if (resolvedActorId && form.state.values.createdById !== resolvedActorId) {
       form.setFieldValue('createdById', resolvedActorId)
     }
-  }, [resolvedActorId, form])
+  }, [resolvedActorId])
+
+  // Ensure createdById is set when dialog opens
+  useEffect(() => {
+    if (open && resolvedActorId && !form.state.values.createdById) {
+      form.setFieldValue('createdById', resolvedActorId)
+    }
+  }, [open, resolvedActorId])
 
   return {
     open,

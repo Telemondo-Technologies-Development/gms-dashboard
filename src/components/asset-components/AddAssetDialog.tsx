@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { assetPostFormSchema, type AssetPostFormInput } from '@/types/asset/assetSchemas'
+import { assetPostFormSchema, type AssetPostFormInput, type AssetPostFormValues } from '@/types/asset/assetSchemas'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCreateAsset } from '@/hooks/assets/useCreateAsset'
 import { useAssetCategories } from '@/hooks/assets/useAssetCategories'
@@ -37,15 +37,15 @@ export function AddAssetDialog({ open, onOpenChange, currentUserId }: AddAssetDi
   const [manufacturedMonth, setManufacturedMonth] = useState<Date | undefined>(undefined)
   const [endOfLifeMonth, setEndOfLifeMonth] = useState<Date | undefined>(undefined)
 
-  const form = useForm<AssetPostFormInput>({
+  const form = useForm<AssetPostFormInput, unknown, AssetPostFormValues>({
     resolver: zodResolver(assetPostFormSchema),
     defaultValues: {
       name: '',
       assetCategoryId: '',
       branchId: '',
       createdById: currentUserId,
-      manufacturedDate: null,
-      endOfLife: null,
+      manufacturedDate: undefined,
+      endOfLife: undefined,
       isDateRangeValid: true,
       objectIds: [],
       remarks: '',
