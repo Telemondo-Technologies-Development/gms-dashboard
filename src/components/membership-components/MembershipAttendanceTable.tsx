@@ -294,6 +294,9 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 														>
 															Previous
 														</Button>
+														<span className="text-sm text-muted-foreground">
+															Page {pageIndex + 1} / {Math.max(1, pageCount)}
+														</span>
 														<Button
 															type="button"
 															variant="outline"

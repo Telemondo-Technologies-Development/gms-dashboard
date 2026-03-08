@@ -543,6 +543,9 @@ function MembersTable({ onSelectMember }: Props) {
                             >
                               Previous
                             </Button>
+                            <span className="text-sm text-muted-foreground whitespace-nowrap">
+                              Page {pageIndex + 1} / {pageCount}
+                            </span>
                             <Button
                               type="button"
                               variant="outline"

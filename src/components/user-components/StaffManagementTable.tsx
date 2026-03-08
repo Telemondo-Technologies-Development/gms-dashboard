@@ -17,9 +17,8 @@ import {
   Tag,
 } from 'lucide-react'
 
-import { useQuery } from '@tanstack/react-query'
-import { getAuthenticatedApi } from '@/lib/api-client'
-import { BranchPersonnelApi, BranchPersonnelRolesApi } from '@/api/generated/apis'
+import { useAllBranchPersonnel } from '@/hooks/Staff/useAllBranchPersonnel'
+import { useAllPersonnelRoles } from '@/hooks/Staff/useAllPersonnelRoles'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -47,8 +46,6 @@ import type { EmployeeTableDTO } from '@/api/generated/models'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import  type { EmployeeTabProps } from '@/types/user/userSchemas'
 
-const personnelApi = getAuthenticatedApi(BranchPersonnelApi)
-const personnelRolesApi = getAuthenticatedApi(BranchPersonnelRolesApi)
 
 
 export function EmployeeTab({
@@ -63,21 +60,13 @@ export function EmployeeTab({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeTableDTO | null>(null)
   const [pageIndex, setPageIndex] = useState(0)
-  const PAGE_SIZE = 5
+  const PAGE_SIZE = 6
 
   // Fetch all branch personnel → actorId → personnelRoleId map
-  const { data: allPersonnel } = useQuery({
-    queryKey: ['branch-personnel-all'],
-    queryFn: () => personnelApi.getAllBranchPersonnel({ pageable: { page: 0, size: 1000 } }).then((r) => r.data ?? []),
-    staleTime: 60_000,
-  })
+  const { data: allPersonnel } = useAllBranchPersonnel()
 
   // Fetch all personnel roles → id → name map
-  const { data: allRoles } = useQuery({
-    queryKey: ['personnel-roles-all'],
-    queryFn: () => personnelRolesApi.getAllPersonnelRoles({ pageable: { page: 0, size: 200 } }).then((r) => r.data ?? []),
-    staleTime: 5 * 60_000,
-  })
+  const { data: allRoles } = useAllPersonnelRoles()
 
   const roleById = useMemo(() => {
     const map = new Map<string, string>()
@@ -337,7 +326,7 @@ export function EmployeeTab({
                         Previous
                       </Button>
                       <span className="text-sm text-muted-foreground">
-                        Page {pageIndex + 1} of {pageCount}
+                        Page {pageIndex + 1} / {pageCount}
                       </span>
                       <Button
                         type="button"
