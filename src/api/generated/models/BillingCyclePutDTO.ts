@@ -56,6 +56,7 @@ export interface BillingCyclePutDTO {
  * @export
  */
 export const BillingCyclePutDTOIntervalsEnum = {
+    Minutes: 'MINUTES',
     Daily: 'DAILY',
     Weekly: 'WEEKLY',
     Monthly: 'MONTHLY',

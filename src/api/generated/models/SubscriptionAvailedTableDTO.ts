@@ -62,6 +62,7 @@ export interface SubscriptionAvailedTableDTO {
  * @export
  */
 export const SubscriptionAvailedTableDTOIntervalsEnum = {
+    Minutes: 'MINUTES',
     Daily: 'DAILY',
     Weekly: 'WEEKLY',
     Monthly: 'MONTHLY',

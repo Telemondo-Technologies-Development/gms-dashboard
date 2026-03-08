@@ -9717,6 +9717,7 @@
           "intervals": {
             "type": "string",
             "enum": [
+              "MINUTES",
               "DAILY",
               "WEEKLY",
               "MONTHLY",
@@ -9750,6 +9751,7 @@
           "intervals": {
             "type": "string",
             "enum": [
+              "MINUTES",
               "DAILY",
               "WEEKLY",
               "MONTHLY",
@@ -9791,6 +9793,7 @@
           "intervals": {
             "type": "string",
             "enum": [
+              "MINUTES",
               "DAILY",
               "WEEKLY",
               "MONTHLY",
@@ -12734,6 +12737,7 @@
           "intervals": {
             "type": "string",
             "enum": [
+              "MINUTES",
               "DAILY",
               "WEEKLY",
               "MONTHLY",
