@@ -4,7 +4,7 @@ import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 import { useEmployees } from "@/hooks/users/useStaffEmployees";
 import type { BranchPersonnelTableDTO } from '@/api/generated/models';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -73,15 +73,15 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
   }, [branchPersonnel, actorNameMap, searchQuery]);
 
   return (
-    <Card className="flex flex-col shadow-md border-muted/40 max-h-[88vh]">
-      <CardHeader>
+    <Card className="flex flex-col shadow-md border-muted/40 h-[650px] overflow-hidden">
+      <CardHeader className="shrink-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
             <CardTitle className="text-xl font-bold tracking-tight flex items-center gap-2">
               Personnel Assignments
             </CardTitle>
             <CardDescription className="mt-1">
-              Currently managing {filteredStaff.length} staff members assigned to this branch.
+              Currently managing {filteredStaff.length} staff members.
             </CardDescription>
           </div>
           <Badge 
@@ -93,8 +93,8 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
         </div>
       </CardHeader>
 
-      <CardContent className="p-0">
-        <div className="p-4 border-b bg-muted/5 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+      <CardContent className="p-0 flex-1 flex flex-col min-h-0">
+        <div className="p-4 border-b bg-muted/5 shrink-0 flex flex-col md:flex-row items-stretch md:items-center gap-3">
           <div className="relative w-full md:max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
             <Input
@@ -104,9 +104,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
               className="pl-9 h-10 w-full bg-background/50 border-muted-foreground/20 focus-visible:ring-1"
             />
           </div>
-
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto md:ml-auto">
-
+          <div className="flex md:ml-auto">
              <Button
                 variant="outline"
                 size="icon"
@@ -119,10 +117,10 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
           </div>
         </div>
 
-        <div className="relative w-full overflow-auto">
+        <div className="flex-1 overflow-auto relative">
           <Table className="w-full table-fixed">
-            <TableHeader className="bg-muted/30">
-              <TableRow className="hover:bg-transparent border-b border-muted/60">
+            <TableHeader className="sticky top-0 z-10 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b">
+              <TableRow className="hover:bg-transparent">
                 <TableHead className="w-[50%] md:w-[40%] pl-4 md:pl-6">Staff Name</TableHead>
                 <TableHead className="hidden md:table-cell w-[25%]">Employee ID</TableHead>
                 <TableHead className="w-[15%]">Status</TableHead>
@@ -159,13 +157,11 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                         </span>
                       </div>
                     </TableCell>
-
                     <TableCell className="hidden md:table-cell py-4 align-top">
                       <span className="text-sm font-mono text-muted-foreground">
                         {staff.actorId ? `${staff.actorId.slice(0, 12)}...` : 'N/A'}
                       </span>
                     </TableCell>
-
                     <TableCell className="py-4 align-top">
                       <Badge className={cn(
                         "font-semibold uppercase text-[10px] tracking-tighter",
@@ -174,7 +170,6 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                         {staff.status || 'UNKNOWN'}
                       </Badge>
                     </TableCell>
-
                     <TableCell className="py-4 align-top text-right pr-4 md:pr-6">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -196,26 +191,22 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                 ))
               )}
             </TableBody>
-
-            {filteredStaff.length > 0 && (
-              <TableFooter className="bg-muted/5">
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={4} className="p-0">
-                    <div className="flex items-center justify-between p-4 w-full h-full text-foreground">
-                       <div className="text-sm text-muted-foreground">
-                         Showing {filteredStaff.length} assigned personnel
-                       </div>
-                       <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Previous</Button>
-                          <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Next</Button>
-                       </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            )}
           </Table>
         </div>
+
+        {filteredStaff.length > 0 && (
+          <div className="shrink-0 border-t bg-muted/5">
+            <div className="flex items-center justify-between p-4 text-foreground">
+              <div className="text-sm text-muted-foreground">
+                Showing {filteredStaff.length} assigned personnel
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Previous</Button>
+                <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Next</Button>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

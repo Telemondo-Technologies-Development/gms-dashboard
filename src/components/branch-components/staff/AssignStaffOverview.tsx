@@ -53,8 +53,7 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
            </div>
         </div>
       </div>
-
-      <div className="flex flex-col xl:flex-row gap-6 items-start"> {/* Added items-start to prevent stretching */}
+      <div className="flex flex-col xl:flex-row gap-6 items-stretch">
         <div className="w-full xl:w-[65%]">
           <AssignedStaffView 
             branches={branches}
@@ -62,26 +61,25 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
             onBranchChange={setSelectedBranchId}
           />
         </div>
-
         <div className="w-full xl:w-[35%]">
-          <Card className="p-6 border-zinc-200 shadow-sm bg-white rounded-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-900">Branch Switcher</h3>
-              <Badge variant="outline" className="text-[10px] uppercase font-bold text-zinc-400">Control Panel</Badge>
+          <Card className="p-6 border-zinc-200 shadow-sm bg-white rounded-2xl h-[650px] flex flex-col">
+            <div className="shrink-0">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-900">Branch Switcher</h3>
+                <Badge variant="outline" className="text-[10px] uppercase font-bold text-zinc-400">Control Panel</Badge>
+              </div>
+              
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+                <input 
+                  placeholder="Find location..." 
+                  className="flex h-11 w-full rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2 text-xs pl-9 outline-none focus:ring-1 focus:ring-zinc-200"
+                  value={branchSearch}
+                  onChange={(e) => setBranchSearch(e.target.value)}
+                />
+              </div>
             </div>
-            
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
-              <input 
-                placeholder="Find location..." 
-                className="flex h-11 w-full rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2 text-xs pl-9 outline-none focus:ring-1 focus:ring-zinc-200"
-                value={branchSearch}
-                onChange={(e) => setBranchSearch(e.target.value)}
-              />
-            </div>
-
-            {/* Height adjusted to h-[460px] to match the table content height */}
-            <ScrollArea className="h-[240px] pr-4">
+            <ScrollArea className="flex-1 pr-4 min-h-0">
               <div className="space-y-3">
                 {filteredBranches.map((branch) => {
                   const isSelected = selectedBranchId === branch.id;
@@ -123,7 +121,7 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
                       <div className="pt-3 border-t border-zinc-100 space-y-2">
                         <div className="flex items-start gap-2">
                           <MapPin size={12} className="text-zinc-400" />
-                          <p className="text-[10px] font-medium leading-tight text-zinc-500">
+                          <p className="text-[10px] font-medium leading-tight text-zinc-500 truncate">
                             {branch.address}
                           </p>
                         </div>
@@ -144,7 +142,7 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
               </div>
             </ScrollArea>
             
-            <div className="mt-6">
+            <div className="mt-6 shrink-0">
               <Button 
                 onClick={() => setIsAssignDialogOpen(true)}
                 className="w-full h-12 bg-[#0062cc] hover:bg-[#0056b3] text-white rounded-xl font-bold text-xs uppercase tracking-widest gap-2"
