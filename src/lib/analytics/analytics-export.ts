@@ -1,10 +1,14 @@
-import type { AnalyticsData } from './analytics-data'
-
+import type { AnalyticsData } from '@/lib/analytics/analytics-data'
 type ExportData = {
   branch: string
   timeRange: string
   analytics: AnalyticsData
 }
+
+type RevenueExpenseRow = AnalyticsData['revenueExpense'][number]
+type MembershipGrowthRow = AnalyticsData['membershipGrowth'][number]
+type PaymentMethodRow = AnalyticsData['paymentMethods'][number]
+type BranchRow = AnalyticsData['branches'][number]
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-PH', {
@@ -35,7 +39,7 @@ export function exportToPDF(data: ExportData): void {
 
   const revenueExpenseRows = analytics.revenueExpense
     .map(
-      (row) => `
+      (row: RevenueExpenseRow) => `
       <tr>
         <td>${row.month}</td>
         <td style="text-align:right;color:#16a34a">${formatCurrency(row.revenue)}</td>
@@ -47,7 +51,7 @@ export function exportToPDF(data: ExportData): void {
 
   const branchRows = analytics.branches
     .map(
-      (b) => `
+      (b: BranchRow) => `
       <tr>
         <td>${b.name}</td>
         <td style="text-align:right">${formatCurrency(b.revenue)}</td>
@@ -132,7 +136,7 @@ export function exportToPDF(data: ExportData): void {
     <div class="payment-methods">
       ${analytics.paymentMethods
         .map(
-          (m) => `
+          (m: PaymentMethodRow) => `
         <div class="payment-card">
           <div style="font-weight:600;margin-bottom:8px">${m.method}</div>
           <div class="payment-percentage">${m.percentage}%</div>
@@ -214,25 +218,25 @@ export function exportToExcel(data: ExportData): void {
     '',
     'PAYMENT METHOD DISTRIBUTION',
     'Method,Amount (PHP),Percentage',
-    ...analytics.paymentMethods.map((m) => `${m.method},${formatCurrencyRaw(m.amount)},${m.percentage}%`),
+    ...analytics.paymentMethods.map((m: PaymentMethodRow) => `${m.method},${formatCurrencyRaw(m.amount)},${m.percentage}%`),
     '',
     `REVENUE VS EXPENSES (${currentYear})`,
     'Month,Revenue (PHP),Expenses (PHP),Net Profit (PHP)',
-    ...analytics.revenueExpense.map((row) => {
+    ...analytics.revenueExpense.map((row: RevenueExpenseRow) => {
       const profit = row.revenue - row.expense
       return `${row.month},${formatCurrencyRaw(row.revenue)},${formatCurrencyRaw(row.expense)},${formatCurrencyRaw(profit)}`
     }),
     '',
     'MEMBERSHIP GROWTH',
     'Month,Total Members,New Members,Cancelled,Net Change',
-    ...analytics.membershipGrowth.map((row) => {
+    ...analytics.membershipGrowth.map((row: MembershipGrowthRow) => {
       const net = row.new - row.cancelled
       return `${row.month},${row.total},${row.new},${row.cancelled},${net}`
     }),
     '',
     'BRANCH PERFORMANCE',
     'Branch,Revenue (PHP),Expenses (PHP),Profit (PHP),Members,Growth',
-    ...analytics.branches.map((b) =>
+    ...analytics.branches.map((b: BranchRow) =>
       `${b.name},${formatCurrencyRaw(b.revenue)},${formatCurrencyRaw(b.expenses)},${formatCurrencyRaw(b.profit)},${b.members},${b.growth}%`,
     ),
   ]

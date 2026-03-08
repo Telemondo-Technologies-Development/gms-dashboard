@@ -21,6 +21,12 @@ import { mapValues } from '../runtime';
 export interface AssetPutDTO {
     /**
      * 
+     * @type {Date}
+     * @memberof AssetPutDTO
+     */
+    acquisitionDate?: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AssetPutDTO
      */
@@ -33,6 +39,12 @@ export interface AssetPutDTO {
     branchId: string;
     /**
      * 
+     * @type {Array<string>}
+     * @memberof AssetPutDTO
+     */
+    brandIds: Array<string>;
+    /**
+     * 
      * @type {Date}
      * @memberof AssetPutDTO
      */
@@ -42,7 +54,13 @@ export interface AssetPutDTO {
      * @type {boolean}
      * @memberof AssetPutDTO
      */
-    isDateRangeValid: boolean;
+    isAcquisitionDateValid: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AssetPutDTO
+     */
+    isEndOfLifeValid: boolean;
     /**
      * 
      * @type {Date}
@@ -72,8 +90,26 @@ export interface AssetPutDTO {
      * @type {string}
      * @memberof AssetPutDTO
      */
+    status: AssetPutDTOStatusEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof AssetPutDTO
+     */
     updatedById: string;
 }
+
+
+/**
+ * @export
+ */
+export const AssetPutDTOStatusEnum = {
+    Operational: 'OPERATIONAL',
+    Down: 'DOWN',
+    Decommissioned: 'DECOMMISSIONED'
+} as const;
+export type AssetPutDTOStatusEnum = typeof AssetPutDTOStatusEnum[keyof typeof AssetPutDTOStatusEnum];
+
 
 /**
  * Check if a given object implements the AssetPutDTO interface.
@@ -81,9 +117,12 @@ export interface AssetPutDTO {
 export function instanceOfAssetPutDTO(value: object): value is AssetPutDTO {
     if (!('assetCategoryId' in value) || value['assetCategoryId'] === undefined) return false;
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
-    if (!('isDateRangeValid' in value) || value['isDateRangeValid'] === undefined) return false;
+    if (!('brandIds' in value) || value['brandIds'] === undefined) return false;
+    if (!('isAcquisitionDateValid' in value) || value['isAcquisitionDateValid'] === undefined) return false;
+    if (!('isEndOfLifeValid' in value) || value['isEndOfLifeValid'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
+    if (!('status' in value) || value['status'] === undefined) return false;
     if (!('updatedById' in value) || value['updatedById'] === undefined) return false;
     return true;
 }
@@ -98,14 +137,18 @@ export function AssetPutDTOFromJSONTyped(json: any, ignoreDiscriminator: boolean
     }
     return {
         
+        'acquisitionDate': json['acquisitionDate'] == null ? undefined : (new Date(json['acquisitionDate'])),
         'assetCategoryId': json['assetCategoryId'],
         'branchId': json['branchId'],
+        'brandIds': json['brandIds'],
         'endOfLife': json['endOfLife'] == null ? undefined : (new Date(json['endOfLife'])),
-        'isDateRangeValid': json['isDateRangeValid'],
+        'isAcquisitionDateValid': json['isAcquisitionDateValid'],
+        'isEndOfLifeValid': json['isEndOfLifeValid'],
         'manufacturedDate': json['manufacturedDate'] == null ? undefined : (new Date(json['manufacturedDate'])),
         'name': json['name'],
         'objectIds': json['objectIds'],
         'remarks': json['remarks'] == null ? undefined : json['remarks'],
+        'status': json['status'],
         'updatedById': json['updatedById'],
     };
 }
@@ -121,14 +164,18 @@ export function AssetPutDTOToJSONTyped(value?: AssetPutDTO | null, ignoreDiscrim
 
     return {
         
+        'acquisitionDate': value['acquisitionDate'] == null ? value['acquisitionDate'] : value['acquisitionDate'].toISOString(),
         'assetCategoryId': value['assetCategoryId'],
         'branchId': value['branchId'],
+        'brandIds': value['brandIds'],
         'endOfLife': value['endOfLife'] == null ? value['endOfLife'] : value['endOfLife'].toISOString(),
-        'isDateRangeValid': value['isDateRangeValid'],
+        'isAcquisitionDateValid': value['isAcquisitionDateValid'],
+        'isEndOfLifeValid': value['isEndOfLifeValid'],
         'manufacturedDate': value['manufacturedDate'] == null ? value['manufacturedDate'] : value['manufacturedDate'].toISOString(),
         'name': value['name'],
         'objectIds': value['objectIds'],
         'remarks': value['remarks'],
+        'status': value['status'],
         'updatedById': value['updatedById'],
     };
 }

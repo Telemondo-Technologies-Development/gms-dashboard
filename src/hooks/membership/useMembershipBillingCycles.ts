@@ -8,9 +8,9 @@ import {
   type BillingCycleTableDTOParsed,
 } from '@/types/membership/MembershipsubscriptionSchemas'
 
-export function useBillingCycles(enabled = true) {
-  const billingCycleApi = getAuthenticatedApi(BillingCycleApi)
+const billingCycleApi = getAuthenticatedApi(BillingCycleApi)
 
+export function useBillingCycles(enabled = true) {
   return useQuery<BillingCycleTableDTOParsed[]>({
     queryKey: [billingCycleQueryKeys.billingCycles],
     enabled,

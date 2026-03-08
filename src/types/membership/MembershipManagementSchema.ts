@@ -7,6 +7,9 @@ export const attendanceTypeSchema = z.enum(['IN', 'OUT', 'UNDECIDED'])
 
 export const subscriptionStatusSchema = z.enum(['ACTIVE', 'CANCELED', 'DONE'])
 
+const nullToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((value) => (value === null ? undefined : value), schema.optional())
+
 export interface AttendanceRecord {
   id: string
   memberId: string
@@ -29,18 +32,18 @@ export interface AddMemberDialogProps {}
 export interface MemberInfo {
   id: string
   firstName: string
-  middleName: string | null
+  middleName?: string | null
   surname: string
-  suffix: string | null
-  status: 'UNDECIDED' | 'ACTIVE' | 'DEACTIVATED' | null
+  suffix?: string | null
+  status?: 'UNDECIDED' | 'ACTIVE' | 'DEACTIVATED' | null
   name: string
-  email: string | null
-  phone: string | null
+  email?: string | null
+  phone?: string | null
 }
 
 export interface MemberFormData {
   id: string
-  actorId: string | null
+  actorId?: string | null
   members: MemberInfo[]
   startDate?: Date
   endDate?: Date
@@ -52,13 +55,13 @@ export interface MemberFormData {
   membershipDetails: string
   documents: File[]
   /** Full name of the staff/admin who recorded this member, sourced inline from the API DTO */
-  recorderName: string | null
+  recorderName?: string | null
 }
 
 export interface MemberDetailsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  memberGroup: MemberFormData | null
+  memberGroup?: MemberFormData | null
 }
 
 // Backend DTO schemas
@@ -87,18 +90,18 @@ export const memberPutDtoSchema = z.object({
 export type MemberPutDto = z.infer<typeof memberPutDtoSchema>
 
 export const memberTableDataSchema = z.object({
-  actorId: z.string().uuid().nullable().default(null),
-  createdById: z.string().uuid().nullable().default(null),
-  createdByFirstName: z.string().nullable().optional(),
-  createdBySurname: z.string().nullable().optional(),
-  createdByEmail: z.string().nullable().optional(),
+  actorId: nullToUndefined(z.string().uuid()),
+  createdById: nullToUndefined(z.string().uuid()),
+  createdByFirstName: nullToUndefined(z.string()),
+  createdBySurname: nullToUndefined(z.string()),
+  createdByEmail: nullToUndefined(z.string()),
   firstName: z.string(),
   id: z.string().uuid(),
-  middleName: z.string().nullable().default(null),
+  middleName: nullToUndefined(z.string()),
   status: memberStatusSchema,
-  suffix: z.string().nullable().default(null),
+  suffix: nullToUndefined(z.string()),
   surname: z.string(),
-  updatedById: z.string().uuid().nullable().default(null),
+  updatedById: nullToUndefined(z.string().uuid()),
 })
 
 export type MemberTableData = z.infer<typeof memberTableDataSchema>
@@ -116,23 +119,23 @@ export type MemberFormValues = {
 
 // API response schemas
 export const apiErrorSchema = z.object({
-  code: z.string().nullable().default(null),
-  description: z.string().nullable().default(null),
-  field: z.string().nullable().default(null),
+  code: nullToUndefined(z.string()),
+  description: nullToUndefined(z.string()),
+  field: nullToUndefined(z.string()),
 })
 
 export const apiMetaSchema = z.object({
-  pageCount: z.number().nullable().default(null),
-  pageIndex: z.number().nullable().default(null),
-  pageSize: z.number().nullable().default(null),
-  totalCount: z.number().nullable().default(null),
+  pageCount: nullToUndefined(z.number()),
+  pageIndex: nullToUndefined(z.number()),
+  pageSize: nullToUndefined(z.number()),
+  totalCount: nullToUndefined(z.number()),
 })
 
 export const apiResponseMemberTableSchema = z.object({
   data: memberTableDataSchema,
-  errors: z.array(apiErrorSchema).nullable().default(null),
+  errors: nullToUndefined(z.array(apiErrorSchema)),
   message: z.string().optional(),
-  meta: apiMetaSchema.nullable().default(null),
+  meta: nullToUndefined(apiMetaSchema),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -141,9 +144,9 @@ export type ApiResponseMemberTable = z.infer<typeof apiResponseMemberTableSchema
 
 export const apiResponseListMemberTableSchema = z.object({
   data: z.array(memberTableDataSchema),
-  errors: z.array(apiErrorSchema).nullable().default(null),
+  errors: nullToUndefined(z.array(apiErrorSchema)),
   message: z.string().optional(),
-  meta: apiMetaSchema.nullable().default(null),
+  meta: nullToUndefined(apiMetaSchema),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -151,23 +154,23 @@ export const apiResponseListMemberTableSchema = z.object({
 export type ApiResponseListMemberTable = z.infer<typeof apiResponseListMemberTableSchema>
 
 export const attendanceTableDataSchema = z.object({
-  actorId: z.string().uuid().nullable().default(null),
-  branchId: z.string().uuid().nullable().default(null),
-  createdById: z.string().uuid().nullable().default(null),
+  actorId: z.string().uuid().optional(),
+  branchId: z.string().uuid().optional(),
+  createdById: z.string().uuid().optional(),
   id: z.string().uuid(),
   recordedAt: z.coerce.date(),
   source: attendanceSourceSchema,
   type: attendanceTypeSchema,
-  updatedById: z.string().uuid().nullable().default(null),
+  updatedById: z.string().uuid().optional(),
 })
 
 export type AttendanceTableData = z.infer<typeof attendanceTableDataSchema>
 
 export const apiResponseListAttendanceTableSchema = z.object({
   data: z.array(attendanceTableDataSchema),
-  errors: z.array(apiErrorSchema).nullable().default(null),
+  errors: z.array(apiErrorSchema).optional(),
   message: z.string().optional(),
-  meta: apiMetaSchema.nullable().default(null),
+  meta: apiMetaSchema.optional(),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -179,7 +182,7 @@ export const memberSubscriptionPostDtoSchema = z.object({
   actorId: z.string().uuid(),
   branchId: z.string().uuid(),
   createdById: z.string().uuid(),
-  endDate: z.string().datetime().nullable(),
+  endDate: z.string().datetime().optional(),
   startDate: z.string().datetime(),
   status: subscriptionStatusSchema,
   subscriptionId: z.string().uuid(),
@@ -190,11 +193,11 @@ export type MemberSubscriptionPostDto = z.infer<typeof memberSubscriptionPostDto
 export const memberSubscriptionPutDtoSchema = z.object({
   actorId: z.string().uuid(),
   branchId: z.string().uuid(),
-  endDate: z.string().datetime().nullable(),
+  endDate: z.string().datetime().optional(),
   startDate: z.string().datetime(),
   status: subscriptionStatusSchema,
   subscriptionId: z.string().uuid(),
-  updateCurrentSubscription: z.boolean().nullable(),
+  updateCurrentSubscription: z.boolean().optional(),
   updatedById: z.string().uuid(),
 })
 
@@ -203,13 +206,13 @@ export type MemberSubscriptionPutDto = z.infer<typeof memberSubscriptionPutDtoSc
 export const memberSubscriptionTableDataSchema = z.object({
   actorId: z.string().uuid(),
   branchId: z.string().uuid(),
-  createdById: z.string().uuid().nullable().default(null),
-  endDate: z.string().datetime().nullable().default(null),
+  createdById: z.string().uuid().optional(),
+  endDate: z.string().datetime().optional(),
   id: z.string().uuid(),
   startDate: z.string().datetime(),
   status: subscriptionStatusSchema,
-  subscriptionAvailedId: z.string().uuid().nullable().default(null),
-  updatedById: z.string().uuid().nullable().default(null),
+  subscriptionAvailedId: z.string().uuid().optional(),
+  updatedById: z.string().uuid().optional(),
 })
 
 export type MemberSubscriptionTableData = z.infer<typeof memberSubscriptionTableDataSchema>
@@ -218,7 +221,7 @@ const apiEnvelopeSchema = z
   .object({
     success: z.boolean(),
     message: z.string().optional(),
-    errors: z.array(apiErrorSchema).nullable().optional(),
+    errors: z.array(apiErrorSchema).optional(),
   })
   .passthrough()
 
@@ -227,7 +230,6 @@ const apiMemberSubscriptionIdEnvelopeSchema = apiEnvelopeSchema.extend({
     .object({
       id: z.string().min(1),
     })
-    .nullable()
     .optional(),
 })
 

@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { AnalyticsData } from '@/lib/analytics-data'
+import type { AnalyticsData } from '@/lib/analytics/analytics-data'
 
 type Props = {
   data: AnalyticsData

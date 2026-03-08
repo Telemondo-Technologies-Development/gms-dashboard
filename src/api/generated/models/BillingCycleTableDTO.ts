@@ -56,6 +56,7 @@ export interface BillingCycleTableDTO {
  * @export
  */
 export const BillingCycleTableDTOIntervalsEnum = {
+    Minutes: 'MINUTES',
     Daily: 'DAILY',
     Weekly: 'WEEKLY',
     Monthly: 'MONTHLY',

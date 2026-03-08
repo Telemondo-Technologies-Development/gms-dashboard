@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { assetPutFormSchema, type AssetPutFormInput, type AssetTable } from '@/types/asset/assetSchemas'
+import { assetPutFormSchema, type AssetPutFormInput, type AssetPutFormValues, type AssetTable } from '@/types/asset/assetSchemas'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUpdateAsset } from '@/hooks/assets/useUpdateAsset'
 import { useAssetCategories } from '@/hooks/assets/useAssetCategories'
@@ -31,15 +31,15 @@ export function AssetDetailsDialog({ open, onOpenChange, asset, currentUserId, o
   const { categories, isLoading: categoriesLoading } = useAssetCategories()
   const { branches, isLoading: branchesLoading } = useBranches()
 
-  const form = useForm<AssetPutFormInput>({
+  const form = useForm<AssetPutFormInput, unknown, AssetPutFormValues>({
     resolver: zodResolver(assetPutFormSchema),
     defaultValues: {
       name: '',
       assetCategoryId: '',
       branchId: '',
       updatedById: currentUserId,
-      manufacturedDate: null,
-      endOfLife: null,
+      manufacturedDate: undefined,
+      endOfLife: undefined,
       isDateRangeValid: true,
       objectIds: [],
       remarks: '',
@@ -53,8 +53,8 @@ export function AssetDetailsDialog({ open, onOpenChange, asset, currentUserId, o
         assetCategoryId: asset.assetCategoryId,
         branchId: asset.branchId,
         updatedById: currentUserId,
-        manufacturedDate: asset.manufacturedDate ? new Date(asset.manufacturedDate) : null,
-        endOfLife: asset.endOfLife ? new Date(asset.endOfLife) : null,
+        manufacturedDate: asset.manufacturedDate ? new Date(asset.manufacturedDate) : undefined,
+        endOfLife: asset.endOfLife ? new Date(asset.endOfLife) : undefined,
         isDateRangeValid: asset.isDateRangeValid,
         objectIds: asset.objectIds || [],
         remarks: asset.remarks || '',
@@ -62,7 +62,7 @@ export function AssetDetailsDialog({ open, onOpenChange, asset, currentUserId, o
     }
   }, [asset, currentUserId, form])
 
-  const handleSubmit = async (values: AssetPutFormInput) => {
+  const handleSubmit = async (values: AssetPutFormValues) => {
     if (!asset) return
     try {
       const validatedData = {

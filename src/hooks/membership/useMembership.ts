@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useInvoices } from '@/hooks/billing/usePaymentHistoryInvoices'
 import { useMemberSubscriptions } from './useMembershipSubscriptions'
 import { useSubscriptionAvailed } from './useMembershipSubscriptionAvailed'
-import { readPersistedAuthToken } from '@/lib/auth/auth-session'
-import { apiResponseListMemberTableSchema } from '@/types/membership/MembershipManagementSchema'
+import { getAuthenticatedApi } from '@/lib/api-client'
+import { MemberApi } from '@/api/generated/apis'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 import type { MemberSubscriptionTableDTO } from '@/api/generated/models/MemberSubscriptionTableDTO'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
@@ -12,42 +12,7 @@ import type { MemberFormData } from '@/types/membership/MembershipManagementSche
 import type { InvoiceTableDTOParsed } from '@/types/payment/paymentSchemas'
 
 const EMPTY_INVOICES: InvoiceTableDTOParsed[] = []
-
-async function fetchMembersFromApi() {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-  const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-  const url = `${base}/api/member`
-
-  const token =
-    typeof window !== 'undefined'
-      ? (readPersistedAuthToken() ?? window.localStorage.getItem('auth_token'))
-      : null
-
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    credentials: 'include',
-  })
-
-  const rawText = await response.text().catch(() => '')
-  if (!response.ok) {
-    throw new Error(`Failed to load members (${response.status}). ${rawText || 'Check server logs for details.'}`)
-  }
-
-  const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
-  const envelopeResult = apiResponseListMemberTableSchema.safeParse(parsedJson)
-  if (!envelopeResult.success) {
-    throw new Error(`Failed to validate members response: ${envelopeResult.error.message}`)
-  }
-
-  const envelope = envelopeResult.data
-  if (!envelope.success) {
-    throw new Error(envelope.message ?? 'Failed to load members.')
-  }
-  return envelope.data ?? []
-}
+const memberApi = getAuthenticatedApi(MemberApi)
 
 
 export function useMembersData() {
@@ -62,7 +27,10 @@ export function useMembersData() {
 
   const membersQuery = useQuery({
     queryKey: [memberQueryKeys.members],
-    queryFn: fetchMembersFromApi,
+    queryFn: async () => {
+      const res = await memberApi.getAllMembers({ pageable: { page: 0, size: 5 } })
+      return res.data ?? []
+    },
   })
 
   const memberSubsQuery = useMemberSubscriptions()

@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import type { AnalyticsData } from '@/lib/analytics-data'
+import type { AnalyticsData } from '@/lib/analytics/analytics-data'
 
 type Props = {
   data: AnalyticsData

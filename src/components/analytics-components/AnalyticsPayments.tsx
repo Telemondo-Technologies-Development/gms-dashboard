@@ -1,6 +1,6 @@
 import { Pie, PieChart, Cell } from 'recharts'
 import { Banknote, CreditCard, Smartphone, type LucideIcon } from 'lucide-react'
-import type { AnalyticsData } from '@/lib/analytics-data'
+import type { AnalyticsData } from '@/lib/analytics/analytics-data'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 type Props = {

@@ -10,7 +10,8 @@ import {
   FileText,
   User,
   Info,
-  AlertTriangle 
+  AlertTriangle,
+  UserCircle2
 } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { PaymentApi } from '@/api/generated/apis/PaymentApi'
@@ -37,6 +38,7 @@ import {
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
+import { EditAdminConfirmDialog } from '@/components/common/EditAdminConfirm'
 import type { PaymentTableDTOParsed, PaymentMethodTableDTOParsed } from '@/types/payment/paymentSchemas'
 
 interface PaymentDetailsDialogProps {
@@ -112,6 +114,7 @@ export function PaymentDetailsDialog({
   )
 
   const [isEditing, setIsEditing] = useState(false)
+  const [showEditConfirm, setShowEditConfirm] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
   const [amountInput, setAmountInput] = useState('')
   const [methodId, setMethodId] = useState('')
@@ -199,7 +202,7 @@ export function PaymentDetailsDialog({
         <DialogHeader>
           <DialogTitle className="text-xl">Payment Details</DialogTitle>
           <DialogDescription>
-           <p>Created by:{' '} <span className="text-xs">{isCreatedByLoading ? 'Loading…' : (createdByName ?? 'Unknown user')}</span></p>
+            View and manage payment transaction details
           </DialogDescription>
         </DialogHeader>
 
@@ -251,6 +254,15 @@ export function PaymentDetailsDialog({
                          <div>
                             <p className="text-xs text-muted-foreground uppercase tracking-wider">Invoice ID</p>
                             <p className="font-mono text-xs mt-0.5 break-all text-muted-foreground">{payment.invoiceId}</p>
+                         </div>
+                         <div>
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                              <UserCircle2 className="h-3 w-3" />
+                              Created By
+                            </p>
+                            <p className="font-medium text-sm mt-0.5">
+                              {isCreatedByLoading ? 'Loading…' : (createdByName ?? 'Unknown user')}
+                            </p>
                          </div>
                      </div>
                 </div>
@@ -425,13 +437,25 @@ export function PaymentDetailsDialog({
                   </Button>
                 </>
               ) : (
-                <Button type="button" onClick={() => setIsEditing(true)}>
+                <Button type="button" onClick={() => setShowEditConfirm(true)}>
                   Edit Transaction
                 </Button>
               )
             ) : null}
           </DialogFooter>
         ) : null}
+        
+        <EditAdminConfirmDialog
+          open={showEditConfirm}
+          onOpenChange={setShowEditConfirm}
+          onConfirm={() => {
+            setIsEditing(true)
+            setShowEditConfirm(false)
+          }}
+          title="Unlock Edit Access"
+          description="Admin confirmation is required to edit this payment transaction. Please enter your admin password to proceed."
+          confirmText="Unlock & Edit"
+        />
       </DialogContent>
     </Dialog>
   )

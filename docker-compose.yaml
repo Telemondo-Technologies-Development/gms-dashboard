@@ -1,4 +1,4 @@
-
+version: "3.9"
 
 services:
   mysql:
@@ -52,6 +52,7 @@ services:
       - app-network
     volumes:
       - minio_data:/data
+
   backend:
     image: ghcr.io/telemondo-technologies-development/gms-backend-spring:dev
     restart: unless-stopped

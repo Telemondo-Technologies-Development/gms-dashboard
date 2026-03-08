@@ -7,16 +7,11 @@ export interface EnsureInvoiceInput {
   createdById: string
   memberSubscriptionId: string
   subscriptionAvailedId: string
-  /** Enrollment start date — used to derive the first invoice due date */
   startDate: Date
-  /** Optional end date — undefined means ongoing (continuous billing, no expiry) */
   endDate?: Date
-  /** Billing interval unit from the subscription (DAILY/WEEKLY/MONTHLY/YEARLY) */
   intervals: BillingInterval
-  /** How many interval units make one billing cycle (e.g. 2 for bi-weekly) */
   intervalCount: number
   gracePeriodDays: number
-  /** Subscription amount — used to determine payment status on first payment */
   subtotal: number
 }
 
@@ -25,7 +20,6 @@ export interface CreatePaymentIfNeededInput {
   invoiceId: string | undefined
   createdById: string
   amount: number
-  /** Full invoice subtotal — used to derive FULL/PARTIAL/PENDING status */
   subtotal?: number
   paidAt?: Date
 	referenceNum?: string
@@ -33,12 +27,12 @@ export interface CreatePaymentIfNeededInput {
 
 
 
-const coerceNullableDate = z.preprocess((value) => {
-	if (value == null || value === '') return null
+const coerceOptionalDate = z.preprocess((value) => {
+	if (value == null || value === '') return undefined
 	if (value instanceof Date) return value
 	const date = new Date(String(value))
-	return Number.isNaN(date.getTime()) ? null : date
-}, z.date().nullable())
+	return Number.isNaN(date.getTime()) ? undefined : date
+}, z.date().optional())
 
 export const pageMetadataSchema = z.object({
 	pageCount: z.coerce.number(),
@@ -55,23 +49,23 @@ export type PaymentStatus = z.infer<typeof paymentStatusSchema>
 export const paymentTableDTOSchema = z.object({
 	amount: z.coerce.number(),
 	createdById: z.string(),
-	failureReason: z.string().nullable().default(null),
+	failureReason: z.string().optional(),
 	id: z.string(),
 	invoiceId: z.string(),
-	paidAt: coerceNullableDate,
+	paidAt: coerceOptionalDate,
 	paymentMethodId: z.string(),
-	referenceNum: z.string().nullable().default(null),
+	referenceNum: z.string().optional(),
 	status: paymentStatusSchema,
-	updatedById: z.string().nullable().default(null),
+	updatedById: z.string().optional(),
 })
 
 export type PaymentTableDTOParsed = z.infer<typeof paymentTableDTOSchema>
 
 export const paymentMethodTableDTOSchema = z.object({
-	createdById: z.string().nullable().default(null),
+	createdById: z.string().optional(),
 	id: z.string(),
 	name: z.string(),
-	updatedById: z.string().nullable().default(null),
+	updatedById: z.string().optional(),
 })
 
 export type PaymentMethodTableDTOParsed = z.infer<typeof paymentMethodTableDTOSchema>
@@ -165,9 +159,9 @@ export const invoiceTableDTOSchema = z.object({
 	actorId: z.string().optional(),
 	branchId: z.string().optional(),
 	createdById: z.string(),
-	// dueDate and gracePeriodDate are server-computed; they can be null for ongoing subscriptions
-	dueDate: coerceDate.nullable(),
-	gracePeriodDate: coerceDate.nullable(),
+	// dueDate and gracePeriodDate are server-computed; they may be omitted for ongoing subscriptions
+	dueDate: coerceDate.optional(),
+	gracePeriodDate: coerceDate.optional(),
 	id: z.string(),
 	issuedAt: coerceDate,
 	memberSubscriptionId: z.string().optional(),

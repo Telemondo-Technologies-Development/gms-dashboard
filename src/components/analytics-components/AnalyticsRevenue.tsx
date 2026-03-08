@@ -1,6 +1,6 @@
 import { Line, LineChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { AlertCircle } from 'lucide-react'
-import type { AnalyticsData } from '@/lib/analytics-data'
+import type { AnalyticsData } from '@/lib/analytics/analytics-data'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   ChartContainer,

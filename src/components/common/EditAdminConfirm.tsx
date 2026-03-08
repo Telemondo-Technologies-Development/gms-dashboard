@@ -93,8 +93,8 @@ export function EditAdminConfirmDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <div className="flex items-center gap-2 text-primary">
-            <ShieldCheck className="h-5 w-5" />
-            <DialogTitle>{title}</DialogTitle>
+            <ShieldCheck className="h-5 w-5 text-destructive" />
+            <DialogTitle className="text-destructive">{title}</DialogTitle>
           </div>
           <DialogDescription className="pt-2">{description}</DialogDescription>
         </DialogHeader>

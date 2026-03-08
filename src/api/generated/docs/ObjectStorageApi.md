@@ -7,6 +7,7 @@ All URIs are relative to *http://localhost:8080*
 | [**deleteFile**](ObjectStorageApi.md#deletefile) | **DELETE** /api/storage/{id} | delete a file from object storage and database |
 | [**getUrl**](ObjectStorageApi.md#geturl) | **GET** /api/storage/{id}/url | Get a file from the object storage by ID |
 | [**uploadAssetDocument**](ObjectStorageApi.md#uploadassetdocument) | **POST** /api/storage/upload/asset/document | (private) |
+| [**uploadBrandLogo**](ObjectStorageApi.md#uploadbrandlogo) | **POST** /api/storage/upload/brand/logo | (private) |
 | [**uploadExpenseReceipt**](ObjectStorageApi.md#uploadexpensereceipt) | **POST** /api/storage/upload/expense/receipt | (private) |
 | [**uploadFile**](ObjectStorageApi.md#uploadfile) | **POST** /api/storage/upload | Upload a file into the object storage |
 | [**uploadMaintenanceRecord**](ObjectStorageApi.md#uploadmaintenancerecord) | **POST** /api/storage/upload/asset/maintenance | (private) |
@@ -173,6 +174,71 @@ async function example() {
 
   try {
     const data = await api.uploadAssetDocument(body);
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Run the test
+example().catch(console.error);
+```
+
+### Parameters
+
+
+| Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **uploadBranchLogoRequest** | [UploadBranchLogoRequest](UploadBranchLogoRequest.md) |  | [Optional] |
+
+### Return type
+
+[**ApiResponseObjectStorage**](ApiResponseObjectStorage.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: `application/json`
+- **Accept**: `*/*`
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | OK |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
+
+
+## uploadBrandLogo
+
+> ApiResponseObjectStorage uploadBrandLogo(uploadBranchLogoRequest)
+
+(private)
+
+### Example
+
+```ts
+import {
+  Configuration,
+  ObjectStorageApi,
+} from '';
+import type { UploadBrandLogoRequest } from '';
+
+async function example() {
+  console.log("🚀 Testing  SDK...");
+  const api = new ObjectStorageApi();
+
+  const body = {
+    // UploadBranchLogoRequest (optional)
+    uploadBranchLogoRequest: ...,
+  } satisfies UploadBrandLogoRequest;
+
+  try {
+    const data = await api.uploadBrandLogo(body);
     console.log(data);
   } catch (error) {
     console.error(error);

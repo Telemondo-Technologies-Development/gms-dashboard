@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { Download, FileSpreadsheet, FileText, AlertCircle, Loader2 } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,10 +25,11 @@ import { MembershipGrowthChart } from '@/components/analytics-components/Analyti
 import { PaymentMethodChart } from '@/components/analytics-components/AnalyticsPayments'
 import { BranchPerformanceTable } from '@/components/analytics-components/AnalyticsBranches'
 import { IncomeReportCards } from '@/components/analytics-components/AnalyticsIncome'
-import { analyticsApi, type AnalyticsFilters } from '@/lib/analyticsApi'
-import type { AnalyticsData } from '@/lib/analytics-data'
-import { exportToPDF, exportToExcel } from '@/lib/analytics-export'
+import { useAnalytics, type AnalyticsFilters } from '@/hooks/analytics/useAnalytics'
+import type { AnalyticsData } from '@/lib/analytics/analytics-data'
+import { exportToPDF, exportToExcel } from '@/lib/analytics/analytics-export'
 import { useBranches } from '@/hooks/branch/useBranches'
+
 
 export const Route = createFileRoute('/dashboard/admin/analytics')({
   component: AnalyticsRoute,
@@ -72,11 +72,7 @@ function AnalyticsRoute() {
     data: rawData,
     isLoading: analyticsLoading,
     isError,
-  } = useQuery({
-    queryKey: ['analytics', filters],
-    queryFn: () => analyticsApi.getAnalytics(filters),
-    staleTime: 1000 * 60 * 5,
-  })
+  } = useAnalytics(filters)
 
   const analyticsData = useMemo(
     () => (rawData ? filterByBranch(selectedBranch, rawData) : null),

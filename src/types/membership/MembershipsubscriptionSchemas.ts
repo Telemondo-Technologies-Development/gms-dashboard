@@ -87,7 +87,7 @@ export const apiResponseSubscriptionAvailedTableDTOSchema = z.object({
 })
 
 export interface UseCreateSubscriptionPlanOptions {
-  createdById: string | null
+  createdById?: string | null
   onCreated?: (plan: CreateSubscriptionPlanCreatedResult) => void
 }
 

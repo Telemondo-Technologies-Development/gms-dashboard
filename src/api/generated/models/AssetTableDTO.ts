@@ -21,6 +21,12 @@ import { mapValues } from '../runtime';
 export interface AssetTableDTO {
     /**
      * 
+     * @type {Date}
+     * @memberof AssetTableDTO
+     */
+    acquisitionDate?: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AssetTableDTO
      */
@@ -31,6 +37,12 @@ export interface AssetTableDTO {
      * @memberof AssetTableDTO
      */
     branchId: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AssetTableDTO
+     */
+    brandIds: Array<string>;
     /**
      * 
      * @type {Date}
@@ -81,6 +93,12 @@ export interface AssetTableDTO {
     remarks?: string;
     /**
      * 
+     * @type {string}
+     * @memberof AssetTableDTO
+     */
+    status: AssetTableDTOStatusEnum;
+    /**
+     * 
      * @type {Date}
      * @memberof AssetTableDTO
      */
@@ -93,16 +111,30 @@ export interface AssetTableDTO {
     updatedById?: string;
 }
 
+
+/**
+ * @export
+ */
+export const AssetTableDTOStatusEnum = {
+    Operational: 'OPERATIONAL',
+    Down: 'DOWN',
+    Decommissioned: 'DECOMMISSIONED'
+} as const;
+export type AssetTableDTOStatusEnum = typeof AssetTableDTOStatusEnum[keyof typeof AssetTableDTOStatusEnum];
+
+
 /**
  * Check if a given object implements the AssetTableDTO interface.
  */
 export function instanceOfAssetTableDTO(value: object): value is AssetTableDTO {
     if (!('assetCategoryId' in value) || value['assetCategoryId'] === undefined) return false;
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
+    if (!('brandIds' in value) || value['brandIds'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
+    if (!('status' in value) || value['status'] === undefined) return false;
     if (!('updatedAt' in value) || value['updatedAt'] === undefined) return false;
     return true;
 }
@@ -117,8 +149,10 @@ export function AssetTableDTOFromJSONTyped(json: any, ignoreDiscriminator: boole
     }
     return {
         
+        'acquisitionDate': json['acquisitionDate'] == null ? undefined : (new Date(json['acquisitionDate'])),
         'assetCategoryId': json['assetCategoryId'],
         'branchId': json['branchId'],
+        'brandIds': json['brandIds'],
         'createdAt': (new Date(json['createdAt'])),
         'createdById': json['createdById'] == null ? undefined : json['createdById'],
         'endOfLife': json['endOfLife'] == null ? undefined : (new Date(json['endOfLife'])),
@@ -127,6 +161,7 @@ export function AssetTableDTOFromJSONTyped(json: any, ignoreDiscriminator: boole
         'name': json['name'],
         'objectIds': json['objectIds'],
         'remarks': json['remarks'] == null ? undefined : json['remarks'],
+        'status': json['status'],
         'updatedAt': (new Date(json['updatedAt'])),
         'updatedById': json['updatedById'] == null ? undefined : json['updatedById'],
     };
@@ -143,8 +178,10 @@ export function AssetTableDTOToJSONTyped(value?: AssetTableDTO | null, ignoreDis
 
     return {
         
+        'acquisitionDate': value['acquisitionDate'] == null ? value['acquisitionDate'] : value['acquisitionDate'].toISOString(),
         'assetCategoryId': value['assetCategoryId'],
         'branchId': value['branchId'],
+        'brandIds': value['brandIds'],
         'createdAt': value['createdAt'].toISOString(),
         'createdById': value['createdById'],
         'endOfLife': value['endOfLife'] == null ? value['endOfLife'] : value['endOfLife'].toISOString(),
@@ -153,6 +190,7 @@ export function AssetTableDTOToJSONTyped(value?: AssetTableDTO | null, ignoreDis
         'name': value['name'],
         'objectIds': value['objectIds'],
         'remarks': value['remarks'],
+        'status': value['status'],
         'updatedAt': value['updatedAt'].toISOString(),
         'updatedById': value['updatedById'],
     };

@@ -21,6 +21,12 @@ import { mapValues } from '../runtime';
 export interface AssetPostDTO {
     /**
      * 
+     * @type {Date}
+     * @memberof AssetPostDTO
+     */
+    acquisitionDate?: Date;
+    /**
+     * 
      * @type {string}
      * @memberof AssetPostDTO
      */
@@ -31,6 +37,12 @@ export interface AssetPostDTO {
      * @memberof AssetPostDTO
      */
     branchId: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof AssetPostDTO
+     */
+    brandIds: Array<string>;
     /**
      * 
      * @type {string}
@@ -48,7 +60,13 @@ export interface AssetPostDTO {
      * @type {boolean}
      * @memberof AssetPostDTO
      */
-    isDateRangeValid: boolean;
+    isAcquisitionDateValid: boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AssetPostDTO
+     */
+    isEndOfLifeValid: boolean;
     /**
      * 
      * @type {Date}
@@ -73,7 +91,25 @@ export interface AssetPostDTO {
      * @memberof AssetPostDTO
      */
     remarks?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AssetPostDTO
+     */
+    status: AssetPostDTOStatusEnum;
 }
+
+
+/**
+ * @export
+ */
+export const AssetPostDTOStatusEnum = {
+    Operational: 'OPERATIONAL',
+    Down: 'DOWN',
+    Decommissioned: 'DECOMMISSIONED'
+} as const;
+export type AssetPostDTOStatusEnum = typeof AssetPostDTOStatusEnum[keyof typeof AssetPostDTOStatusEnum];
+
 
 /**
  * Check if a given object implements the AssetPostDTO interface.
@@ -81,10 +117,13 @@ export interface AssetPostDTO {
 export function instanceOfAssetPostDTO(value: object): value is AssetPostDTO {
     if (!('assetCategoryId' in value) || value['assetCategoryId'] === undefined) return false;
     if (!('branchId' in value) || value['branchId'] === undefined) return false;
+    if (!('brandIds' in value) || value['brandIds'] === undefined) return false;
     if (!('createdById' in value) || value['createdById'] === undefined) return false;
-    if (!('isDateRangeValid' in value) || value['isDateRangeValid'] === undefined) return false;
+    if (!('isAcquisitionDateValid' in value) || value['isAcquisitionDateValid'] === undefined) return false;
+    if (!('isEndOfLifeValid' in value) || value['isEndOfLifeValid'] === undefined) return false;
     if (!('name' in value) || value['name'] === undefined) return false;
     if (!('objectIds' in value) || value['objectIds'] === undefined) return false;
+    if (!('status' in value) || value['status'] === undefined) return false;
     return true;
 }
 
@@ -98,15 +137,19 @@ export function AssetPostDTOFromJSONTyped(json: any, ignoreDiscriminator: boolea
     }
     return {
         
+        'acquisitionDate': json['acquisitionDate'] == null ? undefined : (new Date(json['acquisitionDate'])),
         'assetCategoryId': json['assetCategoryId'],
         'branchId': json['branchId'],
+        'brandIds': json['brandIds'],
         'createdById': json['createdById'],
         'endOfLife': json['endOfLife'] == null ? undefined : (new Date(json['endOfLife'])),
-        'isDateRangeValid': json['isDateRangeValid'],
+        'isAcquisitionDateValid': json['isAcquisitionDateValid'],
+        'isEndOfLifeValid': json['isEndOfLifeValid'],
         'manufacturedDate': json['manufacturedDate'] == null ? undefined : (new Date(json['manufacturedDate'])),
         'name': json['name'],
         'objectIds': json['objectIds'],
         'remarks': json['remarks'] == null ? undefined : json['remarks'],
+        'status': json['status'],
     };
 }
 
@@ -121,15 +164,19 @@ export function AssetPostDTOToJSONTyped(value?: AssetPostDTO | null, ignoreDiscr
 
     return {
         
+        'acquisitionDate': value['acquisitionDate'] == null ? value['acquisitionDate'] : value['acquisitionDate'].toISOString(),
         'assetCategoryId': value['assetCategoryId'],
         'branchId': value['branchId'],
+        'brandIds': value['brandIds'],
         'createdById': value['createdById'],
         'endOfLife': value['endOfLife'] == null ? value['endOfLife'] : value['endOfLife'].toISOString(),
-        'isDateRangeValid': value['isDateRangeValid'],
+        'isAcquisitionDateValid': value['isAcquisitionDateValid'],
+        'isEndOfLifeValid': value['isEndOfLifeValid'],
         'manufacturedDate': value['manufacturedDate'] == null ? value['manufacturedDate'] : value['manufacturedDate'].toISOString(),
         'name': value['name'],
         'objectIds': value['objectIds'],
         'remarks': value['remarks'],
+        'status': value['status'],
     };
 }
 

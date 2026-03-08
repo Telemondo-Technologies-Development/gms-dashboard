@@ -24,15 +24,21 @@ export const billingCycleQueryKeys = {
 
 export const branchQueryKeys = {
   branches: 'branches',
+  
 }
 
 export const userQueryKeys = {
   currentUser: 'current-user',
 }
 
+export const accessControlQueryKeys = {
+  roles: ['auth-roles'] as const,
+}
+
 export const employeeQueryKeys = {
   employee: ['employees'] as const,
   staff : ['employees', 'staff'] as const,
+  personnelRolesAll : ['personnelRolesAll'] as const,
 }
 
 export const expenseQueryKeys = {

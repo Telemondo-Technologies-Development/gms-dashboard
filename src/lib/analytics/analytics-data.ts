@@ -37,13 +37,13 @@ export type AnalyticsData = {
 
 export const MOCK_ANALYTICS_DATA: AnalyticsData = {
   monthlyIncome: {
-    current: 1200000, // PHP 12,000 in cents
-    previous: 923077, // To get 30% increase
+    current: 1200000, 
+    previous: 923077, 
     percentChange: 30,
   },
   annualIncome: {
-    current: 30000000, // PHP 300,000 in cents
-    previous: 42857143, // To get -30% decrease
+    current: 30000000, 
+    previous: 42857143, 
     percentChange: -30,
   },
   revenueExpense: [

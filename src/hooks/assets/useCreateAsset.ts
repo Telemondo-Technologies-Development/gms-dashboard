@@ -13,7 +13,7 @@ export function useCreateAsset() {
     mutationFn: async (formData: AssetPostFormValues) => {
       const assetData = assetPostFormToDTO(formData)
       console.log('Creating asset with data:', assetData)
-      const response = await assetApi.createAsset({ assetPostDTO: assetData as AssetPostDTO })
+      const response = await assetApi.createAsset({ assetPostDTO: assetData as unknown as AssetPostDTO })
       return parseAssetResponse(response)
     },
     onSuccess: (data) => {
