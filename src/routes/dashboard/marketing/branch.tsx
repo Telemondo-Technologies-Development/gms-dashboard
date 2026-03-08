@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { AddBranchDialog } from '@/components/branch-components/branch/AddBranchDialog';
 import type { BranchFormData, StaffMember } from '@/components/branch-components/branch/AddBranchDialog';
 import { BranchDetailsDialog } from '@/components/branch-components/branch/BranchDetailsDialog';
 import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
@@ -27,11 +26,11 @@ interface Branch {
   updatedAt: string;
   createdById: string;
   updatedById: string;
-  assignedStaff?: any[]; 
+  assignedStaff?: any[];
 }
 
 function RouteComponent() {
-  const { actorId } = useAuthSession(); 
+  const { actorId } = useAuthSession();
   const { branches, refetch, isLoading } = useBranches();
   const [activeTab, setActiveTab] = useState('branches');
   const [dialogState, setDialogState] = useState({
@@ -50,40 +49,6 @@ function RouteComponent() {
     setDialogState((prev) => ({ ...prev, [dialog]: value }));
   };
 
-  const handleAddBranch = async (branch: BranchFormData) => {
-    const currentTimestamp = new Date().toISOString();
-    const newBranch = {
-      ...branch,
-      status: branch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE', 
-      createdById: actorId,
-      updatedById: actorId,
-      createdAt: currentTimestamp,
-      updatedAt: currentTimestamp,
-    };
-  
-    try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-      const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
-      const url = `${base}/api/branch`;
-      const token = localStorage.getItem('auth_token');
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(newBranch),
-      });
-  
-      if (!response.ok) throw new Error('Failed to add branch.');
-      refetch(); 
-    } catch (error) {
-      console.error(error);
-      alert('Failed to add branch.');
-    }
-  };
-
   const handleSaveBranch = async (updatedBranch: BranchFormData) => {
     try {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -91,20 +56,14 @@ function RouteComponent() {
       const url = `${base}/api/branch/${updatedBranch.id}`;
       const token = localStorage.getItem('auth_token');
 
-      // Fetch new coordinates based on the updated address
       const fetchCoordinates = async (address: string) => {
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-              address
-            )}&format=json`
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json`
           );
           const data = await response.json();
           if (data.length > 0) {
-            return {
-              latitude: data[0].lat,
-              longitude: data[0].lon,
-            };
+            return { latitude: data[0].lat, longitude: data[0].lon };
           }
           return { latitude: '0', longitude: '0' };
         } catch (error) {
@@ -125,7 +84,7 @@ function RouteComponent() {
           ...updatedBranch,
           latitude,
           longitude,
-          status: updatedBranch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE', 
+          status: updatedBranch.status === 'INACTIVE' ? 'CLOSED' : 'ACTIVE',
           updatedById: actorId,
           updatedAt: new Date().toISOString(),
         }),
@@ -133,7 +92,7 @@ function RouteComponent() {
 
       if (!response.ok) throw new Error('Failed to update branch.');
       refetch();
-      toggleDialog('detailsOpen', false); 
+      toggleDialog('detailsOpen', false);
 
       if (mapBranch && mapBranch.id === updatedBranch.id) {
         setMapBranch({ ...updatedBranch, latitude, longitude });
@@ -158,7 +117,7 @@ function RouteComponent() {
       });
 
       if (!response.ok) throw new Error('Failed to delete branch.');
-      refetch(); 
+      refetch();
       toggleDialog('confirmDialogOpen', false);
       setBranchToRemove(null);
     } catch (error) {
@@ -168,20 +127,15 @@ function RouteComponent() {
   };
 
   const selectedBranch: Branch | null = selectedBranchId
-  ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
-  : null;
+    ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
+    : null;
 
-function handleUpdateStaff(newStaff: StaffMember[]): void {
-  console.log('Updated staff:', newStaff); 
-  refetch();
-}
+  function handleUpdateStaff(newStaff: StaffMember[]): void {
+    refetch();
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div />
-        <AddBranchDialog onAddBranch={handleAddBranch} />
-      </div> 
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-10 flex space-x-6">
           <TabsTrigger value="branches">Branches</TabsTrigger>
@@ -190,49 +144,48 @@ function handleUpdateStaff(newStaff: StaffMember[]): void {
 
         <TabsContent value="branches">
           {isLoading ? (
-            <div className="flex justify-center p-10"><p>Loading branches...</p></div>
-          ) : branches.length > 0 ? (
-            <BranchList 
-              branches={branches} 
+            <div className="flex justify-center p-10">
+              <p className="text-sm font-medium text-muted-foreground animate-pulse">Loading branches...</p>
+            </div>
+          ) : (
+            <BranchList
+              branches={branches}
+              actorId={actorId ?? undefined}
+              refetch={refetch}
               onSelectBranch={setSelectedBranchId}
               onToggleDialog={toggleDialog}
               onSetMapBranch={setMapBranch}
               onSetBranchToRemove={setBranchToRemove}
               onSetActiveBranchForStaff={(branch) => {
-                setActiveBranchForStaff(branch); 
-                setActiveTab('staff');          
+                setActiveBranchForStaff(branch);
+                setActiveTab('staff');
               }}
             />
-          ) : (
-            <div className="p-8 border rounded-md text-center text-muted-foreground">
-              No branches found. Click "Add Branch" to get started.
-            </div>
           )}
         </TabsContent>
 
         <TabsContent value="staff">
-          <AssignStaffOverview 
-            branches={branches} 
-            defaultBranchId={activeBranchForStaff?.id} 
+          <AssignStaffOverview
+            branches={branches}
+            defaultBranchId={activeBranchForStaff?.id}
           />
         </TabsContent>
       </Tabs>
-  
 
       <BranchDetailsDialog
         open={dialogState.detailsOpen}
         onOpenChange={(open) => toggleDialog('detailsOpen', open)}
-        branch={selectedBranch ? { 
-          ...selectedBranch, 
-          status: selectedBranch.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE', 
-          revenue: 0, 
-          expenses: 0, 
-          memberships: 0, 
-          assignedStaff: selectedBranch.assignedStaff || [] 
+        branch={selectedBranch ? {
+          ...selectedBranch,
+          status: selectedBranch.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
+          revenue: 0,
+          expenses: 0,
+          memberships: 0,
+          assignedStaff: selectedBranch.assignedStaff || []
         } : null}
         onSave={handleSaveBranch}
       />
-  
+
       <AssignStaffDialog
         open={dialogState.staffDialogOpen}
         onOpenChange={(open) => toggleDialog('staffDialogOpen', open)}
@@ -241,15 +194,15 @@ function handleUpdateStaff(newStaff: StaffMember[]): void {
         staff={activeBranchForStaff?.assignedStaff || []}
         onUpdateStaff={handleUpdateStaff}
       />
-  
+
       <MapDialog
         open={dialogState.mapDialogOpen}
         onOpenChange={(open) => toggleDialog('mapDialogOpen', open)}
-        latitude={mapBranch?.latitude || '0'} 
-        longitude={mapBranch?.longitude || '0'} 
+        latitude={mapBranch?.latitude || '0'}
+        longitude={mapBranch?.longitude || '0'}
         address={mapBranch?.address || ''}
       />
-  
+
       <DeleteConfirmDialog
         isOpen={dialogState.confirmDialogOpen}
         branchName={branchToRemove?.name || null}
