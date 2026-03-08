@@ -21,28 +21,28 @@ export const assetTableSchema = z.object({
   id: z.string(),
   name: z.string(),
   assetCategoryId: z.string(),
-  assetCategoryName: z.string().optional().nullable(),
+  assetCategoryName: z.string().optional(),
   branchId: z.string(),
-  branchName: z.string().optional().nullable(),
-  createdById: z.string().optional().nullable(),
-  updatedById: z.string().optional().nullable(),
-  manufacturedDate: z.union([z.string(), z.date()]).optional().nullable(),
-  endOfLife: z.union([z.string(), z.date()]).optional().nullable(),
+  branchName: z.string().optional(),
+  createdById: z.string().optional(),
+  updatedById: z.string().optional(),
+  manufacturedDate: z.union([z.string(), z.date()]).optional(),
+  endOfLife: z.union([z.string(), z.date()]).optional(),
   isDateRangeValid: z.boolean().optional().default(true),
   objectIds: z.array(z.string()).default([]),
-  remarks: z.string().optional().nullable(),
-  createdAt: z.union([z.string(), z.date()]).optional().nullable(),
-  updatedAt: z.union([z.string(), z.date()]).optional().nullable(),
+  remarks: z.string().optional(),
+  createdAt: z.union([z.string(), z.date()]).optional(),
+  updatedAt: z.union([z.string(), z.date()]).optional(),
 })
 
 export type AssetTable = z.infer<typeof assetTableSchema>
 
 // API Response Schemas
 export const apiResponseAssetTableSchema = z.object({
-  data: assetTableSchema.nullable(),
-  errors: z.array(apiErrorSchema).nullable().default(null),
+  data: assetTableSchema.optional(),
+  errors: z.array(apiErrorSchema).optional(),
   message: z.string().optional(),
-  meta: pageMetadataSchema.nullable().default(null),
+  meta: pageMetadataSchema.optional(),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -50,10 +50,10 @@ export const apiResponseAssetTableSchema = z.object({
 export type ApiResponseAssetTable = z.infer<typeof apiResponseAssetTableSchema>
 
 export const apiResponseListAssetTableSchema = z.object({
-  data: z.array(assetTableSchema).nullable(),
-  errors: z.array(apiErrorSchema).nullable().default(null),
+  data: z.array(assetTableSchema).optional(),
+  errors: z.array(apiErrorSchema).optional(),
   message: z.string().optional(),
-  meta: pageMetadataSchema.nullable().default(null),
+  meta: pageMetadataSchema.optional(),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -66,11 +66,11 @@ export const assetPostFormSchema = z.object({
   assetCategoryId: z.string().uuid('Invalid asset category'),
   branchId: z.string().uuid('Invalid branch'),
   createdById: z.string().uuid('Invalid user ID'),
-  manufacturedDate: z.date().optional().nullable(),
-  endOfLife: z.date().optional().nullable(),
+  manufacturedDate: z.date().optional(),
+  endOfLife: z.date().optional(),
   isDateRangeValid: z.boolean().default(true),
   objectIds: z.array(z.string().uuid()).default([]),
-  remarks: z.string().max(1000, 'Remarks are too long').optional().nullable(),
+  remarks: z.string().max(1000, 'Remarks are too long').optional(),
 }).refine(
   (data) => {
     if (data.manufacturedDate && data.endOfLife) {
@@ -92,11 +92,11 @@ export const assetPutFormSchema = z.object({
   assetCategoryId: z.string().uuid('Invalid asset category'),
   branchId: z.string().uuid('Invalid branch'),
   updatedById: z.string().uuid('Invalid user ID'),
-  manufacturedDate: z.date().optional().nullable(),
-  endOfLife: z.date().optional().nullable(),
+  manufacturedDate: z.date().optional(),
+  endOfLife: z.date().optional(),
   isDateRangeValid: z.boolean().default(true),
   objectIds: z.array(z.string().uuid()).default([]),
-  remarks: z.string().max(1000, 'Remarks are too long').optional().nullable(),
+  remarks: z.string().max(1000, 'Remarks are too long').optional(),
 }).refine(
   (data) => {
     if (data.manufacturedDate && data.endOfLife) {

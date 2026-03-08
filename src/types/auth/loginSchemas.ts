@@ -13,11 +13,11 @@ export type LoginResponse = z.infer<typeof loginResponseSchema>
 
 export const apiResponseEnvelopeSchema = z.object({
   success: z.boolean(),
-  message: z.string().nullable().optional(),
-  data: z.unknown().nullable().optional(),
-  errors: z.unknown().nullable().optional(),
-  meta: z.unknown().nullable().optional(),
-  timestamp: z.number().nullable().optional(),
+  message: z.string().optional(),
+  data: z.unknown().optional(),
+  errors: z.unknown().optional(),
+  meta: z.unknown().optional(),
+  timestamp: z.number().optional(),
 })
 
 export type ApiResponseEnvelope = z.infer<typeof apiResponseEnvelopeSchema>
