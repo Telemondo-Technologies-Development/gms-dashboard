@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Loader2, UserMinus, Building2, MoreHorizontal, UserCheck, RefreshCw } from 'lucide-react';
+import { Search, Loader2, UserMinus, MoreHorizontal, UserCheck, RefreshCw } from 'lucide-react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 import { useEmployees } from "@/hooks/users/useStaffEmployees";
 import type { BranchPersonnelTableDTO } from '@/api/generated/models';
@@ -8,13 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,9 +32,7 @@ interface AssignedStaffViewProps {
 }
 
 export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
-  branches,
   currentBranchId,
-  onBranchChange,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: branchPersonnel, isLoading: loadingBP, refetch } = useBranchPersonnel(currentBranchId);
@@ -50,8 +41,6 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
 
   const actorNameMap = useMemo(() => {
     const map = new Map<string, string>();
-    
-    // Defensive check for array location
     const employeeList = Array.isArray(employeesResponse) 
       ? employeesResponse 
       : (employeesResponse as any)?.data ?? [];
@@ -117,19 +106,6 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto md:ml-auto">
-             <div className="flex items-center gap-2 w-full sm:w-64">
-                <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                <Select value={currentBranchId} onValueChange={onBranchChange}>
-                    <SelectTrigger className="h-10 w-full bg-background/50 border-muted-foreground/20">
-                        <SelectValue placeholder="Switch Branch" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                        {branches.map(b => (
-                            <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-             </div>
 
              <Button
                 variant="outline"
