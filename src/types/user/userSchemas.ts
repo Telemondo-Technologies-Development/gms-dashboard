@@ -16,20 +16,20 @@ export const pageMetadataSchema = z.object({
 })
 
 export const userTableSchema = z.object({
-  actorId: z.string().uuid().nullable().default(null),
-  createdAt: z.string().datetime().nullable().default(null),
+  actorId: z.string().uuid().optional(),
+  createdAt: z.string().datetime().optional(),
   email: z.string(),
   id: z.string().uuid(),
-  updatedAt: z.string().datetime().nullable().default(null),
+  updatedAt: z.string().datetime().optional(),
 })
 
 export type UserTable = z.infer<typeof userTableSchema>
 
 export const apiResponseUserTableSchema = z.object({
   data: userTableSchema,
-  errors: z.array(apiErrorSchema).nullable().default(null),
+  errors: z.array(apiErrorSchema).optional(),
   message: z.string().optional(),
-  meta: pageMetadataSchema.nullable().default(null),
+  meta: pageMetadataSchema.optional(),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
@@ -38,9 +38,9 @@ export type ApiResponseUserTable = z.infer<typeof apiResponseUserTableSchema>
 
 export const apiResponseListUserTableSchema = z.object({
   data: z.array(userTableSchema),
-  errors: z.array(apiErrorSchema).nullable().default(null),
+  errors: z.array(apiErrorSchema).optional(),
   message: z.string().optional(),
-  meta: pageMetadataSchema.nullable().default(null),
+  meta: pageMetadataSchema.optional(),
   success: z.boolean(),
   timestamp: z.number().optional(),
 })
