@@ -4,9 +4,9 @@ import { Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import AddReportDialog from '@/components/tracking-components/AddReportDialog';
 import IncidentReportsModal from '@/components/tracking-components/IncidentReportsModal';
 
@@ -35,6 +35,7 @@ export default function Tracking() {
 
   const { data: reportTypes, isLoading: typesLoading } = useReportTypes();
   const isLoading = reportsLoading || typesLoading;
+  
   const typeMap = useMemo(() => {
     const map: Record<string, string> = {};
     reportTypes?.forEach((t) => {
@@ -56,7 +57,7 @@ export default function Tracking() {
           id: report.actorId,
           name: `${report.actorFirstname ?? ''} ${report.actorSurname ?? ''}`.trim() || 'Unknown Personnel',
           branch: report.branchName || 'No Branch',
-          status: report.actorStatus || 'IN',
+          status: report.actorStatus || 'IN', 
           reportCount: 0,
           reports: [],
         });
@@ -123,6 +124,7 @@ export default function Tracking() {
           <AddReportDialog onSuccess={handleRefresh} />
         </div>
       </div>
+
       <Card className="border-none shadow-xl shadow-zinc-200/50 rounded-3xl overflow-hidden bg-white">
         <CardHeader className="border-b border-zinc-50 px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -132,11 +134,11 @@ export default function Tracking() {
             </div>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-              <Input
+              <input
                 placeholder="Search by name or branch..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 bg-zinc-50 border-none rounded-xl text-sm focus-visible:ring-1 focus-visible:ring-zinc-200"
+                className="w-full pl-10 pr-4 h-11 bg-zinc-50 border-none rounded-xl text-sm focus-visible:ring-1 focus-visible:ring-zinc-200 focus:outline-none"
               />
             </div>
           </div>
@@ -158,11 +160,11 @@ export default function Tracking() {
               <Table>
                 <TableHeader className="bg-muted/30 sticky top-0 z-10">
                   <TableRow className="hover:bg-transparent border-b border-muted/60">
-                    <TableHead className="pl-8 w-[30%] bg-muted/30">Full Name</TableHead>
-                    <TableHead className="w-[20%] bg-muted/30">Primary Branch</TableHead>
-                    <TableHead className="w-[15%] bg-muted/30">Status</TableHead>
-                    <TableHead className="w-[15%] text-center bg-muted/30">Incidents</TableHead>
-                    <TableHead className="pr-8 w-[20%] text-right bg-muted/30">Action</TableHead>
+                    <TableHead className="pl-8 w-[30%] bg-muted/30 uppercase text-[10px] font-black">Full Name</TableHead>
+                    <TableHead className="w-[20%] bg-muted/30 uppercase text-[10px] font-black">Primary Branch</TableHead>
+                    <TableHead className="w-[15%] bg-muted/30 uppercase text-[10px] font-black">Status</TableHead>
+                    <TableHead className="w-[15%] text-center bg-muted/30 uppercase text-[10px] font-black">Incidents</TableHead>
+                    <TableHead className="pr-8 w-[20%] text-right bg-muted/30 uppercase text-[10px] font-black">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -173,40 +175,48 @@ export default function Tracking() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredCustomers.map((customer) => (
-                      <TableRow
-                        key={customer.id}
-                        className="group cursor-pointer hover:bg-zinc-50/80 border-zinc-50 transition-colors"
-                        onClick={() => handleOpenModal(customer)}
-                      >
-                        <TableCell className="px-8 py-5">
-                          <p className="font-bold text-zinc-900 group-hover:text-[#0062cc] transition-colors">
-                            {customer.name}
-                          </p>
-                          <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-tighter">
-                            {customer.id.replace('0x', '').slice(0, 8)}
-                          </p>
-                        </TableCell>
-                        <TableCell className="font-medium text-zinc-600">{customer.branch}</TableCell>
-                        <TableCell>
-                          <Badge className={`rounded-lg px-2 py-0.5 text-[10px] font-black uppercase tracking-tight border-none ${
-                            customer.status === 'IN' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
-                          }`}>
-                            {customer.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-zinc-100 text-zinc-900 text-xs font-black">
-                            {customer.reportCount}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right px-8">
-                          <Button variant="ghost" className="h-8 text-[10px] font-black uppercase text-[#0062cc]">
-                            View History
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    filteredCustomers.map((customer) => {
+                      const statusClean = customer.status.toLowerCase();
+                      const isActive = statusClean === 'active' || statusClean === 'in';
+
+                      return (
+                        <TableRow
+                          key={customer.id}
+                          className="group cursor-pointer hover:bg-zinc-50/80 border-zinc-50 transition-colors"
+                          onClick={() => handleOpenModal(customer)}
+                        >
+                          <TableCell className="px-8 py-5">
+                            <p className="font-bold text-zinc-900 group-hover:text-[#0062cc] transition-colors">
+                              {customer.name}
+                            </p>
+                            <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-tighter">
+                              {customer.id.replace('0x', '').slice(0, 8)}
+                            </p>
+                          </TableCell>
+                          <TableCell className="font-medium text-zinc-600">{customer.branch}</TableCell>
+                          <TableCell>
+                            <Badge className={cn(
+                              "rounded-lg px-2 py-0.5 text-[10px] font-black uppercase tracking-tight border-none shadow-none pointer-events-none",
+                              isActive 
+                                ? "bg-emerald-50 text-emerald-600" 
+                                : "bg-rose-50 text-rose-600"
+                            )}>
+                              {customer.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-zinc-100 text-zinc-900 text-xs font-black">
+                              {customer.reportCount}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right px-8">
+                            <Button variant="ghost" className="h-8 text-[10px] font-black uppercase text-[#0062cc]">
+                              View History
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
