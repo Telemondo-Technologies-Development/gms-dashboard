@@ -78,7 +78,6 @@ export function parseUsersResponse(json: unknown): UserTable[] {
 }
 
 
-// Schema for employee form (matches backend EmployeePostDTO/EmployeeTableDTO)
 export const employeeFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   surname: z.string().min(1, 'Surname is required'),
@@ -92,8 +91,6 @@ export const employeeFormSchema = z.object({
 
 export type EmployeeFormValues = z.infer<typeof employeeFormSchema>
 export type EmployeeFormInput = z.input<typeof employeeFormSchema>
-
-// Schema for the combined employee + user form (legacy, being deprecated)
 export const userFormSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
@@ -113,7 +110,7 @@ export type UserFormInput = z.input<typeof userFormSchema>
 export const createUserFormSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  roleIds: z.array(z.string().uuid()).min(1, 'Select at least one role'),
+  roleIds: z.array(z.string().uuid()).default([]),
 })
 
 export type CreateUserFormValues = z.infer<typeof createUserFormSchema>
@@ -128,4 +125,20 @@ export interface EmployeeTabProps {
   onDelete: (id: string) => void
   onAddLogin: (employee: EmployeeTableDTO) => void
   onAddPermission: (employee: EmployeeTableDTO) => void
+}
+
+export const createRoleFormSchema = z.object({
+  name: z.string().min(1, 'Role name is required'),
+  description: z.string().min(1, 'Description is required'),
+})
+// ---------------------------------------------------------------------------
+// Module-level API client
+// ---------------------------------------------------------------------------
+export interface CreateEmployeeLoginDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  employeeName: string
+  onSubmit: (values: CreateUserFormValues) => Promise<void>
+  isSubmitting: boolean
+  errorMessage?: string | null
 }

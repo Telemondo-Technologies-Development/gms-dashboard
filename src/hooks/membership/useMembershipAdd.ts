@@ -8,11 +8,11 @@ import { MemberApi } from '@/api/generated/apis/MemberApi'
 import { SubscriptionApi } from '@/api/generated/apis/SubscriptionApi'
 import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 import { getAuthenticatedApi } from '@/lib/api-client'
+import { ResponseError } from '@/api/generated/runtime'
 import { useAddMemberDialogData } from '@/hooks/membership/useMembershipDetails'
 import { useBillingActions } from '@/hooks/billing/usePaymentHistoryBillingActions'
 import { memberQueryKeys } from '@/lib/QueryKeys'
 import {
-  apiResponseMemberTableSchema,
   getMembershipApiErrorMessage,
   memberPostDtoSchema,
 } from '@/types/membership/MembershipManagementSchema'
@@ -20,6 +20,10 @@ import type { MemberFormValues } from '@/types/membership/MembershipManagementSc
 import { useCreateSubscriptionPlan } from '@/hooks/membership/useMembershipAddSubscriptionPlan'
 import { useCreatePaymentMethod } from '@/hooks/billing/usePaymentHistoryAddMethods'
 import type { SubscriptionPlanFormState } from '@/types/membership/MembershipsubscriptionSchemas'
+
+const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
+const memberApi = getAuthenticatedApi(MemberApi)
+const subscriptionApi = getAuthenticatedApi(SubscriptionApi)
 
 interface UseAddMemberDialogResult {
   open: boolean
@@ -73,7 +77,6 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
   const [membershipDetails, setMembershipDetails] = useState('')
 
   const {
-    token,
     currentUserQuery,
     resolvedActorId,
     currentUserEmail,
@@ -83,10 +86,6 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
   } = useAddMemberDialogData({ open })
 
   const { ensureInvoiceForSubscription, createPaymentIfNeeded } = useBillingActions()
-
-  const memberSubscriptionApi = getAuthenticatedApi(MemberSubscriptionApi)
-  const memberApi = getAuthenticatedApi(MemberApi)
-  const subscriptionApi = getAuthenticatedApi(SubscriptionApi)
 
   // Use hooks for inline creation
   const createSubscriptionPlan = useCreateSubscriptionPlan({
@@ -208,7 +207,7 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
         throw new Error('User branch not found. Please ensure you are assigned to a branch.')
       }
 
-      const memberPostDTO = {
+      const memberPostDTO = memberPostDtoSchema.parse({
         createdById,
         firstName: values.firstName.trim(),
         middleName: values.middleName.trim() || undefined,
@@ -216,56 +215,30 @@ export function useAddMemberDialog(): UseAddMemberDialogResult {
         surname: values.surname.trim(),
         suffix: values.suffix.trim() || undefined,
         status: values.status,
-      }
-
-      const validated = memberPostDtoSchema.parse(memberPostDTO)
-
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
-      const base = import.meta.env.DEV ? '' : (apiBaseUrl || '')
-      const response = await fetch(`${base}/api/member`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        credentials: 'include',
-        body: JSON.stringify(validated),
       })
 
-      const rawText = await response.text().catch(() => '')
-      if (!response.ok) {
-        let parsedErrorPayload: unknown = null
-        if (rawText.trim()) {
-          try {
-            parsedErrorPayload = JSON.parse(rawText)
-          } catch {
-            parsedErrorPayload = null
+      let createResponse: Awaited<ReturnType<typeof memberApi.createMember>>
+      try {
+        createResponse = await memberApi.createMember({ memberPostDTO })
+      } catch (error) {
+        if (error instanceof ResponseError) {
+          const body = await error.response.text().catch(() => '')
+          if (error.response.status === 409 || body.includes('VAL_009') || body.includes('members.uk_name')) {
+            throw new Error('A member with this name already exists. Please review the name details or edit the existing member record.')
           }
+          let parsed: unknown = null
+          try { parsed = body.trim() ? JSON.parse(body) : null } catch { /* ignore */ }
+          throw new Error(getMembershipApiErrorMessage(parsed, `Create member failed (${error.response.status}).`))
         }
-        const parsedErrorMessage = getMembershipApiErrorMessage(
-          parsedErrorPayload,
-          `Create member failed (${response.status}). ${rawText || 'Check server logs for details.'}`,
-        )
-
-        const isDuplicateMember =
-          response.status === 409 &&
-          typeof rawText === 'string' &&
-          (rawText.includes('VAL_009') || rawText.includes('members.uk_name'))
-
-        if (isDuplicateMember) {
-          throw new Error('A member with this name already exists. Please review the name details or edit the existing member record.')
-        }
-
-        throw new Error(parsedErrorMessage)
+        throw error
       }
 
-      const parsedJson: unknown = rawText.trim() ? JSON.parse(rawText) : null
-      const envelope = apiResponseMemberTableSchema.parse(parsedJson)
-      if (!envelope.success) {
-        throw new Error(envelope.message ?? 'Failed to create member.')
+      if (!createResponse.success) {
+        throw new Error(createResponse.message ?? 'Failed to create member.')
       }
 
-      const member = envelope.data
+      const member = createResponse.data
+      if (!member) throw new Error('Failed to create member: no data returned.')
 
       if (skipBilling) {
         return member

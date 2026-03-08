@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Loader2, ShieldCheck } from 'lucide-react'
 
 import {
@@ -24,22 +24,22 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
-import { createUserFormSchema } from '@/types/user/userSchemas'
-import type { CreateUserFormInput, CreateUserFormValues } from '@/types/user/userSchemas'
+import { createUserFormSchema, createRoleFormSchema } from '@/types/user/userSchemas'
+import type { CreateUserFormInput, CreateEmployeeLoginDialogProps } from '@/types/user/userSchemas'
 import { AccessControlApi } from '@/api/generated/apis'
 import { getAuthenticatedApi } from '@/lib/api-client'
+import { accessControlQueryKeys } from '@/lib/QueryKeys'
 import { InlineAddRoleForm } from './StaffAddRoles'
 import type { RoleFormState } from './StaffAddRoles'
 import { useAuthSession } from '@/lib/auth/auth-session'
+import { useAllRoles } from '@/hooks/users/useAllRoles'
 
-interface CreateEmployeeLoginDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  employeeName: string
-  onSubmit: (values: CreateUserFormValues) => Promise<void>
-  isSubmitting: boolean
-  errorMessage?: string | null
-}
+
+
+
+const accessControlApi = getAuthenticatedApi(AccessControlApi)
+
+
 
 export function CreateEmployeeLoginDialog({
   open,
@@ -51,27 +51,12 @@ export function CreateEmployeeLoginDialog({
 }: CreateEmployeeLoginDialogProps) {
   const session = useAuthSession()
   const queryClient = useQueryClient()
-  const accessControlApi = getAuthenticatedApi(AccessControlApi)
-  
+
   const [showNewRoleForm, setShowNewRoleForm] = useState(false)
   const [newRoleForm, setNewRoleForm] = useState<RoleFormState>({ name: '', description: '' })
   const [roleCreateError, setRoleCreateError] = useState<string | null>(null)
 
-  const { data: rolesData, isLoading: rolesLoading } = useQuery({
-    queryKey: ['auth-roles'],
-    queryFn: async () => {
-      const response = await accessControlApi.getAllRoles({
-        pageable: { page: 0, size: 1000 },
-      })
-      if (response.success && Array.isArray(response.data)) {
-        return response.data as Array<{ id: string; name: string; description?: string }>
-      }
-      return []
-    },
-    staleTime: 5 * 60 * 1000,
-  })
-
-  const roles = rolesData ?? []
+  const { data: roles = [], isLoading: rolesLoading } = useAllRoles()
 
   const form = useForm<CreateUserFormInput>({
     resolver: zodResolver(createUserFormSchema),
@@ -84,15 +69,14 @@ export function CreateEmployeeLoginDialog({
 
   const createRoleMutation = useMutation({
     mutationFn: async () => {
+      const parsed = createRoleFormSchema.parse(newRoleForm)
       if (!session.actorId) throw new Error('Missing actor ID for current user.')
-      if (!newRoleForm.name.trim()) throw new Error('Role name is required.')
-      if (!newRoleForm.description.trim()) throw new Error('Role description is required.')
 
       const response = await accessControlApi.createRole({
         rolePostDTO: {
           createdById: session.actorId,
-          name: newRoleForm.name.trim(),
-          description: newRoleForm.description.trim(),
+          name: parsed.name,
+          description: parsed.description,
         },
       })
 
@@ -104,18 +88,15 @@ export function CreateEmployeeLoginDialog({
     },
     onSuccess: (createdRole) => {
       setRoleCreateError(null)
-      void queryClient.invalidateQueries({ queryKey: ['auth-roles'] })
-      
-      if (!createdRole?.id) {
+      void queryClient.invalidateQueries({ queryKey: accessControlQueryKeys.roles })
+
+      if (!createdRole.id) {
         setRoleCreateError('Role created but ID not returned')
         return
       }
-      
-      // Add the new role to the selected roles
+
       const currentRoles = form.getValues('roleIds') as string[]
       form.setValue('roleIds', [...currentRoles, createdRole.id])
-      
-      // Reset form and hide
       setNewRoleForm({ name: '', description: '' })
       setShowNewRoleForm(false)
     },
@@ -262,7 +243,7 @@ export function CreateEmployeeLoginDialog({
                             type="button"
                             size="sm"
                             onClick={() => void createRoleMutation.mutateAsync()}
-                            disabled={!newRoleForm.name.trim() || !newRoleForm.description.trim() || createRoleMutation.isPending}
+                            disabled={!createRoleFormSchema.safeParse(newRoleForm).success || createRoleMutation.isPending}
                           >
                             {createRoleMutation.isPending ? (
                               <>

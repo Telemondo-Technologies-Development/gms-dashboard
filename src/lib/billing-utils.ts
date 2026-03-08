@@ -34,6 +34,7 @@ export function calculateNextDueDate(
  */
 export function formatBillingCycle(intervalCount: number, intervals: BillingInterval): string {
   const singularMap: Record<BillingInterval, string> = {
+    MINUTES: 'Minute',
     DAILY: 'Day',
     WEEKLY: 'Week',
     MONTHLY: 'Month',

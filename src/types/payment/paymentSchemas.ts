@@ -7,16 +7,11 @@ export interface EnsureInvoiceInput {
   createdById: string
   memberSubscriptionId: string
   subscriptionAvailedId: string
-  /** Enrollment start date — used to derive the first invoice due date */
   startDate: Date
-  /** Optional end date — undefined means ongoing (continuous billing, no expiry) */
   endDate?: Date
-  /** Billing interval unit from the subscription (DAILY/WEEKLY/MONTHLY/YEARLY) */
   intervals: BillingInterval
-  /** How many interval units make one billing cycle (e.g. 2 for bi-weekly) */
   intervalCount: number
   gracePeriodDays: number
-  /** Subscription amount — used to determine payment status on first payment */
   subtotal: number
 }
 
@@ -25,7 +20,6 @@ export interface CreatePaymentIfNeededInput {
   invoiceId: string | undefined
   createdById: string
   amount: number
-  /** Full invoice subtotal — used to derive FULL/PARTIAL/PENDING status */
   subtotal?: number
   paidAt?: Date
 	referenceNum?: string
