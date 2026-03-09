@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Loader2, UserMinus, MoreHorizontal, UserCheck, RefreshCw } from 'lucide-react';
+import { Search, Loader2, UserMinus, MoreHorizontal, UserCheck, RefreshCw, Shield } from 'lucide-react';
 import { useBranchPersonnel } from '@/hooks/Staff/useBranchPersonnel';
 import { useEmployees } from "@/hooks/users/useStaffEmployees";
-import type { BranchPersonnelTableDTO } from '@/api/generated/models';
+import { useAllPersonnelRoles } from '@/hooks/Staff/useAllPersonnelRoles'; 
+import type { BranchPersonnelTableDTO, PersonnelRoleTableDTO } from '@/api/generated/models';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -21,8 +22,9 @@ function cn(...classes: (string | boolean | undefined | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-interface StaffWithName extends BranchPersonnelTableDTO {
+interface StaffWithDetails extends BranchPersonnelTableDTO {
   fullName: string;
+  roleName: string;
 }
 
 interface AssignedStaffViewProps {
@@ -37,7 +39,19 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const { data: branchPersonnel, isLoading: loadingBP, refetch } = useBranchPersonnel(currentBranchId);
   const { data: employeesResponse, isLoading: loadingEmp } = useEmployees();
-  const isLoading = loadingBP || loadingEmp;
+  const { data: rolesResponse, isLoading: loadingRoles } = useAllPersonnelRoles();
+  const isLoading = loadingBP || loadingEmp || loadingRoles;
+  const roleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    const roleList = (rolesResponse as any)?.data ?? rolesResponse ?? [];
+    
+    roleList.forEach((role: PersonnelRoleTableDTO) => {
+      if (role.id) {
+        map.set(role.id, role.name || 'Unknown Role');
+      }
+    });
+    return map;
+  }, [rolesResponse]);
 
   const actorNameMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -62,15 +76,19 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
     return personnelList
       .map((p: BranchPersonnelTableDTO) => {
         const nameFromMap = actorNameMap.get(p.actorId);
+        const roleNameFromMap = roleMap.get(p.personnelRoleId || '');
+        
         return {
           ...p,
           fullName: nameFromMap || `Staff (${p.actorId?.slice(0, 8) || 'Unknown'})`,
-        } as StaffWithName;
+          roleName: roleNameFromMap || 'No Role Assigned',
+        } as StaffWithDetails;
       })
-      .filter((p: StaffWithName) =>
-        p.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+      .filter((p: StaffWithDetails) =>
+        p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.roleName.toLowerCase().includes(searchQuery.toLowerCase())
       );
-  }, [branchPersonnel, actorNameMap, searchQuery]);
+  }, [branchPersonnel, actorNameMap, roleMap, searchQuery]);
 
   return (
     <Card className="flex flex-col shadow-md border-muted/40 h-[650px] overflow-hidden">
@@ -100,7 +118,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by staff name..."
+              placeholder="Search by name or role..."
               className="pl-9 h-10 w-full bg-background/50 border-muted-foreground/20 focus-visible:ring-1"
             />
           </div>
@@ -121,8 +139,8 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
           <Table className="w-full table-fixed">
             <TableHeader className="sticky top-0 z-10 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[50%] md:w-[40%] pl-4 md:pl-6">Staff Name</TableHead>
-                <TableHead className="hidden md:table-cell w-[25%]">Employee ID</TableHead>
+                <TableHead className="w-[45%] md:w-[40%] pl-4 md:pl-6">Staff Name</TableHead>
+                <TableHead className="hidden md:table-cell w-[25%]">Functional Role</TableHead>
                 <TableHead className="w-[15%]">Status</TableHead>
                 <TableHead className="w-[15%] text-right pr-4 md:pr-6">Actions</TableHead>
               </TableRow>
@@ -145,7 +163,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredStaff.map((staff: StaffWithName) => (
+                filteredStaff.map((staff: StaffWithDetails) => (
                   <TableRow key={staff.id || staff.actorId} className="hover:bg-muted/40 transition-colors group border-b border-muted/40">
                     <TableCell className="pl-4 md:pl-6 py-4 align-top">
                       <div className="flex flex-col gap-0.5 min-w-0">
@@ -158,9 +176,12 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell py-4 align-top">
-                      <span className="text-sm font-mono text-muted-foreground">
-                        {staff.actorId ? `${staff.actorId.slice(0, 12)}...` : 'N/A'}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                         <Shield className="h-3.5 w-3.5 text-slate-400" />
+                         <span className="text-sm font-medium text-slate-600">
+                           {staff.roleName}
+                         </span>
+                      </div>
                     </TableCell>
                     <TableCell className="py-4 align-top">
                       <Badge className={cn(
@@ -193,20 +214,6 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
             </TableBody>
           </Table>
         </div>
-
-        {filteredStaff.length > 0 && (
-          <div className="shrink-0 border-t bg-muted/5">
-            <div className="flex items-center justify-between p-4 text-foreground">
-              <div className="text-sm text-muted-foreground">
-                Showing {filteredStaff.length} assigned personnel
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Previous</Button>
-                <Button variant="outline" size="sm" disabled className="h-8 px-3 text-xs">Next</Button>
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
