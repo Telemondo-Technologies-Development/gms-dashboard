@@ -17,6 +17,7 @@ import {
 	IdCardLanyard,
 	KeyRound,
 	Shield,
+	LayoutDashboard,
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { cn } from '@/lib/utils'
@@ -119,7 +120,6 @@ export default function Aside() {
 			items: [
 				{ label: "Staff", href: "/dashboard/admin/users", icon: IdCardLanyard },
 				{ label: "Roles & Access", href: "/dashboard/admin/access", icon: KeyRound },
-				{ label: "Overview", href: "/dashboard/admin/overview", icon: ChartCandlestick },
 				{ label: "Audit Log", href: "/dashboard/admin/audit", icon: Shield },
 				{ label: "Expenses", href: "/dashboard/admin/expense", icon: BanknoteArrowDown  },
 				{ label: "Analytics", href: "/dashboard/admin/analytics", icon: LineChart },
@@ -156,6 +156,7 @@ export default function Aside() {
 				<div>
 					<div className={collapsed ? 'mb-4 flex flex-col gap-2' : 'mb-4 flex items-center justify-between px-2'}>
 						<div className={collapsed ? 'flex items-center justify-center w-full' : 'flex items-center justify-between w-full'}>
+
 							<div className="flex items-center">
 								<span
 									className={cn(
@@ -166,6 +167,7 @@ export default function Aside() {
 									Dashboard
 								</span>
 							</div>
+
 							<Button
 								className="h-8 w-8  border border-border bg-background flex items-center justify-center shrink-0 hover:bg-accent hover:text-accent-foreground transition-colors"
 								aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -181,6 +183,15 @@ export default function Aside() {
 					</div>
 
 					<div className="space-y-6">
+						<nav className="flex flex-col gap-1">
+							<NavLink
+								href="/dashboard/admin/overview"
+								icon={LayoutDashboard}
+								label="Overview"
+								isActive={currentPath === '/dashboard'}
+								collapsed={collapsed}
+							/>
+						</nav>
 						{sections.map((section) => (
 							<Section
 								key={section.title}
