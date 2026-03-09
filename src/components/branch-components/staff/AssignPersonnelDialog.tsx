@@ -5,18 +5,16 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, Check } from "lucide-react";
+
+// Hooks
 import { useEmployees } from "@/hooks/users/useStaffEmployees";
+import { useAssignBranchPersonnel } from '@/hooks/Staff/useAssignBranchPersonnel';
+import { useAuthSession } from '@/lib/auth/auth-session';
+import { usePersonnelRoles } from '@/hooks/Staff/usePersonnelRoles';
 
 function cn(...classes: (string | boolean | undefined | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
-
-const PRESET_ROLES = [
-  "Branch Manager",
-  "Head Coach",
-  "Fitness Instructor",
-  "Front Desk / Reception",
-];
 
 interface AssignPersonnelDialogProps {
   open: boolean;
@@ -33,11 +31,14 @@ export function AssignPersonnelDialog({
   onSuccess, 
   initialBranchId 
 }: AssignPersonnelDialogProps) {
+  const { actorId } = useAuthSession();
   const { data: employeesResponse } = useEmployees();
+  const { data: rolesResponse, isLoading: isLoadingRoles } = usePersonnelRoles();
+  const { mutateAsync: assignPersonnel } = useAssignBranchPersonnel();
 
   const [selectedStaffId, setSelectedStaffId] = useState("");
   const [selectedBranchId, setSelectedBranchId] = useState("");
-  const [role, setRole] = useState("");
+  const [roleId, setRoleId] = useState(""); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [staffSearch, setStaffSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -45,13 +46,10 @@ export function AssignPersonnelDialog({
 
   useEffect(() => {
     if (open) {
-      if (initialBranchId) {
-        setSelectedBranchId(initialBranchId);
-      } else {
-        setSelectedBranchId("");
-      }
+      setSelectedBranchId(initialBranchId ?? "");
       setStaffSearch("");
       setSelectedStaffId("");
+      setRoleId("");
       setShowSuggestions(false);
     }
   }, [open, initialBranchId]);
@@ -68,15 +66,13 @@ export function AssignPersonnelDialog({
       );
   }, [employeesResponse, staffSearch]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (suggestionRef.current && !suggestionRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const availableRoles = useMemo(() => {
+    const list = (rolesResponse as any)?.data ?? rolesResponse ?? [];
+    return list.map((r: any) => ({
+      id: r.id,
+      name: r.name
+    }));
+  }, [rolesResponse]);
 
   const handleSelectStaff = (staff: any) => {
     setSelectedStaffId(staff.id);
@@ -85,17 +81,22 @@ export function AssignPersonnelDialog({
   };
 
   const handleSave = async () => {
-    if (!selectedStaffId || !selectedBranchId || !role) return;
+    if (!selectedStaffId || !selectedBranchId || !roleId) return;
+    
     setIsSubmitting(true);
     try { 
+      await assignPersonnel({
+        actorId: selectedStaffId,
+        branchId: selectedBranchId,
+        createdById: actorId ?? '',
+        personnelRoleId: roleId,
+        status: 'ACTIVE' as any
+      });
+
       onSuccess();
-      setSelectedStaffId("");
-      setSelectedBranchId("");
-      setRole("");
-      setStaffSearch("");
       onOpenChange(false);
-    } catch (error) {
-      console.error("Assignment failed", error);
+    } catch (error: any) {
+      console.error("Assignment failed:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +105,6 @@ export function AssignPersonnelDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-visible p-0 border border-slate-200 shadow-xl rounded-lg bg-white">
-        
         <DialogHeader className="shrink-0 px-6 pt-6 pb-4 border-b border-slate-50">
           <DialogTitle className="text-xl font-bold text-slate-900">Deploy Personnel</DialogTitle>
           <DialogDescription className="text-slate-900 text-[13px] mt-1">
@@ -148,19 +148,23 @@ export function AssignPersonnelDialog({
               </div>
             )}
           </div>
+
           <div className="space-y-1.5 relative z-40">
             <Label className="text-[13px] font-semibold text-slate-700">Functional Role *</Label>
-            <Select value={role} onValueChange={setRole}>
+            <Select value={roleId} onValueChange={setRoleId}>
               <SelectTrigger className="h-10 rounded-md border-slate-200 bg-white">
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select a role"} />
               </SelectTrigger>
               <SelectContent position="popper" sideOffset={4} className="w-[var(--radix-select-trigger-width)] max-h-[200px]">
-                {PRESET_ROLES.map((r) => (
-                  <SelectItem key={r} value={r} className="cursor-pointer">{r}</SelectItem>
+                {availableRoles.map((r: any) => (
+                  <SelectItem key={r.id} value={r.id} className="cursor-pointer">
+                    {r.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
           <div className="space-y-1.5 relative z-30">
             <Label className="text-[13px] font-semibold text-slate-700">Target Branch Location *</Label>
             <Select 
@@ -189,7 +193,7 @@ export function AssignPersonnelDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} className="h-9">Cancel</Button>
           <Button 
             onClick={handleSave}
-            disabled={!selectedStaffId || !selectedBranchId || !role || isSubmitting}
+            disabled={!selectedStaffId || !selectedBranchId || !roleId || isSubmitting}
             className="bg-[#0052cc] hover:bg-[#0041a3] text-white h-9"
           >
             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm Deployment"}
