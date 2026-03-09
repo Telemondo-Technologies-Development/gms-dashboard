@@ -132,9 +132,14 @@ export default function MembershipAddAttendance({ members }: MembershipAddAttend
 			<CardHeader>
 				<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 					<div>
-						<CardTitle className="text-xl font-bold tracking-tight">Today's Attendance</CardTitle>
+						<CardTitle className="text-xl font-bold tracking-tight">
+							{selectedDay === format(new Date(), 'yyyy-MM-dd') ? "Today's Attendance" : 'Attendance'}
+						</CardTitle>
 						<CardDescription className="mt-1">
-							{filteredRows.length} attended today • {format(new Date(), 'EEEE, MMMM dd, yyyy')}
+							{filteredRows.length} attended •{' '}
+							{selectedDay
+								? format(parseCalendarDay(selectedDay) ?? new Date(), 'EEEE, MMMM dd, yyyy')
+								: format(new Date(), 'EEEE, MMMM dd, yyyy')}
 						</CardDescription>
 					</div>
 					<Badge variant="default" className="px-3 py-1 text-sm">

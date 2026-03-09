@@ -368,20 +368,6 @@ export function PaymentHistoryTable() {
                     </div>
 
                     <div className="flex items-center  ml-auto gap-2 w-full xl:w-auto xl:mt-0 justify-end ">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={handleRefresh}
-                        disabled={paymentsLoading}
-                        className="h-10 w-10 shrink-0"
-                      >
-                        {paymentsLoading ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        ) : (
-                          <RefreshCw className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </Button>
                       <Button className="h-10">
                         <Download className="h-4 w-4 mr-2" />
                         Export
