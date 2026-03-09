@@ -85,7 +85,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                         <div key={member.id} className="rounded-lg space-y-4">
                           <div className="grid grid-cols-1 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor={`firstName-${member.id}`}>First Name *</Label>
+                              <Label htmlFor={`firstName-${member.id}`}>First Name <span className="text-destructive">*</span></Label>
                               <Input
                                 id={`firstName-${member.id}`}
                                 value={member.firstName || ''}
@@ -105,7 +105,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`surname-${member.id}`}>Surname *</Label>
+                              <Label htmlFor={`surname-${member.id}`}>Surname <span className="text-destructive">*</span></Label>
                               <Input
                                 id={`surname-${member.id}`}
                                 value={member.surname || ''}
@@ -125,7 +125,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                             </div>
 
                             <div className="space-y-2">
-                              <Label>Status</Label>
+                              <Label>Status <span className="text-destructive">*</span></Label>
                               <Select value={member.status || 'UNDECIDED'} disabled>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select status" />
@@ -182,7 +182,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
                       ) : (
                         <div className="space-y-4">
                           <div className="space-y-2">
-                            <Label htmlFor="subscription">Subscription Plan *</Label>
+                            <Label htmlFor="subscription">Subscription Plan <span className="text-destructive">*</span></Label>
                             <Select
                               value={selectedSubscriptionId}
                               onValueChange={setSelectedSubscriptionId}
@@ -243,7 +243,7 @@ export function MemberDetailsDialog({ open, onOpenChange, memberGroup }: MemberD
 
                       <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
-                          <Label>Start Date</Label>
+                          <Label>Start Date <span className="text-destructive">*</span></Label>
                           <Popover>
                             <PopoverTrigger asChild>
                               <Button

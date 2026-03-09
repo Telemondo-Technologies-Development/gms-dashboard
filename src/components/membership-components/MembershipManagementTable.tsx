@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import { Search, Calendar as CalendarIcon, RefreshCw, Loader2, User, Mail, CreditCard, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useNavigate } from '@tanstack/react-router'
 
 import { useMembersData } from '@/hooks/membership/useMembership'
 import { useAttendanceEligibility } from '@/hooks/membership/useMembershipAttendanceEligibility'
@@ -62,6 +63,7 @@ function MembersTable({ onSelectMember }: Props) {
   const PAGE_SIZE = 5
 
   const { enrichedMembers, isFetching, error, refetchAll } = useMembersData()
+  const navigate = useNavigate()
   const attendanceQuery = useAttendance()
   const session = useAuthSession()
   const selectedBranchId = useSelectedBranchId()
@@ -334,22 +336,11 @@ function MembersTable({ onSelectMember }: Props) {
                   </div>
                 </PopoverContent>
               </Popover>
-              
+              <Button onClick={() => navigate({ to: "/dashboard/marketing/membership/data" })}>
+                Data
+              </Button>
+                            
               <div className="flex items-center gap-2 justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={refetchAll}
-                  disabled={isFetching}
-                  className="h-10 w-10 shrink-0"
-                >
-                  {isFetching ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </Button>
                 <AddMemberDialog />
               </div>
             </div>
