@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import type { BranchFormData } from '@/components/branch-components/branch/AddBranchDialog';
 import { BranchDetailsDialog } from '@/components/branch-components/branch/BranchDetailsDialog';
-import { AssignStaffDialog } from '@/components/branch-components/staff/AssignStaffDialog';
 import { MapDialog } from '@/components/branch-components/branch/MapDialog';
 import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
 import { BranchList } from '@/components/branch-components/branch/BranchList';
@@ -130,9 +129,6 @@ function RouteComponent() {
     ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
     : null;
 
-  function handleUpdateStaff(): void {
-    refetch();
-  }
 
   return (
     <div className="space-y-6">
@@ -184,15 +180,6 @@ function RouteComponent() {
           assignedStaff: selectedBranch.assignedStaff || []
         } : null}
         onSave={handleSaveBranch}
-      />
-
-      <AssignStaffDialog
-        open={dialogState.staffDialogOpen}
-        onOpenChange={(open) => toggleDialog('staffDialogOpen', open)}
-        branchId={activeBranchForStaff?.id || ''}
-        branchName={activeBranchForStaff?.name || ''}
-        staff={activeBranchForStaff?.assignedStaff || []}
-        onUpdateStaff={handleUpdateStaff}
       />
 
       <MapDialog
