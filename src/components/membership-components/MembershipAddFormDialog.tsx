@@ -193,7 +193,7 @@ export function AddMemberDialog() {
                   <form.Field name="status">
                     {(field) => (
                         <div className="space-y-2">
-                        <Label>Status</Label>
+                        <Label>Status <span className="text-destructive">*</span></Label>
                         <Select value={field.state.value} onValueChange={(v) => field.handleChange(v as MemberFormValues['status'])}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select status" />
