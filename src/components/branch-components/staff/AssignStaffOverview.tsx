@@ -159,6 +159,8 @@ export const AssignStaffOverview: React.FC<AssignStaffOverviewProps> = ({
         open={isAssignDialogOpen} 
         onOpenChange={setIsAssignDialogOpen}
         branches={branches}
+        // Pass the currently selected branch ID here
+        initialBranchId={selectedBranchId} 
         onSuccess={() => setIsAssignDialogOpen(false)}
       />
     </div>
