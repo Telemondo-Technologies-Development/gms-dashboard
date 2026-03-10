@@ -15,7 +15,8 @@ interface Branch {
   updatedAt: string;
   createdById: string;
   updatedById: string;
-  assignedStaff?: any; 
+  branchPersonnel?: any;
+  assignedStaff?: any;
 }
 
 interface BranchListProps {
@@ -82,10 +83,11 @@ export const BranchList: React.FC<BranchListProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {branches.map((branch) => {
+          const personnelList = Array.isArray(branch.branchPersonnel)
+            ? branch.branchPersonnel
+            : (branch.branchPersonnel as any)?.data ?? 
+              (Array.isArray(branch.assignedStaff) ? branch.assignedStaff : (branch.assignedStaff as any)?.data ?? []);
 
-          const personnelList = Array.isArray(branch.assignedStaff) 
-            ? branch.assignedStaff 
-            : (branch.assignedStaff as any)?.data ?? [];
           const staffCount = personnelList.length;
 
           return (
@@ -160,8 +162,7 @@ export const BranchList: React.FC<BranchListProps> = ({
                     )}
                   </div>
                   <span>Assigned Staff</span>
-
-                  <span className={`ml-1 px-2.5 py-0.5 rounded-full text-[10px] border transition-colors ${
+                  <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] border transition-colors ${
                     staffCount === 0 
                       ? "bg-red-50 text-red-600 border-red-100" 
                       : "bg-blue-50 text-[#0062cc] border-blue-100 font-bold"
