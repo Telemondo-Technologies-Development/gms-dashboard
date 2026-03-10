@@ -5,11 +5,13 @@ import { toast } from 'sonner'
 
 import { InvoiceApi } from '@/api/generated/apis/InvoiceApi'
 import { PaymentApi } from '@/api/generated/apis/PaymentApi'
+import { ResponseError } from '@/api/generated/runtime'
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { calculateNextDueDate, resolvePaymentStatus } from '@/lib/billing-utils'
 import { invoiceQueryKeys, paymentQueryKeys } from '@/lib/QueryKeys'
 import {
   apiResponseListInvoiceTableDTOSchema,
+  apiResponseListPaymentTableDTOSchema,
   apiResponseListPaymentMethodTableDTOSchema,
 } from '@/types/payment/paymentSchemas'
 import type {
@@ -17,6 +19,39 @@ import type {
   EnsureInvoiceInput,
   PaymentMethodTableDTOParsed,
 } from '@/types/payment/paymentSchemas'
+
+function getPaymentApiErrorMessage(parsed: unknown, fallback: string) {
+  if (!parsed || typeof parsed !== 'object') return fallback
+
+  const record = parsed as Record<string, unknown>
+
+  if (typeof record.message === 'string' && record.message.trim()) {
+    return record.message
+  }
+
+  if (Array.isArray(record.errors) && record.errors.length > 0) {
+    const first = record.errors[0]
+    if (first && typeof first === 'object') {
+      const errorRecord = first as Record<string, unknown>
+      if (typeof errorRecord.description === 'string' && errorRecord.description.trim()) {
+        return errorRecord.description
+      }
+      if (typeof errorRecord.code === 'string' && errorRecord.code.trim()) {
+        return errorRecord.code
+      }
+    }
+  }
+
+  if (typeof record.error === 'string' && record.error.trim()) {
+    return record.error
+  }
+
+  if (typeof record.detail === 'string' && record.detail.trim()) {
+    return record.detail
+  }
+
+  return fallback
+}
 
 export function usePaymentHistoryCreateActions() {
   const queryClient = useQueryClient()
@@ -75,6 +110,10 @@ export function usePaymentHistoryCreateActions() {
     async (input: CreatePaymentIfNeededInput): Promise<void> => {
       if (!input.invoiceId) return
 
+      if (!Number.isFinite(input.amount) || input.amount <= 0) {
+        throw new Error('Payment amount must be greater than 0.')
+      }
+
       const selectedMethod = await getPaymentMethod(input.paymentMethodId)
       if (!selectedMethod) return
 
@@ -88,17 +127,42 @@ export function usePaymentHistoryCreateActions() {
 
       const paymentStatus = resolvePaymentStatus(input.amount, input.subtotal ?? input.amount)
 
-      await paymentApi.createPayment({
-        paymentPostDTO: {
-          amount: input.amount,
-          createdById: input.createdById,
-          invoiceId: input.invoiceId,
-          paidAt: input.paidAt ?? new Date(),
-          paymentMethodId: input.paymentMethodId,
-          referenceNum,
-          status: paymentStatus,
-        },
-      })
+      const paymentsResp = await paymentApi.getAllPayments({ pageable: { page: 0, size: 500 } })
+      const paymentsParsed = apiResponseListPaymentTableDTOSchema.parse(paymentsResp)
+      const existingPayment = (paymentsParsed.data ?? []).find((payment) => payment.invoiceId === input.invoiceId)
+
+      if (existingPayment) {
+        throw new Error('A payment already exists for this invoice. Refresh the table and update the existing payment instead.')
+      }
+
+      try {
+        await paymentApi.createPayment({
+          paymentPostDTO: {
+            amount: input.amount,
+            createdById: input.createdById,
+            invoiceId: input.invoiceId,
+            paidAt: input.paidAt ?? new Date(),
+            paymentMethodId: input.paymentMethodId,
+            referenceNum,
+            status: paymentStatus,
+          },
+        })
+      } catch (error) {
+        if (error instanceof ResponseError) {
+          const body = await error.response.text().catch(() => '')
+          let parsed: unknown = null
+          try {
+            parsed = body.trim() ? JSON.parse(body) : null
+          } catch {
+            parsed = null
+          }
+
+          const fallback = body.trim() || `Create payment failed (${error.response.status}).`
+          throw new Error(getPaymentApiErrorMessage(parsed, fallback))
+        }
+
+        throw error
+      }
 
       try {
         let dueDate = input.knownDueDate ?? new Date()
