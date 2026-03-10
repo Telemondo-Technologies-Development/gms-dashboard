@@ -72,7 +72,7 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
     const personnelList = Array.isArray(branchPersonnel)
       ? branchPersonnel
       : (branchPersonnel as any)?.data ?? [];
-
+  
     return personnelList
       .map((p: BranchPersonnelTableDTO) => {
         const nameFromMap = actorNameMap.get(p.actorId);
@@ -80,14 +80,15 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
         
         return {
           ...p,
-          fullName: nameFromMap || `Staff (${p.actorId?.slice(0, 8) || 'Unknown'})`,
+          fullName: nameFromMap || null,
           roleName: roleNameFromMap || 'No Role Assigned',
         } as StaffWithDetails;
       })
-      .filter((p: StaffWithDetails) =>
-        p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.roleName.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      .filter((p: StaffWithDetails) => {
+        const matchesSearch = (p.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                               p.roleName.toLowerCase().includes(searchQuery.toLowerCase()));
+        return p.fullName !== null && matchesSearch && p.status === 'ACTIVE';
+      });
   }, [branchPersonnel, actorNameMap, roleMap, searchQuery]);
 
   return (
