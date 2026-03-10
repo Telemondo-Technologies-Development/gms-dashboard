@@ -1,25 +1,38 @@
 ﻿import { useCallback, useMemo } from 'react'
-import { usePayments } from './usePayments'
-import { usePaymentMethods } from './usePaymentMethods'
-import { useInvoices } from './usePaymentHistoryInvoices'
-import { usePaymentHistoryMembers } from './usePaymentHistoryMembers'
-import type { PaymentMethodTableDTOParsed, InvoiceTableDTOParsed } from '@/types/payment/paymentSchemas'
+import { usePaymentHistoryPaymentsQuery } from './usePaymentsHistoryPaymentsQuery'
+import { usePaymentHistoryPaymentMethodsQuery } from './usePaymentHistoryMethodsQuery'
+import { usePaymentHistoryInvoicesQuery } from './usePaymentHistoryInvoicesQuery'
+import { usePaymentHistoryMembersQuery } from './usePaymentHistoryMembersQuery'
+import type { PaymentMethodTableDTOParsed, InvoiceTableDTOParsed, PaymentTableDTOParsed } from '@/types/payment/paymentSchemas'
 
 /**
- * Aggregates all data queries needed by PaymentHistoryTable and
- * builds the lookup Maps (invoiceById, paymentMethodById, memberNameByActorId).
+ * Aggregates all data queries needed by PaymentHistoryTable.
+ * The table is invoice-centric: every invoice is a row, with
+ * its associated payment record (if any) attached.
  */
-export function usePaymentHistoryLookups() {
-  const paymentsQuery    = usePayments(0, 200)
-  const methodsQuery     = usePaymentMethods(0, 200)
-  const invoicesQuery    = useInvoices(0, 500)
-  const membersQuery     = usePaymentHistoryMembers()
+export function usePaymentHistoryDataQuery() {
+  const paymentsQuery = usePaymentHistoryPaymentsQuery(0, 500)
+  const methodsQuery = usePaymentHistoryPaymentMethodsQuery(0, 200)
+  const invoicesQuery = usePaymentHistoryInvoicesQuery(0, 500)
+  const membersQuery = usePaymentHistoryMembersQuery()
 
   const invoiceById = useMemo(() => {
     const map = new Map<string, InvoiceTableDTOParsed>()
     for (const inv of invoicesQuery.data ?? []) map.set(inv.id, inv)
     return map
   }, [invoicesQuery.data])
+
+  // One payment per invoice (latest by paidAt if multiple)
+  const paymentByInvoiceId = useMemo(() => {
+    const map = new Map<string, PaymentTableDTOParsed>()
+    for (const p of paymentsQuery.data ?? []) {
+      const existing = map.get(p.invoiceId)
+      if (!existing || (p.paidAt && (!existing.paidAt || p.paidAt > existing.paidAt))) {
+        map.set(p.invoiceId, p)
+      }
+    }
+    return map
+  }, [paymentsQuery.data])
 
   const paymentMethodById = useMemo(() => {
     const map = new Map<string, PaymentMethodTableDTOParsed>()
@@ -35,14 +48,19 @@ export function usePaymentHistoryLookups() {
   }, [paymentsQuery, methodsQuery, invoicesQuery, membersQuery])
 
   return {
+    // Use invoices as the base list — every invoice is a row
+    invoices:              invoicesQuery.data ?? [],
     payments:              paymentsQuery.data ?? [],
+    paymentByInvoiceId,
     invoiceById,
     paymentMethodById,
     memberNameByActorId:   membersQuery.memberNameByActorId,
-    isLoading:             paymentsQuery.isLoading || invoicesQuery.isLoading,
+    isLoading:             invoicesQuery.isLoading || paymentsQuery.isLoading,
     methodsLoading:        methodsQuery.isLoading,
     membersLoading:        membersQuery.isLoading,
-    paymentsError:         paymentsQuery.error,
+    paymentsError:         invoicesQuery.error ?? paymentsQuery.error,
     handleRefresh,
   }
 }
+
+export const usePaymentHistoryLookups = usePaymentHistoryDataQuery

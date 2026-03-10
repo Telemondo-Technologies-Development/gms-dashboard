@@ -8,7 +8,7 @@ import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAuthSession } from '@/lib/auth/auth-session'
 import { apiResponseListUserTableSchema, apiResponseUserTableSchema, type UserTable } from '@/types/user/userSchemas'
 import { tryDecodeJwtClaims, getStringClaim, looksLikeUuid } from '@/lib/auth/jwt-utils'
-import { useSubscriptionAvailed } from './useMembershipSubscriptionAvailed'
+import { useSubscriptionAvailed } from './useMembershipSubscriptionAvailedQuery'
 import { userQueryKeys, branchQueryKeys } from '@/lib/QueryKeys'
 import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
 

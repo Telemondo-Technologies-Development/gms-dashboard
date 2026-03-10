@@ -1,5 +1,5 @@
-import { useSubscriptionAvailed } from './useMembershipSubscriptionAvailed'
-import { useMemberSubscriptionByActorId } from './useMembershipSubscriptions'
+import { useSubscriptionAvailed } from './useMembershipSubscriptionAvailedQuery'
+import { useMemberSubscriptionByActorId } from './useMembershipSubscriptionsQuery'
 
 export function useMemberDetailsDialogData(options: { open: boolean; memberActorId: string | null }) {
   const { open, memberActorId } = options

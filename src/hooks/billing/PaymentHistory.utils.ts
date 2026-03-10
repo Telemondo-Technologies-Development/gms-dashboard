@@ -1,4 +1,7 @@
 ﻿import { ZodError } from 'zod'
+import type { InvoiceTableDTOParsed, PaymentTableDTOParsed } from '@/types/payment/paymentSchemas'
+
+export type PaymentHistoryDisplayStatus = 'paid' | 'failed' | 'pending'
 
 /**
  * Format a ZodError into a concise string summary
@@ -54,4 +57,33 @@ export function formatPaymentAmount(amountCents: number, currency: string = 'PHP
     style: 'currency',
     currency,
   }).format(amount)
+}
+
+export function mapPaymentHistoryDisplayStatus(
+  invoice: InvoiceTableDTOParsed,
+  payment?: PaymentTableDTOParsed,
+): PaymentHistoryDisplayStatus {
+  if (payment?.paidAt || invoice.status === 'PAID') return 'paid'
+  if (invoice.status === 'OVERDUE') return 'failed'
+  if (payment?.failureReason && payment.failureReason.trim().length > 0) return 'failed'
+  return 'pending'
+}
+
+export function summarizePaymentHistory(
+  invoices: InvoiceTableDTOParsed[],
+  paymentByInvoiceId: Map<string, PaymentTableDTOParsed>,
+) {
+  return invoices.reduce(
+    (acc, invoice) => {
+      const payment = paymentByInvoiceId.get(invoice.id)
+      const status = mapPaymentHistoryDisplayStatus(invoice, payment)
+      acc[status] += invoice.total
+      return acc
+    },
+    {
+      paid: 0,
+      pending: 0,
+      failed: 0,
+    } as Record<PaymentHistoryDisplayStatus, number>,
+  )
 }

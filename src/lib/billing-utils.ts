@@ -1,4 +1,4 @@
-import { addDays, addWeeks, addMonths, addYears } from 'date-fns'
+import { addMinutes, addDays, addWeeks, addMonths, addYears } from 'date-fns'
 import type { SubscriptionAvailedTableDTOIntervalsEnum } from '@/api/generated/models/SubscriptionAvailedTableDTO'
 
 export type BillingInterval = SubscriptionAvailedTableDTOIntervalsEnum
@@ -19,6 +19,7 @@ export function calculateNextDueDate(
 ): Date {
   const count = intervalCount > 0 ? intervalCount : 1
   switch (intervals) {
+    case 'MINUTES': return addMinutes(fromDate, count)
     case 'DAILY':   return addDays(fromDate, count)
     case 'WEEKLY':  return addWeeks(fromDate, count)
     case 'MONTHLY': return addMonths(fromDate, count)
