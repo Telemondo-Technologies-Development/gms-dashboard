@@ -83,13 +83,6 @@ export const BranchList: React.FC<BranchListProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {branches.map((branch) => {
-          const personnelList = Array.isArray(branch.branchPersonnel)
-            ? branch.branchPersonnel
-            : (branch.branchPersonnel as any)?.data ?? 
-              (Array.isArray(branch.assignedStaff) ? branch.assignedStaff : (branch.assignedStaff as any)?.data ?? []);
-
-          const staffCount = personnelList.length;
-
           return (
             <Card
               key={branch.id}
@@ -155,20 +148,8 @@ export const BranchList: React.FC<BranchListProps> = ({
                     onSetActiveBranchForStaff(branch);
                   }}
                 >
-                  <div className="relative">
-                    <Users size={16} className="group-hover/btn:scale-110 transition-transform" />
-                    {staffCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border border-white" />
-                    )}
-                  </div>
+                  <Users size={16} className="group-hover/btn:scale-110 transition-transform" />
                   <span>Assigned Staff</span>
-                  <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] border transition-colors ${
-                    staffCount === 0 
-                      ? "bg-red-50 text-red-600 border-red-100" 
-                      : "bg-blue-50 text-[#0062cc] border-blue-100 font-bold"
-                  }`}>
-                    {staffCount}
-                  </span>
                 </button>
               </div>
             </Card>
