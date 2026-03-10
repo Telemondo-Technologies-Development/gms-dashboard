@@ -7,8 +7,12 @@ import type { InvoiceTableDTOParsed } from '@/types/payment/paymentSchemas'
 import { Badge } from '@/components/ui/badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 
-export type DerivedMemberStatus = 'ACTIVE' | 'INACTIVE' | 'DEACTIVATED' | 'UNDECIDED'
+export type DerivedMemberStatus = 'ACTIVE' | 'DUE' | 'INACTIVE' | 'DEACTIVATED' | 'UNDECIDED'
 
+/**
+ * Derives the display status for a member based on their subscriptions and invoice history.
+ * Flow: subscription issued → invoice generated → DUE (within grace period) → OVERDUE (grace expired) → DEACTIVATED
+ */
 export function deriveMemberStatus(
   member: MemberTableDTO,
   subscriptions: MemberSubscriptionTableDTO[],
@@ -20,8 +24,13 @@ export function deriveMemberStatus(
   if (!activeSub) return 'INACTIVE'
 
   const subInvoices = invoices.filter((inv) => inv.memberSubscriptionId === activeSub.id)
-  const hasOverdue = subInvoices.some((inv) => inv.status === 'OVERDUE')
-  if (hasOverdue) return 'DEACTIVATED'
+
+  // Grace period exceeded — failed to pay → DEACTIVATED
+  if (subInvoices.some((inv) => inv.status === 'OVERDUE')) return 'DEACTIVATED'
+
+  // Invoice issued, within grace period — payment pending
+  if (subInvoices.some((inv) => inv.status === 'DUE' || inv.status === 'ISSUED' || inv.status === 'PENDING'))
+    return 'DUE'
 
   return member.status === 'ACTIVE' ? 'ACTIVE' : (member.status as DerivedMemberStatus)
 }
@@ -29,6 +38,7 @@ export function deriveMemberStatus(
 function statusVariant(status: DerivedMemberStatus): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (status === 'ACTIVE') return 'default'
   if (status === 'DEACTIVATED') return 'destructive'
+  if (status === 'DUE') return 'outline'
   return 'secondary'
 }
 
@@ -41,8 +51,9 @@ function subStatusVariant(status: string): 'default' | 'secondary' | 'destructiv
 function invoiceStatusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (status === 'PAID') return 'default'
   if (status === 'OVERDUE') return 'destructive'
+  if (status === 'DUE' || status === 'ISSUED' || status === 'PENDING') return 'outline'
   if (status === 'PARTIAL') return 'secondary'
-  return 'outline'
+  return 'secondary'
 }
 
 interface MemberProgressSheetProps {
@@ -124,11 +135,11 @@ export function MemberProgressSheet({ member, subscriptions, invoices, open, onO
                         <div className="space-y-1.5 mt-2 border-l-2 border-muted pl-3">
                           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Invoices</p>
                           {subInvoices
-                            .sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime())
+                            .sort((a, b) => (b.issuedAt?.getTime() ?? 0) - (a.issuedAt?.getTime() ?? 0))
                             .map((inv) => (
                               <div key={inv.id} className="flex items-center justify-between gap-2">
                                 <span className="text-xs text-muted-foreground">
-                                  {format(new Date(inv.issuedAt), 'MMM d, yyyy')}
+                                  {inv.issuedAt ? format(inv.issuedAt, 'MMM d, yyyy') : '—'}
                                 </span>
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-xs font-medium">

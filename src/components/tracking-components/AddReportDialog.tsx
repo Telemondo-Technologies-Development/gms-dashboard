@@ -25,7 +25,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useMembersData } from '@/hooks/membership/useMembership';
+import { useMembersData } from '@/hooks/membership/useMembershipMemberQuery';
 import { useBranches } from '@/hooks/branch/useBranches';
 import { useReports } from '@/hooks/Tracking/useReports';
 import { useReportTypes } from '@/hooks/Tracking/useReportTypes';

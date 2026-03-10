@@ -20,7 +20,7 @@ function formatCurrency(amount: number, currency: string = 'PHP') {
 
 export function PaymentHistorySummary({ totals, transactionCount }: PaymentHistorySummaryProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       <Card className="h-[110px] flex flex-col justify-center ">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 ">
           <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>

@@ -1,13 +1,14 @@
 import { useMemo, useState, useCallback, memo, useEffect } from 'react'
 import { format } from 'date-fns'
 import { Search, Calendar as CalendarIcon, RefreshCw, Loader2, User, Mail, CreditCard, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useNavigate } from '@tanstack/react-router'
 
-import { useMembersData } from '@/hooks/membership/useMembership'
+import { useMembersData } from '@/hooks/membership/useMembershipMemberQuery'
 import { useAttendanceEligibility } from '@/hooks/membership/useMembershipAttendanceEligibility'
-import { useAttendance } from '@/hooks/membership/useMembershipAttendance'
+import { useAttendance } from '@/hooks/membership/useMembershipAttendanceQuery'
+import { useMembershipDeleteMember } from '@/hooks/membership/useMembershipDeleteMember'
 import { parseCalendarDay, toStartOfDay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 import { AddMemberDialog } from '@/components/membership-components/MembershipAddFormDialog'
@@ -15,10 +16,8 @@ import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm
 import { getAuthenticatedApi } from '@/lib/api-client'
 import { useAuthSession } from '@/lib/auth/auth-session'
 import { useSelectedBranchId } from '@/hooks/useSelectedBranchId'
-import { MemberApi } from '@/api/generated/apis/MemberApi'
 import { AttendanceApi } from '@/api/generated/apis/AttendanceApi'
 import { AttendancePostDTOSourceEnum, AttendancePostDTOTypeEnum } from '@/api/generated/models/AttendancePostDTO'
-import { memberQueryKeys } from '@/lib/QueryKeys'
 import type { MemberFormData } from '@/types/membership/MembershipManagementSchema'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -67,7 +66,6 @@ function MembersTable({ onSelectMember }: Props) {
   const attendanceQuery = useAttendance()
   const session = useAuthSession()
   const selectedBranchId = useSelectedBranchId()
-  const queryClient = useQueryClient()
   const { getAttendanceEligibility } = useAttendanceEligibility()
 
   const todayAttendedActorIds = useMemo(() => {
@@ -118,15 +116,7 @@ function MembersTable({ onSelectMember }: Props) {
     [getAttendanceEligibility, todayAttendedActorIds],
   )
 
-  const deleteMemberMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const api = getAuthenticatedApi(MemberApi)
-      await api.deleteMember({ id })
-    },
-    onSuccess: () => {
-      refetchAll()
-    },
-  })
+  const deleteMemberMutation = useMembershipDeleteMember(refetchAll)
 
   const addAttendanceMutation = useMutation({
     mutationFn: async (memberGroup: MemberFormData) => {
@@ -173,7 +163,7 @@ function MembersTable({ onSelectMember }: Props) {
       return response
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [memberQueryKeys.attendances] })
+      void attendanceQuery.refetch()
       toast.success('Attendance added.')
     },
     onError: (error) => {

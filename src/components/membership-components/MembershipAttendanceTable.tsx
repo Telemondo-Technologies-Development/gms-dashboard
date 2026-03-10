@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import type { AttendanceTableRow, MembershipAddAttendanceProps } from '@/types/membership/MembershipManagementSchema'
-import { useAttendance } from '@/hooks/membership/useMembershipAttendance'
+import { useAttendance } from '@/hooks/membership/useMembershipAttendanceQuery'
 import { sortAttendanceRowsByDateStack } from '@/types/membership/MembershipAttendanceSchema'
 import { parseCalendarDay, toStartOfDay } from '@/lib/date-utils'
 import { getAuthenticatedApi } from '@/lib/api-client'

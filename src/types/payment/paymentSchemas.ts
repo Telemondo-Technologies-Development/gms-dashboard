@@ -22,7 +22,13 @@ export interface CreatePaymentIfNeededInput {
   amount: number
   subtotal?: number
   paidAt?: Date
-	referenceNum?: string
+  referenceNum?: string
+  /** Known due date for this invoice — used as a reliable fallback when the
+   *  server returns epoch/null for dueDate in the GET response. */
+  knownDueDate?: Date
+  /** Grace period in days for the subscription — used to compute gracePeriodDate
+   *  as a reliable fallback when the server hasn't set it on the invoice yet. */
+  gracePeriodDays?: number
 }
 
 
@@ -151,22 +157,23 @@ export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
 
 const coerceDate = z.preprocess((value) => {
 	if (value instanceof Date) return value
+	if (value == null) return undefined
 	const d = new Date(String(value))
+	if (isNaN(d.getTime())) return undefined
 	return d
-}, z.date())
+}, z.date().optional())
 
 export const invoiceTableDTOSchema = z.object({
-	actorId: z.string().optional(),
-	branchId: z.string().optional(),
+	actorId: z.string(),
+	branchId: z.string(),
 	createdById: z.string(),
-	// dueDate and gracePeriodDate are server-computed; they may be omitted for ongoing subscriptions
-	dueDate: coerceDate.optional(),
-	gracePeriodDate: coerceDate.optional(),
+	dueDate: coerceDate,
+	gracePeriodDate: coerceDate,
 	id: z.string(),
 	issuedAt: coerceDate,
-	memberSubscriptionId: z.string().optional(),
+	memberSubscriptionId: z.string(),
 	status: invoiceStatusSchema,
-	subscriptionAvailedId: z.string().optional(),
+	subscriptionAvailedId: z.string(),
 	subtotal: z.coerce.number(),
 	systemGenerated: z.boolean(),
 	total: z.coerce.number(),

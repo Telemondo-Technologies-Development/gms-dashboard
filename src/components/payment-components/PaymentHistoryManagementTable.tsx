@@ -12,7 +12,6 @@ import {
   Download, 
   CreditCard, 
   ArrowUpDown, 
-  RefreshCw,
   Loader2,
   Trash2,
   MoreHorizontal,
@@ -20,13 +19,18 @@ import {
   Printer
 } from 'lucide-react'
 
-import { usePaymentHistoryLookups } from '@/hooks/billing/usePaymentHistoryLookups'
-import { useDeletePayment } from '@/hooks/billing/usePaymentHistoryBillingActions'
-import { useSelectedPayment } from '@/hooks/billing/useSelectedPayment'
+import { usePaymentHistoryDataQuery } from '@/hooks/billing/usePaymentHistoryLookups'
+import {
+  usePaymentHistoryDeleteInvoice,
+  usePaymentHistoryDeletePayment,
+} from '@/hooks/billing/usePaymentHistoryDelete'
+import { usePaymentHistorySelectedPayment } from '@/hooks/billing/usePaymentHistorySelectedPayment'
+import { mapPaymentHistoryDisplayStatus, type PaymentHistoryDisplayStatus } from '@/hooks/billing/PaymentHistory.utils'
 import { parseCalendarDay } from '@/lib/date-utils'
 import type {
   PaymentHistoryFilters,
   PaymentTableDTOParsed,
+  InvoiceTableDTOParsed,
 } from '@/types/payment/paymentSchemas'
 
 import { PaymentDetailsDialog } from '@/components/payment-components/PaymentHistoryDetailsDialog'
@@ -49,8 +53,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
-type DisplayStatus = 'paid' | 'failed' | 'pending'
-
 function formatCurrency(amount: number, currency: string = 'PHP') {
   return new Intl.NumberFormat('en-PH', {
     style: 'currency',
@@ -59,13 +61,7 @@ function formatCurrency(amount: number, currency: string = 'PHP') {
   }).format(amount)
 }
 
-function mapDisplayStatus(payment: PaymentTableDTOParsed): DisplayStatus {
-  if (payment.paidAt) return 'paid'
-  if (payment.failureReason && payment.failureReason.trim().length > 0) return 'failed'
-  return 'pending'
-}
-
-function statusBadge(status: DisplayStatus) {
+function statusBadge(status: PaymentHistoryDisplayStatus) {
   switch (status) {
     case 'paid':
       return (
@@ -88,23 +84,26 @@ function statusBadge(status: DisplayStatus) {
   }
 }
 
-import { PaymentHistorySummary } from './PaymentHistorySummary'
-
 export function PaymentHistoryTable() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [receiptOpen, setReceiptOpen] = useState(false)
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null)
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceTableDTOParsed | null>(null)
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [paymentToDelete, setPaymentToDelete] = useState<PaymentTableDTOParsed | null>(null)
+  const [invoiceToDelete, setInvoiceToDelete] = useState<InvoiceTableDTOParsed | null>(null)
 
-  const [pageSize] = useState(5)
+  const [pageSize] = useState(4)
   const [pageIndex, setPageIndex] = useState(0)
 
-  const deletePaymentMutation = useDeletePayment()
+  const deletePaymentMutation = usePaymentHistoryDeletePayment()
+  const deleteInvoiceMutation = usePaymentHistoryDeleteInvoice()
 
   const {
+    invoices,
     payments,
+    paymentByInvoiceId,
     invoiceById,
     paymentMethodById,
     memberNameByActorId,
@@ -112,14 +111,13 @@ export function PaymentHistoryTable() {
     methodsLoading,
     membersLoading,
     paymentsError,
-    handleRefresh,
-  } = usePaymentHistoryLookups()
+  } = usePaymentHistoryDataQuery()
 
   const {
     selectedPayment,
     isLoading: selectedPaymentLoading,
     error: selectedPaymentError,
-  } = useSelectedPayment(selectedPaymentId, payments)
+  } = usePaymentHistorySelectedPayment(selectedPaymentId, payments)
 
   const defaultValues: PaymentHistoryFilters = {
     query: '',
@@ -135,25 +133,25 @@ export function PaymentHistoryTable() {
     },
   })
 
-  // Filtering Logic
-  const filterPayments = (filters: PaymentHistoryFilters) => {
+  // Filtering Logic — invoice-centric
+  const filterInvoices = (filters: PaymentHistoryFilters): InvoiceTableDTOParsed[] => {
     const q = filters.query.trim().toLowerCase()
     const from = filters.fromDate ? new Date(filters.fromDate) : null
     const to = filters.toDate ? new Date(filters.toDate) : null
 
-    return payments.filter((p) => {
-      const st = mapDisplayStatus(p)
+    return invoices.filter((inv: InvoiceTableDTOParsed) => {
+      const payment = paymentByInvoiceId.get(inv.id)
+      const st = mapPaymentHistoryDisplayStatus(inv, payment)
       if (filters.status !== 'all' && st !== filters.status) return false
 
       if (q) {
-        const methodName = paymentMethodById.get(p.paymentMethodId)?.name ?? ''
-        const invoice = invoiceById.get(p.invoiceId)
-        const memberName = invoice?.actorId ? memberNameByActorId.get(invoice.actorId) ?? '' : ''
-        const haystack = `${p.id} ${p.invoiceId} ${methodName} ${p.status} ${p.failureReason ?? ''} ${memberName}`.toLowerCase()
+        const methodName = payment ? (paymentMethodById.get(payment.paymentMethodId)?.name ?? '') : ''
+        const memberName = memberNameByActorId.get(inv.actorId) ?? ''
+        const haystack = `${inv.id} ${methodName} ${inv.status} ${memberName}`.toLowerCase()
         if (!haystack.includes(q)) return false
       }
 
-      const date = p.paidAt ? new Date(p.paidAt) : null
+      const date = inv.dueDate ?? inv.issuedAt ?? null
       if (from && date && date < from) return false
       if (to && date && date > to) return false
       return true
@@ -172,32 +170,22 @@ export function PaymentHistoryTable() {
   }
 
   return (
-    <div className="space-y-4 h-full flex flex-col">
+    <div className=" h-full flex flex-col mt-0">
       <form.Subscribe selector={(state) => state.values}>
         {(filters) => {
-          // Compute filtered data inside render
-          const filteredPayments = filterPayments(filters).sort((a, b) => {
-             const dateA = a.paidAt ? new Date(a.paidAt).getTime() : 0
-             const dateB = b.paidAt ? new Date(b.paidAt).getTime() : 0
+          // Compute filtered data inside render — invoice-centric
+          const filteredInvoices = filterInvoices(filters).sort((a: InvoiceTableDTOParsed, b: InvoiceTableDTOParsed) => {
+             const dateA = a.issuedAt?.getTime() ?? a.dueDate?.getTime() ?? 0
+             const dateB = b.issuedAt?.getTime() ?? b.dueDate?.getTime() ?? 0
              return dateB - dateA
           })
           
-          const currentTotals = filteredPayments.reduce((acc, p) => {
-             const st = mapDisplayStatus(p)
-             acc[st] += p.amount
-             return acc
-          }, { paid: 0, failed: 0, pending: 0 } as Record<DisplayStatus, number>)
-          
           // Pagination
-          const pageCount = Math.max(1, Math.ceil(filteredPayments.length / pageSize))
-          const pageItems = filteredPayments.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+          const pageCount = Math.max(1, Math.ceil(filteredInvoices.length / pageSize))
+          const pageItems = filteredInvoices.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
 
           return (
-            <div className="flex flex-col gap-6">
-              <PaymentHistorySummary 
-                totals={currentTotals} 
-                transactionCount={filteredPayments.length} 
-              />
+            <div className="flex flex-col gap-3">
               {/* Main Table Card */}
               <Card className="flex flex-col shadow-md border-muted/40 w-full ">
                 <CardHeader>
@@ -205,11 +193,11 @@ export function PaymentHistoryTable() {
                     <div>
                       <CardTitle className="text-xl font-bold tracking-tight">Payment History</CardTitle>
                       <CardDescription className="mt-1">
-                        View and manage {filteredPayments.length} billing records, invoices, and transaction statuses.
+                        View and manage {filteredInvoices.length} billing records, invoices, and transaction statuses.
                       </CardDescription>
                     </div>
                     <Badge variant="default" className="w-fit px-3 py-1 text-sm">
-                      Total: {filteredPayments.length}
+                      Total: {filteredInvoices.length}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -380,7 +368,7 @@ export function PaymentHistoryTable() {
                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
                        <p className="text-sm">Loading payment history...</p>
                     </div>
-                  ) : filteredPayments.length === 0 ? (
+                  ) : filteredInvoices.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
                       <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
                         <Receipt className="h-6 w-6 text-muted-foreground" />
@@ -399,7 +387,7 @@ export function PaymentHistoryTable() {
                             <TableHead className="w-[20%]">Method</TableHead>
                             <TableHead className="w-[15%]">
                                <div className="flex items-center gap-1">
-                                 Paid Date
+                                 Date
                                  <ArrowUpDown className="h-3 w-3" />
                                </div>
                             </TableHead>
@@ -409,15 +397,15 @@ export function PaymentHistoryTable() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {pageItems.map((p) => {
-                            const methodName = paymentMethodById.get(p.paymentMethodId)?.name
-                            const st = mapDisplayStatus(p)
-                            const invoice = invoiceById.get(p.invoiceId)
-                            const memberName = invoice?.actorId ? memberNameByActorId.get(invoice.actorId) : undefined
+                          {pageItems.map((inv: InvoiceTableDTOParsed) => {
+                            const payment = paymentByInvoiceId.get(inv.id)
+                            const methodName = payment ? paymentMethodById.get(payment.paymentMethodId)?.name : undefined
+                            const st = mapPaymentHistoryDisplayStatus(inv, payment)
+                            const memberName = memberNameByActorId.get(inv.actorId)
 
                             return (
                               <TableRow
-                                key={p.id}
+                                key={inv.id}
                                 role="button"
                                 tabIndex={0}
                                 className="cursor-pointer hover:bg-muted/40 transition-colors group border-b border-muted/40"
@@ -431,7 +419,7 @@ export function PaymentHistoryTable() {
                                       </span>
                                       <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 w-full min-w-0">
                                          <span className="truncate max-w-25 sm:max-w-30">
-                                            Inv #{p.invoiceId.slice(0, 8)}...
+                                            Inv #{inv.id.slice(0, 8)}...
                                          </span>
                                       </div>
                                     </div>
@@ -445,20 +433,30 @@ export function PaymentHistoryTable() {
                                       <span className="truncate max-w-30">{methodsLoading ? '...' : (methodName || '—')}</span>
                                     </div>
                                     <div className="pl-5 text-xs text-muted-foreground truncate max-w-30">
-                                      {p.referenceNum ? `Ref: ${p.referenceNum}` : 'Ref: —'}
+                                      {payment?.referenceNum ? `Ref: ${payment.referenceNum}` : 'Ref: —'}
                                     </div>
                                   </div>
                                 </TableCell>
                                 
                                 <TableCell className="py-4 align-top">
                                    <div className="flex flex-col gap-0.5">
-                                      {p.paidAt ? (
+                                      {payment?.paidAt ? (
                                         <>
                                             <span className="text-sm font-medium text-foreground/80">
-                                                {format(new Date(p.paidAt), 'MMM dd, yyyy')}
+                                                {format(new Date(payment.paidAt), 'MMM dd, yyyy')}
                                             </span>
                                             <span className="text-xs text-muted-foreground">
-                                                {format(new Date(p.paidAt), 'h:mm a')}
+                                                {format(new Date(payment.paidAt), 'h:mm a')}
+                                            </span>
+                                        </>
+                                      ) : inv.dueDate ? (
+                                        <>
+                                            <span className="text-xs text-muted-foreground">Due</span>
+                                            <span className="text-sm font-medium text-foreground/80">
+                                                {format(inv.dueDate, 'MMM dd, yyyy')}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {format(inv.dueDate, 'h:mm a')}
                                             </span>
                                         </>
                                       ) : (
@@ -469,7 +467,7 @@ export function PaymentHistoryTable() {
                                 
                                 <TableCell className="py-4 align-top text-right">
                                   <span className="font-semibold text-sm">
-                                    {formatCurrency(p.amount, 'PHP')}
+                                    {formatCurrency(inv.total, 'PHP')}
                                   </span>
                                 </TableCell>
                                 
@@ -496,7 +494,8 @@ export function PaymentHistoryTable() {
                                         <DropdownMenuItem
                                         onClick={(e) => {
                                           e.stopPropagation()
-                                          setSelectedPaymentId(p.id)
+                                          setSelectedPaymentId(payment?.id ?? null)
+                                          setSelectedInvoice(inv)
                                           setDetailsOpen(true)
                                         }}
                                         >
@@ -506,11 +505,12 @@ export function PaymentHistoryTable() {
                                       <DropdownMenuItem
                                         onClick={(e) => {
                                           e.stopPropagation()
-                                          setSelectedPaymentId(p.id)
-                                          // Need to ensure payment data is loaded before opening receipt
-                                          // but we can set ID and let the dialog fetch/select it
-                                          setReceiptOpen(true)
+                                          if (payment) {
+                                            setSelectedPaymentId(payment.id)
+                                            setReceiptOpen(true)
+                                          }
                                         }}
+                                        disabled={!payment}
                                       >
                                         <Printer className="mr-2 h-4 w-4" />
                                         Print Receipt
@@ -522,7 +522,13 @@ export function PaymentHistoryTable() {
                                         className="text-destructive focus:text-destructive"
                                         onClick={(e) => {
                                            e.stopPropagation()
-                                           setPaymentToDelete(p)
+                                           if (payment) {
+                                             setPaymentToDelete(payment)
+                                             setInvoiceToDelete(null)
+                                           } else {
+                                             setInvoiceToDelete(inv)
+                                             setPaymentToDelete(null)
+                                           }
                                            setDeleteConfirmOpen(true)
                                         }}
                                       >
@@ -536,13 +542,13 @@ export function PaymentHistoryTable() {
                             )
                           })}
                         </TableBody>
-                        {filteredPayments.length > 0 && (
+                        {filteredInvoices.length > 0 && (
                           <TableFooter className="bg-muted/5">
                             <TableRow className="hover:bg-transparent">
                               <TableCell colSpan={6} className="p-0">
                                 <div className="flex flex-col items-center justify-center gap-2 px-3 py-2 sm:flex-row sm:justify-between w-full h-full">
                                   <div className="text-sm text-center text-muted-foreground sm:text-left">
-                                    Showing {Math.min(pageIndex * pageSize + 1, filteredPayments.length)} to {Math.min((pageIndex + 1) * pageSize, filteredPayments.length)} of {filteredPayments.length} entries
+                                    Showing {Math.min(pageIndex * pageSize + 1, filteredInvoices.length)} to {Math.min((pageIndex + 1) * pageSize, filteredInvoices.length)} of {filteredInvoices.length} entries
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <Button
@@ -593,17 +599,19 @@ export function PaymentHistoryTable() {
           if (!open) {
             setReceiptOpen(false)
             setSelectedPaymentId(null)
+            setSelectedInvoice(null)
           }
         }}
         paymentId={selectedPaymentId}
         payment={selectedPayment}
+        invoice={selectedInvoice ?? undefined}
         loading={selectedPaymentLoading}
         error={selectedPaymentError ?? undefined}
         paymentMethodMap={paymentMethodById}
         memberName={selectedPayment ? (() => {
            const invoice = invoiceById.get(selectedPayment.invoiceId)
            return invoice?.actorId ? memberNameByActorId.get(invoice.actorId) : undefined
-        })() : undefined}
+        })() : (selectedInvoice ? memberNameByActorId.get(selectedInvoice.actorId) : undefined)}
         onPrintReceipt={() => setReceiptOpen(true)}
       />
 
@@ -628,11 +636,16 @@ export function PaymentHistoryTable() {
              if (paymentToDelete?.id) {
                  await deletePaymentMutation.mutateAsync(paymentToDelete.id)
                  setPaymentToDelete(null)
+             } else if (invoiceToDelete?.id) {
+                 await deleteInvoiceMutation.mutateAsync(invoiceToDelete.id)
+                 setInvoiceToDelete(null)
              }
          }}
-         title={`Delete Payment: ${paymentToDelete?.id}`}
-         description="Are you sure you want to delete this payment record? This action cannot be undone."
-         confirmText="Delete Payment"
+         title={paymentToDelete ? `Delete Payment: ${paymentToDelete.id}` : `Delete Invoice: ${invoiceToDelete?.id ?? ''}`}
+         description={paymentToDelete
+           ? 'Are you sure you want to delete this payment record? This action cannot be undone.'
+           : 'Are you sure you want to delete this invoice? This action cannot be undone.'}
+         confirmText={paymentToDelete ? 'Delete Payment' : 'Delete Invoice'}
       />
     </div>
   )

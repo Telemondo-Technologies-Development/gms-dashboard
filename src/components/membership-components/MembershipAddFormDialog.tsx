@@ -22,7 +22,7 @@ import type { SubscriptionAvailedTableDTO } from '@/api/generated/models/Subscri
 import type { MemberFormValues } from '@/types/membership/MembershipManagementSchema'
 import { AddBillingDialog } from '@/components/membership-components/MembershipBillForm'
 import { InlineAddSubscriptionForm } from '@/components/membership-components/MembershipAddSubscription'
-import { useAddMemberDialog } from '@/hooks/membership/useMembershipAdd'
+import { useAddMemberDialog } from '@/hooks/membership/useMembershipCreateMember'
 import { useEmployeeDisplayName } from '@/hooks/users/useStaffDisplayName'
 
 export function AddMemberDialog() {
@@ -269,7 +269,7 @@ export function AddMemberDialog() {
                           </div>
 
                           <div className="space-y-2">
-                            <Label>End Date</Label>
+                            <Label>End Date <span className="text-muted-foreground text-xs font-normal">(optional — driven by billing cycle)</span></Label>
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button

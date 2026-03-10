@@ -5,7 +5,7 @@ import type { MemberFormData } from '@/types/membership/MembershipManagementSche
 import MembershipAddAttendance from '@/components/membership-components/MembershipAttendanceTable'
 import MembersTable from '@/components/membership-components/MembershipManagementTable'
 import { MemberDetailsDialog } from '@/components/membership-components/MembershipDetailsDialog'
-import { useMembersData } from '@/hooks/membership/useMembership'
+import { useMembersData } from '@/hooks/membership/useMembershipMemberQuery'
 
 export const Route = createFileRoute('/dashboard/marketing/membership/')({
   component: MembershipRoute,

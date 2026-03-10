@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import type { SubscriptionPlanFormState } from '@/types/membership/MembershipsubscriptionSchemas'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useBillingCycles } from '@/hooks/membership/useMembershipBillingCycles'
+import { useBillingCycles } from '@/hooks/membership/useMembershipBillingCyclesQuery'
 
 interface InlineAddSubscriptionFormProps {
   formState: SubscriptionPlanFormState
@@ -78,27 +79,50 @@ export function InlineAddSubscriptionForm({ formState, setFormState, onCancel, e
 
         <div className="space-y-2">
           <Label htmlFor="billing-cycle">Billing Cycle</Label>
-          <Select
-            value={formState.billingCycleId}
-            onValueChange={(value) => setFormState((prev) => ({ ...prev, billingCycleId: value }))}
-          >
-            <SelectTrigger id="billing-cycle" className="bg-background">
-              <SelectValue placeholder="Select cycle" />
-            </SelectTrigger>
-            <SelectContent>
-              {billingCyclesQuery.isLoading ? (
-                <SelectItem value="__loading__" disabled>Loading...</SelectItem>
-              ) : billingCyclesQuery.data?.length ? (
-                billingCyclesQuery.data.map((cycle) => (
-                  <SelectItem key={cycle.id} value={cycle.id}>
-                    {cycle.name} ({cycle.intervalCount} {cycle.intervals})
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="__empty__" disabled>No cycles found</SelectItem>
-              )}
-            </SelectContent>
-          </Select>
+          {billingCyclesQuery.isError ? (
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-destructive font-medium">Failed to load billing cycles</p>
+                <p className="text-xs text-destructive/80 mt-0.5 wrap-break-word">
+                  {billingCyclesQuery.error instanceof Error
+                    ? billingCyclesQuery.error.message
+                    : 'Unknown error'}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-destructive hover:text-destructive shrink-0"
+                onClick={() => void billingCyclesQuery.refetch()}
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <Select
+              value={formState.billingCycleId}
+              onValueChange={(value) => setFormState((prev) => ({ ...prev, billingCycleId: value }))}
+            >
+              <SelectTrigger id="billing-cycle" className="bg-background">
+                <SelectValue placeholder="Select cycle" />
+              </SelectTrigger>
+              <SelectContent>
+                {billingCyclesQuery.isLoading ? (
+                  <SelectItem value="__loading__" disabled>Loading...</SelectItem>
+                ) : billingCyclesQuery.data?.length ? (
+                  billingCyclesQuery.data.map((cycle) => (
+                    <SelectItem key={cycle.id} value={cycle.id}>
+                      {cycle.name} ({cycle.intervalCount} {cycle.intervals})
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="__empty__" disabled>No cycles found</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
       

@@ -6,13 +6,13 @@ const apiErrorSchema = z
   })
   .passthrough()
 
-export const subscriptionIntervalsSchema = z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'])
+export const subscriptionIntervalsSchema = z.enum(['MINUTES', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'])
 
 export const billingCycleTableDTOSchema = z.object({
   gracePeriodDays: z.coerce.number(),
   id: z.string(),
   intervalCount: z.coerce.number(),
-  intervals: subscriptionIntervalsSchema,
+  intervals: z.string(),
   name: z.string(),
 })
 
@@ -71,7 +71,7 @@ export const subscriptionAvailedTableDTOSchema = z.object({
   gracePeriodDays: z.coerce.number(),
   id: z.string(),
   intervalCount: z.coerce.number(),
-  intervals: subscriptionIntervalsSchema,
+  intervals: z.string(),
   name: z.string(),
 })
 

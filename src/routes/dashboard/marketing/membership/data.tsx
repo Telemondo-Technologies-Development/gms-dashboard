@@ -3,9 +3,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { Search, Download, RefreshCw, Users, ChevronRight, Clock } from 'lucide-react'
 
-import { useMembersData } from '@/hooks/membership/useMembership'
-import { useMemberSubscriptions } from '@/hooks/membership/useMembershipSubscriptions'
-import { useInvoices } from '@/hooks/billing/usePaymentHistoryInvoices'
+import { useMembersData } from '@/hooks/membership/useMembershipMemberQuery'
+import { useMemberSubscriptions } from '@/hooks/membership/useMembershipSubscriptionsQuery'
+import { usePaymentHistoryInvoicesQuery } from '@/hooks/billing/usePaymentHistoryInvoicesQuery'
 import type { MemberTableDTO } from '@/api/generated/models/MemberTableDTO'
 import type { MemberSubscriptionTableDTO } from '@/api/generated/models/MemberSubscriptionTableDTO'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table'
@@ -60,7 +60,7 @@ function RouteComponent() {
 
   const { isLoading, isFetching, error, refetchAll, queries } = useMembersData()
   const subsQuery = useMemberSubscriptions()
-  const invoicesQuery = useInvoices(0, 500)
+  const invoicesQuery = usePaymentHistoryInvoicesQuery(0, 500)
   const rawMembers: MemberTableDTO[] = queries.members.data ?? []
   const allSubs: MemberSubscriptionTableDTO[] = subsQuery.data ?? []
   const allInvoices = invoicesQuery.data ?? []

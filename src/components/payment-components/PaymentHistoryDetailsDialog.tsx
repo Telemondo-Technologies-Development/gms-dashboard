@@ -39,7 +39,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
 import { EditAdminConfirmDialog } from '@/components/common/EditAdminConfirm'
-import type { PaymentTableDTOParsed, PaymentMethodTableDTOParsed } from '@/types/payment/paymentSchemas'
+import type { PaymentTableDTOParsed, PaymentMethodTableDTOParsed, InvoiceTableDTOParsed } from '@/types/payment/paymentSchemas'
 
 interface PaymentDetailsDialogProps {
   open: boolean
@@ -51,6 +51,8 @@ interface PaymentDetailsDialogProps {
   paymentMethodMap: Map<string, PaymentMethodTableDTOParsed>
   onPrintReceipt?: (payment: PaymentTableDTOParsed) => void
   memberName?: string
+  /** Invoice to show when there is no payment record yet (e.g. pending invoice). */
+  invoice?: InvoiceTableDTOParsed
 }
 
 type DisplayStatus = 'paid' | 'failed' | 'pending'
@@ -95,6 +97,21 @@ function statusBadge(status: DisplayStatus) {
   }
 }
 
+function invoiceStatusBadge(status: InvoiceTableDTOParsed['status']) {
+  switch (status) {
+    case 'PAID':
+      return <Badge className="gap-1.5 px-2.5 py-0.5" variant="default"><CheckCircle2 className="h-3.5 w-3.5" />Paid</Badge>
+    case 'OVERDUE':
+      return <Badge className="gap-1.5 px-2.5 py-0.5" variant="destructive"><XCircle className="h-3.5 w-3.5" />Overdue</Badge>
+    case 'PENDING':
+    case 'ISSUED':
+    case 'DUE':
+      return <Badge className="gap-1.5 px-2.5 py-0.5 bg-orange-500 hover:bg-orange-600 border-transparent text-white" variant="outline"><Clock className="h-3.5 w-3.5" />{status.charAt(0) + status.slice(1).toLowerCase()}</Badge>
+    default:
+      return <Badge variant="outline">{status}</Badge>
+  }
+}
+
 export function PaymentDetailsDialog({
   open,
   onOpenChange,
@@ -105,6 +122,7 @@ export function PaymentDetailsDialog({
   paymentMethodMap,
   onPrintReceipt,
   memberName,
+  invoice,
 }: PaymentDetailsDialogProps) {
   const session = useAuthSession()
   const queryClient = useQueryClient()
@@ -415,6 +433,63 @@ export function PaymentDetailsDialog({
                 <span>Recorded on {payment.paidAt ? format(new Date(payment.paidAt), 'PPpp') : '—'}</span>
             </div>
 
+          </div>
+          ) : invoice ? (
+          <div className="space-y-6 pb-4">
+            <Card className="bg-muted/10 border-none shadow-sm">
+              <CardContent className="p-4 flex flex-row items-center justify-between">
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm text-muted-foreground font-medium">Invoice Status</span>
+                  <div className="mt-1">{invoiceStatusBadge(invoice.status)}</div>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm text-muted-foreground font-medium">Total Due</span>
+                  <div className="text-2xl font-bold tracking-tight text-primary">
+                    {new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 2 }).format(invoice.total)}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
+                  <User className="h-4 w-4" /> Member Information
+                </h4>
+                <div className="rounded-lg border p-3 bg-card space-y-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Member</p>
+                    <p className="font-medium text-sm mt-0.5">{memberName || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Invoice ID</p>
+                    <p className="font-mono text-xs mt-0.5 break-all text-muted-foreground">{invoice.id}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
+                  <FileText className="h-4 w-4" /> Invoice Details
+                </h4>
+                <div className="rounded-lg border p-3 bg-card space-y-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Issued</p>
+                    <p className="font-medium text-sm mt-0.5">{invoice.issuedAt ? format(invoice.issuedAt, 'MMM d, yyyy h:mm a') : '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Due Date</p>
+                    <p className="font-medium text-sm mt-0.5">{invoice.dueDate ? format(invoice.dueDate, 'MMM d, yyyy h:mm a') : '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Grace Period Ends</p>
+                    <p className="font-medium text-sm mt-0.5">{invoice.gracePeriodDate ? format(invoice.gracePeriodDate, 'MMM d, yyyy') : '—'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-md border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 dark:bg-orange-950 dark:text-orange-300 flex items-center gap-2">
+              <Clock className="h-4 w-4 shrink-0" />
+              No payment has been recorded for this invoice yet.
+            </div>
           </div>
           ) : (
           <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
