@@ -91,6 +91,31 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
       });
   }, [branchPersonnel, actorNameMap, roleMap, searchQuery]);
 
+
+const handleUnassign = async (personnelId: string) => {
+  if (!window.confirm("Are you sure you want to unassign this staff member?")) return;
+  try {
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+    const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
+    const token = localStorage.getItem('auth_token');
+
+    const response = await fetch(`${base}/api/branch/personnel/${personnelId}`, {
+      method: 'DELETE',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to unassign staff");
+    }
+    refetch(); 
+    
+  } catch (error) {
+    console.error("Unassign error:", error);
+    alert("Could not remove staff. They might be tied to other records.");
+  }
+};
+
   return (
     <Card className="flex flex-col shadow-md border-muted/40 h-[650px] overflow-hidden">
       <CardHeader className="shrink-0">
@@ -193,21 +218,24 @@ export const AssignedStaffView: React.FC<AssignedStaffViewProps> = ({
                       </Badge>
                     </TableCell>
                     <TableCell className="py-4 align-top text-right pr-4 md:pr-6">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Staff Options</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
-                            <UserMinus className="mr-2 h-4 w-4" />
-                            Unassign Staff
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Staff Options</DropdownMenuLabel>
+                        <DropdownMenuSeparator />                     
+                        <DropdownMenuItem 
+                          className="text-destructive focus:text-destructive cursor-pointer"
+                          onClick={() => handleUnassign(staff.id)} 
+                        >
+                          <UserMinus className="mr-2 h-4 w-4" />
+                          Unassign Staff
+                        </DropdownMenuItem>                       
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))

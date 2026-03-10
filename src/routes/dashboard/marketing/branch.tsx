@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import type { BranchFormData } from '@/components/branch-components/branch/AddBranchDialog';
 import { BranchDetailsDialog } from '@/components/branch-components/branch/BranchDetailsDialog';
 import { MapDialog } from '@/components/branch-components/branch/MapDialog';
-import { DeleteConfirmDialog } from '../../../components/branch-components/DeleteConfirmDialog';
+import { DeleteAdminConfirmDialog } from '@/components/common/DeleteAdminConfirm';
 import { BranchList } from '@/components/branch-components/branch/BranchList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { AssignStaffOverview } from '@/components/branch-components/staff/AssignStaffOverview';
@@ -13,20 +13,6 @@ import { useAuthSession } from '@/lib/auth/auth-session';
 export const Route = createFileRoute('/dashboard/marketing/branch')({
   component: RouteComponent,
 });
-
-interface Branch {
-  id: string;
-  name: string;
-  address: string;
-  latitude: string;
-  longitude: string;
-  status: 'ACTIVE' | 'INACTIVE';
-  createdAt: string;
-  updatedAt: string;
-  createdById: string;
-  updatedById: string;
-  assignedStaff?: any[];
-}
 
 function RouteComponent() {
   const { actorId } = useAuthSession();
@@ -43,6 +29,8 @@ function RouteComponent() {
   const [activeBranchForStaff, setActiveBranchForStaff] = useState<BranchFormData | null>(null);
   const [mapBranch, setMapBranch] = useState<BranchFormData | null>(null);
   const [branchToRemove, setBranchToRemove] = useState<BranchFormData | null>(null);
+
+  const selectedBranch = selectedBranchId ? branches.find((b: BranchFormData) => b.id === selectedBranchId) : null;
 
   const toggleDialog = (dialog: keyof typeof dialogState, value: boolean) => {
     setDialogState((prev) => ({ ...prev, [dialog]: value }));
@@ -104,30 +92,36 @@ function RouteComponent() {
 
   const handleRemoveBranch = async () => {
     if (!branchToRemove) return;
+    
     try {
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
       const base = import.meta.env.DEV ? '' : (apiBaseUrl || '');
-      const url = `${base}/api/branch/${branchToRemove.id}`;
       const token = localStorage.getItem('auth_token');
-
-      const response = await fetch(url, {
+  
+      // API CALL: This endpoint should be configured on the backend to 
+      // also delete entries in the 'branch_personnel' table (Cascade)
+      const response = await fetch(`${base}/api/branch/${branchToRemove.id}`, {
         method: 'DELETE',
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { 
+          ...(token ? { Authorization: `Bearer ${token}` } : {}) 
+        },
       });
-
-      if (!response.ok) throw new Error('Failed to delete branch.');
-      refetch();
-      toggleDialog('confirmDialogOpen', false);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete branch.');
+      }
+  
+      // Refresh data and clean up UI state
+      await refetch();
       setBranchToRemove(null);
-    } catch (error) {
+      // Note: DeleteAdminConfirmDialog handles closing itself via onOpenChange
+    } catch (error: any) {
       console.error(error);
-      alert('Failed to delete branch.');
+      // Re-throw so the Dialog can catch it and show the error message in its UI
+      throw error; 
     }
   };
-
-  const selectedBranch: Branch | null = selectedBranchId
-    ? branches.find((b: Branch) => b.id === selectedBranchId) ?? null
-    : null;
 
 
   return (
@@ -190,12 +184,14 @@ function RouteComponent() {
         address={mapBranch?.address || ''}
       />
 
-      <DeleteConfirmDialog
-        isOpen={dialogState.confirmDialogOpen}
-        branchName={branchToRemove?.name || null}
-        onCancel={() => toggleDialog('confirmDialogOpen', false)}
-        onConfirm={handleRemoveBranch}
-      />
+<DeleteAdminConfirmDialog
+  open={dialogState.confirmDialogOpen}
+  onOpenChange={(open: boolean) => toggleDialog('confirmDialogOpen', open)}
+  onConfirm={handleRemoveBranch}
+  title={`Delete Branch: ${branchToRemove?.name}`}
+  description="WARNING: This will permanently delete this branch and all its staff assignments. This action requires admin password verification."
+  confirmText="Permanently Delete"
+/>
     </div>
   );
 }
