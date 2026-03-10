@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  Printer,
   Calendar as CalendarIcon,
   CreditCard,
   FileText,
@@ -39,6 +38,12 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Card, CardContent } from '@/components/ui/card'
 import { EditAdminConfirmDialog } from '@/components/common/EditAdminConfirm'
+import {
+  PaymentHistoryUpdatePaymentAdminConfirm,
+  PaymentHistoryUpdatePaymentForm,
+  PaymentHistoryUpdatePaymentTrigger,
+} from '@/components/payment-components/PaymentHistoryUpdatePayment'
+import { usePaymentHistoryUpdatePayment } from '@/hooks/billing/usePaymentHistoryUpdatePayment'
 import type { PaymentTableDTOParsed, PaymentMethodTableDTOParsed, InvoiceTableDTOParsed } from '@/types/payment/paymentSchemas'
 
 interface PaymentDetailsDialogProps {
@@ -139,17 +144,23 @@ export function PaymentDetailsDialog({
   const [statusValue, setStatusValue] = useState<PaymentTableDTOParsed['status']>('PENDING')
   const [paidAt, setPaidAt] = useState<Date | undefined>(undefined)
   const [failureReason, setFailureReason] = useState('')
-
   const paymentMethodOptions = useMemo(
-    () => Array.from(paymentMethodMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
+    () => Array.from(paymentMethodMap.values()).sort((left, right) => left.name.localeCompare(right.name)),
     [paymentMethodMap],
   )
   const { displayName: createdByName, isLoading: isCreatedByLoading } = useEmployeeDisplayName(payment?.createdById)
+  const updatePaymentController = usePaymentHistoryUpdatePayment({
+    payment,
+    invoice,
+    paymentMethodMap,
+  })
+  const resetUpdatePaymentState = updatePaymentController.resetState
 
   useEffect(() => {
     if (!payment) {
       setIsEditing(false)
       setEditError(null)
+      resetUpdatePaymentState()
       return
     }
 
@@ -160,7 +171,8 @@ export function PaymentDetailsDialog({
     setFailureReason(payment.failureReason ?? '')
     setEditError(null)
     setIsEditing(false)
-  }, [payment])
+    resetUpdatePaymentState()
+  }, [payment, resetUpdatePaymentState])
 
   const updatePaymentMutation = useMutation({
     mutationFn: async () => {
@@ -433,6 +445,8 @@ export function PaymentDetailsDialog({
                 <span>Recorded on {payment.paidAt ? format(new Date(payment.paidAt), 'PPpp') : '—'}</span>
             </div>
 
+            <PaymentHistoryUpdatePaymentForm controller={updatePaymentController} />
+
           </div>
           ) : invoice ? (
           <div className="space-y-6 pb-4">
@@ -486,10 +500,14 @@ export function PaymentDetailsDialog({
                 </div>
               </div>
             </div>
-            <div className="rounded-md border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 dark:bg-orange-950 dark:text-orange-300 flex items-center gap-2">
-              <Clock className="h-4 w-4 shrink-0" />
-              No payment has been recorded for this invoice yet.
-            </div>
+            {!updatePaymentController.markPaidMode && (
+              <div className="rounded-md border border-orange-200 bg-orange-50 p-3 text-sm text-orange-800 dark:bg-orange-950 dark:text-orange-300 flex items-center gap-2">
+                <Clock className="h-4 w-4 shrink-0" />
+                No payment has been recorded for this invoice yet.
+              </div>
+            )}
+
+            <PaymentHistoryUpdatePaymentForm controller={updatePaymentController} />
           </div>
           ) : (
           <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
@@ -499,8 +517,10 @@ export function PaymentDetailsDialog({
         )}
         </div>
 
-        {payment ? (
+        {(payment || invoice) ? (
           <DialogFooter className="mt-2 gap-2">
+            <PaymentHistoryUpdatePaymentTrigger controller={updatePaymentController} isEditing={isEditing} />
+
             {isAdmin ? (
               isEditing ? (
                 <>
@@ -512,9 +532,11 @@ export function PaymentDetailsDialog({
                   </Button>
                 </>
               ) : (
-                <Button type="button" onClick={() => setShowEditConfirm(true)}>
-                  Edit Transaction
-                </Button>
+                !updatePaymentController.markPaidMode ? (
+                  <Button type="button" onClick={() => setShowEditConfirm(true)}>
+                    Edit Transaction
+                  </Button>
+                ) : null
               )
             ) : null}
           </DialogFooter>
@@ -531,6 +553,8 @@ export function PaymentDetailsDialog({
           description="Admin confirmation is required to edit this payment transaction. Please enter your admin password to proceed."
           confirmText="Unlock & Edit"
         />
+
+        <PaymentHistoryUpdatePaymentAdminConfirm controller={updatePaymentController} />
       </DialogContent>
     </Dialog>
   )

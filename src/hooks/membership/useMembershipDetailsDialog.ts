@@ -76,7 +76,7 @@ export function useMembershipDetailsDialog(options: UseMembershipDetailsDialogOp
     if (!memberGroup) return
 
     setMembers(memberGroup.members)
-    setStartDate(memberGroup.startDate)
+    setStartDate(memberGroup.startDate ?? (memberSubscriptionQuery.data ? undefined : new Date()))
     setEndDate(memberGroup.endDate)
     setPaymentMethodId('')
     setPaymentReferenceNum('')
