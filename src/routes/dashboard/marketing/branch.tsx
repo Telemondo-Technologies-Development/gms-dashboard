@@ -184,14 +184,14 @@ function RouteComponent() {
         address={mapBranch?.address || ''}
       />
 
-<DeleteAdminConfirmDialog
-  open={dialogState.confirmDialogOpen}
-  onOpenChange={(open: boolean) => toggleDialog('confirmDialogOpen', open)}
-  onConfirm={handleRemoveBranch}
-  title={`Delete Branch: ${branchToRemove?.name}`}
-  description="WARNING: This will permanently delete this branch and all its staff assignments. This action requires admin password verification."
-  confirmText="Permanently Delete"
-/>
+      <DeleteAdminConfirmDialog
+        open={dialogState.confirmDialogOpen}
+        onOpenChange={(open: boolean) => toggleDialog('confirmDialogOpen', open)}
+        onConfirm={handleRemoveBranch}
+        title={`Delete Branch: ${branchToRemove?.name}`}
+        description="WARNING: This will permanently delete this branch and all its staff assignments. This action requires admin password verification."
+        confirmText="Permanently Delete"
+      />
     </div>
   );
 }

@@ -1,7 +1,9 @@
 import React from 'react';
+import { Link } from '@tanstack/react-router';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { MapPin, MoreVertical, Users } from 'lucide-react'; 
+import { MapPin, MoreVertical, Users, BarChart3} from 'lucide-react';
 import { AddBranchDialog, type BranchFormData } from './AddBranchDialog';
 
 interface Branch {
@@ -77,7 +79,17 @@ export const BranchList: React.FC<BranchListProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end items-center px-1">
+      <div className="flex justify-end items-center gap-3 px-1">
+        <Button 
+          asChild 
+          variant="outline" 
+          className="gap-2 bg-white border-zinc-200 text-slate-700 hover:bg-slate-50 hover:text-[#0062cc] transition-colors shadow-sm"
+        >
+          <Link to="/dashboard/admin/analytics">
+            <BarChart3 className="h-4 w-4 text-[#0062cc]" />
+            View Analytics
+          </Link>
+        </Button>
         <AddBranchDialog onAddBranch={handleAddBranch} />
       </div>
 
