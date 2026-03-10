@@ -3080,6 +3080,45 @@
             "schema": {
               "$ref": "#/components/schemas/Pageable"
             }
+          },
+          {
+            "in": "query",
+            "name": "fullName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNDECIDED",
+                "ACTIVE",
+                "DEACTIVATED"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
           }
         ],
         "responses": {
@@ -3139,6 +3178,51 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/Pageable"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MANUAL",
+                "QR",
+                "FACE",
+                "FINGERPRINT"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IN",
+                "OUT",
+                "UNDECIDED"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -3230,6 +3314,51 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MANUAL",
+                "QR",
+                "FACE",
+                "FINGERPRINT"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "IN",
+                "OUT",
+                "UNDECIDED"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -4020,6 +4149,45 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "in": "query",
+            "name": "fullName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "UNDECIDED",
+                "ACTIVE",
+                "DEACTIVATED"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
           }
         ],
         "responses": {
@@ -4090,6 +4258,49 @@
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/Pageable"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "FULL",
+                "PARTIAL",
+                "PENDING",
+                "MISSED",
+                "CANCELLED",
+                "WAITING",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "paymentMethodName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -4343,6 +4554,49 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "FULL",
+                "PARTIAL",
+                "PENDING",
+                "MISSED",
+                "CANCELLED",
+                "WAITING",
+                "FAILED"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "paymentMethodName",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateFrom",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dateTo",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         ],
@@ -9717,6 +9971,7 @@
           "intervals": {
             "type": "string",
             "enum": [
+              "ONCE",
               "MINUTES",
               "DAILY",
               "WEEKLY",
@@ -9751,6 +10006,7 @@
           "intervals": {
             "type": "string",
             "enum": [
+              "ONCE",
               "MINUTES",
               "DAILY",
               "WEEKLY",
@@ -9793,6 +10049,7 @@
           "intervals": {
             "type": "string",
             "enum": [
+              "ONCE",
               "MINUTES",
               "DAILY",
               "WEEKLY",
@@ -11614,6 +11871,9 @@
             "type": "string",
             "format": "uuid"
           },
+          "paymentMethodName": {
+            "type": "string"
+          },
           "referenceNum": {
             "type": "string"
           },
@@ -11640,6 +11900,7 @@
           "id",
           "invoiceId",
           "paymentMethodId",
+          "paymentMethodName",
           "status"
         ]
       },
@@ -12737,6 +12998,7 @@
           "intervals": {
             "type": "string",
             "enum": [
+              "ONCE",
               "MINUTES",
               "DAILY",
               "WEEKLY",
