@@ -11,7 +11,24 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PostRouteImport } from './routes/post'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardSalesRouteImport } from './routes/dashboard/sales'
+import { Route as DashboardNavigationRouteImport } from './routes/dashboard/navigation'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as DashboardMarketingMembershipRouteImport } from './routes/dashboard/marketing/membership'
+import { Route as DashboardMarketingBranchRouteImport } from './routes/dashboard/marketing/branch'
+import { Route as DashboardMarketingAssetRouteImport } from './routes/dashboard/marketing/asset'
+import { Route as DashboardBillingPaymentHistoryRouteImport } from './routes/dashboard/billing/payment-history'
+import { Route as DashboardAdminUsersRouteImport } from './routes/dashboard/admin/users'
+import { Route as DashboardAdminTrackingRouteImport } from './routes/dashboard/admin/tracking'
+import { Route as DashboardAdminOverviewRouteImport } from './routes/dashboard/admin/overview'
+import { Route as DashboardAdminExpenseRouteImport } from './routes/dashboard/admin/expense'
+import { Route as DashboardAdminAnalyticsRouteImport } from './routes/dashboard/admin/analytics'
+import { Route as DashboardMarketingMembershipIndexRouteImport } from './routes/dashboard/marketing/membership/index'
+import { Route as DashboardMarketingMembershipDataRouteImport } from './routes/dashboard/marketing/membership/data'
+import { Route as DashboardMarketingBranchBranchIdAssignRouteImport } from './routes/dashboard/marketing/branch/$branchId/assign'
 
 const PostRoute = PostRouteImport.update({
   id: '/post',
@@ -23,40 +40,241 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardSalesRoute = DashboardSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardNavigationRoute = DashboardNavigationRouteImport.update({
+  id: '/navigation',
+  path: '/navigation',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardMarketingMembershipRoute =
+  DashboardMarketingMembershipRouteImport.update({
+    id: '/marketing/membership',
+    path: '/marketing/membership',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardMarketingBranchRoute =
+  DashboardMarketingBranchRouteImport.update({
+    id: '/marketing/branch',
+    path: '/marketing/branch',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardMarketingAssetRoute = DashboardMarketingAssetRouteImport.update({
+  id: '/marketing/asset',
+  path: '/marketing/asset',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardBillingPaymentHistoryRoute =
+  DashboardBillingPaymentHistoryRouteImport.update({
+    id: '/billing/payment-history',
+    path: '/billing/payment-history',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardAdminUsersRoute = DashboardAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAdminTrackingRoute = DashboardAdminTrackingRouteImport.update({
+  id: '/admin/tracking',
+  path: '/admin/tracking',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAdminOverviewRoute = DashboardAdminOverviewRouteImport.update({
+  id: '/admin/overview',
+  path: '/admin/overview',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAdminExpenseRoute = DashboardAdminExpenseRouteImport.update({
+  id: '/admin/expense',
+  path: '/admin/expense',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAdminAnalyticsRoute = DashboardAdminAnalyticsRouteImport.update({
+  id: '/admin/analytics',
+  path: '/admin/analytics',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardMarketingMembershipIndexRoute =
+  DashboardMarketingMembershipIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardMarketingMembershipRoute,
+  } as any)
+const DashboardMarketingMembershipDataRoute =
+  DashboardMarketingMembershipDataRouteImport.update({
+    id: '/data',
+    path: '/data',
+    getParentRoute: () => DashboardMarketingMembershipRoute,
+  } as any)
+const DashboardMarketingBranchBranchIdAssignRoute =
+  DashboardMarketingBranchBranchIdAssignRouteImport.update({
+    id: '/$branchId/assign',
+    path: '/$branchId/assign',
+    getParentRoute: () => DashboardMarketingBranchRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/post': typeof PostRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/dashboard/navigation': typeof DashboardNavigationRoute
+  '/dashboard/sales': typeof DashboardSalesRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
+  '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/overview': typeof DashboardAdminOverviewRoute
+  '/dashboard/admin/tracking': typeof DashboardAdminTrackingRoute
+  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
+  '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
+  '/dashboard/marketing/asset': typeof DashboardMarketingAssetRoute
+  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRouteWithChildren
+  '/dashboard/marketing/membership': typeof DashboardMarketingMembershipRouteWithChildren
+  '/dashboard/marketing/membership/data': typeof DashboardMarketingMembershipDataRoute
+  '/dashboard/marketing/membership/': typeof DashboardMarketingMembershipIndexRoute
+  '/dashboard/marketing/branch/$branchId/assign': typeof DashboardMarketingBranchBranchIdAssignRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/post': typeof PostRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/dashboard/navigation': typeof DashboardNavigationRoute
+  '/dashboard/sales': typeof DashboardSalesRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
+  '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/overview': typeof DashboardAdminOverviewRoute
+  '/dashboard/admin/tracking': typeof DashboardAdminTrackingRoute
+  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
+  '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
+  '/dashboard/marketing/asset': typeof DashboardMarketingAssetRoute
+  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRouteWithChildren
+  '/dashboard/marketing/membership/data': typeof DashboardMarketingMembershipDataRoute
+  '/dashboard/marketing/membership': typeof DashboardMarketingMembershipIndexRoute
+  '/dashboard/marketing/branch/$branchId/assign': typeof DashboardMarketingBranchBranchIdAssignRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/post': typeof PostRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/dashboard/navigation': typeof DashboardNavigationRoute
+  '/dashboard/sales': typeof DashboardSalesRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/admin/analytics': typeof DashboardAdminAnalyticsRoute
+  '/dashboard/admin/expense': typeof DashboardAdminExpenseRoute
+  '/dashboard/admin/overview': typeof DashboardAdminOverviewRoute
+  '/dashboard/admin/tracking': typeof DashboardAdminTrackingRoute
+  '/dashboard/admin/users': typeof DashboardAdminUsersRoute
+  '/dashboard/billing/payment-history': typeof DashboardBillingPaymentHistoryRoute
+  '/dashboard/marketing/asset': typeof DashboardMarketingAssetRoute
+  '/dashboard/marketing/branch': typeof DashboardMarketingBranchRouteWithChildren
+  '/dashboard/marketing/membership': typeof DashboardMarketingMembershipRouteWithChildren
+  '/dashboard/marketing/membership/data': typeof DashboardMarketingMembershipDataRoute
+  '/dashboard/marketing/membership/': typeof DashboardMarketingMembershipIndexRoute
+  '/dashboard/marketing/branch/$branchId/assign': typeof DashboardMarketingBranchBranchIdAssignRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/post'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/post'
+    | '/auth/login'
+    | '/dashboard/navigation'
+    | '/dashboard/sales'
+    | '/dashboard/'
+    | '/dashboard/admin/analytics'
+    | '/dashboard/admin/expense'
+    | '/dashboard/admin/overview'
+    | '/dashboard/admin/tracking'
+    | '/dashboard/admin/users'
+    | '/dashboard/billing/payment-history'
+    | '/dashboard/marketing/asset'
+    | '/dashboard/marketing/branch'
+    | '/dashboard/marketing/membership'
+    | '/dashboard/marketing/membership/data'
+    | '/dashboard/marketing/membership/'
+    | '/dashboard/marketing/branch/$branchId/assign'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/post'
-  id: '__root__' | '/' | '/about' | '/post'
+  to:
+    | '/'
+    | '/about'
+    | '/post'
+    | '/auth/login'
+    | '/dashboard/navigation'
+    | '/dashboard/sales'
+    | '/dashboard'
+    | '/dashboard/admin/analytics'
+    | '/dashboard/admin/expense'
+    | '/dashboard/admin/overview'
+    | '/dashboard/admin/tracking'
+    | '/dashboard/admin/users'
+    | '/dashboard/billing/payment-history'
+    | '/dashboard/marketing/asset'
+    | '/dashboard/marketing/branch'
+    | '/dashboard/marketing/membership/data'
+    | '/dashboard/marketing/membership'
+    | '/dashboard/marketing/branch/$branchId/assign'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/post'
+    | '/auth/login'
+    | '/dashboard/navigation'
+    | '/dashboard/sales'
+    | '/dashboard/'
+    | '/dashboard/admin/analytics'
+    | '/dashboard/admin/expense'
+    | '/dashboard/admin/overview'
+    | '/dashboard/admin/tracking'
+    | '/dashboard/admin/users'
+    | '/dashboard/billing/payment-history'
+    | '/dashboard/marketing/asset'
+    | '/dashboard/marketing/branch'
+    | '/dashboard/marketing/membership'
+    | '/dashboard/marketing/membership/data'
+    | '/dashboard/marketing/membership/'
+    | '/dashboard/marketing/branch/$branchId/assign'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   PostRoute: typeof PostRoute
+  AuthLoginRoute: typeof AuthLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,6 +293,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,13 +307,195 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/sales': {
+      id: '/dashboard/sales'
+      path: '/sales'
+      fullPath: '/dashboard/sales'
+      preLoaderRoute: typeof DashboardSalesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/navigation': {
+      id: '/dashboard/navigation'
+      path: '/navigation'
+      fullPath: '/dashboard/navigation'
+      preLoaderRoute: typeof DashboardNavigationRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/marketing/membership': {
+      id: '/dashboard/marketing/membership'
+      path: '/marketing/membership'
+      fullPath: '/dashboard/marketing/membership'
+      preLoaderRoute: typeof DashboardMarketingMembershipRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/marketing/branch': {
+      id: '/dashboard/marketing/branch'
+      path: '/marketing/branch'
+      fullPath: '/dashboard/marketing/branch'
+      preLoaderRoute: typeof DashboardMarketingBranchRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/marketing/asset': {
+      id: '/dashboard/marketing/asset'
+      path: '/marketing/asset'
+      fullPath: '/dashboard/marketing/asset'
+      preLoaderRoute: typeof DashboardMarketingAssetRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/billing/payment-history': {
+      id: '/dashboard/billing/payment-history'
+      path: '/billing/payment-history'
+      fullPath: '/dashboard/billing/payment-history'
+      preLoaderRoute: typeof DashboardBillingPaymentHistoryRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/admin/users': {
+      id: '/dashboard/admin/users'
+      path: '/admin/users'
+      fullPath: '/dashboard/admin/users'
+      preLoaderRoute: typeof DashboardAdminUsersRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/admin/tracking': {
+      id: '/dashboard/admin/tracking'
+      path: '/admin/tracking'
+      fullPath: '/dashboard/admin/tracking'
+      preLoaderRoute: typeof DashboardAdminTrackingRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/admin/overview': {
+      id: '/dashboard/admin/overview'
+      path: '/admin/overview'
+      fullPath: '/dashboard/admin/overview'
+      preLoaderRoute: typeof DashboardAdminOverviewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/admin/expense': {
+      id: '/dashboard/admin/expense'
+      path: '/admin/expense'
+      fullPath: '/dashboard/admin/expense'
+      preLoaderRoute: typeof DashboardAdminExpenseRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/admin/analytics': {
+      id: '/dashboard/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/dashboard/admin/analytics'
+      preLoaderRoute: typeof DashboardAdminAnalyticsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/marketing/membership/': {
+      id: '/dashboard/marketing/membership/'
+      path: '/'
+      fullPath: '/dashboard/marketing/membership/'
+      preLoaderRoute: typeof DashboardMarketingMembershipIndexRouteImport
+      parentRoute: typeof DashboardMarketingMembershipRoute
+    }
+    '/dashboard/marketing/membership/data': {
+      id: '/dashboard/marketing/membership/data'
+      path: '/data'
+      fullPath: '/dashboard/marketing/membership/data'
+      preLoaderRoute: typeof DashboardMarketingMembershipDataRouteImport
+      parentRoute: typeof DashboardMarketingMembershipRoute
+    }
+    '/dashboard/marketing/branch/$branchId/assign': {
+      id: '/dashboard/marketing/branch/$branchId/assign'
+      path: '/$branchId/assign'
+      fullPath: '/dashboard/marketing/branch/$branchId/assign'
+      preLoaderRoute: typeof DashboardMarketingBranchBranchIdAssignRouteImport
+      parentRoute: typeof DashboardMarketingBranchRoute
+    }
   }
 }
 
+interface DashboardMarketingBranchRouteChildren {
+  DashboardMarketingBranchBranchIdAssignRoute: typeof DashboardMarketingBranchBranchIdAssignRoute
+}
+
+const DashboardMarketingBranchRouteChildren: DashboardMarketingBranchRouteChildren =
+  {
+    DashboardMarketingBranchBranchIdAssignRoute:
+      DashboardMarketingBranchBranchIdAssignRoute,
+  }
+
+const DashboardMarketingBranchRouteWithChildren =
+  DashboardMarketingBranchRoute._addFileChildren(
+    DashboardMarketingBranchRouteChildren,
+  )
+
+interface DashboardMarketingMembershipRouteChildren {
+  DashboardMarketingMembershipDataRoute: typeof DashboardMarketingMembershipDataRoute
+  DashboardMarketingMembershipIndexRoute: typeof DashboardMarketingMembershipIndexRoute
+}
+
+const DashboardMarketingMembershipRouteChildren: DashboardMarketingMembershipRouteChildren =
+  {
+    DashboardMarketingMembershipDataRoute:
+      DashboardMarketingMembershipDataRoute,
+    DashboardMarketingMembershipIndexRoute:
+      DashboardMarketingMembershipIndexRoute,
+  }
+
+const DashboardMarketingMembershipRouteWithChildren =
+  DashboardMarketingMembershipRoute._addFileChildren(
+    DashboardMarketingMembershipRouteChildren,
+  )
+
+interface DashboardRouteRouteChildren {
+  DashboardNavigationRoute: typeof DashboardNavigationRoute
+  DashboardSalesRoute: typeof DashboardSalesRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardAdminAnalyticsRoute: typeof DashboardAdminAnalyticsRoute
+  DashboardAdminExpenseRoute: typeof DashboardAdminExpenseRoute
+  DashboardAdminOverviewRoute: typeof DashboardAdminOverviewRoute
+  DashboardAdminTrackingRoute: typeof DashboardAdminTrackingRoute
+  DashboardAdminUsersRoute: typeof DashboardAdminUsersRoute
+  DashboardBillingPaymentHistoryRoute: typeof DashboardBillingPaymentHistoryRoute
+  DashboardMarketingAssetRoute: typeof DashboardMarketingAssetRoute
+  DashboardMarketingBranchRoute: typeof DashboardMarketingBranchRouteWithChildren
+  DashboardMarketingMembershipRoute: typeof DashboardMarketingMembershipRouteWithChildren
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardNavigationRoute: DashboardNavigationRoute,
+  DashboardSalesRoute: DashboardSalesRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardAdminAnalyticsRoute: DashboardAdminAnalyticsRoute,
+  DashboardAdminExpenseRoute: DashboardAdminExpenseRoute,
+  DashboardAdminOverviewRoute: DashboardAdminOverviewRoute,
+  DashboardAdminTrackingRoute: DashboardAdminTrackingRoute,
+  DashboardAdminUsersRoute: DashboardAdminUsersRoute,
+  DashboardBillingPaymentHistoryRoute: DashboardBillingPaymentHistoryRoute,
+  DashboardMarketingAssetRoute: DashboardMarketingAssetRoute,
+  DashboardMarketingBranchRoute: DashboardMarketingBranchRouteWithChildren,
+  DashboardMarketingMembershipRoute:
+    DashboardMarketingMembershipRouteWithChildren,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   PostRoute: PostRoute,
+  AuthLoginRoute: AuthLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

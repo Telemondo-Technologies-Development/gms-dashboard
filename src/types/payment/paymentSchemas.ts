@@ -1,0 +1,205 @@
+import { z } from 'zod'
+import type { BillingInterval } from '@/lib/billing-utils'
+
+export interface EnsureInvoiceInput {
+  actorId: string
+  branchId: string
+  createdById: string
+  memberSubscriptionId: string
+  subscriptionAvailedId: string
+  startDate: Date
+  endDate?: Date
+  intervals: BillingInterval
+  intervalCount: number
+  gracePeriodDays: number
+  subtotal: number
+}
+
+export interface CreatePaymentIfNeededInput {
+  paymentMethodId: string
+  invoiceId: string | undefined
+  createdById: string
+  amount: number
+  subtotal?: number
+  paidAt?: Date
+  referenceNum?: string
+  /** Known due date for this invoice — used as a reliable fallback when the
+   *  server returns epoch/null for dueDate in the GET response. */
+  knownDueDate?: Date
+  /** Grace period in days for the subscription — used to compute gracePeriodDate
+   *  as a reliable fallback when the server hasn't set it on the invoice yet. */
+  gracePeriodDays?: number
+}
+
+
+
+const coerceOptionalDate = z.preprocess((value) => {
+	if (value == null || value === '') return undefined
+	if (value instanceof Date) return value
+	const date = new Date(String(value))
+	return Number.isNaN(date.getTime()) ? undefined : date
+}, z.date().optional())
+
+export const pageMetadataSchema = z.object({
+	pageCount: z.coerce.number(),
+	pageIndex: z.coerce.number(),
+	pageSize: z.coerce.number(),
+	totalCount: z.coerce.number(),
+})
+
+export type PageMetadata = z.infer<typeof pageMetadataSchema>
+
+export const paymentStatusSchema = z.enum(['FULL', 'PARTIAL', 'PENDING', 'MISSED', 'CANCELLED', 'WAITING', 'FAILED'])
+export type PaymentStatus = z.infer<typeof paymentStatusSchema>
+
+export const paymentTableDTOSchema = z.object({
+	amount: z.coerce.number(),
+	createdById: z.string(),
+	failureReason: z.string().optional(),
+	id: z.string(),
+	invoiceId: z.string(),
+	paidAt: coerceOptionalDate,
+	paymentMethodId: z.string(),
+	referenceNum: z.string().optional(),
+	status: paymentStatusSchema,
+	updatedById: z.string().optional(),
+})
+
+export type PaymentTableDTOParsed = z.infer<typeof paymentTableDTOSchema>
+
+export const paymentMethodTableDTOSchema = z.object({
+	createdById: z.string().optional(),
+	id: z.string(),
+	name: z.string(),
+	updatedById: z.string().optional(),
+})
+
+export type PaymentMethodTableDTOParsed = z.infer<typeof paymentMethodTableDTOSchema>
+
+export const paymentMethodPostSchema = z.object({
+	createdById: z.string().min(1),
+	name: z.string().min(1),
+})
+
+export type PaymentMethodPostInput = z.infer<typeof paymentMethodPostSchema>
+
+const apiErrorSchema = z
+	.object({
+		message: z.string().optional(),
+	})
+	.passthrough()
+
+export const apiResponseListPaymentTableDTOSchema = z.object({
+	data: z.array(paymentTableDTOSchema).optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export type ApiResponseListPaymentTableDTOParsed = z.infer<typeof apiResponseListPaymentTableDTOSchema>
+
+export const apiResponsePaymentTableDTOSchema = z.object({
+	data: paymentTableDTOSchema.optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export type ApiResponsePaymentTableDTOParsed = z.infer<typeof apiResponsePaymentTableDTOSchema>
+
+export const apiResponseListPaymentMethodTableDTOSchema = z.object({
+	data: z.array(paymentMethodTableDTOSchema).optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export const apiResponsePaymentMethodTableDTOSchema = z.object({
+	data: paymentMethodTableDTOSchema.optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export type ApiResponseListPaymentMethodTableDTOParsed = z.infer<
+	typeof apiResponseListPaymentMethodTableDTOSchema
+>
+
+// Form schema for payment history filters (usable with RHF + zodResolver or TanStack Form)
+export const paymentHistoryFiltersSchema = z
+	.object({
+		query: z.string().default(''),
+		status: z.enum(['all', 'paid', 'pending', 'failed']).default('all'),
+		fromDate: z.string().default(''),
+		toDate: z.string().default(''),
+	})
+	.refine(
+		(value) => {
+			if (!value.fromDate || !value.toDate) return true
+			return new Date(value.fromDate).getTime() <= new Date(value.toDate).getTime()
+		},
+		{ message: 'From date must be before To date' },
+	)
+
+export type PaymentHistoryFilters = z.infer<typeof paymentHistoryFiltersSchema>
+
+// Invoice schemas for linking payments to invoices
+export const invoiceStatusSchema = z.enum(['DRAFT', 'PENDING', 'ISSUED', 'PAID', 'PARTIAL', 'DUE', 'OVERDUE'])
+export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>
+
+const coerceDate = z.preprocess((value) => {
+	if (value instanceof Date) return value
+	if (value == null) return undefined
+	const d = new Date(String(value))
+	if (isNaN(d.getTime())) return undefined
+	return d
+}, z.date().optional())
+
+export const invoiceTableDTOSchema = z.object({
+	actorId: z.string(),
+	branchId: z.string(),
+	createdById: z.string(),
+	dueDate: coerceDate,
+	gracePeriodDate: coerceDate,
+	id: z.string(),
+	issuedAt: coerceDate,
+	memberSubscriptionId: z.string(),
+	status: invoiceStatusSchema,
+	subscriptionAvailedId: z.string(),
+	subtotal: z.coerce.number(),
+	systemGenerated: z.boolean(),
+	total: z.coerce.number(),
+	updatedById: z.string().optional(),
+})
+
+export type InvoiceTableDTOParsed = z.infer<typeof invoiceTableDTOSchema>
+
+export const apiResponseListInvoiceTableDTOSchema = z.object({
+	data: z.array(invoiceTableDTOSchema).optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export type ApiResponseListInvoiceTableDTOParsed = z.infer<typeof apiResponseListInvoiceTableDTOSchema>
+
+export const apiResponseInvoiceTableDTOSchema = z.object({
+	data: invoiceTableDTOSchema.optional(),
+	errors: z.array(apiErrorSchema).optional(),
+	message: z.string().optional(),
+	meta: pageMetadataSchema.optional(),
+	success: z.boolean(),
+	timestamp: z.coerce.number(),
+})
+
+export type ApiResponseInvoiceTableDTOParsed = z.infer<typeof apiResponseInvoiceTableDTOSchema>
