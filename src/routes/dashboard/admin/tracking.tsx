@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useMemo } from 'react';
-import { Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Search, Loader2, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
@@ -17,25 +18,17 @@ export const Route = createFileRoute('/dashboard/admin/tracking')({
   component: Tracking,
 });
 
-interface GroupedCustomer {
-  id: string;
-  name: string;
-  branch: string;
-  status: string;
-  reportCount: number;
-  reports: any[];
-}
-
 export default function Tracking() {
   const queryClient = useQueryClient();
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [selectedIncident, setSelectedIncident] = useState<any | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { reports, isLoading: reportsLoading, isError: reportsError } = useReports();
-
-  const { data: reportTypes, isLoading: typesLoading } = useReportTypes();
-  const isLoading = reportsLoading || typesLoading;
   
+  const { reports, isLoading: reportsLoading, isError: reportsError } = useReports();
+  const { data: reportTypes, isLoading: typesLoading } = useReportTypes();
+
+  const isLoading = reportsLoading || typesLoading;
+
   const typeMap = useMemo(() => {
     const map: Record<string, string> = {};
     reportTypes?.forEach((t) => {
@@ -44,73 +37,57 @@ export default function Tracking() {
     return map;
   }, [reportTypes]);
 
-  const groupedCustomers = useMemo(() => {
+  const reportList = useMemo(() => {
     if (!reports) return [];
 
-    const customerMap = new Map<string, GroupedCustomer>();
+    return reports.map((report: any) => ({
+      ...report,
+      typeName: typeMap[report.reportTypeId] || "General Incident",
+      actorName: `${report.actorFirstname} ${report.actorSurname}`.trim(),
+      filerName: `${report.createdByFirstName} ${report.createdBySurname}`.trim(),
+    })).sort((a: any, b: any) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime());
+  }, [reports, typeMap]);
 
-    reports.forEach((report: any) => {
-      const actorKey = report.actorId;
-      
-      if (!customerMap.has(actorKey)) {
-        customerMap.set(actorKey, {
-          id: report.actorId,
-          name: `${report.actorFirstname ?? ''} ${report.actorSurname ?? ''}`.trim() || 'Unknown Personnel',
-          branch: report.branchName || 'No Branch',
-          status: report.actorStatus || 'IN', 
-          reportCount: 0,
-          reports: [],
-        });
-      }
-
-      const customer = customerMap.get(actorKey)!;
-      customer.reports.push({
-        id: report.id,
-        date: report.occurredAt,
-        type: typeMap[report.reportTypeId] || "General Incident", 
-        description: report.description,
-        filer: `${report.createdByFirstName ?? ''} ${report.createdBySurname ?? ''}`.trim(),
-        attachments: report.objectIds || [], 
-      });
-      customer.reportCount = customer.reports.length;
-    });
-
-    return Array.from(customerMap.values());
-  }, [reports, typeMap]); 
-
-  const filteredCustomers = useMemo(() => {
-    return groupedCustomers.filter((customer) =>
-      customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      customer.branch.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredReports = useMemo(() => {
+    return reportList.filter((r) =>
+      r.actorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.branchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.typeName.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [groupedCustomers, searchQuery]);
+  }, [reportList, searchQuery]);
 
-  const activeCustomerData = useMemo(() => 
-    groupedCustomers.find((c) => c.id === selectedCustomerId),
-    [groupedCustomers, selectedCustomerId]
-  );
-
-  const handleOpenModal = (customer: GroupedCustomer): void => {
-    setSelectedCustomerId(customer.id);
+  const handleOpenModal = (report: any) => {
+    const incidentData = {
+      id: report.id,
+      date: report.occurredAt,
+      type: report.typeName,
+      description: report.description,
+      filer: report.filerName,
+      branch: report.branchName,
+      attachments: report.objectIds || [],
+      involvedPersonnel: [report.actorName] 
+    };
+    setSelectedIncident(incidentData);
     setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setSelectedCustomerId(null);
   };
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['reports'] });
-    queryClient.invalidateQueries({ queryKey: ['reportTypes'] });
+  };
+
+  const getTypeColor = (type: string) => {
+    const t = type.toLowerCase();
+    if (t.includes('positive') || t.includes('award')) return 'bg-emerald-50 text-emerald-600';
+    if (t.includes('negative') || t.includes('incident') || t.includes('late')) return 'bg-rose-50 text-rose-600';
+    return 'bg-blue-50 text-blue-600';
   };
 
   return (
     <div className="space-y-6 p-4 md:p-8 max-w-[1600px] mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">Incident Tracking</h2>
-          <p className="text-zinc-500 font-medium">Monitor and manage personnel behavior and branch reports.</p>
+          <h2 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">Incident Feed</h2>
+          <p className="text-zinc-500 font-medium">Viewing unique behavior logs and branch incidents.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
@@ -119,7 +96,7 @@ export default function Tracking() {
             className="rounded-xl border-zinc-200 font-bold text-xs uppercase tracking-widest gap-2"
           >
             <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
-            Refresh Data
+            Refresh
           </Button>
           <AddReportDialog onSuccess={handleRefresh} />
         </div>
@@ -128,17 +105,14 @@ export default function Tracking() {
       <Card className="border-none shadow-xl shadow-zinc-200/50 rounded-3xl overflow-hidden bg-white">
         <CardHeader className="border-b border-zinc-50 px-8 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl font-bold text-zinc-800">Personnel & Customers</CardTitle>
-              <CardDescription>Records of all incidents filed by branch and staff.</CardDescription>
-            </div>
+            <CardTitle className="text-xl font-bold text-zinc-800">Incident Logs</CardTitle>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
               <input
-                placeholder="Search by name or branch..."
+                placeholder="Search by personnel, branch, or type..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 h-11 bg-zinc-50 border-none rounded-xl text-sm focus-visible:ring-1 focus-visible:ring-zinc-200 focus:outline-none"
+                className="w-full pl-10 pr-4 h-11 bg-zinc-50 border-none rounded-xl text-sm focus:outline-none"
               />
             </div>
           </div>
@@ -148,75 +122,59 @@ export default function Tracking() {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-24 gap-4">
               <Loader2 className="h-10 w-10 animate-spin text-[#0062cc]" />
-              <p className="text-zinc-400 font-bold text-xs uppercase tracking-widest">Loading records...</p>
+              <p className="text-zinc-400 font-bold text-xs uppercase">Loading unique reports...</p>
             </div>
           ) : reportsError ? (
-            <div className="flex flex-col items-center justify-center py-24 text-red-500 gap-2">
+            <div className="flex flex-col items-center justify-center py-24 text-red-500">
               <AlertCircle size={32} />
-              <p className="font-bold uppercase text-xs tracking-widest">Failed to load reports</p>
+              <p className="font-bold uppercase text-xs">Failed to load reports</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader className="bg-muted/30 sticky top-0 z-10">
-                  <TableRow className="hover:bg-transparent border-b border-muted/60">
-                    <TableHead className="pl-8 w-[30%] bg-muted/30 uppercase text-[10px] font-black">Full Name</TableHead>
-                    <TableHead className="w-[20%] bg-muted/30 uppercase text-[10px] font-black">Primary Branch</TableHead>
-                    <TableHead className="w-[15%] bg-muted/30 uppercase text-[10px] font-black">Status</TableHead>
-                    <TableHead className="w-[15%] text-center bg-muted/30 uppercase text-[10px] font-black">Incidents</TableHead>
-                    <TableHead className="pr-8 w-[20%] text-right bg-muted/30 uppercase text-[10px] font-black">Action</TableHead>
+                <TableHeader className="bg-muted/30">
+                  <TableRow>
+                    <TableHead className="pl-8 uppercase text-[10px] font-black">Date Occurred</TableHead>
+                    <TableHead className="uppercase text-[10px] font-black">Personnel</TableHead>
+                    <TableHead className="uppercase text-[10px] font-black">Classification</TableHead>
+                    <TableHead className="uppercase text-[10px] font-black">Branch</TableHead>
+                    <TableHead className="pr-8 text-right uppercase text-[10px] font-black">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCustomers.length === 0 ? (
+                  {filteredReports.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-20 text-zinc-400">
-                        No incident records found matching your search.
-                      </TableCell>
+                      <TableCell colSpan={5} className="text-center py-20 text-zinc-400">No records found.</TableCell>
                     </TableRow>
                   ) : (
-                    filteredCustomers.map((customer) => {
-                      const statusClean = customer.status.toLowerCase();
-                      const isActive = statusClean === 'active' || statusClean === 'in';
-
-                      return (
-                        <TableRow
-                          key={customer.id}
-                          className="group cursor-pointer hover:bg-zinc-50/80 border-zinc-50 transition-colors"
-                          onClick={() => handleOpenModal(customer)}
-                        >
-                          <TableCell className="px-8 py-5">
-                            <p className="font-bold text-zinc-900 group-hover:text-[#0062cc] transition-colors">
-                              {customer.name}
-                            </p>
-                            <p className="text-[10px] text-zinc-400 font-medium uppercase tracking-tighter">
-                              {customer.id.replace('0x', '').slice(0, 8)}
-                            </p>
-                          </TableCell>
-                          <TableCell className="font-medium text-zinc-600">{customer.branch}</TableCell>
-                          <TableCell>
-                            <Badge className={cn(
-                              "rounded-lg px-2 py-0.5 text-[10px] font-black uppercase tracking-tight border-none shadow-none pointer-events-none",
-                              isActive 
-                                ? "bg-emerald-50 text-emerald-600" 
-                                : "bg-rose-50 text-rose-600"
-                            )}>
-                              {customer.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-zinc-100 text-zinc-900 text-xs font-black">
-                              {customer.reportCount}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right px-8">
-                            <Button variant="ghost" className="h-8 text-[10px] font-black uppercase text-[#0062cc]">
-                              View History
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
+                    filteredReports.map((report) => (
+                      <TableRow key={report.id} className="group hover:bg-zinc-50/80 transition-colors border-zinc-50">
+                        <TableCell className="pl-8">
+                           <div className="flex items-center gap-2">
+                             <Calendar size={14} className="text-zinc-400" />
+                             <span className="font-bold text-zinc-700">
+                               {format(new Date(report.occurredAt), 'MMM dd, yyyy')}
+                             </span>
+                           </div>
+                        </TableCell>
+                        <TableCell className="font-bold text-zinc-900">{report.actorName}</TableCell>
+                        <TableCell>
+                          <Badge className={cn("rounded-lg text-[10px] font-black uppercase shadow-none border-none", getTypeColor(report.typeName))}>
+                            {report.typeName}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-medium text-zinc-500">{report.branchName}</TableCell>
+                        <TableCell className="text-right pr-8">
+                          <Button 
+                            variant="ghost" 
+                            onClick={() => handleOpenModal(report)}
+                            className="text-[#0062cc] font-black text-[10px] uppercase hover:bg-blue-50"
+                          >
+                            View Details
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
                   )}
                 </TableBody>
               </Table>
@@ -225,11 +183,14 @@ export default function Tracking() {
         </CardContent>
       </Card>
 
-      {activeCustomerData && (
+      {selectedIncident && (
         <IncidentReportsModal
-          customer={activeCustomerData}
+          incident={selectedIncident}
           open={modalOpen}
-          onClose={handleCloseModal}
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedIncident(null);
+          }}
         />
       )}
     </div>
